@@ -25,7 +25,7 @@
       <name>MythTV</name>
       <exec>/usr/bin/mythfrontend</exec>
       <logo>./logos/mythtv.png</logo>
-      <autostart>1</autostart>
+      <autostart>0</autostart>
     </program>
     <program>
       <name>NX Desktop</name>

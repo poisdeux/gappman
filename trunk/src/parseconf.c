@@ -234,6 +234,8 @@ void freeMenuElements( menu_elements *elt )
   int i;
   while(elt != NULL)
   {
+    printf("TEST:\n");
+    fflush(stdout);
     next = elt->next;
     free(elt->menu_width);
     free(elt->menu_height);
@@ -249,18 +251,6 @@ void freeMenuElements( menu_elements *elt )
     free(elt);
     elt = next;
   }
-}
-
-/**
-* \brief relinguishes the memory occupied by menu_element structures
-* \param *elt first menu_element structure
-*/
-void cleanup( menu_elements *elt )
-{
-  freeMenuElements( elt );
-  free(program_menu_alignment);
-  free(&program_menu_width);
-  free(&program_menu_height);
 }
 
 /**

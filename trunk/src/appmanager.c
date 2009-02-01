@@ -62,7 +62,7 @@ static gint check_app_status(struct appwidgetinfo* appw)
     //No need for appw anymore
     free(appw);
     
-    //Change resolution back to original
+    //Change resolution back to menu resolution
     changeresolution(screen_width, screen_height);
     
     //Stop glib timer
@@ -214,7 +214,8 @@ static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event,
     }
   }
   
-  if( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventKey*)event)->keyval == 65293 || ((GdkEventButton*)event)->button == 1)
+  //Only start program  if spacebar or mousebutton is pressed
+  if( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
   {
     startprogram( widget, elt );
   }
@@ -524,8 +525,8 @@ static void usage()
 {
   printf("usage: appmanager [--keep-below] [--debug <LEVEL>] [--width <WIDTHINPIXELS>] [--height <HEIGHTINPIXELS>] [--conffile <FILENAME>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
   printf("");
-  printf("--keep-below:\t\tKeeps the window at the bottom of the window manager's stack");
-  printf("--debug <LEVEL>:\t\tsets verbosity level");
+  printf("--keep-below:\t\tKeeps the window at the bottom of the window manager's stack\n");
+  printf("--debug <LEVEL>:\t\tsets verbosity leven\n");
   printf("--width <WIDTHINPIXELS>:\t\twidth of the main window (default: screen width)\n");
   printf("--height <HEIGHTINPIXELS:\t\t\height of the main window (default: screen height)\n");
   printf("--conffile <FILENAME>:\t\t configuration file specifying the program and actions (default: ./conf.xml)\n");
@@ -691,8 +692,14 @@ int main (int argc, char **argv)
   
   gtk_main ();
 
+//   printf("Free programs\n");
+//   fflush(stdout);
   freeMenuElements( programs );
+//   printf("Free actions\n");
+//   fflush(stdout);
   freeMenuElements( actions );
+//   printf("Exit gappmanager\n");
+//   fflush(stdout);
   return 0;
 }
 
