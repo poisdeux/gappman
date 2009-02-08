@@ -73,7 +73,9 @@ int main (int argc, char **argv)
   int dialog_width;
   int dialog_height;
   int c;
-  char* shutdownimagefile = "/usr/share/pixmaps/gappman/shutdown.png";
+  char* shutdownimagefile = "/usr/share/pixmaps/gappman/system-shutdown.png";
+  char* restartimagefile = "/usr/share/pixmaps/gappman/system-restart.png";
+  char* suspendimagefile = "/usr/share/pixmaps/gappman/system-suspend.png";
 
   gtk_init (&argc, &argv);
 
@@ -114,7 +116,7 @@ int main (int argc, char **argv)
   gtk_window_set_decorated (GTK_WINDOW (mainwin), FALSE);
   gtk_window_set_default_size (GTK_WINDOW (mainwin), dialog_width, dialog_height);
 
-  // shutdown, reboot, cancel 
+  // shutdown, reboot, suspend
   table = gtk_table_new(1, 3, TRUE); 
 
   // shutdown button
@@ -123,12 +125,12 @@ int main (int argc, char **argv)
   gtk_widget_show(button);
   
   // reboot button
-  button = createbutton(shutdownimagefile, dialog_width, dialog_height); 
+  button = createbutton(restartimagefile, dialog_width, dialog_height); 
   gtk_table_attach_defaults(GTK_TABLE(table), button, 1, 2, 0, 1); 
   gtk_widget_show(button);
 
-  // cancel button
-  button = createbutton(shutdownimagefile, dialog_width, dialog_height); 
+  // suspend button
+  button = createbutton(suspendimagefile, dialog_width, dialog_height); 
   gtk_table_attach_defaults(GTK_TABLE(table), button, 2, 3, 0, 1); 
   gtk_widget_show(button);
   
