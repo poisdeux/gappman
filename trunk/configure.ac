@@ -52,6 +52,7 @@ AC_PROG_CC
 AC_CONFIG_FILES([
 Makefile
 src/Makefile
+widgets/shutdown/Makefile
 ])
 
 AC_OUTPUT
