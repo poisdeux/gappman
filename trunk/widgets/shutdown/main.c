@@ -23,38 +23,60 @@ static void usage()
 	printf("./shutdown\n");
 }
 
-static GtkWidget* createbutton(char* imagefile, int max_width, int max_height)
+static GtkWidget* load_image(char* imagefile, int max_width, int max_height)
 {
-  GtkWidget *button;
   GtkWidget *image;
   GdkPixbuf *pixbuf;
   int width,height;
   double ratio;
 
-  button = gtk_button_new();
+  image = gtk_image_new_from_file (imagefile);
+  pixbuf = gtk_image_get_pixbuf(GTK_IMAGE(image));
+  width = gdk_pixbuf_get_width(pixbuf);
+  height = gdk_pixbuf_get_height(pixbuf);
+  ratio = (double) width/max_width;
+  width /= ratio;
+  height /= ratio;
 
-    image = gtk_image_new_from_file (imagefile);
-    pixbuf = gtk_image_get_pixbuf(GTK_IMAGE(image));
-    width = gdk_pixbuf_get_width(pixbuf);
-    height = gdk_pixbuf_get_height(pixbuf);
-    ratio = (double) width/max_width;
+  // Check if button does not overlap the maximum allowed height
+  // if so we assume orientation is portrait and determine 
+  // button size based on height
+  if( height > max_height )
+  {
+    ratio = (double) height/max_height;
     width /= ratio;
     height /= ratio;
+  }
+  pixbuf = gdk_pixbuf_scale_simple(pixbuf, width, height, GDK_INTERP_BILINEAR);
+  gtk_image_set_from_pixbuf(GTK_IMAGE(image), pixbuf);
 
-    // Check if button does not overlap the maximum allowed height
-    // if so we assume orientation is portrait and determine 
-    // button size based on height
-    if( height > max_height )
-    {
-      ratio = (double) height/max_height;
-      width /= ratio;
-      height /= ratio;
-    }
-    pixbuf = gdk_pixbuf_scale_simple(pixbuf, width, height, GDK_INTERP_BILINEAR);
-    gtk_image_set_from_pixbuf(GTK_IMAGE(image), pixbuf);
-    gtk_button_set_image(GTK_BUTTON(button), image);
+  return image;
+}
 
-    return button;
+static GtkWidget* image_label_box (gchar* imagefile, gchar* labeltext, int max_width, int max_height)
+{
+    GtkWidget *box;
+    GtkWidget *label;
+    GtkWidget *image;
+
+    /* Create box for image and label */
+    box = gtk_vbox_new (FALSE, 0);
+    gtk_container_set_border_width (GTK_CONTAINER (box), 2);
+
+    /* Now on to the image stuff */
+    image = load_image(imagefile, max_width, max_height);
+
+    /* Create a label for the button */
+    label = gtk_label_new (labeltext);
+
+    /* Pack the image and label into the box */
+    gtk_box_pack_start (GTK_BOX (box), image, FALSE, FALSE, 3);
+    gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 3);
+
+    gtk_widget_show (image);
+    gtk_widget_show (label);
+
+    return box;
 }
 
 /**
@@ -64,9 +86,8 @@ int main (int argc, char **argv)
 {
   GdkScreen *screen;
   GdkWindow *rootwin;
-  GdkPixbuf *pixbuf;
   GtkWidget *button;
-  GtkWidget *image;
+  GtkWidget *labelimagebox;
   GtkWidget *mainwin;
   GtkWidget *table;
   const char* conffile = "/etc/gappman/shutdown.xml";
@@ -104,8 +125,8 @@ int main (int argc, char **argv)
   //loadConf(conffile);
 
    screen = gdk_screen_get_default ();
-   dialog_width =  gdk_screen_get_width (screen) / 4;
-   dialog_height =  gdk_screen_get_height (screen) / 4;
+   dialog_width =  gdk_screen_get_width (screen) / 9;
+   dialog_height =  gdk_screen_get_height (screen) / 9;
 
   mainwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   
@@ -117,22 +138,36 @@ int main (int argc, char **argv)
   gtk_window_set_default_size (GTK_WINDOW (mainwin), dialog_width, dialog_height);
 
   // shutdown, reboot, suspend
-  table = gtk_table_new(1, 3, TRUE); 
+  table = gtk_table_new(2, 3, TRUE); 
 
   // shutdown button
-  button = createbutton(shutdownimagefile, dialog_width, dialog_height); 
-  gtk_table_attach_defaults(GTK_TABLE(table), button, 0, 1, 0, 1); 
+  button = gtk_button_new();
+  labelimagebox = image_label_box("/usr/share/pixmaps/gappman/system-shutdown.png", "Shutdown", dialog_width, dialog_height); 
+  gtk_container_add (GTK_CONTAINER (button), labelimagebox);
+  gtk_widget_show (labelimagebox);
   gtk_widget_show(button);
+  gtk_table_attach_defaults(GTK_TABLE(table), button, 0, 1, 0, 1); 
   
   // reboot button
-  button = createbutton(restartimagefile, dialog_width, dialog_height); 
-  gtk_table_attach_defaults(GTK_TABLE(table), button, 1, 2, 0, 1); 
+  button = gtk_button_new();
+  labelimagebox = image_label_box("/usr/share/pixmaps/gappman/system-restart.png", "Reboot", dialog_width, dialog_height); 
+  gtk_container_add (GTK_CONTAINER (button), labelimagebox);
+  gtk_widget_show (labelimagebox);
   gtk_widget_show(button);
+  gtk_table_attach_defaults(GTK_TABLE(table), button, 1, 2, 0, 1); 
 
   // suspend button
-  button = createbutton(suspendimagefile, dialog_width, dialog_height); 
-  gtk_table_attach_defaults(GTK_TABLE(table), button, 2, 3, 0, 1); 
+  button = gtk_button_new();
+  labelimagebox = image_label_box("/usr/share/pixmaps/gappman/system-suspend.png", "Suspend", dialog_width, dialog_height); 
+  gtk_container_add (GTK_CONTAINER (button), labelimagebox);
+  gtk_widget_show (labelimagebox);
   gtk_widget_show(button);
+  gtk_table_attach_defaults(GTK_TABLE(table), button, 2, 3, 0, 1); 
+ 
+  // cancel button
+  button = gtk_button_new_with_label("Cancel");
+  gtk_widget_show(button);
+  gtk_table_attach_defaults(GTK_TABLE(table), button, 1, 3, 1, 2); 
   
   gtk_container_add (GTK_CONTAINER (mainwin), table);
   gtk_widget_show (table);
