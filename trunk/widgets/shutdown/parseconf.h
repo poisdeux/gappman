@@ -12,67 +12,82 @@
 #include <libxml/xmlreader.h>
 
 /**
-* \struct menu_element
-* \brief structure to hold the attributes to create the button to start a program
+* Enumeration for length types.
+* Currently supported types are: PERCENTAGE and PIXELS
 */
-struct menu_element
-{
-  struct length *menu_width;
-  struct length *menu_height;
-  int app_width;
-  int app_height;
-  char **orientation;
-  const xmlChar *name; //!< holds the name of the program
-  const xmlChar *exec; //!< absolute path to executable
-  const xmlChar *logo; //!< absolute path to image file
-  int autostart; //!< a value of 1 will start program at startup, 0 will not.
-  char **args; //!< array of strings containing arguments that need to be passed to the executable
-  int numArguments; //!< will hold the total amount of elements in the args array
-  struct menu_element *next; //!< pointer to the next menu_element structure
+enum length_types {
+  PERCENTAGE,
+  PIXELS
 };
 
 /**
-* \typedef menu_elements
+* \struct button
+* \brief structure to hold the attributes to create a button
 */
-typedef struct menu_element menu_elements;
+struct button
+{
+  struct length *box_width;
+  struct length *box_height;
+  const xmlChar *labeltext; //!< holds the name of the program
+  const xmlChar *executable; //!< absolute path to executable
+  const xmlChar *imagefilename; //!< absolute path to image file
+  char **args; //!< array of strings containing arguments that need to be passed to the executable
+  int numArguments; //!< will hold the total amount of elements in the args array
+  struct button *next; //!< pointer to the next button structure
+};
 
 /**
-* \brief load the configuration file and parses it to create the menu_elements structures.
+* \typedef buttons
+*/
+typedef struct button buttons;
+
+/**
+* \struct length
+* \brief structure to hold the length value and type
+*/
+struct length
+{
+  enum length_types type; //!< Type of the value, i.e. percentage or pixels?
+  int value; //!< Actual length value without metric indicator, e.g. % or px.
+};
+
+/**
+* \brief load the configuration file and parses it to create the button structures.
 * \param  *filename the name of the configuration file with the path
 */
 void loadConf(const char *filename);
 
 /**
-* \brief relinguishes the memory occupied by menu_element structures
-* \param *elt first menu_element structure
+* \brief relinguishes the memory occupied by button structures
+* \param *elt first button structure
 */
-void freeMenuElements( menu_elements *elt );
+void freeMenuElements( buttons *elt );
 
 /**
-* \brief prints the elements of a menu_element structure
-* \param *elt menu_element structure that should be printed
+* \brief prints the elements of a button structure
+* \param *elt button structure that should be printed
 */
-void printMenuElements( menu_elements *elt );
+void printMenuElements( buttons *elt );
 
 /**
-* \brief returns the total number of menu_elements
+* \brief returns the total number of buttons
 */
 int getNumberOfElements();
 
 /**
-* \brief Get the width of the program menu area
+* \brief Get the width of the widget area as specified in the configuration file
 * \return struct length
 */
 struct length* getWidth();
 
 /**
-* \brief Get the height of the program menu area
+* \brief Get the height of the widget area as specified in the configuration file
 * \return struct length
 */
 struct length* getHeight();
 
 /**
-* \brief Get the alignment of the program menu area
+* \brief Get the alignment of the widget area
 * \return String: [[top|left|bottom|right|center],...]
 */
 xmlChar* getAlignment();

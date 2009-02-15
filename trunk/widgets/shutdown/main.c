@@ -17,6 +17,7 @@
 #include <sys/wait.h>
 #include <getopt.h>
 #include <string.h>
+#include <parseconf.h>
 
 static void usage()
 {
@@ -80,6 +81,44 @@ static GtkWidget* image_label_box (gchar* imagefile, gchar* labeltext, int max_w
 }
 
 /**
+* \brief function to calculate the absolute width based upon the total available width
+* \param total_width Total available width for the box element
+* \param *box_width Pointer to a struct length holding the length value and type of the box
+* \return box width in amount of pixels
+*/
+static int calculateBoxLength(int total_length, struct length *box_length)
+{
+  int length;
+
+  if ( box_length->type == PERCENTAGE )
+  {
+    length = round( (double) total_length * (box_length->value / (double) 100));
+  }
+  else
+  {
+    length = box_length->value;
+  }
+
+  if ( length > total_length)
+  {
+    g_warning( "Box length exceeds total length. This might indicate a configuration error." );
+  }
+
+  return length;
+}
+
+/**
+* \brief Create the button layout using the available screen height and width
+* \param *elts pointer to first menu_elements structure
+* \param screen_height total screen height
+* \param screen_width total screen width
+*/
+static GtkWidget* createbuttons( menu_elements *elts, int screen_width, int screen_height)
+{
+
+}
+
+/**
 * \brief main function setting up the UI
 */
 int main (int argc, char **argv)
@@ -122,11 +161,12 @@ int main (int argc, char **argv)
   }
 
   /** Load configuration elements */
-  //loadConf(conffile);
-
-   screen = gdk_screen_get_default ();
-   dialog_width =  gdk_screen_get_width (screen) / 9;
-   dialog_height =  gdk_screen_get_height (screen) / 9;
+  loadConf(conffile);
+  actions = getActions();
+  
+  screen = gdk_screen_get_default ();
+  dialog_width =  gdk_screen_get_width (screen) / 9;
+  dialog_height =  gdk_screen_get_height (screen) / 9;
 
   mainwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   
@@ -138,7 +178,7 @@ int main (int argc, char **argv)
   gtk_window_set_default_size (GTK_WINDOW (mainwin), dialog_width, dialog_height);
 
   // shutdown, reboot, suspend
-  table = gtk_table_new(2, 3, TRUE); 
+  table = gtk_table_new(2, 3, TRUE);
 
   // shutdown button
   button = gtk_button_new();
