@@ -17,7 +17,7 @@ AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 AC_STRUCT_TM
 AC_PROG_CC_STDC
-
+AC_PROG_LIBTOOL
 
 CFLAGS=$PASSED_CFLAGS
 
@@ -29,6 +29,7 @@ AC_CHECK_PROG(HAVE_PKG_CONFIG, pkg-config, "yes", "no",)
 if test "$HAVE_PKG_CONFIG" = "no" ; then
   AC_MSG_ERROR(== Could not find required program pkg-config.)
 fi
+
 
 AC_SEARCH_LIBS([xmlTextReaderRead], [xml2], [
 LIBXML_INCLUDES=`pkg-config --cflags libxml-2.0`
@@ -49,9 +50,10 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
 AC_PROG_CC
 
-AC_CONFIG_FILES([
+AC_CONFIG_FILES([ 
 Makefile
 src/Makefile
+libs/parseconf/Makefile
 widgets/shutdown/Makefile
 ])
 
