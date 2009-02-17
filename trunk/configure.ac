@@ -17,6 +17,10 @@ AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 AC_STRUCT_TM
 AC_PROG_CC_STDC
+
+for top_builddir in . .. ../.. $ac_auxdir $ac_auxdir/..; do
+  test -f $top_builddir/configure && break
+done
 AC_PROG_LIBTOOL
 
 CFLAGS=$PASSED_CFLAGS
@@ -44,7 +48,6 @@ echo "Error: gtk+-2.0 not found!"; exit 1
 ], [])
 
 AC_CONFIG_SRCDIR(src)
-AC_CONFIG_AUX_DIR(config)
 
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
@@ -53,7 +56,9 @@ AC_PROG_CC
 AC_CONFIG_FILES([ 
 Makefile
 src/Makefile
+libs/Makefile
 libs/parseconf/Makefile
+widgets/Makefile
 widgets/shutdown/Makefile
 ])
 

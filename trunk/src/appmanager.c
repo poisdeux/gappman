@@ -18,7 +18,7 @@
 #include <getopt.h>
 #include <string.h>
 #include "changeresolution.h"
-#include "parseconf.h"
+#include "../libs/parseconf/parseconf.h"
 
 static int DEBUG=0;
 static int KEEP_BELOW=0;
@@ -528,7 +528,7 @@ static void usage()
   printf("--keep-below:\t\tKeeps the window at the bottom of the window manager's stack\n");
   printf("--debug <LEVEL>:\t\tsets verbosity leven\n");
   printf("--width <WIDTHINPIXELS>:\t\twidth of the main window (default: screen width)\n");
-  printf("--height <HEIGHTINPIXELS:\t\t\height of the main window (default: screen height)\n");
+  printf("--height <HEIGHTINPIXELS:\t\theight of the main window (default: screen height)\n");
   printf("--conffile <FILENAME>:\t\t configuration file specifying the program and actions (default: ./conf.xml)\n");
   printf("--gtkrc <GTKRCFILENAME>:\t\t gtk configuration file which can be used for themeing\n");
   printf("--windowed:\t\t creates a border around the window\n");

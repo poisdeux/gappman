@@ -1,7 +1,5 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
-SUBDIRS = libs src widgets
-dist_doc_DATA = README
-EXTRA_DIST = xml-config-files/*.xml logos/*.png ChangeLog
+SUBDIRS = shutdown
 
 dist-hook:
 	find -name "*~" -exec rm {} \;

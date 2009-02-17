@@ -113,10 +113,10 @@ static int calculateBoxLength(int total_length, struct length *box_length)
 * \param screen_height total screen height
 * \param screen_width total screen width
 */
-static GtkWidget* createbuttons( menu_elements *elts, int screen_width, int screen_height)
-{
+//static GtkWidget* createbuttons( menu_elements *elts, int screen_width, int screen_height)
+//{
 
-}
+//}
 
 /**
 * \brief main function setting up the UI
@@ -162,7 +162,7 @@ int main (int argc, char **argv)
 
   /** Load configuration elements */
   loadConf(conffile);
-  actions = getActions();
+  //actions = getActions();
   
   screen = gdk_screen_get_default ();
   dialog_width =  gdk_screen_get_width (screen) / 9;
