@@ -17,11 +17,257 @@
 #include <sys/wait.h>
 #include <getopt.h>
 #include <string.h>
-#include <parseconf.h>
+#include <../../libs/parseconf/parseconf.h>
+
+static int DEBUG = 0;
+static int WINDOWED = 0;
 
 static void usage()
 {
-	printf("./shutdown\n");
+  printf("usage: shutdown [--help] [--debug <LEVEL>] [--width <WIDTHINPIXELS>] [--height <HEIGHTINPIXELS>] [--conffile <FILENAME>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
+  printf("");
+  printf("--help:\t\tshows this help text\n");
+  printf("--debug <LEVEL>:\t\tsets verbosity leven\n");
+  printf("--width <WIDTHINPIXELS>:\t\twidth of the main window (default: screen width / 9)\n");
+  printf("--height <HEIGHTINPIXELS:\t\theight of the main window (default: screen height / 9)\n");
+  printf("--conffile <FILENAME>:\t\t configuration file specifying the program and actions (default: /etc/gappman/shutdown.xml)\n");
+  printf("--gtkrc <GTKRCFILENAME>:\t\t gtk configuration file which can be used for themeing\n");
+  printf("--windowed:\t\t creates a border around the window\n");
+
+}
+
+/**
+* \brief function that starts any program as defined by the structure *elt.
+* \param *widget pointer to the button widget which has the process_startprogram_event connected through a signal
+* \param *event the GdkEvent that occured. Space key and left mousebutton are valid actions.
+* \param *elt menu_element structure containing the filename and arguments of the program that should be started
+*/
+static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
+{
+
+  if (DEBUG == 2)
+  {
+    printf("process_startprogram_event\n");
+  }
+
+  if(DEBUG > 1)
+  {
+    if ( event->type == GDK_KEY_RELEASE )
+    {
+      printf("%s key pressed and has value %d\n", ((GdkEventKey*)event)->string, ((GdkEventKey*)event)->keyval);
+    }
+  }
+
+  //Only start program  if spacebar or mousebutton is pressed
+  if( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
+  {
+    //startprogram( widget, elt );
+  }
+
+  return FALSE;
+}
+
+/**
+* \brief function that highlights a button
+* \param *widget pointer to the button widget
+* \param *event the GdkEvent that occured.
+* \param *elt will not be used, but must be defined.
+*/
+static gboolean press_button ( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
+{
+  if (DEBUG == 2)
+  {
+    printf("press_button: event->type: %d\n", event->type);
+  }
+  gtk_widget_activate(widget);
+  return FALSE;
+}
+
+/**
+* \brief function that highlights a button
+* \param *widget pointer to the button widget
+* \param *event the GdkEvent that occured.
+* \param *elt will not be used, but must be defined.
+*/
+static gboolean highlight_button ( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
+{
+  if (DEBUG == 2)
+  {
+    printf("highlight_button: event->type: %d\n", event->type);
+  }
+
+  gtk_button_set_relief(GTK_BUTTON(widget), GTK_RELIEF_NORMAL);
+  gtk_widget_grab_focus(widget);
+  return TRUE;
+}
+
+/**
+* \brief function that de-highlights a button
+* \param *widget pointer to the button widget
+* \param *event the GdkEvent that occured.
+* \param *elt will not be used, but must be defined.
+*/
+static gboolean dehighlight_button ( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
+{
+  if (DEBUG == 2)
+  {
+    printf("dehighlight_button: event->type: %d\n", event->type);
+  }
+
+  gtk_button_set_relief(GTK_BUTTON(widget), GTK_RELIEF_NONE);
+  return TRUE;
+}
+
+/**
+* \brief Calculates the amount of elements per row to evenly spread all elements on a surface of screen_height x screen_width.
+* \param screen_height total screen height
+* \param screen_width total screen width
+* \param amount_of_elements number of elements that should be placed in the screen_height x screen_width area
+*/
+static int calculateAmountOfElementsPerColumn(int height, int width, int amount_of_elements)
+{
+  double rows;
+  double ratio;
+  ratio = (double) MAX(height, width) / (double) MIN(height, width);
+  rows = sqrt(amount_of_elements/ratio);
+
+  if (DEBUG > 0)
+  {
+    printf("calculateAmountOfElementsPerColumn: width=%d, height=%d, ratio=%f, rows=%f, round(%f*%f)=%d\n", width, height, ratio, rows, ratio, rows, (int) round(rows * ratio));
+  }
+  //Check orientation and adjust accordingly
+  if ( height > width )
+  {
+    return (int) round(rows);
+  }
+  else
+  {
+    return (int) round(rows * ratio);
+  }
+}
+
+/**
+* \brief
+*/
+static void parseAlignment(float *alignment_x, float *alignment_y, xmlChar** alignmentfromconf)
+{
+  char *result = NULL;
+
+  result = strtok( *alignmentfromconf, "," );
+  while( result != NULL ) {
+    if ( strcmp(result, "top") == 0 )
+    {
+      *alignment_y = 0.0;
+    }
+    else if ( strcmp(result, "left") == 0 )
+    {
+      *alignment_x = 0.0;
+    }
+    else if ( strcmp(result, "bottom") == 0 )
+    {
+      *alignment_y = 1.0;
+    }
+    else if ( strcmp(result, "right") == 0 )
+    {
+      *alignment_x = 1.0;
+    }
+    else if ( strcmp(result, "center") == 0 )
+    {
+      /**
+      * Only set the value if it has not been set previously
+      * otherwise you might undo a previous parsed alignment
+      * option
+      */
+      if (*alignment_y < 0.0)
+      {
+        *alignment_y = 0.5;
+      }
+      if (*alignment_x < 0.0)
+      {
+        *alignment_x = 0.5;
+      }
+    }
+    if( DEBUG > 0 )
+    {
+      printf("parseAlignment: \"%s\" x:%f y:%f\n", result, *alignment_x, *alignment_y);
+    }
+    result = strtok( NULL, "," );
+  }
+
+  // Set initial values to 0
+  if (*alignment_y < 0.0)
+  {
+    *alignment_y = 0.0;
+  }
+  if (*alignment_x < 0.0)
+  {
+    *alignment_x = 0.0;
+  }
+}
+
+/**
+* \brief Create a single button
+* \param *elt pointer to menu_element struct that contains the logo image filename.
+* \param max_width button width
+*/
+static GtkWidget* createbutton ( menu_elements *elt, int max_width, int max_height )
+{
+  GtkWidget *button, *logoimage;
+  GdkPixbuf *pixbuf;
+  int width, height;
+  double ratio;
+
+  if( elt->logo != NULL )
+  {
+    logoimage = gtk_image_new_from_file ((char *) elt->logo);
+    pixbuf = gtk_image_get_pixbuf(GTK_IMAGE(logoimage));
+    width = gdk_pixbuf_get_width(pixbuf);
+    height = gdk_pixbuf_get_height(pixbuf);
+    ratio = (double) width/max_width;
+    width /= ratio;
+    height /= ratio;
+
+    // Check if button does not overlap the maximum allowed height
+    if( height > max_height )
+    {
+      ratio = (double) height/max_height;
+      width /= ratio;
+      height /= ratio;
+    }
+
+    if (DEBUG > 0)
+    {
+      printf("createbutton:  button_width: %d button_height: %d ratio: %.4f\n", width, height, ratio);
+    }
+
+    pixbuf = gdk_pixbuf_scale_simple(pixbuf, width, height, GDK_INTERP_BILINEAR);
+    gtk_image_set_from_pixbuf(GTK_IMAGE(logoimage), pixbuf);
+  }
+
+  button = gtk_button_new ();
+  gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
+
+  if( elt->logo != NULL )
+  {
+    gtk_button_set_image(GTK_BUTTON(button), logoimage);
+  }
+
+  gtk_button_set_focus_on_click(GTK_BUTTON(button), TRUE);
+
+  // Signals to start the program
+  g_signal_connect (G_OBJECT (button), "button_release_event", G_CALLBACK (process_startprogram_event), elt);
+  g_signal_connect (G_OBJECT (button), "key_release_event", G_CALLBACK (process_startprogram_event), elt);
+
+  // Signals to highlight the button
+  g_signal_connect (G_OBJECT (button), "focus_in_event", G_CALLBACK (highlight_button), NULL);
+  g_signal_connect (G_OBJECT (button), "focus_out_event", G_CALLBACK (dehighlight_button), NULL);
+  g_signal_connect (G_OBJECT (button), "enter_notify_event", G_CALLBACK (highlight_button), NULL);
+  g_signal_connect (G_OBJECT (button), "leave_notify_event", G_CALLBACK (dehighlight_button), NULL);
+
+  // Signals to create button press effect when clicked
+  g_signal_connect (G_OBJECT (button), "button_press_event", G_CALLBACK (press_button), elt);
+
+  return button;
 }
 
 static GtkWidget* load_image(char* imagefile, int max_width, int max_height)
@@ -113,10 +359,78 @@ static int calculateBoxLength(int total_length, struct length *box_length)
 * \param screen_height total screen height
 * \param screen_width total screen width
 */
-//static GtkWidget* createbuttons( menu_elements *elts, int screen_width, int screen_height)
-//{
+static GtkWidget* createbuttons( menu_elements *elts, int dialog_width, int dialog_height)
+{
+  menu_elements *next, *cur;
+  GtkWidget* button, *hbox, *vbox, *align;
+  struct appm_alignment *alignment;
+  int elts_per_row, count, button_width;
+  int box_width, box_height;
+  float alignment_x = -1.0;
+  float alignment_y = -1.0;
 
-//}
+  if ( DEBUG > 0 )
+  {
+    printf("Creating dialog layout with width %d and height %d\n", dialog_width, dialog_height);
+  }
+
+  vbox = gtk_vbox_new (FALSE, 0);
+
+  elts_per_row = calculateAmountOfElementsPerColumn(dialog_height, dialog_width, getNumberOfElements());
+  if ( elts_per_row < 1 )
+  {
+    elts_per_row = 1;
+  }
+
+  button_width = dialog_width/elts_per_row;
+
+  parseAlignment(&alignment_x, &alignment_y, (xmlChar **) elts->orientation);
+
+  if (DEBUG > 0)
+  {
+    printf("createbuttons: box_height=%d, box_width=%d, numberElts=%d, elts_per_row=%d, button_width=%d\n", box_height, box_width, getNumberOfElements(), elts_per_row, button_width);
+    printf("Alignment settings: gtk_alignment_new (%f, %f, %f, %f)\n", alignment_x, alignment_y, ((float) box_width/dialog_width), ((float) box_height/dialog_height));
+    fflush(stdout);
+  }
+
+  cur=elts;
+  count = 0;
+  while(cur != NULL)
+  {
+    if( (count % elts_per_row) == 0 )
+    {
+      if (DEBUG > 0)
+      {
+        printf("Creating new row: %d\n", count % elts_per_row );
+      }
+      hbox = gtk_hbox_new (FALSE, 0);
+
+      align = gtk_alignment_new (alignment_x, alignment_y, (float) dialog_width, (float) dialog_height);
+      gtk_container_add (GTK_CONTAINER (align), hbox);
+      gtk_widget_show (hbox);
+
+      gtk_container_add (GTK_CONTAINER (vbox), align);
+      gtk_widget_show (align);
+
+    }
+
+    next = cur->next;
+    button = createbutton(cur, button_width, box_height);
+    gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 1);
+    gtk_widget_show (button);
+    cur = next;
+    count++;
+  }
+
+  align = gtk_alignment_new (alignment_x, alignment_y, (float) box_width/dialog_width, (float) box_height/dialog_height);
+
+  gtk_container_add (GTK_CONTAINER (align), vbox);
+  gtk_widget_show (align);
+  gtk_widget_show (vbox);
+
+  return align;
+}
+
 
 /**
 * \brief main function setting up the UI
@@ -129,6 +443,7 @@ int main (int argc, char **argv)
   GtkWidget *labelimagebox;
   GtkWidget *mainwin;
   GtkWidget *table;
+  menu_elements *actions;
   const char* conffile = "/etc/gappman/shutdown.xml";
   int dialog_width;
   int dialog_height;
@@ -142,21 +457,42 @@ int main (int argc, char **argv)
   while (1) {
       int option_index = 0;
       static struct option long_options[] = {
-          {"help", 1, 0, 'h'},
+          {"width", 1, 0, 'w'},
+          {"height", 1, 0, 'h'},
+          {"conffile", 1, 0, 'c'},
+          {"debug", 1, 0, 'd'},
+          {"help", 0, 0, 'i'},
+          {"gtkrc", 1, 0, 'r'},
+          {"windowed", 0, 0, 'j'},
           {0, 0, 0, 0}
       };
-
-      c = getopt_long(argc, argv, "h",
+      c = getopt_long(argc, argv, "w:h:c:d:r:ij",
               long_options, &option_index);
       if (c == -1)
           break;
 
       switch (c) {
+      case 'w':
+          dialog_width=atoi(optarg);
+          break;
       case 'h':
+          dialog_height=atoi(optarg);
+          break;
+      case 'c':
+          conffile=optarg;
+          break;
+      case 'd':
+          DEBUG=atoi(optarg);
+          break;
+      case 'r':
+          gtk_rc_parse (optarg);
+          break;
+      case 'j':
+          WINDOWED=1;
+          break;
+      default:
           usage();
           return 0;
-      default:
-	;;
       }
   }
 
