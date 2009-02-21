@@ -58,6 +58,7 @@ Makefile
 src/Makefile
 libs/Makefile
 libs/parseconf/Makefile
+libs/layout/Makefile
 widgets/Makefile
 widgets/shutdown/Makefile
 ])
