@@ -360,14 +360,14 @@ int main (int argc, char **argv)
 
   if ( actions != NULL )
   {
-    align = createbuttons( actions, screen_width, screen_height );
+    align = createbuttons( actions, screen_width, screen_height , &process_startprogram_event );
     gtk_container_add (GTK_CONTAINER (vbox), align);
     gtk_widget_show (align);
   }
 
   if ( programs != NULL )
   {
-    align = createbuttons( programs, screen_width, screen_height );
+    align = createbuttons( programs, screen_width, screen_height, &process_startprogram_event );
     gtk_container_add (GTK_CONTAINER (vbox), align);
     gtk_widget_show (align);
   }
@@ -380,14 +380,9 @@ int main (int argc, char **argv)
   
   gtk_main ();
 
-//   printf("Free programs\n");
-//   fflush(stdout);
   freeMenuElements( programs );
-//   printf("Free actions\n");
-//   fflush(stdout);
   freeMenuElements( actions );
-//   printf("Exit gappmanager\n");
-//   fflush(stdout);
-  return 0;
+  
+	return 0;
 }
 

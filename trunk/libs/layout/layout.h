@@ -12,6 +12,5 @@
 
 #include <gtk/gtk.h>
  
-GtkWidget* createbuttons( menu_elements *elts, int screen_width, int screen_height);
-
+GtkWidget* createbuttons( menu_elements *elts, int screen_width, int screen_height, gboolean(*processevent)(GtkWidget*, GdkEvent*, menu_elements*));
 

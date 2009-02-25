@@ -6,7 +6,6 @@
 
 static int DEBUG = 0;
 
-
 /**
 * \brief function to calculate the absolute width based upon the total available width
 * \param total_width Total available width for the box element
@@ -177,7 +176,7 @@ static void parseAlignment(float *alignment_x, float *alignment_y, xmlChar** ali
 * \param *elt pointer to menu_element struct that contains the logo image filename.
 * \param max_width button width
 */
-static GtkWidget* createbutton ( menu_elements *elt, int max_width, int max_height )
+static GtkWidget* createbutton ( menu_elements *elt, int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, menu_elements*) )
 {
   GtkWidget *button, *logoimage;
   GdkPixbuf *pixbuf;
@@ -223,8 +222,8 @@ static GtkWidget* createbutton ( menu_elements *elt, int max_width, int max_heig
 
   // Signals to start the program
   // process_startprogram_event must be replaced with argument passed to this function?!?
-  // g_signal_connect (G_OBJECT (button), "button_release_event", G_CALLBACK (process_startprogram_event), elt);
-  // g_signal_connect (G_OBJECT (button), "key_release_event", G_CALLBACK (process_startprogram_event), elt);
+  g_signal_connect (G_OBJECT (button), "button_release_event", G_CALLBACK (processevent), elt);
+  g_signal_connect (G_OBJECT (button), "key_release_event", G_CALLBACK (processevent), elt);
 
   // Signals to highlight the button
   g_signal_connect (G_OBJECT (button), "focus_in_event", G_CALLBACK (highlight_button), NULL);
@@ -244,7 +243,7 @@ static GtkWidget* createbutton ( menu_elements *elt, int max_width, int max_heig
 * \param screen_height total screen height
 * \param screen_width total screen width
 */
-GtkWidget* createbuttons( menu_elements *elts, int screen_width, int screen_height)
+GtkWidget* createbuttons( menu_elements *elts, int screen_width, int screen_height, gboolean(processevent)(GtkWidget*, GdkEvent*, menu_elements*))
 {
   menu_elements *next, *cur;
   GtkWidget* button, *hbox, *vbox, *align;
@@ -304,7 +303,7 @@ GtkWidget* createbuttons( menu_elements *elts, int screen_width, int screen_heig
     }
 
     next = cur->next;
-    button = createbutton(cur, button_width, box_height);
+    button = createbutton(cur, button_width, box_height, processevent);
     gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 1);
     gtk_widget_show (button);
     cur = next;
