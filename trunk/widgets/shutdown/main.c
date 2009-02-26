@@ -37,6 +37,68 @@ static void usage()
 
 }
 
+static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
+{
+  char **args;
+  int i;
+  int status;
+  int ret;
+  struct appwidgetinfo* appw;
+  __pid_t childpid;
+  FILE *fp;
+
+  /**
+    Create argument list. First element should be the filename
+    of the executable and last element needs to be NULL.
+    see man exec for more details
+  */
+  args = (char **) malloc((elt->numArguments + 2)* sizeof(char *));
+  args[0] = (char *) elt->exec;
+  for ( i = 0; i < elt->numArguments; i++ )
+  {
+    args[i+1] = elt->args[i];
+  }
+  args[i+1] = NULL;
+
+  fp = fopen((char *) elt->exec,"r");
+  if( fp )
+  {
+    //Disable button
+    gtk_widget_set_sensitive(GTK_WIDGET(widget), FALSE);
+
+    fclose(fp);
+
+    childpid = fork();
+    if ( childpid == 0 )
+    {
+      if(DEBUG == 2)
+      {
+        printf("Executing: %s with args: ", elt->exec);
+        for ( i = 0; i < elt->numArguments; i++ )
+        {
+          printf("%s ", args[i+1]);
+        }
+        printf("\n");
+      }
+
+      execvp((char *) elt->exec, args);
+      _exit(0);
+    }
+    else if (  childpid < 0 )
+    {
+      printf("Failed to fork!\n");
+      return FALSE;
+    }
+  }
+  else
+  {
+    printf("File: %s not found!\n", (char *) elt->exec);
+  }
+
+  free(args);
+}
+
+
 /**
 * \brief function that starts any program as defined by the structure *elt.
 * \param *widget pointer to the button widget which has the process_startprogram_event connected through a signal
@@ -62,7 +124,7 @@ static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event,
   //Only start program  if spacebar or mousebutton is pressed
   if( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
   {
-    //startprogram( widget, elt );
+    startprogram( widget, elt );
   }
 
   return FALSE;
