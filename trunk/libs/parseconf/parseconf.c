@@ -55,6 +55,7 @@ struct menu_element* createMenuElement()
   elt->next = NULL;
   elt->args = NULL;
   elt->autostart = 0;
+  elt->printlabel = 0;
   elt->app_height = -1;
   elt->app_width = -1;
   return elt;
@@ -151,6 +152,10 @@ processMenuElement(xmlTextReaderPtr reader, menu_elements *elt, const char* elem
           printf("processProgram: %s\n", value);
           elt->name = value;
         }
+        else if( strcmp((char *) name, "printlabel") == 0 )
+        {
+          elt->printlabel = atoi(value);
+        }
         else if( strcmp((char *) name, "exec") == 0 )
         {
           elt->exec = value;
@@ -234,21 +239,39 @@ void freeMenuElements( menu_elements *elt )
   int i;
   while(elt != NULL)
   {
-    printf("TEST:\n");
+    printf("menu_element free: menu_width\n");
     fflush(stdout);
     next = elt->next;
     free(elt->menu_width);
+    printf("menu_element free: menu_height\n");
+    fflush(stdout);
     free(elt->menu_height);
+    printf("menu_element free: orientation\n");
+    fflush(stdout);
     free(elt->orientation);
+    printf("menu_element free: name\n");
+    fflush(stdout);
     free((xmlChar *) elt->name);
+    printf("menu_element free: exec\n");
+    fflush(stdout);
     free((xmlChar *) elt->exec);
+    printf("menu_element free: logo\n");
+    fflush(stdout);
     free((xmlChar *) elt->logo);
     for (i = 0; i < elt->numArguments; i++)
     {
+    printf("menu_element free: args[%d]\n", i);
+    fflush(stdout);
       free(elt->args[i]);
     }
+    printf("menu_element free: args\n");
+    fflush(stdout);
     free(elt->args);
+    printf("menu_element free: elt\n");
+    fflush(stdout);
     free(elt);
+    printf("menu_element free: next\n");
+    fflush(stdout);
     elt = next;
   }
 }

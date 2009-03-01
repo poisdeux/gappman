@@ -35,14 +35,15 @@ struct menu_element
   const xmlChar *exec; //!< absolute path to executable
   const xmlChar *logo; //!< absolute path to image file
   int autostart; //!< a value of 1 will start program at startup, 0 will not.
+  int printlabel; //!< If set to 1 the label should be printed. Otherwise do not print a textlabel
   char **args; //!< array of strings containing arguments that need to be passed to the executable
   int numArguments; //!< will hold the total amount of elements in the args array
   struct menu_element *next; //!< pointer to the next menu_element structure
 };
 
 /**
-* \struct menu_element
-* \brief structure to hold the attributes to create the button to start a program
+* \struct length
+* \brief structure to hold the length type (pixel, percentage) and its value. 
 */
 struct length
 {

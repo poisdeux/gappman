@@ -187,6 +187,18 @@ static GtkWidget* image_label_box (gchar* imagefile, gchar* labeltext, int max_w
 }
 
 /**
+* \brief callback function to quit the program
+* \param *widget pointer to widget to destroy
+* \param data mandatory argument for callback function, may be NULL.
+*/
+static void destroy( GtkWidget *widget,
+                     gpointer   data )
+{
+    gtk_main_quit ();
+}
+
+
+/**
 * \brief main function setting up the UI
 */
 int main (int argc, char **argv)
@@ -202,12 +214,9 @@ int main (int argc, char **argv)
   GtkWidget *table;
   menu_elements *actions;
   const char* conffile = "/etc/gappman/shutdown.xml";
-  int dialog_width;
-  int dialog_height;
+  int screen_width;
+  int screen_height;
   int c;
-  char* shutdownimagefile = "/usr/share/pixmaps/gappman/system-shutdown.png";
-  char* restartimagefile = "/usr/share/pixmaps/gappman/system-restart.png";
-  char* suspendimagefile = "/usr/share/pixmaps/gappman/system-suspend.png";
 
   gtk_init (&argc, &argv);
 
@@ -230,10 +239,10 @@ int main (int argc, char **argv)
 
       switch (c) {
       case 'w':
-          dialog_width=atoi(optarg);
+          screen_width=atoi(optarg);
           break;
       case 'h':
-          dialog_height=atoi(optarg);
+          screen_height=atoi(optarg);
           break;
       case 'c':
           conffile=optarg;
@@ -258,8 +267,8 @@ int main (int argc, char **argv)
   actions = getActions();
   
   screen = gdk_screen_get_default ();
-  dialog_width =  gdk_screen_get_width (screen) / 9;
-  dialog_height =  gdk_screen_get_height (screen) / 9;
+  screen_width =  gdk_screen_get_width (screen);
+  screen_height =  gdk_screen_get_height (screen);
 
   mainwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   
@@ -267,13 +276,23 @@ int main (int argc, char **argv)
   //  gtk_window_set_opacity (GTK_WINDOW (mainwin), 0.0);
   
   //Remove border
-  gtk_window_set_decorated (GTK_WINDOW (mainwin), FALSE);
-
+  if ( !WINDOWED )
+  {
+    gtk_window_set_decorated (GTK_WINDOW (mainwin), FALSE);
+  }
+  else
+  {
+    gtk_window_set_decorated (GTK_WINDOW (mainwin), TRUE);
+    g_signal_connect (G_OBJECT (mainwin), "delete_event",
+          G_CALLBACK (destroy), NULL);
+    g_signal_connect (G_OBJECT (mainwin), "destroy",
+                      G_CALLBACK (destroy), NULL);
+  }
 	vbox = gtk_vbox_new (FALSE, 10);
 
   if ( actions != NULL )
   {
-    align = createbuttons( actions, gdk_screen_get_width (screen), gdk_screen_get_height (screen), &process_startprogram_event );
+    align = createbuttons( actions, screen_width, screen_height, &process_startprogram_event );
     gtk_container_add (GTK_CONTAINER (vbox), align);
     gtk_widget_show (align);
   }
@@ -286,10 +305,10 @@ int main (int argc, char **argv)
   gtk_widget_show(button);
 
   gtk_container_add (GTK_CONTAINER (vbox), hbox);
-	gtk_widget_show (hbox); 
+  gtk_widget_show (hbox); 
 
-	gtk_container_add (GTK_CONTAINER (mainwin), vbox);
-	gtk_widget_show (vbox); 
+  gtk_container_add (GTK_CONTAINER (mainwin), vbox);
+  gtk_widget_show (vbox); 
   gtk_widget_show (mainwin);
   
   gtk_main ();

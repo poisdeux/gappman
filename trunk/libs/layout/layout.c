@@ -7,6 +7,88 @@
 static int DEBUG = 0;
 
 /**
+* \brief callback function to quit the program
+* \param *widget pointer to widget to destroy
+* \param data mandatory argument for callback function, may be NULL.
+*/
+static void layout_destroy( GtkWidget *widget,
+                     gpointer   data )
+{
+    gtk_main_quit ();
+}
+
+/**
+* \brief loads image and scales it making sure the image fits inside
+* max_width*max_height maintaining the correct aspect ratio
+* \param imagefile filename of the image on disk
+* \param max_width maximum width image may have
+* \param max_height maximum height image may have
+* \return GtkWidget pointer to image
+*/
+static GtkWidget* load_image(char* imagefile, int max_width, int max_height)
+{
+  GtkWidget *image;
+  GdkPixbuf *pixbuf;
+  int width,height;
+  double ratio;
+
+  image = gtk_image_new_from_file (imagefile);
+  pixbuf = gtk_image_get_pixbuf(GTK_IMAGE(image));
+  width = gdk_pixbuf_get_width(pixbuf);
+  height = gdk_pixbuf_get_height(pixbuf);
+  ratio = (double) width/max_width;
+  width /= ratio;
+  height /= ratio;
+
+  // Check if button does not overlap the maximum allowed height
+  // if so we assume orientation is portrait and determine
+  // button size based on height
+  if( height > max_height )
+  {
+    ratio = (double) height/max_height;
+    width /= ratio;
+    height /= ratio;
+  }
+  pixbuf = gdk_pixbuf_scale_simple(pixbuf, width, height, GDK_INTERP_BILINEAR);
+  gtk_image_set_from_pixbuf(GTK_IMAGE(image), pixbuf);
+
+  return image;
+}
+
+/**
+* \brief Creates a box with an image and labeltext below it.
+* \param imagefile filename of image on disk
+* \param labeltext string containing label
+* \param max_width maximum allowed width the image may have
+* \param max_height maximum allowed height the image may have  
+*/
+static GtkWidget* image_label_box (gchar* imagefile, gchar* labeltext, int max_width, int max_height)
+{
+    GtkWidget *box;
+    GtkWidget *label;
+    GtkWidget *image;
+
+    /* Create box for image and label */
+    box = gtk_vbox_new (FALSE, 0);
+    gtk_container_set_border_width (GTK_CONTAINER (box), 2);
+
+    /* Now on to the image stuff */
+    image = load_image(imagefile, max_width, max_height);
+    gtk_box_pack_start (GTK_BOX (box), image, FALSE, FALSE, 3);
+    gtk_widget_show (image);
+
+    if(labeltext != NULL)
+    { 
+      /* Create a label for the button */
+      label = gtk_label_new (labeltext);
+      gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 3);
+      gtk_widget_show (label);
+    }
+
+    return box;
+}
+
+/**
 * \brief function to calculate the absolute width based upon the total available width
 * \param total_width Total available width for the box element
 * \param *box_width Pointer to a struct length holding the length value and type of the box
@@ -178,44 +260,36 @@ static void parseAlignment(float *alignment_x, float *alignment_y, xmlChar** ali
 */
 static GtkWidget* createbutton ( menu_elements *elt, int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, menu_elements*) )
 {
-  GtkWidget *button, *logoimage;
+  GtkWidget *button, *imagelabelbox;
   GdkPixbuf *pixbuf;
   int width, height;
   double ratio;
 
   if( elt->logo != NULL )
   {
-    logoimage = gtk_image_new_from_file ((char *) elt->logo);
-    pixbuf = gtk_image_get_pixbuf(GTK_IMAGE(logoimage));
-    width = gdk_pixbuf_get_width(pixbuf);
-    height = gdk_pixbuf_get_height(pixbuf);
-    ratio = (double) width/max_width;
-    width /= ratio;
-    height /= ratio;
-
-   // Check if button does not overlap the maximum allowed height
-    if( height > max_height )
+    if(elt->printlabel == 0)
     {
-      ratio = (double) height/max_height;
-      width /= ratio;
-      height /= ratio;
+      //NO LABEL THANK YOU VERY MUCH
+      imagelabelbox = image_label_box((gchar*) elt->logo , NULL, max_width, max_height);
     }
-
+    else
+    {
+      //LABEL PLEASE
+      imagelabelbox = image_label_box((gchar*) elt->logo , (gchar*) elt->name, max_width, max_height);
+    }
     if (DEBUG > 0)
     {
       printf("createbutton:  button_width: %d button_height: %d ratio: %.4f\n", width, height, ratio);
     }
-
-    pixbuf = gdk_pixbuf_scale_simple(pixbuf, width, height, GDK_INTERP_BILINEAR);
-    gtk_image_set_from_pixbuf(GTK_IMAGE(logoimage), pixbuf);
   }
 
   button = gtk_button_new ();
+  gtk_container_add(GTK_CONTAINER(button), imagelabelbox);
   gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
 
   if( elt->logo != NULL )
   {
-    gtk_button_set_image(GTK_BUTTON(button), logoimage);
+    gtk_button_set_image(GTK_BUTTON(button), imagelabelbox);
   }
 
   gtk_button_set_focus_on_click(GTK_BUTTON(button), TRUE);

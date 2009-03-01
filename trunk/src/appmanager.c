@@ -198,17 +198,6 @@ static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event,
   return FALSE;
 }
 
-/**
-* \brief callback function to quit the program
-* \param *widget pointer to widget to destroy
-* \param data mandatory argument for callback function, may be NULL.
-*/
-static void destroy( GtkWidget *widget,
-                     gpointer   data )
-{
-    gtk_main_quit ();
-}
-
 static void usage()
 {
   printf("usage: appmanager [--keep-below] [--debug <LEVEL>] [--width <WIDTHINPIXELS>] [--height <HEIGHTINPIXELS>] [--conffile <FILENAME>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
@@ -244,6 +233,17 @@ static void autostartprograms( menu_elements *elts )
     }
     cur = cur->next;
   }
+}
+
+/**
+* \brief callback function to quit the program
+* \param *widget pointer to widget to destroy
+* \param data mandatory argument for callback function, may be NULL.
+*/
+static void destroy( GtkWidget *widget,
+                     gpointer   data )
+{
+    gtk_main_quit ();
 }
 
 /**
