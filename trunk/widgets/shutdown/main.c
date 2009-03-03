@@ -271,7 +271,9 @@ int main (int argc, char **argv)
   screen_height =  gdk_screen_get_height (screen);
 
   mainwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  
+ 
+	gtk_window_set_position(GTK_WINDOW (mainwin), GTK_WIN_POS_CENTER);
+ 
   //Make window transparent
   //  gtk_window_set_opacity (GTK_WINDOW (mainwin), 0.0);
   
