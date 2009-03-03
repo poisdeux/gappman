@@ -239,39 +239,39 @@ void freeMenuElements( menu_elements *elt )
   int i;
   while(elt != NULL)
   {
-    printf("menu_element free: menu_width\n");
-    fflush(stdout);
+    //printf("menu_element free: menu_width\n");
+    //fflush(stdout);
     next = elt->next;
     free(elt->menu_width);
-    printf("menu_element free: menu_height\n");
-    fflush(stdout);
+    //printf("menu_element free: menu_height\n");
+    //fflush(stdout);
     free(elt->menu_height);
-    printf("menu_element free: orientation\n");
-    fflush(stdout);
+    //printf("menu_element free: orientation\n");
+    //fflush(stdout);
     free(elt->orientation);
-    printf("menu_element free: name\n");
-    fflush(stdout);
+    //printf("menu_element free: name\n");
+    //fflush(stdout);
     free((xmlChar *) elt->name);
-    printf("menu_element free: exec\n");
-    fflush(stdout);
+    //printf("menu_element free: exec\n");
+    //fflush(stdout);
     free((xmlChar *) elt->exec);
-    printf("menu_element free: logo\n");
-    fflush(stdout);
+    //printf("menu_element free: logo\n");
+    //fflush(stdout);
     free((xmlChar *) elt->logo);
     for (i = 0; i < elt->numArguments; i++)
     {
-    printf("menu_element free: args[%d]\n", i);
-    fflush(stdout);
+    //printf("menu_element free: args[%d]\n", i);
+    //fflush(stdout);
       free(elt->args[i]);
     }
-    printf("menu_element free: args\n");
-    fflush(stdout);
+    //printf("menu_element free: args\n");
+    //fflush(stdout);
     free(elt->args);
-    printf("menu_element free: elt\n");
-    fflush(stdout);
+    //printf("menu_element free: elt\n");
+    //fflush(stdout);
     free(elt);
-    printf("menu_element free: next\n");
-    fflush(stdout);
+    //printf("menu_element free: next\n");
+    //fflush(stdout);
     elt = next;
   }
 }
