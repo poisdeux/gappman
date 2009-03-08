@@ -76,20 +76,21 @@ void printMenuElements( menu_elements *elt );
 
 /**
 * \brief returns the total number of menu_elements
+* \return integer
 */
 int getNumberOfElements();
 
 /**
-* \brief Get the width of the program menu area
-* \return struct length
+* \brief Get the path of the cache location on disk
+* \return string
 */
-struct length* getWidth();
+char* getCachelocation();
 
 /**
-* \brief Get the height of the program menu area
-* \return struct length
+* \brief Get the name of the program as specified in the configuration file
+* \return string
 */
-struct length* getHeight();
+char* getProgramname();
 
 /**
 * \brief Get the alignment of the program menu area

@@ -10,6 +10,7 @@ populate the menu_elements structures.
 -----------------------------------------------------------------------------
 
 <gappman>
+  <cachelocation>DIRECTORYPATH</cachelocation>
   <actions width="<WIDTH>" height="<HEIGHT>" align="[[top|left|bottom|right|center],...]">
     <action>
       <name>ACTIONNAME</name>
@@ -71,4 +72,4 @@ The attributes <width> and <height> can be specified in amount of pixels or in p
 <arg> and <resolution> are optional. If no <resolution> is given the default screen resolution will be used. 
 The <autostart> attribute can have values 0 or 1. If set to 1 the program will be started when appmanager is started.
 
-
+If <cachelocation> is specified the system will first look for a cached version of the scaled images. If it cannot find an image it will scale the image pointed by <logo>, scale it, and save the scaled version in the directory specified by <cachelocation>.

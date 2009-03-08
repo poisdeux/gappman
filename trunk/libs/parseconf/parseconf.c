@@ -13,11 +13,11 @@
 #include <string.h>
 
 static int numberElts;
-static struct length program_menu_width;
-static struct length program_menu_height;
 static char *program_menu_alignment;
 static menu_elements* programs;
 static menu_elements* actions;
+static char *program_name;
+static char *cache_location;
 
 static void printElements(xmlTextReaderPtr reader)
 {
@@ -95,23 +95,21 @@ static void addArgument(menu_elements *elt, char *argument)
 }
 
 /**
-* \brief Get the width of the program menu area
-* \param width Width in pixels or percentage
-* \return pointer to length struct
+* \brief Get the path of the cache location on disk
+* \return string
 */
-struct length* getWidth()
+char* getCachelocation()
 {
-  return &program_menu_width;
+	return cache_location;
 }
 
 /**
-* \brief Get the height of the program menu area
-* \param height Height in pixels or percentage
-* \return pointer to length struct
+* \brief Get the name of the program as specified in the configuration file
+* \return string 
 */
-struct length* getHeight()
+char* getProgramname()
 {
-  return &program_menu_height;
+	return program_name;
 }
 
 /**
@@ -143,13 +141,14 @@ processMenuElement(xmlTextReaderPtr reader, menu_elements *elt, const char* elem
       if ( xmlTextReaderNodeType(reader) == 1 )
       {
         name = xmlTextReaderName(reader);
+	//printf("DEBUG: Attribute: %s\n", name);
       }
       else if ( xmlTextReaderNodeType(reader) == 3 )
       {
         value = xmlTextReaderValue(reader);
         if( strcmp((char *) name, "name") == 0 )
         {
-          printf("processProgram: %s\n", value);
+          //printf("DEBUG: processProgram: %s\n", value);
           elt->name = value;
         }
         else if( strcmp((char *) name, "printlabel") == 0 )
@@ -294,6 +293,14 @@ menu_elements* getActions()
   return actions;
 }
 
+/**
+* \brief creates the menu_elements structures
+* \param element_name name of the element being processed
+* \param group_element_name name of the group the element belongs to. E.g programs or actions.
+* \param reader the XML reader from libxml
+* \param **elts pointer to the linked list of menu element structures.
+* \return nothing. Use the **elts call by reference to retrieve the menu elements.
+*/
 void static processMenuElements(const char* element_name, const char* group_element_name, xmlTextReaderPtr reader, menu_elements **elts)
 {
   int ret = 1;
@@ -310,7 +317,7 @@ void static processMenuElements(const char* element_name, const char* group_elem
   menu_height = (struct length *) malloc (sizeof(struct length));
   orient = (char **) malloc (sizeof(char));
   
-  //Initial values 100%
+  //Initial default values 100%
   menu_width->value = 100;
   menu_width->type = PERCENTAGE;
   menu_height->value = 100;
@@ -331,21 +338,21 @@ void static processMenuElements(const char* element_name, const char* group_elem
       (*elts)->orientation = orient;
       
       prev = *elts;
-      printf("processMenuElements: %s\n", name);
+      //printf("DEBUG: processMenuElements: %s\n", name);
       processMenuElement(reader, *elts, element_name);
       numberElts++;
     }
     
     if( strcmp((char *) name, group_element_name) == 0 && xmlTextReaderNodeType(reader) == 15)
     {
-      printf("processMenuElements: %s\n", name);
+      //printf("DEBUG: processMenuElements: %s\n", name);
       if (xmlTextReaderHasAttributes(reader))
       {
         parseLength(xmlTextReaderGetAttribute (reader, "width"), menu_width);
         parseLength(xmlTextReaderGetAttribute (reader, "height"), menu_height);
         *orient = xmlTextReaderGetAttribute (reader, "align");
       
-        printf("DEBUG: %d : %d : %s\n", menu_width->value, menu_height->value, *orient);
+        //printf("DEBUG: %d : %d : %s\n", menu_width->value, menu_height->value, *orient);
       }
       ret = 0;
     }
@@ -365,22 +372,38 @@ void loadConf(const char *filename) {
     //Initialize
     programs = NULL;
     actions = NULL;
+    cache_location = NULL;
+    program_name = NULL;
 
     reader = xmlReaderForFile(filename, NULL, 0);
     if (reader != NULL) {
 
         ret = xmlTextReaderRead(reader);
+
+        // first attribute must be the name of the program 
+	program_name = xmlTextReaderName(reader);
+	//printf("DEBUG: Program_name: %s\n", program_name);
+
         while (ret == 1) {
-            name = xmlTextReaderName(reader);
+          name = xmlTextReaderName(reader);
           if( strcmp((char *) name, "programs") == 0 && xmlTextReaderNodeType(reader) == 1)
           {
             processMenuElements("program", "programs", reader, &programs);
           }
-          if( strcmp((char *) name, "actions") == 0 && xmlTextReaderNodeType(reader) == 1)
+          else if( strcmp((char *) name, "actions") == 0 && xmlTextReaderNodeType(reader) == 1)
           {
             processMenuElements("action", "actions", reader, &actions);
           }
+	  if( strcmp((char *) name, "cachelocation") == 0 && xmlTextReaderNodeType(reader) == 1) 
+	  { 
             ret = xmlTextReaderRead(reader);
+	    cache_location = xmlTextReaderValue(reader);
+	    //printf("DEBUG: Cache_location: %s\n",cache_location);
+	  }
+	  else
+	  {
+            ret = xmlTextReaderRead(reader);
+          }
         }
 
 	/**
@@ -399,5 +422,4 @@ void loadConf(const char *filename) {
      */
     xmlCleanupParser();
 
-//     return(programs);
 }
