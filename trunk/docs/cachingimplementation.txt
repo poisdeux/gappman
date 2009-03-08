@@ -1,0 +1,25 @@
+Large high resolution images take a lot of CPU processing to scale.
+This results in significant delays when the widget/application is started.
+To speed up the process caching of the scaled image can result in 
+much faster startup times.
+
+This would require a new attribute: <cachelocation> specifying
+a location on disk where the cached files are put.
+Cached version of the images should conform to the following
+naming scheme:
+
+APPNAME-BUTTONNAME-WIDTHxHEIGHT
+
+The WIDTH and HEIGHT should be the max width and height as passed
+to the function load_image in layout.c.
+
+The load_image function first looks in the <cachelocation> directory
+if a file conforming to the naming scheme exists. If so, it will load
+this file and will not perform any scaling. If it cannot find the file
+it will load the original <logo> and scale it. 
+
+If the <cachelocation> attribute is not specified caching should be
+disabled.
+
+
+

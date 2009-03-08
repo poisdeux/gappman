@@ -17,7 +17,7 @@ Features:
 * Supports two types of buttons; actions and programs. Here, action means starting a management application like configuring the X server, restarting the system, setting up network, etc.. Programs are applications which fullfill the actual purpose of the system. E.g. mediaplayer, remote desktop, webbrowsing, etc. etc..
 * Change screen resolution when a program is started and change it back to original when program quits.
 * Fully configurable using one XML configuration file.
-
+* Image caching for fast loading of scaled images.
 
 -----------------------------------------------------------------------------
 2. Installation
