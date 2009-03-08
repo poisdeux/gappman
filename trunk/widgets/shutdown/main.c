@@ -217,6 +217,7 @@ int main (int argc, char **argv)
   int screen_width;
   int screen_height;
   int c;
+  time_t timestruct;
 
   gtk_init (&argc, &argv);
 
@@ -263,19 +264,21 @@ int main (int argc, char **argv)
   }
 
   /** Load configuration elements */
+  //printf("DEBUG: Loading configuration file\n");
   loadConf(conffile);
   actions = getActions();
-  
+  //printf("DEBUG: Done loading configuration file\n");
+
   screen = gdk_screen_get_default ();
   screen_width =  gdk_screen_get_width (screen);
   screen_height =  gdk_screen_get_height (screen);
 
   mainwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
  
-	gtk_window_set_position(GTK_WINDOW (mainwin), GTK_WIN_POS_CENTER);
+  gtk_window_set_position(GTK_WINDOW (mainwin), GTK_WIN_POS_CENTER);
  
   //Make window transparent
-  //  gtk_window_set_opacity (GTK_WINDOW (mainwin), 0.0);
+  //gtk_window_set_opacity (GTK_WINDOW (mainwin), 0.8);
   
   //Remove border
   if ( !WINDOWED )
@@ -290,13 +293,16 @@ int main (int argc, char **argv)
     g_signal_connect (G_OBJECT (mainwin), "destroy",
                       G_CALLBACK (destroy), NULL);
   }
-	vbox = gtk_vbox_new (FALSE, 10);
+  vbox = gtk_vbox_new (FALSE, 10);
 
   if ( actions != NULL )
   {
+    timestruct = time(NULL);    
+    //printf("DEBUG: creating buttons\n");
     align = createbuttons( actions, screen_width, screen_height, &process_startprogram_event );
     gtk_container_add (GTK_CONTAINER (vbox), align);
     gtk_widget_show (align);
+    //printf("DEBUG: finished creating buttons in %f seconds\n", difftime(time(NULL), timestruct));
   }
 
 	hbox = gtk_hbox_new (FALSE, 10); 
@@ -312,7 +318,8 @@ int main (int argc, char **argv)
   gtk_container_add (GTK_CONTAINER (mainwin), vbox);
   gtk_widget_show (vbox); 
   gtk_widget_show (mainwin);
-  
+ 
+  gtk_window_set_focus(GTK_WINDOW (mainwin), button); 
   gtk_main ();
 
   freeMenuElements( actions );

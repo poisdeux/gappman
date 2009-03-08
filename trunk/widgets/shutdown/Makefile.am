@@ -7,6 +7,4 @@ shutdown_LDADD = @GTK_OBJS@
 shutdown_LDADD += @LIBXML_OBJS@
 shutdown_LDADD += ../../libs/parseconf/libparseconf.la
 shutdown_LDADD += ../../libs/layout/liblayout.la
-shutdowndir = ../src
-shutdown.$(OBJEXT): parseconf.o
 
