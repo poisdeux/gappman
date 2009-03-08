@@ -17,22 +17,12 @@ static void layout_destroy( GtkWidget *widget,
     gtk_main_quit ();
 }
 
-/**
-* \brief loads image and scales it making sure the image fits inside
-* max_width*max_height maintaining the correct aspect ratio
-* \param imagefile filename of the image on disk
-* \param max_width maximum width image may have
-* \param max_height maximum height image may have
-* \return GtkWidget pointer to image
-*/
-static GtkWidget* load_image(char* imagefile, int max_width, int max_height)
+static GdkPixbuf* scale_image(GtkWidget *image, int max_width, int max_height)
 {
-  GtkWidget *image;
-  GdkPixbuf *pixbuf;
-  int width,height;
+  GdkPixbuf* pixbuf;
+  int width, height;
   double ratio;
 
-  image = gtk_image_new_from_file (imagefile);
   pixbuf = gtk_image_get_pixbuf(GTK_IMAGE(image));
   width = gdk_pixbuf_get_width(pixbuf);
   height = gdk_pixbuf_get_height(pixbuf);
@@ -49,9 +39,64 @@ static GtkWidget* load_image(char* imagefile, int max_width, int max_height)
     width /= ratio;
     height /= ratio;
   }
-  pixbuf = gdk_pixbuf_scale_simple(pixbuf, width, height, GDK_INTERP_BILINEAR);
-  gtk_image_set_from_pixbuf(GTK_IMAGE(image), pixbuf);
+  return gdk_pixbuf_scale_simple(pixbuf, width, height, GDK_INTERP_BILINEAR);
+}
+ 
+/**
+* \brief loads image and scales it making sure the image fits inside
+* max_width*max_height maintaining the correct aspect ratio
+* \param imagefile filename of the image on disk
+* \param max_width maximum width image may have
+* \param max_height maximum height image may have
+* \return GtkWidget pointer to image
+*/
+static GtkWidget* load_image(menu_elements *elt, int max_width, int max_height)
+{
+  GtkWidget *image;
+  GdkPixbuf *pixbuf;
+  char* cachedfile;
+  size_t stringlength;
+  FILE *fp;
 
+  // Paths can be of arbitrary lengt.
+  // Filenames can not be longer than 255 chars
+  // Width and height will not exceed 9999 (4 chars)
+  if ( getCachelocation() != NULL )
+  {
+    stringlength = strlen(getCachelocation()) + 255 + 8;
+
+    cachedfile = (char*) malloc(stringlength * sizeof(char) + 1);
+  
+    //Filename of cached image should conform to
+    //CACHEDLOCATION/PROGRAMNAME-BUTTONNAME-WIDTHxHEIGHT
+    sprintf(cachedfile, "%s/%s-%s-%dx%d", getCachelocation(), getProgramname(), 
+    	elt->name, max_width, max_height);
+    //printf("DEBUG: CACHEDFILE: %s\n", cachedfile);
+    fflush(stdout);
+
+    fp = fopen(cachedfile, "rw");
+    if ( fp )
+    {
+	//printf("DEBUG: Reading cachefile\n");
+        image = gtk_image_new_from_file (cachedfile);
+    }
+    else
+    {
+	//printf("DEBUG: Creating cachefile\n");
+        image = gtk_image_new_from_file ((char*) elt->logo);
+	pixbuf = scale_image(image, max_width, max_height); 
+        gtk_image_set_from_pixbuf(GTK_IMAGE(image), pixbuf);
+	gdk_pixbuf_save(pixbuf, cachedfile, "png", NULL, "compression", "9", NULL);	
+    }
+
+    free(cachedfile);
+  }
+  else
+  {
+    image = gtk_image_new_from_file ((char*) elt->logo);
+    gtk_image_set_from_pixbuf(GTK_IMAGE(image), scale_image(image, max_width, max_height));
+  }
+  
   return image;
 }
 
@@ -62,7 +107,7 @@ static GtkWidget* load_image(char* imagefile, int max_width, int max_height)
 * \param max_width maximum allowed width the image may have
 * \param max_height maximum allowed height the image may have  
 */
-static GtkWidget* image_label_box (gchar* imagefile, gchar* labeltext, int max_width, int max_height)
+static GtkWidget* image_label_box (menu_elements *elt, gchar* labeltext, int max_width, int max_height)
 {
     GtkWidget *box;
     GtkWidget *label;
@@ -73,7 +118,7 @@ static GtkWidget* image_label_box (gchar* imagefile, gchar* labeltext, int max_w
     gtk_container_set_border_width (GTK_CONTAINER (box), 2);
 
     /* Now on to the image stuff */
-    image = load_image(imagefile, max_width, max_height);
+    image = load_image(elt, max_width, max_height);
     gtk_box_pack_start (GTK_BOX (box), image, FALSE, FALSE, 3);
     gtk_widget_show (image);
 
@@ -270,12 +315,12 @@ static GtkWidget* createbutton ( menu_elements *elt, int max_width, int max_heig
     if(elt->printlabel == 0)
     {
       //NO LABEL THANK YOU VERY MUCH
-      imagelabelbox = image_label_box((gchar*) elt->logo , NULL, max_width, max_height);
+      imagelabelbox = image_label_box(elt , NULL, max_width, max_height);
     }
     else
     {
       //LABEL PLEASE
-      imagelabelbox = image_label_box((gchar*) elt->logo , (gchar*) elt->name, max_width, max_height);
+      imagelabelbox = image_label_box(elt , (gchar*) elt->name, max_width, max_height);
     }
     if (DEBUG > 0)
     {
