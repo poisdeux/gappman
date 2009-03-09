@@ -1,0 +1,44 @@
+
+The processmanager widget must obtain the list of programs from gappman.
+This cannot be obtained from the configuration file as the PIDs are 
+needed to manage the processes. These are known when the program is 
+started and therefore not available from the configuration file.
+
+Processmanager should show the Programname, Logo, and State in a
+table format:
+
++------+-------------+-------+
+| Logo | Programname | State |
++------+-------------+-------+
+| .... |     ....    |  ...  |
++------+-------------+-------+
+| .... |     ....    |  ...  |
++------+--------+----+-------+
+| CANCEL |
++--------+
+
+Selection should be highlighted per row and pressing spacebar should
+provide the user with a dialog allowing her to choose what action to
+perform.
+
++------------------+------------------+
+| Programname      | State            |
++------------------+---------+--------+
+| button:          | button: |
+| Stop PROGRAMNAME | Cancel  |
++------------------+---------+
+
+When the stop button is pressed the signals sent are depended on the state
+of the program.
+
+* Running: TERM 
+* Interruptible: TERM 
+* Uninterruptible: KILL
+* Stopped: KILL
+* Zombie: Restart parent process
+
+Zombie processes are a bit harder too kill. The parent should be restarted
+or killed. This would be gappman and it should be able to handle the HUP
+signal.
+
+
