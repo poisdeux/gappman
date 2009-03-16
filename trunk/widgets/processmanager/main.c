@@ -115,12 +115,6 @@ int main (int argc, char **argv)
       }
   }
 
-  /** Load configuration elements */
-  //printf("DEBUG: Loading configuration file\n");
-  loadConf(conffile);
-  actions = getActions();
-  //printf("DEBUG: Done loading configuration file\n");
-
   screen = gdk_screen_get_default ();
   screen_width =  gdk_screen_get_width (screen);
   screen_height =  gdk_screen_get_height (screen);
@@ -145,36 +139,6 @@ int main (int argc, char **argv)
     g_signal_connect (G_OBJECT (mainwin), "destroy",
                       G_CALLBACK (destroy), NULL);
   }
-  vbox = gtk_vbox_new (FALSE, 10);
-
-  if ( actions != NULL )
-  {
-    timestruct = time(NULL);    
-    //printf("DEBUG: creating buttons\n");
-    align = createbuttons( actions, screen_width, screen_height, &process_startprogram_event );
-    gtk_container_add (GTK_CONTAINER (vbox), align);
-    gtk_widget_show (align);
-    //printf("DEBUG: finished creating buttons in %f seconds\n", difftime(time(NULL), timestruct));
-  }
-
-	hbox = gtk_hbox_new (FALSE, 10); 
-  // cancel button
-  button = gtk_button_new_with_label("Cancel");
-	g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (gtk_main_quit), NULL);
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
-  gtk_widget_show(button);
-
-  gtk_container_add (GTK_CONTAINER (vbox), hbox);
-  gtk_widget_show (hbox); 
-
-  gtk_container_add (GTK_CONTAINER (mainwin), vbox);
-  gtk_widget_show (vbox); 
-  gtk_widget_show (mainwin);
- 
-  gtk_window_set_focus(GTK_WINDOW (mainwin), button); 
-  gtk_main ();
-
-  freeMenuElements( actions );
 
   return 0;
 }
