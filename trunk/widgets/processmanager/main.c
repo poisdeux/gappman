@@ -140,6 +140,8 @@ int main (int argc, char **argv)
                       G_CALLBACK (destroy), NULL);
   }
 
+  gtk_main ();
+
   return 0;
 }
 

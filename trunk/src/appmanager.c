@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <getopt.h>
+#include <sys/socket.h>
 #include <string.h>
 #include "changeresolution.h"
 #include "../libs/parseconf/parseconf.h"
@@ -40,6 +41,22 @@ struct appwidgetinfo
   GtkWidget *widget;
 };
 
+static int start_listening()
+{
+	int fd;
+	GIOChannel *chan;
+  
+	fd = socket(PF_LOCAL, SOCK_STREAM, 0);
+	chan = g_io_channel_unix_new(fd);
+
+	//g_io_add_watch(chan, G_IO_IN, );	
+}
+
+/**
+* \brief Checks if the application is still responding and enables the button when it doesn't respond.
+* \param appw appwidgetinfo structure which holds the application's button widget and the PID of the running application.
+* \return TRUE if application responds, FALSE if not.
+*/ 
 static gint check_app_status(struct appwidgetinfo* appw)
 {
   int status;
@@ -74,6 +91,12 @@ static gint check_app_status(struct appwidgetinfo* appw)
   return TRUE;
 }
 
+/**
+* \brief Creates an appwidgetinfo structure
+* \param PID the process ID of the application
+* \param widget pointer to the GtkWidget which belongs to the button of the application
+* \return pointer to appwidgetinfo structure
+*/
 static struct appwidgetinfo* create_new_appwidgetinfo(int PID, GtkWidget *widget)
 {
   struct appwidgetinfo *appw;
@@ -96,6 +119,12 @@ static struct appm_alignment * create_appm_alignment_struct()
   return alignment;
 }
 
+/**
+* \brief Starts the program with any specified arguments by forking and letting the child (fork) start the program
+* \param widget pointer to GtkWidget of the button that was pressed to start the application
+* \param elt pointer to the menu_element structure for the application that needs to be started
+* \return gboolean FALSE if the fork failed or the program's executable could not be found. TRUE if fork succeeded and program was found.  
+*/
 static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
 {
   char **args;
@@ -162,9 +191,11 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
   else 
   {
     printf("File: %s not found!\n", (char *) elt->exec);
+    return FALSE;
   }
 
   free(args);
+  return TRUE;
 }
 
 /**
