@@ -1,9 +1,33 @@
+#include <glib.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+//#include <stdlib.h>
+//#include <string.h>
+//#include <unistd.h>
+//#include <wait.h>
+//#include <signal.h>
+
+void handlemessage( GIOChannel* gio )
+{
+/*
+	GIOStatus           g_io_channel_read_chars             (GIOChannel *channel,
+                                                         gchar *buf,
+                                                         gsize count,
+                                                         gsize *bytes_read,
+                                                         GError **error);
+*/
+
+}
+
 gboolean gappman_connect (const gchar *server, gint port)
 {
 
 	GIOChannel* gio;
 	
 	int sock;
+	int sourceid;
 	struct hostent *host;
 	gchar line[] = { ';', '\n'};
 	g_return_val_if_fail (server != NULL, FALSE);
@@ -28,14 +52,9 @@ gboolean gappman_connect (const gchar *server, gint port)
 	g_io_channel_set_buffer_size (gio, 0);
 	g_io_channel_set_line_term (gio, line, 2);
 	g_io_channel_set_encoding (gio, "UTF-8", NULL);
-	
-	gift_io.source = g_io_create_watch (gio, G_IO_IN | G_IO_PRI);
-	g_source_set_priority (gio.source, G_PRIORITY_LOW);
-	g_source_set_callback (gio.source, (GSourceFunc) gift_receive,
-			       NULL, NULL);
 
-	g_source_attach (gio.source, NULL);
+	sourceid = g_io_add_watch_full( gio, G_PRIORITY_LOW, G_IO_IN, handlemessage, gio, NULL);
+	
 	return TRUE;
 }
-
 
