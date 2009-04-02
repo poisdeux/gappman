@@ -3,13 +3,10 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-//#include <stdlib.h>
-//#include <string.h>
-//#include <unistd.h>
-//#include <wait.h>
-//#include <signal.h>
 
-void handlemessage( GIOChannel* gio )
+static GIOChannel* gio = NULL;
+
+gboolean handlemessage( GIOChannel* gio , GIOCondition cond, gpointer data )
 {
 /*
 	GIOStatus           g_io_channel_read_chars             (GIOChannel *channel,
@@ -18,13 +15,16 @@ void handlemessage( GIOChannel* gio )
                                                          gsize *bytes_read,
                                                          GError **error);
 */
+	gchar msg[256];
+	int bytes_read;
+	GIOChannelError **gerror;
 
+	g_io_channel_read_chars(gio, msg, 256, &bytes_read, (GError **) gerror);
 }
 
-gboolean gappman_connect (const gchar *server, gint port)
+gboolean gappman_start_listener (const gchar *server, gint port)
 {
 
-	GIOChannel* gio;
 	
 	int sock;
 	int sourceid;
@@ -58,3 +58,14 @@ gboolean gappman_connect (const gchar *server, gint port)
 	return TRUE;
 }
 
+gboolean gappman_close_listener ()
+{
+	GIOStatus status;
+
+  status = g_io_channel_shutdown( gio, TRUE, NULL);
+
+	if ( status == G_IO_STATUS_ERROR )
+		return FALSE;
+
+	return TRUE;
+}
