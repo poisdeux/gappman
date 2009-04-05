@@ -130,62 +130,6 @@ static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event,
   return FALSE;
 }
 
-static GtkWidget* load_image(char* imagefile, int max_width, int max_height)
-{
-  GtkWidget *image;
-  GdkPixbuf *pixbuf;
-  int width,height;
-  double ratio;
-
-  image = gtk_image_new_from_file (imagefile);
-  pixbuf = gtk_image_get_pixbuf(GTK_IMAGE(image));
-  width = gdk_pixbuf_get_width(pixbuf);
-  height = gdk_pixbuf_get_height(pixbuf);
-  ratio = (double) width/max_width;
-  width /= ratio;
-  height /= ratio;
-
-  // Check if button does not overlap the maximum allowed height
-  // if so we assume orientation is portrait and determine
-  // button size based on height
-  if( height > max_height )
-  {
-    ratio = (double) height/max_height;
-    width /= ratio;
-    height /= ratio;
-  }
-  pixbuf = gdk_pixbuf_scale_simple(pixbuf, width, height, GDK_INTERP_BILINEAR);
-  gtk_image_set_from_pixbuf(GTK_IMAGE(image), pixbuf);
-
-  return image;
-}
-
-static GtkWidget* image_label_box (gchar* imagefile, gchar* labeltext, int max_width, int max_height)
-{
-    GtkWidget *box;
-    GtkWidget *label;
-    GtkWidget *image;
-
-    /* Create box for image and label */
-    box = gtk_vbox_new (FALSE, 0);
-    gtk_container_set_border_width (GTK_CONTAINER (box), 2);
-
-    /* Now on to the image stuff */
-    image = load_image(imagefile, max_width, max_height);
-
-    /* Create a label for the button */
-    label = gtk_label_new (labeltext);
-
-    /* Pack the image and label into the box */
-    gtk_box_pack_start (GTK_BOX (box), image, FALSE, FALSE, 3);
-    gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 3);
-
-    gtk_widget_show (image);
-    gtk_widget_show (label);
-
-    return box;
-}
-
 /**
 * \brief callback function to quit the program
 * \param *widget pointer to widget to destroy
@@ -204,14 +148,11 @@ static void destroy( GtkWidget *widget,
 int main (int argc, char **argv)
 {
   GdkScreen *screen;
-  GdkWindow *rootwin;
   GtkWidget *button;
-  GtkWidget *labelimagebox;
   GtkWidget *vbox;
   GtkWidget *hbox;
   GtkWidget *align;
   GtkWidget *mainwin;
-  GtkWidget *table;
   menu_elements *actions;
   const char* conffile = "/etc/gappman/shutdown.xml";
   int screen_width;
@@ -297,7 +238,7 @@ int main (int argc, char **argv)
 
   if ( actions != NULL )
   {
-    timestruct = time(NULL);    
+    //timestruct = time(NULL);    
     //printf("DEBUG: creating buttons\n");
     align = createbuttons( actions, screen_width, screen_height, &process_startprogram_event );
     gtk_container_add (GTK_CONTAINER (vbox), align);
