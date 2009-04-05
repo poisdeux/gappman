@@ -38,6 +38,69 @@ static void usage()
 }
 
 
+static void setupmainwindow()
+{
+  GdkScreen *screen;
+  GtkWidget *button;
+  GtkWidget *vbox;
+  GtkWidget *hbox;
+  GtkWidget *align;
+  GtkWidget *mainwin;
+	int dialog_width, dialog_height;
+
+	screen = gdk_screen_get_default ();
+  dialog_width =  gdk_screen_get_width (screen)/5;
+  dialog_height =  gdk_screen_get_height (screen)/5;
+
+	if ((dialog_width < 100) && (gdk_screen_get_width(screen) < 100))
+	{
+		dialog_width = gdk_screen_get_width(screen);
+	}
+	else
+	{
+		dialog_width = 100;
+	}
+
+	if (dialog_height < 100) && (gdk_screen_get_height(screen) < 100))
+	{
+		dialog_height = gdk_screen_get_height(screen);
+	}
+	else
+	{
+		dialog_height = 100;
+	}
+
+
+	mainwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+
+  gtk_window_set_position(GTK_WINDOW (mainwin), GTK_WIN_POS_CENTER);
+
+  //Make window transparent
+  //gtk_window_set_opacity (GTK_WINDOW (mainwin), 0.8);
+
+  //Remove border
+  if ( !WINDOWED )
+  {
+    gtk_window_set_decorated (GTK_WINDOW (mainwin), FALSE);
+  }
+  else
+  {
+    gtk_window_set_decorated (GTK_WINDOW (mainwin), TRUE);
+    g_signal_connect (G_OBJECT (mainwin), "delete_event",
+          G_CALLBACK (destroy), NULL);
+    g_signal_connect (G_OBJECT (mainwin), "destroy",
+                      G_CALLBACK (destroy), NULL);
+  }
+
+	vbox = gtk_vbox_new (FALSE, 10);
+
+	hbox = gtk_hbox_new (FALSE, 10);
+
+	imagebox = image_label_box_hor (menu_elements *elt, "MythTV", dialog_width - 50, 10)
+	statusbox = gtk_label_new("running");
+	
+}
+
 /**
 * \brief callback function to quit the program
 * \param *widget pointer to widget to destroy
@@ -139,6 +202,8 @@ int main (int argc, char **argv)
     g_signal_connect (G_OBJECT (mainwin), "destroy",
                       G_CALLBACK (destroy), NULL);
   }
+
+	setupmainwindow();
 
   gtk_main ();
 

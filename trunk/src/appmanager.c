@@ -19,6 +19,7 @@
 #include <sys/socket.h>
 #include <string.h>
 #include "changeresolution.h"
+#include "listener.h"
 #include "../libs/parseconf/parseconf.h"
 #include "../libs/layout/layout.h"
 
@@ -40,17 +41,6 @@ struct appwidgetinfo
   int PID; //<! Process ID of running app (child replaced through execvp)
   GtkWidget *widget;
 };
-
-static int start_listening()
-{
-	int fd;
-	GIOChannel *chan;
-  
-	fd = socket(PF_LOCAL, SOCK_STREAM, 0);
-	chan = g_io_channel_unix_new(fd);
-
-	//g_io_add_watch(chan, G_IO_IN, );	
-}
 
 /**
 * \brief Checks if the application is still responding and enables the button when it doesn't respond.
@@ -408,6 +398,11 @@ int main (int argc, char **argv)
   gtk_widget_show (mainwin);
 
   autostartprograms( programs );
+
+	if ( ! gappman_start_listener("localhost", 2103) )
+	{
+		fprintf(stderr, "Error: could not start listener.\n");
+	}
   
   gtk_main ();
 

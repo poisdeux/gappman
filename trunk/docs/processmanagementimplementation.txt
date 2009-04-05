@@ -37,9 +37,10 @@ of the program.
 * Stopped: KILL
 * Zombie: Restart parent process
 
-Zombie processes are a bit harder too kill. The parent should be restarted
+Zombie processes are a bit harder to kill. The parent should be restarted
 or killed. This would be gappman and it should be able to handle the HUP
-signal.
+signal. Zombie processes would indicate a bug in gappman as these are not
+supposed to happen.
 
 
 === Server code to be added to gappman (needs to be rewritten to GTK)

@@ -50,7 +50,7 @@ static GdkPixbuf* scale_image(GtkWidget *image, int max_width, int max_height)
 * \param max_height maximum height image may have
 * \return GtkWidget pointer to image
 */
-static GtkWidget* load_image(menu_elements *elt, int max_width, int max_height)
+GtkWidget* load_image(menu_elements *elt, int max_width, int max_height)
 {
   GtkWidget *image;
   GdkPixbuf *pixbuf;
@@ -101,13 +101,47 @@ static GtkWidget* load_image(menu_elements *elt, int max_width, int max_height)
 }
 
 /**
+* \brief Creates a box with an image and labeltext on the right of it.
+* \param imagefile filename of image on disk
+* \param labeltext string containing label
+* \param max_width maximum allowed width the image may have
+* \param max_height maximum allowed height the image may have 
+* \return GtkWidget pointer 
+*/
+GtkWidget* image_label_box_hor (menu_elements *elt, gchar* labeltext, int max_width, int max_height)
+{
+    GtkWidget *box;
+    GtkWidget *label;
+    GtkWidget *image;
+
+    /* Create box for image and label */
+    box = gtk_hbox_new (FALSE, 0);
+    gtk_container_set_border_width (GTK_CONTAINER (box), 2);
+
+    /* Now on to the image stuff */
+    image = load_image(elt, max_width, max_height);
+    gtk_box_pack_start (GTK_BOX (box), image, FALSE, FALSE, 3);
+    gtk_widget_show (image);
+
+    if(labeltext != NULL)
+    { 
+      /* Create a label for the button */
+      label = gtk_label_new (labeltext);
+      gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 3);
+      gtk_widget_show (label);
+    }
+
+    return box;
+}
+
+/**
 * \brief Creates a box with an image and labeltext below it.
 * \param imagefile filename of image on disk
 * \param labeltext string containing label
 * \param max_width maximum allowed width the image may have
 * \param max_height maximum allowed height the image may have  
 */
-static GtkWidget* image_label_box (menu_elements *elt, gchar* labeltext, int max_width, int max_height)
+static GtkWidget* image_label_box_vert (menu_elements *elt, gchar* labeltext, int max_width, int max_height)
 {
     GtkWidget *box;
     GtkWidget *label;
@@ -315,12 +349,12 @@ static GtkWidget* createbutton ( menu_elements *elt, int max_width, int max_heig
     if(elt->printlabel == 0)
     {
       //NO LABEL THANK YOU VERY MUCH
-      imagelabelbox = image_label_box(elt , NULL, max_width, max_height);
+      imagelabelbox = image_label_box_vert(elt , NULL, max_width, max_height);
     }
     else
     {
       //LABEL PLEASE
-      imagelabelbox = image_label_box(elt , (gchar*) elt->name, max_width, max_height);
+      imagelabelbox = image_label_box_vert(elt , (gchar*) elt->name, max_width, max_height);
     }
     if (DEBUG > 0)
     {

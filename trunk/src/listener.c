@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <glib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -8,24 +9,27 @@ static GIOChannel* gio = NULL;
 
 gboolean handlemessage( GIOChannel* gio , GIOCondition cond, gpointer data )
 {
-/*
-	GIOStatus           g_io_channel_read_chars             (GIOChannel *channel,
-                                                         gchar *buf,
-                                                         gsize count,
-                                                         gsize *bytes_read,
-                                                         GError **error);
-*/
-	gchar msg[256];
+	gchar msg[1];
 	int bytes_read;
-	GIOChannelError **gerror;
+	GError *gerror = NULL;
+	GIOStatus status;
 
-	g_io_channel_read_chars(gio, msg, 256, &bytes_read, (GError **) gerror);
+	status = g_io_channel_read_chars(gio, msg, 1, &bytes_read, &gerror);
+	if( gerror != NULL )
+	{
+		fprintf(stderr, "Error: %s\n", gerror->message );
+	}
+	if( status == G_IO_STATUS_NORMAL )
+	{
+		fprintf(stdout, "MESSAGE RECEIVED: %s\n", msg);
+		return TRUE;
+	}
+	
+	return FALSE; 
 }
 
 gboolean gappman_start_listener (const gchar *server, gint port)
 {
-
-	
 	int sock;
 	int sourceid;
 	struct hostent *host;
@@ -41,13 +45,17 @@ gboolean gappman_start_listener (const gchar *server, gint port)
 		addr.sin_addr = * (struct in_addr *) host->h_addr;
 		addr.sin_port = g_htons(port);
 		addr.sin_family = AF_INET;
-		if (connect (sock, (struct sockaddr *) &addr, sizeof (addr)) == -1)
+		fprintf(stdout, "Listening to port %d on %s\n", port, server);
+		if ( bind(sock, (struct sockaddr *) &addr, sizeof(addr)) < 0) 
 			return FALSE;
 
-
+		listen(sock,5);
 	}
 	else
+	{
 		return FALSE;
+	}
+
 	gio = g_io_channel_unix_new (sock);
 	g_io_channel_set_buffer_size (gio, 0);
 	g_io_channel_set_line_term (gio, line, 2);
