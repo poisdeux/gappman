@@ -32,8 +32,8 @@ When the stop button is pressed the signals sent are depended on the state
 of the program.
 
 * Running: TERM 
-* Interruptible: TERM 
-* Uninterruptible: KILL
+* Sleeping (Interruptible): TERM 
+* Waiting (Uninterruptible): KILL
 * Stopped: KILL
 * Zombie: Restart parent process
 
