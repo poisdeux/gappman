@@ -61,6 +61,7 @@ libs/parseconf/Makefile
 libs/layout/Makefile
 widgets/Makefile
 widgets/shutdown/Makefile
+widgets/processmanager/Makefile
 ])
 
 AC_OUTPUT
