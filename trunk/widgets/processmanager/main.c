@@ -37,68 +37,27 @@ static void usage()
 
 }
 
-
-static void setupmainwindow()
+static GtkWidget* createrow(menu_elements *elt, gchar *status, int status_fontsize, int width, int height)
 {
-  GdkScreen *screen;
-  GtkWidget *button;
-  GtkWidget *vbox;
-  GtkWidget *hbox;
-  GtkWidget *align;
-  GtkWidget *mainwin;
-	int dialog_width, dialog_height;
-
-	screen = gdk_screen_get_default ();
-  dialog_width =  gdk_screen_get_width (screen)/5;
-  dialog_height =  gdk_screen_get_height (screen)/5;
-
-	if ((dialog_width < 100) && (gdk_screen_get_width(screen) < 100))
-	{
-		dialog_width = gdk_screen_get_width(screen);
-	}
-	else
-	{
-		dialog_width = 100;
-	}
-
-	if (dialog_height < 100) && (gdk_screen_get_height(screen) < 100))
-	{
-		dialog_height = gdk_screen_get_height(screen);
-	}
-	else
-	{
-		dialog_height = 100;
-	}
-
-
-	mainwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-
-  gtk_window_set_position(GTK_WINDOW (mainwin), GTK_WIN_POS_CENTER);
-
-  //Make window transparent
-  //gtk_window_set_opacity (GTK_WINDOW (mainwin), 0.8);
-
-  //Remove border
-  if ( !WINDOWED )
-  {
-    gtk_window_set_decorated (GTK_WINDOW (mainwin), FALSE);
-  }
-  else
-  {
-    gtk_window_set_decorated (GTK_WINDOW (mainwin), TRUE);
-    g_signal_connect (G_OBJECT (mainwin), "delete_event",
-          G_CALLBACK (destroy), NULL);
-    g_signal_connect (G_OBJECT (mainwin), "destroy",
-                      G_CALLBACK (destroy), NULL);
-  }
-
-	vbox = gtk_vbox_new (FALSE, 10);
+  GtkWidget *hbox, *imagebox, *statuslabel;
+	gchar *markup;
 
 	hbox = gtk_hbox_new (FALSE, 10);
 
-	imagebox = image_label_box_hor (menu_elements *elt, "MythTV", dialog_width - 50, 10)
-	statusbox = gtk_label_new("running");
+	//status_fontsize is 1024th of a point. We reserve 20% of the total width
+	//for the status column.
+	imagebox = image_label_box_vert (elt, (gchar *) elt->name, width, height);
+	statuslabel = gtk_label_new("");
+	markup = g_markup_printf_escaped ("<span size=\"%d\">%s</span>", status_fontsize, status);
+	gtk_label_set_markup (GTK_LABEL (statuslabel), markup);
+	g_free (markup);
+
 	
+	gtk_container_add(GTK_CONTAINER(hbox), imagebox);
+	gtk_widget_show(imagebox);	
+	gtk_container_add(GTK_CONTAINER(hbox), statuslabel);
+	gtk_widget_show(statuslabel);
+	return hbox;
 }
 
 /**
@@ -127,15 +86,23 @@ int main (int argc, char **argv)
   GtkWidget *align;
   GtkWidget *mainwin;
   GtkWidget *table;
-  menu_elements *actions;
-  const char* conffile = "/etc/gappman/shutdown.xml";
-  int screen_width;
-  int screen_height;
+  menu_elements *programs, *elt_tmp;
+  const char* conffile = "/etc/gappman/processmanager.xml";
+  int dialog_width;
+  int dialog_height;
+	int program_width;
+	int row_height;
   int c;
+	int status_fontsize;
   time_t timestruct;
 
   gtk_init (&argc, &argv);
+  screen = gdk_screen_get_default ();
+  dialog_width =  gdk_screen_get_width (screen)/3;
+  dialog_height =  gdk_screen_get_height (screen)/3;
 
+  mainwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+ 
   while (1) {
       int option_index = 0;
       static struct option long_options[] = {
@@ -155,10 +122,10 @@ int main (int argc, char **argv)
 
       switch (c) {
       case 'w':
-          screen_width=atoi(optarg);
+          dialog_width=atoi(optarg);
           break;
       case 'h':
-          screen_height=atoi(optarg);
+          dialog_height=atoi(optarg);
           break;
       case 'c':
           conffile=optarg;
@@ -178,12 +145,9 @@ int main (int argc, char **argv)
       }
   }
 
-  screen = gdk_screen_get_default ();
-  screen_width =  gdk_screen_get_width (screen);
-  screen_height =  gdk_screen_get_height (screen);
+	loadConf(conffile);
+	programs = getPrograms();
 
-  mainwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
- 
   gtk_window_set_position(GTK_WINDOW (mainwin), GTK_WIN_POS_CENTER);
  
   //Make window transparent
@@ -203,10 +167,34 @@ int main (int argc, char **argv)
                       G_CALLBACK (destroy), NULL);
   }
 
-	setupmainwindow();
+	//The size is 1024th of a point. We reserve 30% for the statuscolumn
+	//so we have dialog_width/3 * 1024 points available for a max of 8
+	//characters
+	status_fontsize=1024*(dialog_width/2)/8;
+	program_width=dialog_width-(dialog_width/2);
+	row_height=dialog_height/getNumberOfElements();
+	
+	vbox = gtk_vbox_new(FALSE, 10);
+
+	elt_tmp = programs;
+
+	while ( programs != NULL )
+	{
+		hbox = createrow(programs, "running", status_fontsize, program_width, dialog_height);
+
+		gtk_container_add(GTK_CONTAINER(vbox), hbox);	
+		gtk_widget_show (hbox);
+	
+		programs = programs->next;		
+	}	
+
+ 	gtk_container_add (GTK_CONTAINER (mainwin), vbox);
+  gtk_widget_show (vbox);
+  gtk_widget_show (mainwin);
 
   gtk_main ();
 
+	freeMenuElements(elt_tmp);
   return 0;
 }
 
