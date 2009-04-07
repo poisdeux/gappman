@@ -141,11 +141,13 @@ GtkWidget* image_label_box_hor (menu_elements *elt, gchar* labeltext, int max_wi
 * \param max_width maximum allowed width the image may have
 * \param max_height maximum allowed height the image may have  
 */
-static GtkWidget* image_label_box_vert (menu_elements *elt, gchar* labeltext, int max_width, int max_height)
+GtkWidget* image_label_box_vert (menu_elements *elt, gchar* labeltext, int max_width, int max_height)
 {
     GtkWidget *box;
     GtkWidget *label;
     GtkWidget *image;
+		int fontsize;
+		gchar *markup;
 
     /* Create box for image and label */
     box = gtk_vbox_new (FALSE, 0);
@@ -158,8 +160,13 @@ static GtkWidget* image_label_box_vert (menu_elements *elt, gchar* labeltext, in
 
     if(labeltext != NULL)
     { 
-      /* Create a label for the button */
-      label = gtk_label_new (labeltext);
+      label = gtk_label_new ("");
+
+			//The size is 1024th of a point. 
+  		fontsize=1024*max_width/strlen(labeltext);
+			markup = g_markup_printf_escaped ("<span size=\"%d\">%s</span>", fontsize, labeltext);
+  		gtk_label_set_markup (GTK_LABEL (label), markup);
+		  g_free (markup);
       gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 3);
       gtk_widget_show (label);
     }

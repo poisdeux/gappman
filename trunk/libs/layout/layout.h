@@ -30,6 +30,16 @@ static void layout_destroy( GtkWidget *widget, gpointer   data );
 GtkWidget* image_label_box_hor (menu_elements *elt, gchar* labeltext, int max_width, int max_height);
 
 /**
+* \brief Creates a box with an image and labeltext below it.
+* \param imagefile filename of image on disk
+* \param labeltext string containing label
+* \param max_width maximum allowed width the image may have
+* \param max_height maximum allowed height the image may have
+* \return GtkWidget pointer
+*/
+GtkWidget* image_label_box_vert (menu_elements *elt, gchar* labeltext, int max_width, int max_height);
+
+/**
 * \brief loads image and scales it making sure the image fits inside
 * max_width*max_height maintaining the correct aspect ratio
 * \param imagefile filename of the image on disk
