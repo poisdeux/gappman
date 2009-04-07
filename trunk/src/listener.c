@@ -9,23 +9,27 @@ static GIOChannel* gio = NULL;
 
 gboolean handlemessage( GIOChannel* gio , GIOCondition cond, gpointer data )
 {
-	gchar msg[1];
+	gchar *msg;
 	int bytes_read;
+	int len;
 	GError *gerror = NULL;
 	GIOStatus status;
 
-	status = g_io_channel_read_chars(gio, msg, 1, &bytes_read, &gerror);
-	if( gerror != NULL )
+	if (cond & G_IO_IN)
 	{
-		fprintf(stderr, "Error: %s\n", gerror->message );
+		status = g_io_channel_read_line(gio, &msg, &len, NULL,  &gerror);
+		if( status == G_IO_STATUS_ERROR )
+		{
+			g_error ("handlemessage: %s\n", gerror->message);
+		}
+		else
+		{
+			fprintf(stdout, "MESSAGE RECEIVED: %s\n", msg);
+			g_free (msg);
+		}
 	}
-	if( status == G_IO_STATUS_NORMAL )
-	{
-		fprintf(stdout, "MESSAGE RECEIVED: %s\n", msg);
-		return TRUE;
-	}
-	
-	return FALSE; 
+	//Always return TRUE to keep watch active.	
+	return TRUE; 
 }
 
 gboolean gappman_start_listener (const gchar *server, gint port)
@@ -61,8 +65,11 @@ gboolean gappman_start_listener (const gchar *server, gint port)
 	g_io_channel_set_line_term (gio, line, 2);
 	g_io_channel_set_encoding (gio, "UTF-8", NULL);
 
-	sourceid = g_io_add_watch_full( gio, G_PRIORITY_LOW, G_IO_IN, handlemessage, gio, NULL);
-	
+	if(! g_io_add_watch( gio, G_IO_IN, handlemessage, NULL ))
+	{
+		fprintf(stderr, "Cannot add watch on GIOChannel!\n");
+	}
+
 	return TRUE;
 }
 
