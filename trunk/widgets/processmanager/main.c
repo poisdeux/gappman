@@ -23,6 +23,9 @@
 static int DEBUG = 0;
 static int WINDOWED = 0;
 
+static char* color[3] = {"green", "orange", "red"};
+static char* status[3] =  {"running", "sleeping", "stopped"};  
+
 static void usage()
 {
   printf("usage: processmanager [--help] [--debug <LEVEL>] [--width <WIDTHINPIXELS>] [--height <HEIGHTINPIXELS>] [--conffile <FILENAME>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
@@ -37,26 +40,64 @@ static void usage()
 
 }
 
-static GtkWidget* createrow(menu_elements *elt, gchar *status, int status_fontsize, int width, int height)
+/**
+* \brief function that starts any program as defined by the structure *elt.
+* \param *widget pointer to the button widget which has the process_startprogram_event connected through a signal
+* \param *event the GdkEvent that occured. Space key and left mousebutton are valid actions.
+* \param *elt menu_element structure containing the filename and arguments of the program that should be started
+*/
+static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
 {
-  GtkWidget *hbox, *imagebox, *statuslabel;
-	gchar *markup;
 
+  if (DEBUG == 2)
+  {
+    printf("process_startprogram_event\n");
+  }
+
+  if(DEBUG > 1)
+  {
+    if ( event->type == GDK_KEY_RELEASE )
+    {
+      printf("%s key pressed and has value %d\n", ((GdkEventKey*)event)->string, ((GdkEventKey*)event)->keyval);
+    }
+  }
+
+  //Only start program  if spacebar or mousebutton is pressed
+  if( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
+  {
+    //startprogram( elt, status );
+  }
+
+  return FALSE;
+}
+
+
+static GtkWidget* createrow(menu_elements *elt, int prog_status, int status_fontsize, int width, int height)
+{
+  GtkWidget *button, *hbox, *imagebox, *statuslabel;
+	gchar *markup;
+	GtkWidget *alignment;
+	
 	hbox = gtk_hbox_new (FALSE, 10);
 
-	//status_fontsize is 1024th of a point. We reserve 20% of the total width
-	//for the status column.
-	imagebox = image_label_box_vert (elt, (gchar *) elt->name, width, height);
+	// Need to expand menu_elt structure to contain PID status.
+  button = createbutton(elt, status_fontsize, width, height, process_startprogram_event);
+
 	statuslabel = gtk_label_new("");
-	markup = g_markup_printf_escaped ("<span size=\"%d\">%s</span>", status_fontsize, status);
+	markup = g_markup_printf_escaped ("<span size=\"%d\" foreground=\"%s\">%s</span>", status_fontsize, color[prog_status], status[prog_status]);
 	gtk_label_set_markup (GTK_LABEL (statuslabel), markup);
 	g_free (markup);
 
-	
-	gtk_container_add(GTK_CONTAINER(hbox), imagebox);
-	gtk_widget_show(imagebox);	
-	gtk_container_add(GTK_CONTAINER(hbox), statuslabel);
+	//right justify the labeltext
+	alignment = gtk_alignment_new(1.0, 0.5, 0, 0);
+	gtk_container_add(GTK_CONTAINER(alignment), statuslabel);
 	gtk_widget_show(statuslabel);
+	
+	gtk_container_add(GTK_CONTAINER(hbox), button);
+	gtk_widget_show(button);	
+	gtk_container_add(GTK_CONTAINER(hbox), alignment);
+	gtk_widget_show(alignment);
+
 	return hbox;
 }
 
@@ -85,6 +126,7 @@ int main (int argc, char **argv)
   GtkWidget *hbox;
   GtkWidget *align;
   GtkWidget *mainwin;
+  GtkWidget *separator;
   GtkWidget *table;
   menu_elements *programs, *elt_tmp;
   const char* conffile = "/etc/gappman/processmanager.xml";
@@ -176,18 +218,32 @@ int main (int argc, char **argv)
 	
 	vbox = gtk_vbox_new(FALSE, 10);
 
+	
 	elt_tmp = programs;
 
 	while ( programs != NULL )
 	{
-		hbox = createrow(programs, "running", status_fontsize, program_width, dialog_height);
+		hbox = createrow(programs, 1, status_fontsize, program_width, row_height);
 
 		gtk_container_add(GTK_CONTAINER(vbox), hbox);	
 		gtk_widget_show (hbox);
 	
-		programs = programs->next;		
+		programs = programs->next;
+		separator = gtk_hseparator_new();
+		gtk_container_add(GTK_CONTAINER(vbox), separator);	
+		gtk_widget_show (separator);
+		
 	}	
 
+  hbox = gtk_hbox_new (FALSE, 10);
+  // cancel button
+  button = gtk_button_new_with_label("Cancel");
+  g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (gtk_main_quit), NULL);
+  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
+  gtk_widget_show(button);
+
+	gtk_container_add(GTK_CONTAINER(vbox), hbox);
+	gtk_widget_show (hbox);	
  	gtk_container_add (GTK_CONTAINER (mainwin), vbox);
   gtk_widget_show (vbox);
   gtk_widget_show (mainwin);
