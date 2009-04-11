@@ -141,12 +141,11 @@ GtkWidget* image_label_box_hor (menu_elements *elt, gchar* labeltext, int max_wi
 * \param max_width maximum allowed width the image may have
 * \param max_height maximum allowed height the image may have  
 */
-GtkWidget* image_label_box_vert (menu_elements *elt, gchar* labeltext, int max_width, int max_height)
+GtkWidget* image_label_box_vert (menu_elements *elt, gchar* labeltext, int fontsize, int max_width, int max_height)
 {
     GtkWidget *box;
     GtkWidget *label;
     GtkWidget *image;
-		int fontsize;
 		gchar *markup;
 
     /* Create box for image and label */
@@ -161,12 +160,12 @@ GtkWidget* image_label_box_vert (menu_elements *elt, gchar* labeltext, int max_w
     if(labeltext != NULL)
     { 
       label = gtk_label_new ("");
-
-			//The size is 1024th of a point. 
-  		fontsize=1024*max_width/strlen(labeltext);
-			markup = g_markup_printf_escaped ("<span size=\"%d\">%s</span>", fontsize, labeltext);
-  		gtk_label_set_markup (GTK_LABEL (label), markup);
-		  g_free (markup);
+			if(fontsize != -1)
+			{
+				markup = g_markup_printf_escaped ("<span size=\"%d\">%s</span>", fontsize, labeltext);
+  			gtk_label_set_markup (GTK_LABEL (label), markup);
+		  	g_free (markup);
+			}
       gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 3);
       gtk_widget_show (label);
     }
@@ -344,7 +343,7 @@ static void parseAlignment(float *alignment_x, float *alignment_y, xmlChar** ali
 * \param *elt pointer to menu_element struct that contains the logo image filename.
 * \param max_width button width
 */
-static GtkWidget* createbutton ( menu_elements *elt, int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, menu_elements*) )
+GtkWidget* createbutton ( menu_elements *elt, int fontsize, int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, menu_elements*) )
 {
   GtkWidget *button, *imagelabelbox;
   GdkPixbuf *pixbuf;
@@ -356,12 +355,12 @@ static GtkWidget* createbutton ( menu_elements *elt, int max_width, int max_heig
     if(elt->printlabel == 0)
     {
       //NO LABEL THANK YOU VERY MUCH
-      imagelabelbox = image_label_box_vert(elt , NULL, max_width, max_height);
+      imagelabelbox = image_label_box_vert(elt , NULL, fontsize, max_width, max_height);
     }
     else
     {
       //LABEL PLEASE
-      imagelabelbox = image_label_box_vert(elt , (gchar*) elt->name, max_width, max_height);
+      imagelabelbox = image_label_box_vert(elt , (gchar*) elt->name, fontsize, max_width, max_height);
     }
     if (DEBUG > 0)
     {
@@ -463,7 +462,7 @@ GtkWidget* createbuttons( menu_elements *elts, int screen_width, int screen_heig
     }
 
     next = cur->next;
-    button = createbutton(cur, button_width, box_height, processevent);
+    button = createbutton(cur, -1, button_width, box_height, processevent);
     gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 1);
     gtk_widget_show (button);
     cur = next;

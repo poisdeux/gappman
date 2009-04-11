@@ -37,7 +37,7 @@ GtkWidget* image_label_box_hor (menu_elements *elt, gchar* labeltext, int max_wi
 * \param max_height maximum allowed height the image may have
 * \return GtkWidget pointer
 */
-GtkWidget* image_label_box_vert (menu_elements *elt, gchar* labeltext, int max_width, int max_height);
+GtkWidget* image_label_box_vert (menu_elements *elt, gchar* labeltext, int fontsize, int max_width, int max_height);
 
 /**
 * \brief loads image and scales it making sure the image fits inside
@@ -48,6 +48,13 @@ GtkWidget* image_label_box_vert (menu_elements *elt, gchar* labeltext, int max_w
 * \return GtkWidget pointer to image
 */
 GtkWidget* load_image(menu_elements *elt, int max_width, int max_height);
+
+/**
+* \brief Create a single button
+* \param *elt pointer to menu_element struct that contains the logo image filename.
+* \param max_width button width
+*/
+GtkWidget* createbutton ( menu_elements *elt, int fontsize, int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, menu_elements*) );
 
 /**
 * \brief Create the button layout using the available screen height and width
