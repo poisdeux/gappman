@@ -22,7 +22,7 @@
 
 static int DEBUG = 0;
 static int WINDOWED = 0;
-
+static GtkWidget *mainwin;
 static char* color[3] = {"green", "orange", "red"};
 static char* status[3] =  {"running", "sleeping", "stopped"};  
 
@@ -38,6 +38,49 @@ static void usage()
   printf("--gtkrc <GTKRCFILENAME>:\t\t gtk configuration file which can be used for themeing\n");
   printf("--windowed:\t\t creates a border around the window\n");
 
+}
+
+static void destroy_widget( GtkWidget *widget, gpointer data )
+{
+	gtk_widget_destroy(GTK_WIDGET(data));
+}
+
+/**
+* \brief creates a popup dialog window that allows the user to stop a program
+* \param *elt pointer to menu_element structure that contains the program to be stopped
+*/
+static void showprocessdialog( menu_elements *elt )
+{
+	GtkWidget *button, *buttonbox, *dialogwin;
+	gchar* label;
+
+	dialogwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+
+  gtk_window_set_transient_for (GTK_WINDOW(dialogwin), GTK_WINDOW(mainwin));
+	gtk_window_set_position(GTK_WINDOW (dialogwin), GTK_WIN_POS_CENTER_ON_PARENT);
+ 
+  //Make window transparent
+  //gtk_window_set_opacity (GTK_WINDOW (dialogwin), 0.8);
+  
+  //Remove border
+  gtk_window_set_decorated (GTK_WINDOW (dialogwin), FALSE);
+
+	buttonbox = gtk_hbutton_box_new();	
+
+	label = g_strdup_printf("Stop %s", elt->name);	
+	button = gtk_button_new_with_label(label);
+	g_free(label);
+	gtk_container_add(GTK_CONTAINER(buttonbox), button);
+	gtk_widget_show(button);
+
+	button = gtk_button_new_with_label("Cancel");
+ 	g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (destroy_widget), dialogwin);
+  gtk_container_add(GTK_CONTAINER(buttonbox), button);
+  gtk_widget_show(button);
+
+	gtk_container_add(GTK_CONTAINER(dialogwin), buttonbox);
+	gtk_widget_show(buttonbox);
+	gtk_widget_show(dialogwin);
 }
 
 /**
@@ -65,14 +108,14 @@ static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event,
   //Only start program  if spacebar or mousebutton is pressed
   if( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
   {
-    //startprogram( elt, status );
+    showprocessdialog( elt );
   }
 
   return FALSE;
 }
 
 
-static GtkWidget* createrow(menu_elements *elt, int prog_status, int status_fontsize, int width, int height)
+static GtkWidget* createrow(menu_elements *elt, int status_fontsize, int width, int height)
 {
   GtkWidget *button, *hbox, *imagebox, *statuslabel;
 	gchar *markup;
@@ -84,7 +127,7 @@ static GtkWidget* createrow(menu_elements *elt, int prog_status, int status_font
   button = createbutton(elt, status_fontsize, width, height, process_startprogram_event);
 
 	statuslabel = gtk_label_new("");
-	markup = g_markup_printf_escaped ("<span size=\"%d\" foreground=\"%s\">%s</span>", status_fontsize, color[prog_status], status[prog_status]);
+	markup = g_markup_printf_escaped ("<span size=\"%d\" foreground=\"%s\">%s</span>", status_fontsize, color[elt->status], status[elt->status]);
 	gtk_label_set_markup (GTK_LABEL (statuslabel), markup);
 	g_free (markup);
 
@@ -125,7 +168,6 @@ int main (int argc, char **argv)
   GtkWidget *vbox;
   GtkWidget *hbox;
   GtkWidget *align;
-  GtkWidget *mainwin;
   GtkWidget *separator;
   GtkWidget *table;
   menu_elements *programs, *elt_tmp;
@@ -223,7 +265,8 @@ int main (int argc, char **argv)
 
 	while ( programs != NULL )
 	{
-		hbox = createrow(programs, 1, status_fontsize, program_width, row_height);
+		programs->status = 1;
+		hbox = createrow(programs, status_fontsize, program_width, row_height);
 
 		gtk_container_add(GTK_CONTAINER(vbox), hbox);	
 		gtk_widget_show (hbox);
