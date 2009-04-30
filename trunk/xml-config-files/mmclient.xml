@@ -26,12 +26,14 @@
       <exec>/usr/bin/mythfrontend</exec>
       <logo>./logos/mythtv.png</logo>
       <autostart>0</autostart>
+			<printlabel>1</printlabel>
     </program>
     <program>
       <name>NX Desktop</name>
       <exec>/usr/NX/bin/nxclient</exec>
       <logo>./logos/nxclient-icon.png</logo>
       <autostart>0</autostart>
+			<printlabel>1</printlabel>
     </program>
     <program>
       <name>MythTV</name>
@@ -39,6 +41,7 @@
       <exec>/usr/bin/mythfrontend</exec>
       <logo>./logos/mythtv.png</logo>
       <autostart>0</autostart>
+			<printlabel>1</printlabel>
     </program>
     <program>
       <name>Stepmania</name>
@@ -46,6 +49,7 @@
       <resolution>640x480</resolution>
       <logo>./logos/stepmania.png</logo>
       <autostart>0</autostart>
+			<printlabel>1</printlabel>
     </program>
   </programs>
 </appmanager>
