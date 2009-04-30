@@ -201,14 +201,30 @@ void printMenuElements( menu_elements *elt )
 {
   menu_elements *next;
   int i ;
+	char *result = NULL;
+	char **orient = NULL;
 
   while(elt != NULL)
   {
     printf("Element\t\tValue\n");
     printf("-----\n");
     printf("name:\t\t%s\n", elt->name);
-    printf("exec:\t\t%s\n", elt->exec);
     printf("logo:\t\t%s\n", elt->logo);
+    printf("menuwidth:\t\t%d\n", elt->menu_width->value);
+    printf("menuheight:\t\t%d\n", elt->menu_height->value);
+    printf("app_width:\t\t%d\n", elt->app_width);
+    printf("app_height:\t\t%d\n", elt->app_height);
+		orient = elt->orientation;	
+	
+		i = 0;
+		while ( elt->orientation[i] != NULL)
+		{
+			printf("orientation:\t\t%s\n", elt->orientation[i++]);
+		}		
+		printf("autostart:\t\t%d\n", elt->autostart);
+		printf("printlabel:\t\t%d\n", elt->printlabel);
+    printf("exec:\t\t%s\n", elt->exec);
+    printf("numArguments:\t\t%d\n", elt->numArguments);
     printf("args:\t\t");
     for (i = 0; i < elt->numArguments; i++)
     {
@@ -236,41 +252,54 @@ void freeMenuElements( menu_elements *elt )
 {
   menu_elements *next;
   int i;
-  while(elt != NULL)
+	char** orient;
+
+	//free shared elements
+	printf("Freeing shared elements\n");
+	fflush(stdout);
+  printf("menu_element free: menu_width\n");
+  fflush(stdout);
+  next = elt->next;
+  free(elt->menu_width);
+  printf("menu_element free: menu_height\n");
+  fflush(stdout);
+  free(elt->menu_height);
+  printf("menu_element free: orientation\n");
+	i = 0;
+	while(elt->orientation[i] != NULL)
+	{
+		printf("Length: %d String: %s\n", strlen(elt->orientation[i]), elt->orientation[i]);
+  	fflush(stdout);		
+  	free(elt->orientation[i]);
+		i=i+1;
+	}
+	printf("Freeing individual element\n");
+	fflush(stdout);
+	while(elt != NULL)
   {
-    //printf("menu_element free: menu_width\n");
-    //fflush(stdout);
-    next = elt->next;
-    free(elt->menu_width);
-    //printf("menu_element free: menu_height\n");
-    //fflush(stdout);
-    free(elt->menu_height);
-    //printf("menu_element free: orientation\n");
-    //fflush(stdout);
-    free(elt->orientation);
-    //printf("menu_element free: name\n");
-    //fflush(stdout);
+    printf("menu_element free: name %s\n", elt->name);
+    fflush(stdout);
     free((xmlChar *) elt->name);
-    //printf("menu_element free: exec\n");
-    //fflush(stdout);
+    printf("menu_element free: exec %s\n", elt->exec);
+    fflush(stdout);
     free((xmlChar *) elt->exec);
-    //printf("menu_element free: logo\n");
-    //fflush(stdout);
+    printf("menu_element free: logo %s\n", elt->logo);
+    fflush(stdout);
     free((xmlChar *) elt->logo);
     for (i = 0; i < elt->numArguments; i++)
     {
-    //printf("menu_element free: args[%d]\n", i);
-    //fflush(stdout);
-      free(elt->args[i]);
+    printf("menu_element free: args[%d]\n", i);
+    fflush(stdout);
+    free(elt->args[i]);
     }
-    //printf("menu_element free: args\n");
-    //fflush(stdout);
+    printf("menu_element free: args\n");
+    fflush(stdout);
     free(elt->args);
-    //printf("menu_element free: elt\n");
-    //fflush(stdout);
+    printf("menu_element free: elt\n");
+    fflush(stdout);
     free(elt);
-    //printf("menu_element free: next\n");
-    //fflush(stdout);
+    printf("menu_element free: next\n");
+    fflush(stdout);
     elt = next;
   }
 }
@@ -304,7 +333,10 @@ menu_elements* getActions()
 void static processMenuElements(const char* element_name, const char* group_element_name, xmlTextReaderPtr reader, menu_elements **elts)
 {
   int ret = 1;
+	int i;
   xmlChar *name;
+	char* result;
+	char* align;
   int width;
   int height;
   menu_elements *prev;
@@ -328,6 +360,7 @@ void static processMenuElements(const char* element_name, const char* group_elem
     ret = xmlTextReaderRead(reader);
     name = xmlTextReaderName(reader);
 
+		// Parse new program or action and create a new menu_element for it.
     if( strcmp((char *) name, element_name) == 0 && xmlTextReaderNodeType(reader) == 1)
     {
       *elts = createMenuElement();
@@ -342,7 +375,8 @@ void static processMenuElements(const char* element_name, const char* group_elem
       processMenuElement(reader, *elts, element_name);
       numberElts++;
     }
-    
+   
+		//parse global parameters 
     if( strcmp((char *) name, group_element_name) == 0 && xmlTextReaderNodeType(reader) == 15)
     {
       //printf("DEBUG: processMenuElements: %s\n", name);
@@ -350,9 +384,19 @@ void static processMenuElements(const char* element_name, const char* group_elem
       {
         parseLength(xmlTextReaderGetAttribute (reader, "width"), menu_width);
         parseLength(xmlTextReaderGetAttribute (reader, "height"), menu_height);
-        *orient = xmlTextReaderGetAttribute (reader, "align");
-      
-        //printf("DEBUG: %d : %d : %s\n", menu_width->value, menu_height->value, *orient);
+        printf("DEBUG: menu_width %d, menu_height %d\n", menu_width->value, menu_height->value);
+        align = xmlTextReaderGetAttribute (reader, "align");
+				i = 0;
+     		result = strtok(align, ",");
+				while(result != NULL)
+				{
+						//printf("DEBUG: orient: %s\n", result);
+						orient[i] = (char*) malloc ( strlen(result) * sizeof(char) );
+						orient[i] = strcpy(orient[i], result);
+						i=i+1;
+     				result = strtok(NULL, ",");
+				}
+				orient[i] = NULL;
       }
       ret = 0;
     }
