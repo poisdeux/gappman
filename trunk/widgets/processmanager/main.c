@@ -25,6 +25,7 @@ static int WINDOWED = 0;
 static GtkWidget *mainwin;
 static char* color[3] = {"green", "orange", "red"};
 static char* status[3] =  {"running", "sleeping", "stopped"};  
+static int fontsize;
 
 static void usage()
 {
@@ -51,8 +52,8 @@ static void destroy_widget( GtkWidget *widget, gpointer data )
 */
 static void showprocessdialog( menu_elements *elt )
 {
-	GtkWidget *button, *buttonbox, *dialogwin;
-	gchar* label;
+	GtkWidget *button, *buttonbox, *dialogwin, *label;
+	gchar* markup;
 
 	dialogwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
@@ -67,20 +68,31 @@ static void showprocessdialog( menu_elements *elt )
 
 	buttonbox = gtk_hbutton_box_new();	
 
-	label = g_strdup_printf("Stop %s", elt->name);	
-	button = gtk_button_new_with_label(label);
-	g_free(label);
+	label = gtk_label_new("");	
+	markup = g_markup_printf_escaped ("<span size=\"%d\">%s</span>", fontsize, g_strdup_printf("Stop %s", elt->name));
+	gtk_label_set_markup (GTK_LABEL (label), markup);
+	g_free (markup);
+	button = gtk_button_new();
+	gtk_container_add(GTK_CONTAINER(button), label);
+  gtk_widget_show(label);
 	gtk_container_add(GTK_CONTAINER(buttonbox), button);
 	gtk_widget_show(button);
 
-	button = gtk_button_new_with_label("Cancel");
+	label = gtk_label_new("");	
+	markup = g_markup_printf_escaped ("<span size=\"%d\">Cancel</span>", fontsize);
+	gtk_label_set_markup (GTK_LABEL (label), markup);
+	g_free (markup);
+	button = gtk_button_new();
  	g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (destroy_widget), dialogwin);
+	gtk_container_add(GTK_CONTAINER(button), label);
+  gtk_widget_show(label);
   gtk_container_add(GTK_CONTAINER(buttonbox), button);
   gtk_widget_show(button);
 
 	gtk_container_add(GTK_CONTAINER(dialogwin), buttonbox);
 	gtk_widget_show(buttonbox);
 	gtk_widget_show(dialogwin);
+	gtk_widget_grab_focus(button);
 }
 
 /**
@@ -108,14 +120,16 @@ static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event,
   //Only start program  if spacebar or mousebutton is pressed
   if( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
   {
+		gtk_widget_set_sensitive(GTK_WIDGET(widget), FALSE);	
     showprocessdialog( elt );
+		gtk_widget_set_sensitive(GTK_WIDGET(widget), TRUE);	
   }
 
-  return FALSE;
+  return TRUE;
 }
 
 
-static GtkWidget* createrow(menu_elements *elt, int status_fontsize, int width, int height)
+static GtkWidget* createrow(menu_elements *elt, int width, int height)
 {
   GtkWidget *button, *hbox, *imagebox, *statuslabel;
 	gchar *markup;
@@ -124,10 +138,10 @@ static GtkWidget* createrow(menu_elements *elt, int status_fontsize, int width, 
 	hbox = gtk_hbox_new (FALSE, 10);
 
 	// Need to expand menu_elt structure to contain PID status.
-  button = createbutton(elt, status_fontsize, width, height, process_startprogram_event);
+  button = createbutton(elt, fontsize, width, height, process_startprogram_event);
 
 	statuslabel = gtk_label_new("");
-	markup = g_markup_printf_escaped ("<span size=\"%d\" foreground=\"%s\">%s</span>", status_fontsize, color[elt->status], status[elt->status]);
+	markup = g_markup_printf_escaped ("<span size=\"%d\" foreground=\"%s\">%s</span>", fontsize, color[elt->status], status[elt->status]);
 	gtk_label_set_markup (GTK_LABEL (statuslabel), markup);
 	g_free (markup);
 
@@ -177,7 +191,6 @@ int main (int argc, char **argv)
 	int program_width;
 	int row_height;
   int c;
-	int status_fontsize;
   time_t timestruct;
 
   gtk_init (&argc, &argv);
@@ -232,6 +245,8 @@ int main (int argc, char **argv)
 	loadConf(conffile);
 	programs = getPrograms();
 
+	printMenuElements(programs);
+
   gtk_window_set_position(GTK_WINDOW (mainwin), GTK_WIN_POS_CENTER);
  
   //Make window transparent
@@ -254,7 +269,7 @@ int main (int argc, char **argv)
 	//The size is 1024th of a point. We reserve 30% for the statuscolumn
 	//so we have dialog_width/3 * 1024 points available for a max of 8
 	//characters
-	status_fontsize=1024*(dialog_width/2)/8;
+	fontsize=1024*(dialog_width/2)/8;
 	program_width=dialog_width-(dialog_width/2);
 	row_height=dialog_height/getNumberOfElements();
 	
@@ -266,7 +281,7 @@ int main (int argc, char **argv)
 	while ( programs != NULL )
 	{
 		programs->status = 1;
-		hbox = createrow(programs, status_fontsize, program_width, row_height);
+		hbox = createrow(programs, program_width, row_height);
 
 		gtk_container_add(GTK_CONTAINER(vbox), hbox);	
 		gtk_widget_show (hbox);
