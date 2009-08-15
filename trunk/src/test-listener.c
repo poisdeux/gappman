@@ -48,6 +48,11 @@ int main(int argc, char *argv[])
     fprintf(stderr, "Error: could not connect.\n");
   }
 
+	if ( listen(sockfd,5) != 0 )
+  {
+    fprintf(stderr, "Error: could not setup listener.\n");
+  }
+
 
   printf("Please enter the message: ");
   memset(buffer, 0, 256);

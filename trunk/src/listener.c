@@ -9,15 +9,18 @@ static GIOChannel* gio = NULL;
 
 gboolean handlemessage( GIOChannel* gio , GIOCondition cond, gpointer data )
 {
-	gchar *msg;
+	gchar **msg;
 	int bytes_read;
-	int len;
+	gsize len;
 	GError *gerror = NULL;
 	GIOStatus status;
 
 	if (cond & G_IO_IN)
 	{
-		status = g_io_channel_read_line(gio, &msg, &len, NULL,  &gerror);
+		printf("DEBUG: handlemessage\n");
+		fflush(stdout);
+		//return TRUE;
+		status = g_io_channel_read_line(gio, msg, &len, NULL,  &gerror);
 		if( status == G_IO_STATUS_ERROR )
 		{
 			g_error ("handlemessage: %s\n", gerror->message);
@@ -49,11 +52,13 @@ gboolean gappman_start_listener (const gchar *server, gint port)
 		addr.sin_addr = * (struct in_addr *) host->h_addr;
 		addr.sin_port = g_htons(port);
 		addr.sin_family = AF_INET;
-		fprintf(stdout, "Listening to port %d on %s\n", port, server);
 		if ( bind(sock, (struct sockaddr *) &addr, sizeof(addr)) < 0) 
 			return FALSE;
 
-		listen(sock,5);
+		if ( listen(sock,5) != 0 )
+			return FALSE;
+		
+		fprintf(stdout, "Listening to port %d on %s\n", port, server);
 	}
 	else
 	{
@@ -65,7 +70,7 @@ gboolean gappman_start_listener (const gchar *server, gint port)
 	g_io_channel_set_line_term (gio, line, 2);
 	g_io_channel_set_encoding (gio, "UTF-8", NULL);
 
-	if(! g_io_add_watch( gio, G_IO_IN, handlemessage, NULL ))
+	if(! g_io_add_watch( gio, G_IO_IN | G_IO_HUP, handlemessage, NULL ))
 	{
 		fprintf(stderr, "Cannot add watch on GIOChannel!\n");
 	}
