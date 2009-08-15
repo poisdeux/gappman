@@ -19,12 +19,14 @@
 #include <string.h>
 #include <../../libs/parseconf/parseconf.h>
 #include <../../libs/layout/layout.h>
+#include <sys/types.h>
+#include <signal.h>
 
 static int DEBUG = 0;
 static int WINDOWED = 0;
 static GtkWidget *mainwin;
-static char* color[3] = {"green", "orange", "red"};
-static char* status[3] =  {"running", "sleeping", "stopped"};  
+static char* color[4] = {"green", "orange", "red", "yellow"};
+static char* status[4] =  {"running", "sleeping", "stopped", "waiting"};  
 static int fontsize;
 
 static void usage()
@@ -35,11 +37,28 @@ static void usage()
   printf("--debug <LEVEL>:\t\tsets verbosity leven\n");
   printf("--width <WIDTHINPIXELS>:\t\twidth of the main window (default: screen width / 9)\n");
   printf("--height <HEIGHTINPIXELS:\t\theight of the main window (default: screen height / 9)\n");
-  printf("--conffile <FILENAME>:\t\t configuration file specifying the program and actions (default: /etc/gappman/shutdown.xml)\n");
+  printf("--conffile <FILENAME>:\t\t configuration file specifying the program and actions (default: /etc/gappman/processmanager.xml)\n");
   printf("--gtkrc <GTKRCFILENAME>:\t\t gtk configuration file which can be used for themeing\n");
   printf("--windowed:\t\t creates a border around the window\n");
 
 }
+
+
+static void kill_program( GtkWidget *widget, menu_elements *data )
+{
+	switch(data->status)
+	{
+		case 0|1:
+			printf("kill(%d, 15)\n", data->PID); 
+			//kill(data->PID, 15);
+			break;;
+		case 2|3:
+			printf("kill(%d, 9)\n", data->PID); 
+			//kill(data->PID, 9);
+			break;;
+	}
+}
+
 
 static void destroy_widget( GtkWidget *widget, gpointer data )
 {
@@ -67,7 +86,7 @@ static void showprocessdialog( menu_elements *elt )
   gtk_window_set_decorated (GTK_WINDOW (dialogwin), FALSE);
 
 	buttonbox = gtk_hbutton_box_new();	
-
+	
 	label = gtk_label_new("");	
 	markup = g_markup_printf_escaped ("<span size=\"%d\">%s</span>", fontsize, g_strdup_printf("Stop %s", elt->name));
 	gtk_label_set_markup (GTK_LABEL (label), markup);
@@ -75,6 +94,7 @@ static void showprocessdialog( menu_elements *elt )
 	button = gtk_button_new();
 	gtk_container_add(GTK_CONTAINER(button), label);
   gtk_widget_show(label);
+ 	g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (kill_program), elt);
 	gtk_container_add(GTK_CONTAINER(buttonbox), button);
 	gtk_widget_show(button);
 
@@ -245,7 +265,9 @@ int main (int argc, char **argv)
 	loadConf(conffile);
 	programs = getPrograms();
 
-	printMenuElements(programs);
+	//printMenuElements(programs);
+	//freeMenuElements(programs);
+	//return 0;
 
   gtk_window_set_position(GTK_WINDOW (mainwin), GTK_WIN_POS_CENTER);
  
