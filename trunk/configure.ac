@@ -47,6 +47,13 @@ GTK_INCLUDES=`pkg-config --cflags gtk+-2.0`
 echo "Error: gtk+-2.0 not found!"; exit 1
 ], [])
 
+AC_SEARCH_LIBS([XRRSetScreenConfigAndRate], [Xrandr], [
+LIBXML_INCLUDES=`pkg-config --cflags libxml-2.0`
+], [
+echo "Error: libXrandr not found!"; exit 1
+], [])
+
+
 AC_CONFIG_SRCDIR(src)
 
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
