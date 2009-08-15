@@ -282,29 +282,29 @@ static int calculateAmountOfElementsPerColumn(int screen_height, int screen_widt
 /**
 * \brief
 */
-static void parseAlignment(float *alignment_x, float *alignment_y, xmlChar** alignmentfromconf)
+static void parseAlignment(float *alignment_x, float *alignment_y, char** alignmentfromconf)
 {
-  char *result = NULL;
+	int i;
 
-  result = strtok( *alignmentfromconf, "," );
-  while( result != NULL ) {
-    if ( strcmp(result, "top") == 0 )
+	i = 0;	
+  while( alignmentfromconf[i] != NULL ) {
+    if ( strcmp(alignmentfromconf[i], "top") == 0 )
     {
       *alignment_y = 0.0;
     }
-    else if ( strcmp(result, "left") == 0 )
+    else if ( strcmp(alignmentfromconf[i], "left") == 0 )
     {
       *alignment_x = 0.0;
     }
-    else if ( strcmp(result, "bottom") == 0 )
+    else if ( strcmp(alignmentfromconf[i], "bottom") == 0 )
     {
       *alignment_y = 1.0;
     }
-    else if ( strcmp(result, "right") == 0 )
+    else if ( strcmp(alignmentfromconf[i], "right") == 0 )
     {
       *alignment_x = 1.0;
     }
-    else if ( strcmp(result, "center") == 0 )
+    else if ( strcmp(alignmentfromconf[i], "center") == 0 )
     {
       /**
       * Only set the value if it has not been set previously
@@ -322,9 +322,9 @@ static void parseAlignment(float *alignment_x, float *alignment_y, xmlChar** ali
     }
     if( DEBUG > 0 )
     {
-      printf("parseAlignment: \"%s\" x:%f y:%f\n", result, *alignment_x, *alignment_y);
+      printf("parseAlignment: \"%s\" x:%f y:%f\n", alignmentfromconf[i], *alignment_x, *alignment_y);
     }
-    result = strtok( NULL, "," );
+		i = i + 1;
   }
 
   // Set initial values to 0
@@ -430,7 +430,7 @@ GtkWidget* createbuttons( menu_elements *elts, int screen_width, int screen_heig
 
   button_width = box_width/elts_per_row;
 
-  parseAlignment(&alignment_x, &alignment_y, (xmlChar **) elts->orientation);
+  parseAlignment(&alignment_x, &alignment_y, elts->orientation);
 
   if (DEBUG > 0)
   {
