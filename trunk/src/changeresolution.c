@@ -24,7 +24,8 @@ int changeresolution (int width, int height)
   Screen *screen;
   int i;
   GdkDisplay *gdk_dpy;
-  
+
+	printf("changeresolution: %d x %d\n",width, height);  
   gdk_dpy = gdk_display_get_default ();
   
   screen = gdk_x11_screen_get_xscreen ( gdk_screen_get_default () );

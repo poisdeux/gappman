@@ -29,6 +29,8 @@ static int KEEP_BELOW=0;
 static int WINDOWED=0;
 static int screen_width=-1;
 static int screen_height=-1;
+static int window_width=-1;
+static int window_height=-1;
 
 struct appm_alignment
 {
@@ -39,7 +41,8 @@ struct appm_alignment
 struct appwidgetinfo
 {
   int PID; //<! Process ID of running app (child replaced through execvp)
-  GtkWidget *widget;
+	int status; //<! Process status which can be either running, sleeping, waiting, stopped, or zombie
+  GtkWidget *widget; //<! Button that started the process
 };
 
 /**
@@ -52,10 +55,11 @@ static gint check_app_status(struct appwidgetinfo* appw)
   int status;
   FILE *fp;
   
-  waitpid(appw->PID, &status, WNOHANG);
+  waitpid(appw->PID, &(appw->status), WNOHANG);
+
   if(DEBUG == 2)
   {
-    printf("Status of PID: %d is %d\n", appw->PID, status);
+    printf("Status of PID: %d is %d\n", appw->PID, appw->status);
   }
   
   // Check if process is still running by sending a 0 signal
@@ -175,7 +179,7 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
     else
     {
       appw = create_new_appwidgetinfo(childpid, widget);
-      g_timeout_add(1000, (GSourceFunc) check_app_status, (gpointer) appw);
+			g_timeout_add(1000, (GSourceFunc) check_app_status, (gpointer) appw);
     }
   }
   else 
@@ -286,6 +290,7 @@ int main (int argc, char **argv)
   const char* conffile = "./conf.xml";
   const char* bgimage = NULL;
   int c;
+	GIOChannel* gio;
 
   gtk_init (&argc, &argv);
 
@@ -310,10 +315,10 @@ int main (int argc, char **argv)
 
       switch (c) {
       case 'w':
-          screen_width=atoi(optarg);
+          window_width=atoi(optarg);
           break;
       case 'h':
-          screen_height=atoi(optarg);
+          window_height=atoi(optarg);
           break;
       case 'c':
           conffile=optarg;
@@ -341,15 +346,9 @@ int main (int argc, char **argv)
   programs = getPrograms();
   actions = getActions();
 
-   screen = gdk_screen_get_default ();
-   if ( screen_width == -1 )
-   {
-        screen_width =  gdk_screen_get_width (screen);
-   }
-   if ( screen_height == -1 )
-   {
-        screen_height =  gdk_screen_get_height (screen);
-   }
+  screen = gdk_screen_get_default ();
+  screen_width =  gdk_screen_get_width (screen);
+  screen_height = gdk_screen_get_height (screen);
 
   mainwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   
@@ -375,20 +374,20 @@ int main (int argc, char **argv)
 		      G_CALLBACK (destroy), NULL);
   }
   
-  gtk_window_set_default_size (GTK_WINDOW (mainwin), screen_width, screen_height);
+  gtk_window_set_default_size (GTK_WINDOW (mainwin), window_width, window_height);
 
   vbox = gtk_vbox_new (TRUE, 0);
 
   if ( actions != NULL )
   {
-    align = createbuttons( actions, screen_width, screen_height , &process_startprogram_event );
+    align = createbuttons( actions, window_width, window_height , &process_startprogram_event );
     gtk_container_add (GTK_CONTAINER (vbox), align);
     gtk_widget_show (align);
   }
 
   if ( programs != NULL )
   {
-    align = createbuttons( programs, screen_width, screen_height, &process_startprogram_event );
+    align = createbuttons( programs, window_width, window_height, &process_startprogram_event );
     gtk_container_add (GTK_CONTAINER (vbox), align);
     gtk_widget_show (align);
   }
@@ -399,12 +398,17 @@ int main (int argc, char **argv)
 
   autostartprograms( programs );
 
-	if ( ! gappman_start_listener("localhost", 2103) )
+	if ( ! gappman_start_listener(gio, "localhost", 2103) )
 	{
 		fprintf(stderr, "Error: could not start listener.\n");
 	}
   
   gtk_main ();
+
+	if ( ! gappman_close_listener(gio) )
+	{
+		fprintf(stderr, "Error: could not close listener.\n");
+	}
 
   freeMenuElements( programs );
   freeMenuElements( actions );

@@ -46,17 +46,18 @@ static void usage()
 
 static void kill_program( GtkWidget *widget, menu_elements *data )
 {
-	switch(data->status)
+/*	switch(data->status)
 	{
 		case 0|1:
-			printf("kill(%d, 15)\n", data->PID); 
+			//printf("kill(%d, 15)\n", data->PID); 
 			//kill(data->PID, 15);
 			break;;
 		case 2|3:
-			printf("kill(%d, 9)\n", data->PID); 
+			//printf("kill(%d, 9)\n", data->PID); 
 			//kill(data->PID, 9);
 			break;;
 	}
+*/
 }
 
 

@@ -39,8 +39,6 @@ struct menu_element
   char **args; //!< array of strings containing arguments that need to be passed to the executable
   int numArguments; //!< will hold the total amount of elements in the args array
   struct menu_element *next; //!< pointer to the next menu_element structure
-	int status; //!< integer specifying if the program is running, sleeping, stopped, waiting, or a zombie.
-  int PID; //!< Process ID if program has been launched
 };
 
 /**

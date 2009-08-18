@@ -58,8 +58,6 @@ struct menu_element* createMenuElement()
   elt->printlabel = 0;
   elt->app_height = -1;
   elt->app_width = -1;
-	elt->PID = -1;
-	elt->status = -1;
   return elt;
 }
 
