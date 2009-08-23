@@ -58,10 +58,26 @@ will be used.
 will return a list of processes with their status as follows:
 
 <gappman>
-	<proces>NAME</proces>
-	<pid>PID</pid>
-	<status>STATUS</pid>
+	<proces>
+		<name>NAME</name>
+		<pid>PID</pid>
+		<status>STATUS</pid>
+	</proces>
 </gappman>
 
+
+appwidgetinfo linked list
+=========================
+
+We use a prev and next pointer to easily remove elements from the
+linked list.
+
+Suppose A points to B and B points to C. To remove B we must
+link A and C. As B both points to its left and right neighbour
+we can simply remove B by looking at B->prev and B->next.
+As B->prev is A. We can let A->next point to C. As B->next points
+to C, we can have C->prev point to A. Effectively removing B from
+the linked list.
+After this B can be freed.
 
 

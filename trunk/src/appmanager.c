@@ -22,7 +22,10 @@
 #include "listener.h"
 #include "../libs/parseconf/parseconf.h"
 #include "../libs/layout/layout.h"
+#include "appmanager.h"
 
+
+struct appwidgetinfo* global_appw;
 
 static int DEBUG=0;
 static int KEEP_BELOW=0;
@@ -38,42 +41,66 @@ struct appm_alignment
   float y;
 };
 
-struct appwidgetinfo
+/**
+* \brief returns the linked list of started applications
+* \return appwidgetinfo*
+*/
+struct appwidgetinfo* get_started_apps()
 {
-  int PID; //<! Process ID of running app (child replaced through execvp)
-	int status; //<! Process status which can be either running, sleeping, waiting, stopped, or zombie
-  GtkWidget *widget; //<! Button that started the process
-};
+	return global_appw;
+}
 
 /**
 * \brief Checks if the application is still responding and enables the button when it doesn't respond.
 * \param appw appwidgetinfo structure which holds the application's button widget and the PID of the running application.
 * \return TRUE if application responds, FALSE if not.
 */ 
-static gint check_app_status(struct appwidgetinfo* appw)
+static gint check_app_status(struct appwidgetinfo* local_appw)
 {
   int status;
   FILE *fp;
-  
-  waitpid(appw->PID, &(appw->status), WNOHANG);
+  struct appwidgetinfo* tmp;
+ 
+  waitpid(local_appw->PID, &(local_appw->status), WNOHANG);
 
   if(DEBUG == 2)
   {
-    printf("Status of PID: %d is %d\n", appw->PID, appw->status);
+    printf("Status of PID: %d is %d\n", local_appw->PID, local_appw->status);
+		fflush(stdout);
   }
   
   // Check if process is still running by sending a 0 signal
   // and check if process does not respond
-  if( kill(appw->PID, 0) == -1 )
+  if( kill(local_appw->PID, 0) == -1 )
   {
-    if(GTK_IS_WIDGET(appw->widget))
+    if(GTK_IS_WIDGET(local_appw->widget))
     {
       //Enable button
-      gtk_widget_set_sensitive(GTK_WIDGET(appw->widget), TRUE);
+      gtk_widget_set_sensitive(GTK_WIDGET(local_appw->widget), TRUE);
     }
-    
-    //No need for appw anymore
-    free(appw);
+   
+		//remove local_appw from list
+		if((local_appw->prev == NULL) && (local_appw->next == NULL))
+		{
+			//local_appw only element in the list,
+			//so we reset the list.
+			global_appw = NULL;
+		}
+		else
+		{ 
+			if(local_appw->prev != NULL)
+			{ 
+				tmp = local_appw->prev;
+				tmp->next = local_appw->next;
+			}
+			if(local_appw->next != NULL)
+			{
+				tmp = local_appw->next;
+				tmp->prev = local_appw->prev;
+			}
+		}
+    //No need for local_appw anymore
+    free(local_appw);
     
     //Change resolution back to menu resolution
     changeresolution(screen_width, screen_height);
@@ -89,15 +116,25 @@ static gint check_app_status(struct appwidgetinfo* appw)
 * \brief Creates an appwidgetinfo structure
 * \param PID the process ID of the application
 * \param widget pointer to the GtkWidget which belongs to the button of the application
-* \return pointer to appwidgetinfo structure
 */
-static struct appwidgetinfo* create_new_appwidgetinfo(int PID, GtkWidget *widget)
+static void create_new_appwidgetinfo(int PID, GtkWidget *widget)
 {
-  struct appwidgetinfo *appw;
-  appw = (struct appwidgetinfo *) malloc(sizeof(struct appwidgetinfo));
-  appw->PID = PID;
-  appw->widget = widget;
-  return appw;
+  struct appwidgetinfo *local_appw;
+  local_appw = (struct appwidgetinfo *) malloc(sizeof(struct appwidgetinfo));
+  if( local_appw != NULL)
+	{
+		local_appw->PID = PID;
+  	local_appw->widget = widget;
+		local_appw->prev = global_appw;
+		local_appw->next = NULL;
+		if( global_appw != NULL )
+		{
+			global_appw->next = local_appw;
+		}
+		//shift global global_appw pointer so it always points to 
+  	//last started process
+  	global_appw = local_appw;
+	}
 }
 
 /**
@@ -125,7 +162,6 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
   int i;
   int status;
   int ret;
-  struct appwidgetinfo* appw;
   __pid_t childpid;
   FILE *fp;
 
@@ -160,7 +196,7 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
     {
       if(DEBUG == 2)
       {
-        printf("Executing: %s with args: ", elt->exec);
+        printf("DEBUG: Executing: %s with args: ", elt->exec);
         for ( i = 0; i < elt->numArguments; i++ )
         {
           printf("%s ", args[i+1]);
@@ -178,8 +214,8 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
     }
     else
     {
-      appw = create_new_appwidgetinfo(childpid, widget);
-			g_timeout_add(1000, (GSourceFunc) check_app_status, (gpointer) appw);
+      create_new_appwidgetinfo(childpid, widget);
+			g_timeout_add(1000, (GSourceFunc) check_app_status, (gpointer) global_appw);
     }
   }
   else 
@@ -340,6 +376,9 @@ int main (int argc, char **argv)
           return 0;
       }
   }
+
+  /** INIT */
+	global_appw = NULL;
 
   /** Load configuration elements */
   loadConf(conffile);

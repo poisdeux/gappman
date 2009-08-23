@@ -4,8 +4,40 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include "appmanager.h"
+static void handlemessagefromprocessmanager(gchar *msg)
+{
+	if(g_strcmp0(msg, "getprocesses"))
+	{
+		printf("Received request from processmanager to return list of processes\n");
+	}
+}
 
-gboolean handlemessage( GIOChannel* gio , GIOCondition cond, gpointer data )
+static void parsemessage(gchar *msg)
+{
+	static int state = 0;
+
+	if(g_strcmp0(msg, "<processmanager>getprocesses</processmanger>"))
+	{
+		printf("Received request from processmanager to return list of processes\n");
+	}
+else if(g_strcmp0(msg, "<processmanager>"))
+	{
+		state=1;
+	}
+	else if(g_strcmp0(msg, "</processmanager>"))
+	{
+		state=0;
+	}
+
+	if (state == 1)
+	{
+		handlemessagefromprocessmanager(msg);
+	}
+
+}
+
+static gboolean handlemessage( GIOChannel* gio , GIOCondition cond, gpointer data )
 {
 	gsize len;
 	gchar *msg;
@@ -45,6 +77,7 @@ gboolean handlemessage( GIOChannel* gio , GIOCondition cond, gpointer data )
 		{
 			fprintf(stdout, "MESSAGE RECEIVED: %s (%d)\n", msg, len);
 			fflush(stdout);
+			parsemessage(msg);
 			g_free(msg);
 		}
 

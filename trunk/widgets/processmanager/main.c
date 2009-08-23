@@ -162,7 +162,8 @@ static GtkWidget* createrow(menu_elements *elt, int width, int height)
   button = createbutton(elt, fontsize, width, height, process_startprogram_event);
 
 	statuslabel = gtk_label_new("");
-	markup = g_markup_printf_escaped ("<span size=\"%d\" foreground=\"%s\">%s</span>", fontsize, color[elt->status], status[elt->status]);
+	//NEEDS TO BE UPDATED AS MENU_ELEMENT DOES NOT CONTAIN STATUS INFO ANYMORE
+	//markup = g_markup_printf_escaped ("<span size=\"%d\" foreground=\"%s\">%s</span>", fontsize, color[elt->status], status[elt->status]);
 	gtk_label_set_markup (GTK_LABEL (statuslabel), markup);
 	g_free (markup);
 
@@ -303,7 +304,8 @@ int main (int argc, char **argv)
 
 	while ( programs != NULL )
 	{
-		programs->status = 1;
+		//NEEDS TO BE UPDATED AS MENU_ELEMENTS DOES NOT CONTAIN STATUS INFO ANYMORE
+		//programs->status = 1;
 		hbox = createrow(programs, program_width, row_height);
 
 		gtk_container_add(GTK_CONTAINER(vbox), hbox);	
