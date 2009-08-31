@@ -45,8 +45,21 @@ struct appm_alignment
 * \brief returns the linked list of started applications
 * \return appwidgetinfo*
 */
-struct appwidgetinfo* get_started_apps()
+struct appwidgetinfo* get_started_apps_status()
 {
+	struct appwidgetinfo* tmp;
+	tmp = global_appw;
+	char* proc_string = malloc((strlen("/proc/") + 6) * sizeof(char)); 
+
+	while (tmp != NULL)
+	{
+		//tmp->status = get_status(tmp->PID);
+		if (g_sprintf(proc_string, "/proc/%d", tmp->PID))
+		{
+		//g_file_get_contents(proc_string, "/proc/%d", tmp->PID);
+		}
+		tmp = tmp->prev;
+	}
 	return global_appw;
 }
 
@@ -97,6 +110,13 @@ static gint check_app_status(struct appwidgetinfo* local_appw)
 			{
 				tmp = local_appw->next;
 				tmp->prev = local_appw->prev;
+			}
+			else
+			{
+				//local_appw is last element
+				//we therefore need to relocate
+				//the global_appw pointer
+				global_appw = local_appw->prev;
 			}
 		}
     //No need for local_appw anymore

@@ -18,4 +18,4 @@ struct appwidgetinfo
 * \return pointer to the appwidgetinfo struct
 */
 
-struct appwidgetinfo* get_started_apps();
+struct appwidgetinfo* get_started_apps_status();

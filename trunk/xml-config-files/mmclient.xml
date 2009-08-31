@@ -8,15 +8,16 @@
     </action>
     <action>
       <name>Network restart</name>
-      <exec>/bin/ls</exec>
-      <arg>-la</arg>
-      <arg>/usr</arg>
+      <exec>/usr/bin/xeyes</exec>
+      <arg>-fg</arg>
+      <arg>blue</arg>
       <logo>./logos/network-restart.png</logo>
     </action>
     <action>
       <name>Kill application</name>
-      <exec></exec>
-      <arg></arg>
+      <exec>/usr/bin/xeyes</exec>
+      <arg>-fg</arg>
+      <arg>red</arg>
       <logo>./logos/mythtv.png</logo>
     </action>
   </actions>

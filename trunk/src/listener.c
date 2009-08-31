@@ -5,11 +5,20 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include "appmanager.h"
+
 static void handlemessagefromprocessmanager(gchar *msg)
 {
-	if(g_strcmp0(msg, "getprocesses"))
+	struct appwidgetinfo* appw_list;
+	
+	if(g_strcmp0(msg, "getprocesses\n") == 0)
 	{
-		printf("Received request from processmanager to return list of processes\n");
+		printf("handlemessage: Received request from processmanager to return list of processes\n");
+		appw_list = get_started_apps();
+	  while(appw_list != NULL)
+		{
+			printf("Name: ..., PID: %d, Status: %d\n", appw_list->PID, appw_list->status);
+			appw_list = appw_list->prev;
+		}			
 	}
 }
 
@@ -17,19 +26,21 @@ static void parsemessage(gchar *msg)
 {
 	static int state = 0;
 
-	if(g_strcmp0(msg, "<processmanager>getprocesses</processmanger>"))
+	printf("DEBUG: state = %d\n", state);
+
+	if(g_strcmp0(msg, "test\n") == 0)
 	{
-		printf("Received request from processmanager to return list of processes\n");
+		printf("Reveived test command\n");
+		handlemessagefromprocessmanager("getprocesses\n");
 	}
-else if(g_strcmp0(msg, "<processmanager>"))
+	else if(g_strcmp0(msg, "<processmanager>\n") == 0)
 	{
 		state=1;
 	}
-	else if(g_strcmp0(msg, "</processmanager>"))
+	else if(g_strcmp0(msg, "</processmanager>\n") == 0)
 	{
 		state=0;
 	}
-
 	if (state == 1)
 	{
 		handlemessagefromprocessmanager(msg);
