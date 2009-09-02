@@ -11,6 +11,7 @@
 
 #include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib/gprintf.h>
 #include <stdlib.h>
 #include <math.h>
 #include <unistd.h>
@@ -45,21 +46,8 @@ struct appm_alignment
 * \brief returns the linked list of started applications
 * \return appwidgetinfo*
 */
-struct appwidgetinfo* get_started_apps_status()
+struct appwidgetinfo* get_started_apps()
 {
-	struct appwidgetinfo* tmp;
-	tmp = global_appw;
-	char* proc_string = malloc((strlen("/proc/") + 6) * sizeof(char)); 
-
-	while (tmp != NULL)
-	{
-		//tmp->status = get_status(tmp->PID);
-		if (g_sprintf(proc_string, "/proc/%d", tmp->PID))
-		{
-		//g_file_get_contents(proc_string, "/proc/%d", tmp->PID);
-		}
-		tmp = tmp->prev;
-	}
 	return global_appw;
 }
 
@@ -136,8 +124,9 @@ static gint check_app_status(struct appwidgetinfo* local_appw)
 * \brief Creates an appwidgetinfo structure
 * \param PID the process ID of the application
 * \param widget pointer to the GtkWidget which belongs to the button of the application
+* \param name programname with PID 
 */
-static void create_new_appwidgetinfo(int PID, GtkWidget *widget)
+static void create_new_appwidgetinfo(int PID, GtkWidget *widget, gchar* name)
 {
   struct appwidgetinfo *local_appw;
   local_appw = (struct appwidgetinfo *) malloc(sizeof(struct appwidgetinfo));
@@ -145,6 +134,7 @@ static void create_new_appwidgetinfo(int PID, GtkWidget *widget)
 	{
 		local_appw->PID = PID;
   	local_appw->widget = widget;
+  	local_appw->name = name;
 		local_appw->prev = global_appw;
 		local_appw->next = NULL;
 		if( global_appw != NULL )
@@ -234,7 +224,7 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
     }
     else
     {
-      create_new_appwidgetinfo(childpid, widget);
+      create_new_appwidgetinfo(childpid, widget, (gchar*) elt->name);
 			g_timeout_add(1000, (GSourceFunc) check_app_status, (gpointer) global_appw);
     }
   }
@@ -457,7 +447,7 @@ int main (int argc, char **argv)
 
   autostartprograms( programs );
 
-	if ( ! gappman_start_listener(gio, "localhost", 2103) )
+	if ( ! gappman_start_listener(&gio, "localhost", 2103) )
 	{
 		fprintf(stderr, "Error: could not start listener.\n");
 	}
@@ -469,6 +459,7 @@ int main (int argc, char **argv)
 		fprintf(stderr, "Error: could not close listener.\n");
 	}
 
+	printf("Closing up. Goodbye\n");
   freeMenuElements( programs );
   freeMenuElements( actions );
   

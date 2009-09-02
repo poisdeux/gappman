@@ -1,54 +1,80 @@
 #include <stdio.h>
 #include <glib.h>
+#include <glib/gprintf.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <string.h>
 #include <netinet/in.h>
+#include <stdlib.h>
 #include <netdb.h>
+#include <unistd.h>
 #include "appmanager.h"
+#include "listener.h"
 
-static void handlemessagefromprocessmanager(gchar *msg)
-{
-	struct appwidgetinfo* appw_list;
-	
-	if(g_strcmp0(msg, "getprocesses\n") == 0)
-	{
-		printf("handlemessage: Received request from processmanager to return list of processes\n");
-		appw_list = get_started_apps();
-	  while(appw_list != NULL)
-		{
-			printf("Name: ..., PID: %d, Status: %d\n", appw_list->PID, appw_list->status);
-			appw_list = appw_list->prev;
-		}			
-	}
-}
+#define SEND_PROCESS_LIST 1;
 
-static void parsemessage(gchar *msg)
+static int parsemessage(gchar *msg)
 {
 	static int state = 0;
+	int msg_id;
 
 	printf("DEBUG: state = %d\n", state);
 
-	if(g_strcmp0(msg, "test\n") == 0)
+	if(g_strcmp0(msg, "listprocesses\n") == 0)
 	{
-		printf("Reveived test command\n");
-		handlemessagefromprocessmanager("getprocesses\n");
+		msg_id = SEND_PROCESS_LIST;
 	}
-	else if(g_strcmp0(msg, "<processmanager>\n") == 0)
-	{
-		state=1;
-	}
-	else if(g_strcmp0(msg, "</processmanager>\n") == 0)
-	{
-		state=0;
-	}
-	if (state == 1)
-	{
-		handlemessagefromprocessmanager(msg);
-	}
-
 }
 
-static gboolean handlemessage( GIOChannel* gio , GIOCondition cond, gpointer data )
+static void writemsg(GIOChannel* gio, gchar* msg)
+{
+	GIOError gerror = G_IO_ERROR_NONE;
+	gsize bytes_written;
+
+	g_printf("Sending message: %s\n", msg);
+	fflush(stdout);
+
+	gerror = g_io_channel_write(gio, msg, strlen(msg), &bytes_written);
+	g_printf("Send message: %s\n", msg);
+	fflush(stdout);
+	if( gerror != G_IO_ERROR_NONE )
+	{
+		g_warning("Error sending message: %s : bytes written %d\n", msg, bytes_written);
+	}
+}
+
+static void answerclient(GIOChannel* gio, int msg_id)
+{
+	struct appwidgetinfo* appw_list;
+	gsize* bytes_written = NULL;
+	gchar* msg = NULL;
+
+	msg = (gchar*) malloc((256 + 16) * sizeof(gchar));
+	
+	appw_list = get_started_apps();
+	while(appw_list != NULL)
+	{
+		g_printf("Name: %s, PID: %d\n", appw_list->name, appw_list->PID);
+		if(strlen(appw_list->name) < 256)
+		{
+			g_sprintf(msg, "name: %s\n", appw_list->name);
+		}
+		else
+		{
+			g_sprintf(msg, "name:\n");
+		}	
+		writemsg(gio, msg);
+
+		g_sprintf(msg, "pid: %d\n", appw_list->PID);
+		writemsg(gio, msg);
+	
+		appw_list = appw_list->prev;
+	}
+
+	free(msg);
+}
+
+static gboolean handleconnection( GIOChannel* gio , GIOCondition cond, gpointer data )
 {
 	gsize len;
 	gchar *msg;
@@ -58,8 +84,8 @@ static gboolean handlemessage( GIOChannel* gio , GIOCondition cond, gpointer dat
 	int newsock;
 	struct sockaddr_in cli_addr;
 	int clilen;
-	gchar line[] = { ';', '\n'};
   GIOChannel* new_gio = NULL;
+	int msg_id;
 
 	newsock = accept((int) data, (struct sockaddr *) &cli_addr, &clilen);
 	if(newsock < 0)
@@ -71,41 +97,39 @@ static gboolean handlemessage( GIOChannel* gio , GIOCondition cond, gpointer dat
 
 	if (cond & G_IO_IN)
 	{
+		// TODO: fork to handle connections concurrently
 		new_gio = g_io_channel_unix_new (newsock);
 		g_io_channel_set_buffer_size (new_gio, 0);
 		g_io_channel_set_encoding (new_gio, "UTF-8", NULL);
-		g_io_channel_set_line_term (new_gio, line, 2);
+		g_io_channel_set_line_term (new_gio, NULL, -1);
 
-		printf("DEBUG: handlemessage\n");
+		printf("DEBUG: handleconnection\n");
 		fflush(stdout);
 
 		status = g_io_channel_read_line(new_gio, &msg, &len, NULL,  &gerror);
 		if( status == G_IO_STATUS_ERROR )
 		{
-			g_error ("Listener (handlemessage): %s\n", gerror->message);
+			g_error ("Listener (handleconnection): %s\n", gerror->message);
 		}
 		else
 		{
 			fprintf(stdout, "MESSAGE RECEIVED: %s (%d)\n", msg, len);
 			fflush(stdout);
-			parsemessage(msg);
+			msg_id = parsemessage(msg);
 			g_free(msg);
+			answerclient(new_gio, msg_id);
 		}
-
-  	status = g_io_channel_shutdown( new_gio, TRUE, &gerror);
-		if ( status == G_IO_STATUS_ERROR )
-			g_error ("Listener (handlemessage): %s\n", gerror->message);
+		gappman_close_listener(new_gio);
 	}
 	//Always return TRUE to keep watch active.	
 	return TRUE; 
 }
 
-gboolean gappman_start_listener (GIOChannel* gio, const gchar *server, gint port)
+gboolean gappman_start_listener (GIOChannel** gio, const gchar *server, gint port)
 {
 	int sock;
 	int sourceid;
 	struct hostent *host;
-	gchar line[] = { ';', '\n'};
 
 	g_return_val_if_fail (server != NULL, FALSE);
 	g_return_val_if_fail (port > 0, FALSE);
@@ -131,13 +155,12 @@ gboolean gappman_start_listener (GIOChannel* gio, const gchar *server, gint port
 		return FALSE;
 	}
 
-	gio = g_io_channel_unix_new (sock);
+	*gio = g_io_channel_unix_new (sock);
 
-	if(! g_io_add_watch( gio, G_IO_IN, handlemessage, (gpointer) sock ))
+	if(! g_io_add_watch( *gio, G_IO_IN, handleconnection, (gpointer) sock ))
 	{
 		fprintf(stderr, "Cannot add watch on GIOChannel!\n");
 	}
-  
 	return TRUE;
 }
 
@@ -147,12 +170,11 @@ gboolean gappman_close_listener (GIOChannel* gio)
 	GError *gerror = NULL;
 
   status = g_io_channel_shutdown( gio, TRUE, &gerror);
-    if( status == G_IO_STATUS_ERROR )
-    {
-      g_error ("Listener (handlemessage): %s\n", gerror->message);
-			return FALSE;
-    }
-
+  if( status == G_IO_STATUS_ERROR )
+  {
+    g_error ("Listener (gappman_close_listener): %s\n", gerror->message);
+		return FALSE;
+  }
 
 	return TRUE;
 }

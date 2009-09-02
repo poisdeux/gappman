@@ -9,6 +9,8 @@
 
 int main(int argc, char *argv[])
 {
+	gsize len;
+  gchar *msg;
   int status, sockfd, portno, n, sourceid;
   struct sockaddr_in serv_addr;
   struct hostent *server;
@@ -49,13 +51,6 @@ int main(int argc, char *argv[])
 		exit(0);
   }
 
-/*	if ( listen(sockfd,5) != 0 )
-  {
-    fprintf(stderr, "Error: could not setup listener.\n");
-		exit(0);
-  }
-*/
-
   printf("Please enter the message: ");
   memset(buffer, 0, 256);
   fgets(buffer,255,stdin);
@@ -70,22 +65,30 @@ int main(int argc, char *argv[])
   {
     g_error("test-listener: %s\n", gerror->message );
   }
+
 	status = g_io_channel_flush( gio, &gerror);
 	if( status == G_IO_STATUS_ERROR )
   {
     g_error("test-listener: %s\n", gerror->message );
   }
 
-	status = g_io_channel_shutdown( gio, TRUE, &gerror);
-  if ( status == G_IO_STATUS_ERROR )
-	{ 
-     g_error ("Listener (handlemessage): %s\n", gerror->message);
-	}
-
-  if( status == G_IO_STATUS_NORMAL )
+	if( status == G_IO_STATUS_NORMAL )
   {
     fprintf(stdout, "MESSAGE SENT: %s\n", buffer);
 	}
+
+	while( g_io_channel_read_line( gio, &msg, &len, NULL,  &gerror) != G_IO_STATUS_EOF )
+	{
+		fprintf(stdout, "MESSAGE RECEIVED: %s\n", msg);
+	}
+
+	status = g_io_channel_shutdown( gio, TRUE, &gerror);
+  if ( status == G_IO_STATUS_ERROR )
+	{ 
+     g_error ("test-listenerr (handlemessage): %s\n", gerror->message);
+	}
+
+  
   return 0;
 
 }

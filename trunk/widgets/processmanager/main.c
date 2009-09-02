@@ -11,6 +11,7 @@
 
 #include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib/gprintf.h>
 #include <stdlib.h>
 #include <math.h>
 #include <unistd.h>
@@ -43,6 +44,33 @@ static void usage()
 
 }
 
+static gchar* get_status(int PID)
+{
+  char* proc_string = malloc((strlen("/proc/stat") + 6) * sizeof(char));
+  gchar* contents = NULL;
+  gchar** contentssplit = NULL;
+  gsize length;
+  GError *gerror = NULL;
+	gchar* status = NULL;
+
+  g_sprintf(proc_string, "/proc/%d/stat", PID);
+  if ( ! g_file_get_contents(proc_string, &contents, &length, &gerror))
+  {
+    g_error("gappman (get_started_apps): %s\n", gerror->message );
+  }
+  else
+  {
+    printf("DEBUG: get_started_apps: %s\n", contents);
+    contentssplit = g_strsplit(contents, " ", 4);
+    printf("DEBUG: status: %s\n", contentssplit[2]);
+
+   	status = g_strdup(contentssplit[2]);
+ 
+		g_free(contents);
+    g_strfreev(contentssplit);
+  }
+	return status;
+}
 
 static void kill_program( GtkWidget *widget, menu_elements *data )
 {
