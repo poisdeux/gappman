@@ -22,12 +22,14 @@
 #include <../../libs/layout/layout.h>
 #include <sys/types.h>
 #include <signal.h>
+#include "connect.h"
 
 static int DEBUG = 0;
 static int WINDOWED = 0;
 static GtkWidget *mainwin;
+static GtkWidget *killdialogwin;
 static char* color[4] = {"green", "orange", "red", "yellow"};
-static char* status[4] =  {"running", "sleeping", "stopped", "waiting"};  
+static char* statusarray[5] =  {"running", "sleeping", "stopped", "waiting", "zombie"};  
 static int fontsize;
 
 static void usage()
@@ -44,7 +46,13 @@ static void usage()
 
 }
 
-static gchar* get_status(int PID)
+static void destroy_widget( GtkWidget *widget, gpointer data )
+{
+	gtk_widget_destroy(GTK_WIDGET(data));
+}
+
+
+static int get_status(int PID)
 {
   char* proc_string = malloc((strlen("/proc/stat") + 6) * sizeof(char));
   gchar* contents = NULL;
@@ -52,47 +60,110 @@ static gchar* get_status(int PID)
   gsize length;
   GError *gerror = NULL;
 	gchar* status = NULL;
+	int ret_status = -1;
 
   g_sprintf(proc_string, "/proc/%d/stat", PID);
   if ( ! g_file_get_contents(proc_string, &contents, &length, &gerror))
   {
-    g_error("gappman (get_started_apps): %s\n", gerror->message );
+    g_warning("gappman (get_started_apps): %s\n", gerror->message );
+		ret_status = -2;
   }
   else
   {
-    printf("DEBUG: get_started_apps: %s\n", contents);
     contentssplit = g_strsplit(contents, " ", 4);
-    printf("DEBUG: status: %s\n", contentssplit[2]);
 
    	status = g_strdup(contentssplit[2]);
- 
+
+		//RUNNING
+		if ( g_strcmp0("R", status) == 0 )
+		{
+			ret_status = -2; 
+		}
+		//ZOMBIE
+		else if ( g_strcmp0("Z", status) == 0 )
+		{
+			ret_status = 4;
+		}
+		//SLEEPING
+		else if ( g_strcmp0("S", status) == 0 )
+		{
+			ret_status = 1;
+		}
+		//WAITING UNINTERRUPTIBLE DISK SLEEP
+		else if ( g_strcmp0("D", status) == 0 )
+		{
+			ret_status = 3;
+		}
+		//TRACED OR STOPPED
+		else if ( g_strcmp0("T", status) == 0 )
+		{
+			ret_status = 2;
+		}
+		//PAGING
+		else if ( g_strcmp0("W", status) == 0 )
+		{
+			ret_status = 3;
+		}
 		g_free(contents);
     g_strfreev(contentssplit);
   }
-	return status;
+	return ret_status;
 }
 
-static void kill_program( GtkWidget *widget, menu_elements *data )
+static int kill_program( GtkWidget *widget, menu_elements *elt )
 {
-/*	switch(data->status)
+	int status;
+	int count = 0;
+
+	status = get_status(elt->pid);
+	switch(status)
 	{
 		case 0|1:
-			//printf("kill(%d, 15)\n", data->PID); 
-			//kill(data->PID, 15);
+			g_debug("kill(%d, 15)\n", elt->pid); 
+			kill(elt->pid, 15);
 			break;;
 		case 2|3:
-			//printf("kill(%d, 9)\n", data->PID); 
-			//kill(data->PID, 9);
+			g_debug("kill(%d, 9)\n", elt->pid); 
+			kill(elt->pid, 9);
 			break;;
+		case 4:
+			g_debug("Oh my god! It's a zombie. Hit it with a shovel!\n");
+			return FALSE;;
+		case -2:
+			g_debug("Oops, could not find proces %d\n", elt->pid);
+			return TRUE;;
+		case -1:
+			g_debug("Huh? What should I do with status %d for proces %d\n", status, elt->pid);
+			return FALSE;;
 	}
-*/
+
+	//disable kill button
+	gtk_widget_set_sensitive(widget, FALSE);
+
+	while((get_status(elt->pid) > 0) && (count < 10))
+	{
+		sleep(1);
+		count++;
+	}	
+	if( count == 10 )		
+	{
+		if(status != get_status(elt->pid))
+		{
+			//Process changed status.
+			//Let's try again
+			kill_program(widget, elt);
+		}
+	}
+
+	//If kill was succesful we should remove
+	//program from main window
+	gtk_widget_set_sensitive(elt->widget, FALSE);
+
+	destroy_widget(widget, killdialogwin);
+
+	return TRUE;
 }
 
-
-static void destroy_widget( GtkWidget *widget, gpointer data )
-{
-	gtk_widget_destroy(GTK_WIDGET(data));
-}
 
 /**
 * \brief creates a popup dialog window that allows the user to stop a program
@@ -100,19 +171,19 @@ static void destroy_widget( GtkWidget *widget, gpointer data )
 */
 static void showprocessdialog( menu_elements *elt )
 {
-	GtkWidget *button, *buttonbox, *dialogwin, *label;
+	GtkWidget *button, *buttonbox, *label;
 	gchar* markup;
 
-	dialogwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+	killdialogwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
-  gtk_window_set_transient_for (GTK_WINDOW(dialogwin), GTK_WINDOW(mainwin));
-	gtk_window_set_position(GTK_WINDOW (dialogwin), GTK_WIN_POS_CENTER_ON_PARENT);
+  gtk_window_set_transient_for (GTK_WINDOW(killdialogwin), GTK_WINDOW(mainwin));
+	gtk_window_set_position(GTK_WINDOW (killdialogwin), GTK_WIN_POS_CENTER_ON_PARENT);
  
   //Make window transparent
-  //gtk_window_set_opacity (GTK_WINDOW (dialogwin), 0.8);
+  //gtk_window_set_opacity (GTK_WINDOW (killdialogwin), 0.8);
   
   //Remove border
-  gtk_window_set_decorated (GTK_WINDOW (dialogwin), FALSE);
+  gtk_window_set_decorated (GTK_WINDOW (killdialogwin), FALSE);
 
 	buttonbox = gtk_hbutton_box_new();	
 	
@@ -132,15 +203,15 @@ static void showprocessdialog( menu_elements *elt )
 	gtk_label_set_markup (GTK_LABEL (label), markup);
 	g_free (markup);
 	button = gtk_button_new();
- 	g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (destroy_widget), dialogwin);
+ 	g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (destroy_widget), killdialogwin);
 	gtk_container_add(GTK_CONTAINER(button), label);
   gtk_widget_show(label);
   gtk_container_add(GTK_CONTAINER(buttonbox), button);
   gtk_widget_show(button);
 
-	gtk_container_add(GTK_CONTAINER(dialogwin), buttonbox);
+	gtk_container_add(GTK_CONTAINER(killdialogwin), buttonbox);
 	gtk_widget_show(buttonbox);
-	gtk_widget_show(dialogwin);
+	gtk_widget_show(killdialogwin);
 	gtk_widget_grab_focus(button);
 }
 
@@ -152,19 +223,6 @@ static void showprocessdialog( menu_elements *elt )
 */
 static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
 {
-
-  if (DEBUG == 2)
-  {
-    printf("process_startprogram_event\n");
-  }
-
-  if(DEBUG > 1)
-  {
-    if ( event->type == GDK_KEY_RELEASE )
-    {
-      printf("%s key pressed and has value %d\n", ((GdkEventKey*)event)->string, ((GdkEventKey*)event)->keyval);
-    }
-  }
 
   //Only start program  if spacebar or mousebutton is pressed
   if( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
@@ -180,18 +238,20 @@ static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event,
 
 static GtkWidget* createrow(menu_elements *elt, int width, int height)
 {
-  GtkWidget *button, *hbox, *imagebox, *statuslabel;
+  GtkWidget *hbox, *imagebox, *statuslabel;
 	gchar *markup;
 	GtkWidget *alignment;
+	int status;
 	
 	hbox = gtk_hbox_new (FALSE, 10);
 
 	// Need to expand menu_elt structure to contain PID status.
-  button = createbutton(elt, fontsize, width, height, process_startprogram_event);
+  elt->widget = createbutton(elt, fontsize, width, height, process_startprogram_event);
 
 	statuslabel = gtk_label_new("");
-	//NEEDS TO BE UPDATED AS MENU_ELEMENT DOES NOT CONTAIN STATUS INFO ANYMORE
-	//markup = g_markup_printf_escaped ("<span size=\"%d\" foreground=\"%s\">%s</span>", fontsize, color[elt->status], status[elt->status]);
+	status = get_status(elt->pid);
+
+	markup = g_markup_printf_escaped ("<span size=\"%d\" foreground=\"%s\">%s</span>", fontsize, color[status], statusarray[status]);
 	gtk_label_set_markup (GTK_LABEL (statuslabel), markup);
 	g_free (markup);
 
@@ -200,8 +260,8 @@ static GtkWidget* createrow(menu_elements *elt, int width, int height)
 	gtk_container_add(GTK_CONTAINER(alignment), statuslabel);
 	gtk_widget_show(statuslabel);
 	
-	gtk_container_add(GTK_CONTAINER(hbox), button);
-	gtk_widget_show(button);	
+	gtk_container_add(GTK_CONTAINER(hbox), elt->widget);
+	gtk_widget_show(elt->widget);	
 	gtk_container_add(GTK_CONTAINER(hbox), alignment);
 	gtk_widget_show(alignment);
 
@@ -234,7 +294,7 @@ int main (int argc, char **argv)
   GtkWidget *align;
   GtkWidget *separator;
   GtkWidget *table;
-  menu_elements *programs, *elt_tmp;
+  menu_elements *actions_tmp, *programs_tmp, *elts;
   const char* conffile = "/etc/gappman/processmanager.xml";
   int dialog_width;
   int dialog_height;
@@ -242,6 +302,8 @@ int main (int argc, char **argv)
 	int row_height;
   int c;
   time_t timestruct;
+	struct proceslist* started_procs = NULL;
+	struct proceslist* started_procs_tmp = NULL;
 
   gtk_init (&argc, &argv);
   screen = gdk_screen_get_default ();
@@ -292,19 +354,8 @@ int main (int argc, char **argv)
       }
   }
 
-	loadConf(conffile);
-	programs = getPrograms();
-
-	//printMenuElements(programs);
-	//freeMenuElements(programs);
-	//return 0;
-
-  gtk_window_set_position(GTK_WINDOW (mainwin), GTK_WIN_POS_CENTER);
- 
-  //Make window transparent
-  //gtk_window_set_opacity (GTK_WINDOW (mainwin), 0.8);
-  
-  //Remove border
+ 	gtk_window_set_position(GTK_WINDOW (mainwin), GTK_WIN_POS_CENTER);
+	//Remove border
   if ( !WINDOWED )
   {
     gtk_window_set_decorated (GTK_WINDOW (mainwin), FALSE);
@@ -318,38 +369,99 @@ int main (int argc, char **argv)
                       G_CALLBACK (destroy), NULL);
   }
 
-	//The size is 1024th of a point. We reserve 30% for the statuscolumn
-	//so we have dialog_width/3 * 1024 points available for a max of 8
-	//characters
-	fontsize=1024*(dialog_width/2)/8;
-	program_width=dialog_width-(dialog_width/2);
-	row_height=dialog_height/getNumberOfElements();
-	
 	vbox = gtk_vbox_new(FALSE, 10);
 
-	
-	elt_tmp = programs;
+	started_procs = getProceslistFromGappman(2103, "localhost");
 
-	while ( programs != NULL )
+	if( started_procs != NULL )
 	{
-		//NEEDS TO BE UPDATED AS MENU_ELEMENTS DOES NOT CONTAIN STATUS INFO ANYMORE
-		//programs->status = 1;
-		hbox = createrow(programs, program_width, row_height);
-
-		gtk_container_add(GTK_CONTAINER(vbox), hbox);	
-		gtk_widget_show (hbox);
+		loadConf(conffile);
 	
-		programs = programs->next;
-		separator = gtk_hseparator_new();
-		gtk_container_add(GTK_CONTAINER(vbox), separator);	
-		gtk_widget_show (separator);
+		//printMenuElements(programs);
+		//freeMenuElements(programs);
+		//return 0;
+	
+ 
+	  //Make window transparent
+ 	 //gtk_window_set_opacity (GTK_WINDOW (mainwin), 0.8);
+  
+ 	
+		//The size is 1024th of a point. We reserve 30% for the statuscolumn
+		//so we have dialog_width/3 * 1024 points available for a max of 8
+		//characters
+		fontsize=1024*(dialog_width/2)/8;
+		program_width=dialog_width-(dialog_width/2);
+		row_height=dialog_height/getNumberOfElements();
 		
-	}	
+		elts = getPrograms();
+		programs_tmp = elts;
 
-  hbox = gtk_hbox_new (FALSE, 10);
-  // cancel button
-  button = gtk_button_new_with_label("Cancel");
-  g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (gtk_main_quit), NULL);
+		while ( elts != NULL )
+		{
+			started_procs_tmp = started_procs;
+			while ( started_procs_tmp != NULL)
+			{
+				if( g_strcmp0(elts->name, started_procs_tmp->name) == 0 )
+				{
+					elts->name = started_procs_tmp->name;
+					elts->pid = started_procs_tmp->pid;
+
+					hbox = createrow(elts, program_width, row_height);
+					gtk_container_add(GTK_CONTAINER(vbox), hbox);	
+					gtk_widget_show (hbox);
+					separator = gtk_hseparator_new();
+					gtk_container_add(GTK_CONTAINER(vbox), separator);	
+					gtk_widget_show (separator);
+
+					//get out of while-loop
+					started_procs_tmp = NULL;
+				}
+				else
+				{
+					started_procs_tmp = started_procs_tmp->prev;
+				}
+			}	
+			elts = elts->next;
+		}
+
+		elts = getActions();
+		actions_tmp = elts;
+
+		while ( elts != NULL )
+		{
+			started_procs_tmp = started_procs;
+			while ( started_procs_tmp != NULL)
+			{
+				if( g_strcmp0(elts->name, started_procs_tmp->name) == 0 )
+				{
+					elts->name = started_procs_tmp->name;
+					elts->pid = started_procs_tmp->pid;
+
+					hbox = createrow(elts, program_width, row_height);
+					gtk_container_add(GTK_CONTAINER(vbox), hbox);	
+					gtk_widget_show (hbox);
+					separator = gtk_hseparator_new();
+					gtk_container_add(GTK_CONTAINER(vbox), separator);	
+					gtk_widget_show (separator);
+
+					//get out of while-loop
+					started_procs_tmp = NULL;
+				}
+				else
+				{
+					started_procs_tmp = started_procs_tmp->prev;
+				}
+			}	
+			elts = elts->next;
+		}
+	}
+
+	freeproceslist(started_procs);
+
+	hbox = gtk_hbox_new (FALSE, 10);
+ 	// cancel button
+ 	button = gtk_button_new_with_label("Cancel");
+ 	g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (gtk_main_quit), NULL);
   gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
   gtk_widget_show(button);
 
@@ -361,7 +473,7 @@ int main (int argc, char **argv)
 
   gtk_main ();
 
-	freeMenuElements(elt_tmp);
+	freeMenuElements(programs_tmp);
   return 0;
 }
 
