@@ -8,7 +8,7 @@
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
-
+#include <gtk/gtk.h>
 #include <libxml/xmlreader.h>
 
 /**
@@ -31,6 +31,7 @@ struct menu_element
   int app_width;
   int app_height;
   char **orientation;
+	GtkWidget *widget; //!< widget associated with this menu_element. Usually a GtkButton.
   const xmlChar *name; //!< holds the name of the program
   const xmlChar *exec; //!< absolute path to executable
   const xmlChar *logo; //!< absolute path to image file
@@ -38,6 +39,7 @@ struct menu_element
   int printlabel; //!< If set to 1 the label should be printed. Otherwise do not print a textlabel
   char **args; //!< array of strings containing arguments that need to be passed to the executable
   int numArguments; //!< will hold the total amount of elements in the args array
+	int pid; //!< should hold the process ID of the process that was started by this menu_element
   struct menu_element *next; //!< pointer to the next menu_element structure
 };
 

@@ -58,6 +58,7 @@ struct menu_element* createMenuElement()
   elt->printlabel = 0;
   elt->app_height = -1;
   elt->app_width = -1;
+	elt->pid = -1;
   return elt;
 }
 
@@ -254,6 +255,8 @@ void freeMenuElements( menu_elements *elt )
   int i;
 	char** orient;
 
+	if (elt != NULL)
+	{
 	//free shared elements
 //	printf("Freeing shared elements\n");
 //	fflush(stdout);
@@ -304,6 +307,7 @@ void freeMenuElements( menu_elements *elt )
     free(elt);
     elt = next;
   }
+	}
 }
 
 /**
