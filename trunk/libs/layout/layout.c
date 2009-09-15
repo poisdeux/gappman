@@ -6,6 +6,8 @@
 
 static int DEBUG = 0;
 
+#define MAXCHARSINLABEL 15;
+
 /**
 * \brief callback function to quit the program
 * \param *widget pointer to widget to destroy
@@ -360,6 +362,7 @@ GtkWidget* createbutton ( menu_elements *elt, int fontsize, int max_width, int m
     else
     {
       //LABEL PLEASE
+			printf("Button label size = %d\n", fontsize);
       imagelabelbox = image_label_box_vert(elt , (gchar*) elt->name, fontsize, max_width, max_height);
     }
     if (DEBUG > 0)
@@ -411,6 +414,7 @@ GtkWidget* createbuttons( menu_elements *elts, int screen_width, int screen_heig
   int box_width, box_height;
   float alignment_x = -1.0;
   float alignment_y = -1.0;
+	int fontsize = -1;
 
   box_width = calculateBoxLength(screen_width, elts->menu_width);
   box_height = calculateBoxLength(screen_height, elts->menu_height);
@@ -429,6 +433,8 @@ GtkWidget* createbuttons( menu_elements *elts, int screen_width, int screen_heig
   }
 
   button_width = box_width/elts_per_row;
+	//The size metric is 1024th of a point. 
+	fontsize = (1024*button_width*2)/MAXCHARSINLABEL;
 
   parseAlignment(&alignment_x, &alignment_y, elts->orientation);
 
@@ -462,7 +468,7 @@ GtkWidget* createbuttons( menu_elements *elts, int screen_width, int screen_heig
     }
 
     next = cur->next;
-    button = createbutton(cur, -1, button_width, box_height, processevent);
+    button = createbutton(cur, fontsize, button_width, box_height, processevent);
     gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 1);
     gtk_widget_show (button);
     cur = next;
