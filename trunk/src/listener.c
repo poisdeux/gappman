@@ -57,15 +57,15 @@ static void answerclient(GIOChannel* gio, int msg_id)
 		g_printf("Name: %s, PID: %d\n", appw_list->name, appw_list->PID);
 		if(strlen(appw_list->name) < 256)
 		{
-			g_sprintf(msg, "name: %s\n", appw_list->name);
+			g_sprintf(msg, "::name::%s", appw_list->name);
 		}
 		else
 		{
-			g_sprintf(msg, "name:\n");
+			g_sprintf(msg, "::name::");
 		}	
 		writemsg(gio, msg);
 
-		g_sprintf(msg, "pid: %d\n", appw_list->PID);
+		g_sprintf(msg, "::pid::%d", appw_list->PID);
 		writemsg(gio, msg);
 	
 		appw_list = appw_list->prev;
