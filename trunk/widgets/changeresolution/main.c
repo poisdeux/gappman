@@ -18,11 +18,10 @@
 #include <sys/wait.h>
 #include <getopt.h>
 #include <string.h>
-#include <../../libs/parseconf/parseconf.h>
-#include <../../libs/layout/changeresolution.h>
-#include <../../libs/layout/layout.h>
 #include <sys/types.h>
 #include <signal.h>
+#include <layout.h>
+#include <changeresolution.h>
 
 static int WINDOWED = 0;
 static GtkWidget *mainwin;
@@ -110,7 +109,7 @@ static void changeresolution( XRRScreenSize *size )
 * \param *event the GdkEvent that occured. Space key and left mousebutton are valid actions.
 * \param *elt menu_element structure containing the filename and arguments of the program that should be started
 */
-static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event, XRRScreenSize *size )
+static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event, void *size )
 {
 
   //Only start program  if spacebar or mousebutton is pressed
@@ -135,7 +134,7 @@ static GtkWidget* createrow(XRRScreenSize size, int width, int height)
 	hbox = gtk_hbox_new (FALSE, 10);
 
 	// Need to expand menu_elt structure to contain PID status.
-  button = create_empty_button(width, height, &process_startprogram_event, (void*) &size);
+  button = create_empty_button(width, height, process_startprogram_event, (void*) &size);
 
 	statuslabel = gtk_label_new("");
 

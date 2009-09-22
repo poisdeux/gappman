@@ -9,8 +9,8 @@
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
 
-
 #include <gtk/gtk.h>
+#include <parseconf.h>
 
 /**
 * \brief callback function to quit the program
@@ -65,7 +65,7 @@ GtkWidget* createbutton ( menu_elements *elt, int fontsize, int max_width, int m
 * \param max_height button height 
 * \param *processevent callback function that will be called when button is pressed
 */
-GtkWidget* create_empty_button ( int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, void* ), void *data);
+GtkWidget* create_empty_button ( int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, void*), void *data);
 
 /**
 * \brief Create the button layout using the available screen height and width

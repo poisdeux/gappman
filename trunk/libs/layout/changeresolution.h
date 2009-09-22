@@ -8,6 +8,7 @@
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
+#include <X11/Xlib.h>
 #include <X11/extensions/Xrandr.h>
 
 /**

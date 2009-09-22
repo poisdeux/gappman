@@ -1,9 +1,7 @@
-#include "changeresolution.h"
-#include <X11/Xlib.h>
-#include <X11/extensions/Xrandr.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
 #include <stdlib.h>
+#include "changeresolution.h"
 
 XRRScreenSize gm_getcurrentsize()
 {
