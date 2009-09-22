@@ -1,3 +1,5 @@
 * Grouping. This would enable different layouts for different groups of buttons and/or widgets
 
 * Keybindings to specific widgets. This would make it possible to have widgets pop-up when for instance watching a movie.
+
+* Fix header includes. layout.h cannot include ../parseconf/parseconf.h as the program including layout.h will not be able to find ../parseconf/parseconf.h. So now each program including layout.h first needs to include parseconf.h

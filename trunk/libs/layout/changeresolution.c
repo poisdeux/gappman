@@ -5,9 +5,26 @@
 #include <gdk/gdkx.h>
 #include <stdlib.h>
 
-int getpossibleresolutions (XRRScreenSize **sizes, int *nsize)
+XRRScreenSize gm_getcurrentsize()
 {
-  Screen *screen;
+  int screen;
+  GdkDisplay *gdk_dpy;
+  int major;
+  int minor;
+	XRRScreenSize *size;
+  XRRScreenConfiguration *sc;
+
+  gdk_dpy = gdk_display_get_default ();
+
+  screen = gdk_x11_screen_get_screen_number ( gdk_screen_get_default () );
+
+	size = XRRSizes(	GDK_DISPLAY_XDISPLAY(gdk_dpy), screen, NULL);
+	//first size should be the current screen size
+	return size[0];
+}
+
+int gm_getpossibleresolutions (XRRScreenSize **sizes, int *nsize)
+{
   GdkDisplay *gdk_dpy;
 	int major;
 	int minor;
@@ -15,7 +32,6 @@ int getpossibleresolutions (XRRScreenSize **sizes, int *nsize)
 
 	gdk_dpy = gdk_display_get_default ();
   
-  screen = gdk_x11_screen_get_xscreen ( gdk_screen_get_default () );
   
   sc = XRRGetScreenInfo ( GDK_DISPLAY_XDISPLAY(gdk_dpy), GDK_ROOT_WINDOW() );
   
@@ -32,7 +48,7 @@ int getpossibleresolutions (XRRScreenSize **sizes, int *nsize)
 	return SUCCES;
 }
 
-int changeresolution (int width, int height)
+int gm_changeresolution (int width, int height)
 {
   XRRScreenSize *sizes;
   XRRScreenConfiguration *sc;
@@ -48,14 +64,12 @@ int changeresolution (int width, int height)
   int major;
   int minor;
   short rate = -1;
-  Screen *screen;
   int i;
   GdkDisplay *gdk_dpy;
 
 	printf("changeresolution: %d x %d\n",width, height);  
   gdk_dpy = gdk_display_get_default ();
   
-  screen = gdk_x11_screen_get_xscreen ( gdk_screen_get_default () );
   
   sc = XRRGetScreenInfo ( GDK_DISPLAY_XDISPLAY(gdk_dpy), GDK_ROOT_WINDOW() );
   

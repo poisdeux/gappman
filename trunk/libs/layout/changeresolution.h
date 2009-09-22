@@ -32,11 +32,19 @@ enum error_types {
 * \param width new display width
 * \param height new display height
 */
-int changeresolution (int width, int height);
+int gm_changeresolution (int width, int height);
 
 /**
 * \brief Queries using Xrandr the possible screen resolutions
 * \param **sizes pointer to a list of XRRScreenSizes
+* \param *int pointer to integer that will hold the amount of available sizes
 * \return int Error type, see enum error_types 
 */
-int getpossibleresolutions (XRRScreenSize **sizes);
+int gm_getpossibleresolutions (XRRScreenSize **sizes, int *size);
+
+/**
+* \brief returns the current screen resolution
+* \return XRRScreenSize struct that will hold the resolution
+*/
+XRRScreenSize gm_getcurrentsize();
+

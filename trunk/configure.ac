@@ -69,6 +69,7 @@ libs/layout/Makefile
 widgets/Makefile
 widgets/shutdown/Makefile
 widgets/processmanager/Makefile
+widgets/changeresolution/Makefile
 ])
 
 AC_OUTPUT

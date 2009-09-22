@@ -342,6 +342,40 @@ static void parseAlignment(float *alignment_x, float *alignment_y, char** alignm
 
 /**
 * \brief Create a single button
+* \param max_width button width
+* \param max_height button height
+* \param *processevent callback function which must be called when button is pressed.
+*/
+GtkWidget* create_empty_button ( int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, void *data ), void *data)
+{
+  GtkWidget *button, *imagelabelbox;
+  GdkPixbuf *pixbuf;
+  int width, height;
+  double ratio;
+
+  button = gtk_button_new ();
+  //gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
+
+  gtk_button_set_focus_on_click(GTK_BUTTON(button), TRUE);
+
+  // Signals to start the program
+  g_signal_connect (G_OBJECT (button), "button_release_event", G_CALLBACK (processevent), data);
+  g_signal_connect (G_OBJECT (button), "key_release_event", G_CALLBACK (processevent), data);
+
+  // Signals to highlight the button
+  g_signal_connect (G_OBJECT (button), "focus_in_event", G_CALLBACK (highlight_button), NULL);
+  g_signal_connect (G_OBJECT (button), "focus_out_event", G_CALLBACK (dehighlight_button), NULL);
+  g_signal_connect (G_OBJECT (button), "enter_notify_event", G_CALLBACK (highlight_button), NULL);
+  g_signal_connect (G_OBJECT (button), "leave_notify_event", G_CALLBACK (dehighlight_button), NULL);
+
+  // Signals to create button press effect when clicked
+  g_signal_connect (G_OBJECT (button), "button_press_event", G_CALLBACK (press_button), NULL);
+
+  return button;
+}
+
+/**
+* \brief Create a single button
 * \param *elt pointer to menu_element struct that contains the logo image filename.
 * \param max_width button width
 */

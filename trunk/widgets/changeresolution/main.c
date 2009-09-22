@@ -19,10 +19,10 @@
 #include <getopt.h>
 #include <string.h>
 #include <../../libs/parseconf/parseconf.h>
+#include <../../libs/layout/changeresolution.h>
 #include <../../libs/layout/layout.h>
 #include <sys/types.h>
 #include <signal.h>
-#include "connect.h"
 
 static int WINDOWED = 0;
 static GtkWidget *mainwin;
@@ -30,10 +30,9 @@ static int fontsize;
 
 static void usage()
 {
-  printf("usage: changeresolution [--help] [--debug <LEVEL>] [--screenwidth <WIDTHINPIXELS>] [--screenheight <HEIGHTINPIXELS>] [--conffile <FILENAME>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
+  printf("usage: changeresolution [--help] [--screenwidth <WIDTHINPIXELS>] [--screenheight <HEIGHTINPIXELS>] [--conffile <FILENAME>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
   printf("");
   printf("--help:\t\tshows this help text\n");
-  printf("--debug <LEVEL>:\t\tsets verbosity leven\n");
   printf("--screenwidth <WIDTHINPIXELS>:\t\twidth of the main (gappman) window (default: screen width / 3)\n");
   printf("--screenheight <HEIGHTINPIXELS:\t\theight of the main (gappman) window (default: screen height / 3)\n");
   printf("--conffile <FILENAME>:\t\t configuration file specifying the program and actions (default: /etc/gappman/processmanager.xml)\n");
@@ -47,37 +46,44 @@ static void destroy_widget( GtkWidget *widget, gpointer data )
 	gtk_widget_destroy(GTK_WIDGET(data));
 }
 
+static gboolean revert_to_old_res(GtkWidget *widget, GdkEvent *event, XRRScreenSize *size)
+{
+	printf("changeresolution: revert_to_old_res\n");
+}
 
 /**
 * \brief creates a popup dialog window that allows the user to stop a program
 * \param *elt pointer to menu_element structure that contains the program to be stopped
 */
-static void showprocessdialog( menu_elements *elt )
+static void changeresolution( XRRScreenSize *size )
 {
-	GtkWidget *button, *buttonbox, *label;
+	GtkWidget *button, *buttonbox, *label, *confirmwin;
 	gchar* markup;
+	XRRScreenSize oldsize;
 
-	killdialogwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+	oldsize = gm_getcurrentsize();
 
-  gtk_window_set_transient_for (GTK_WINDOW(killdialogwin), GTK_WINDOW(mainwin));
-	gtk_window_set_position(GTK_WINDOW (killdialogwin), GTK_WIN_POS_CENTER_ON_PARENT);
+	confirmwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+
+  gtk_window_set_transient_for (GTK_WINDOW(confirmwin), GTK_WINDOW(mainwin));
+	gtk_window_set_position(GTK_WINDOW (confirmwin), GTK_WIN_POS_CENTER_ON_PARENT);
  
   //Make window transparent
-  //gtk_window_set_opacity (GTK_WINDOW (killdialogwin), 0.8);
+  //gtk_window_set_opacity (GTK_WINDOW (confirmwin), 0.8);
   
   //Remove border
-  gtk_window_set_decorated (GTK_WINDOW (killdialogwin), FALSE);
+  gtk_window_set_decorated (GTK_WINDOW (confirmwin), FALSE);
 
 	buttonbox = gtk_hbutton_box_new();	
 	
 	label = gtk_label_new("");	
-	markup = g_markup_printf_escaped ("<span size=\"%d\">%s</span>", fontsize, g_strdup_printf("Stop %s", elt->name));
+	markup = g_markup_printf_escaped ("<span size=\"%d\">Keep resolution</span>", fontsize);
 	gtk_label_set_markup (GTK_LABEL (label), markup);
 	g_free (markup);
 	button = gtk_button_new();
 	gtk_container_add(GTK_CONTAINER(button), label);
   gtk_widget_show(label);
- 	g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (kill_program), elt);
+ 	g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (destroy_widget), confirmwin);
 	gtk_container_add(GTK_CONTAINER(buttonbox), button);
 	gtk_widget_show(button);
 
@@ -86,15 +92,15 @@ static void showprocessdialog( menu_elements *elt )
 	gtk_label_set_markup (GTK_LABEL (label), markup);
 	g_free (markup);
 	button = gtk_button_new();
- 	g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (destroy_widget), killdialogwin);
+ 	g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (revert_to_old_res), &oldsize);
 	gtk_container_add(GTK_CONTAINER(button), label);
   gtk_widget_show(label);
   gtk_container_add(GTK_CONTAINER(buttonbox), button);
   gtk_widget_show(button);
 
-	gtk_container_add(GTK_CONTAINER(killdialogwin), buttonbox);
+	gtk_container_add(GTK_CONTAINER(confirmwin), buttonbox);
 	gtk_widget_show(buttonbox);
-	gtk_widget_show(killdialogwin);
+	gtk_widget_show(confirmwin);
 	gtk_widget_grab_focus(button);
 }
 
@@ -104,14 +110,14 @@ static void showprocessdialog( menu_elements *elt )
 * \param *event the GdkEvent that occured. Space key and left mousebutton are valid actions.
 * \param *elt menu_element structure containing the filename and arguments of the program that should be started
 */
-static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
+static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event, XRRScreenSize *size )
 {
 
   //Only start program  if spacebar or mousebutton is pressed
   if( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
   {
 		gtk_widget_set_sensitive(GTK_WIDGET(widget), FALSE);	
-    showprocessdialog( elt );
+		changeresolution(size);
 		gtk_widget_set_sensitive(GTK_WIDGET(widget), TRUE);	
   }
 
@@ -119,9 +125,9 @@ static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event,
 }
 
 
-static GtkWidget* createrow(menu_elements *elt, int width, int height)
+static GtkWidget* createrow(XRRScreenSize size, int width, int height)
 {
-  GtkWidget *hbox, *imagebox, *statuslabel;
+  GtkWidget *button, *hbox, *statuslabel;
 	gchar *markup;
 	GtkWidget *alignment;
 	int status;
@@ -129,22 +135,21 @@ static GtkWidget* createrow(menu_elements *elt, int width, int height)
 	hbox = gtk_hbox_new (FALSE, 10);
 
 	// Need to expand menu_elt structure to contain PID status.
-  elt->widget = createbutton(elt, fontsize, width, height, process_startprogram_event);
+  button = create_empty_button(width, height, &process_startprogram_event, (void*) &size);
 
 	statuslabel = gtk_label_new("");
-	status = get_status(elt->pid);
 
-	markup = g_markup_printf_escaped ("<span size=\"%d\" foreground=\"%s\">%s</span>", fontsize, color[status], statusarray[status]);
+	markup = g_markup_printf_escaped ("<span size=\"%d\">%dx%d</span>", fontsize, size.width, size.height);
 	gtk_label_set_markup (GTK_LABEL (statuslabel), markup);
 	g_free (markup);
 
-	//right justify the labeltext
-	alignment = gtk_alignment_new(1.0, 0.5, 0, 0);
+	//center labeltext
+	alignment = gtk_alignment_new(1.0, 1.0, 0, 0);
 	gtk_container_add(GTK_CONTAINER(alignment), statuslabel);
 	gtk_widget_show(statuslabel);
 	
-	gtk_container_add(GTK_CONTAINER(hbox), elt->widget);
-	gtk_widget_show(elt->widget);	
+	gtk_container_add(GTK_CONTAINER(hbox), button);
+	gtk_widget_show(button);	
 	gtk_container_add(GTK_CONTAINER(hbox), alignment);
 	gtk_widget_show(alignment);
 
@@ -160,11 +165,6 @@ static void destroy( GtkWidget *widget,
                      gpointer   data )
 {
   gtk_main_quit ();
-}
-
-static GtkWidget* changeresolution_createrow(XRRScreenSize *sizes, int width, int height)
-{
-		
 }
 
 /**
@@ -185,7 +185,10 @@ int main (int argc, char **argv)
 	int row_height;
   int c;
 	int nsize;
+	int ret_value;
+	int i;
 	XRRScreenSize *sizes;
+	const char* conffile = "/etc/gappman/conf.xml";
 
   gtk_init (&argc, &argv);
   screen = gdk_screen_get_default ();
@@ -200,13 +203,12 @@ int main (int argc, char **argv)
           {"width", 1, 0, 'w'},
           {"height", 1, 0, 'h'},
           {"conffile", 1, 0, 'c'},
-          {"debug", 1, 0, 'd'},
           {"help", 0, 0, 'i'},
           {"gtkrc", 1, 0, 'r'},
           {"windowed", 0, 0, 'j'},
           {0, 0, 0, 0}
       };
-      c = getopt_long(argc, argv, "w:h:c:d:r:ij",
+      c = getopt_long(argc, argv, "w:h:c:r:ij",
               long_options, &option_index);
       if (c == -1)
           break;
@@ -220,9 +222,6 @@ int main (int argc, char **argv)
           break;
       case 'c':
           conffile=optarg;
-          break;
-      case 'd':
-          DEBUG=atoi(optarg);
           break;
       case 'r':
           gtk_rc_parse (optarg);
@@ -251,7 +250,7 @@ int main (int argc, char **argv)
                       G_CALLBACK (destroy), NULL);
   }
 	
-	ret_value = getpossibleresolutions(&sizes, &nsize);
+	ret_value = gm_getpossibleresolutions(&sizes, &nsize);
 	if(ret_value != SUCCES)
 	{
 		g_warning("Error could not get possible resolutions (error_type: %d)\n", ret_value); 		
@@ -265,7 +264,7 @@ int main (int argc, char **argv)
 
 		for(i = 0; i < nsize; i++)
 		{
-			hbox = changeresolution_createrow(sizes, dialog_width, row_height);
+			hbox = createrow(sizes[i], dialog_width, row_height);
 			gtk_container_add(GTK_CONTAINER(vbox), hbox);	
 			gtk_widget_show (hbox);
 			separator = gtk_hseparator_new();
@@ -273,39 +272,8 @@ int main (int argc, char **argv)
 			gtk_widget_show (separator);
 		}
 
-		elts = getActions();
-		actions_tmp = elts;
-
-		while ( elts != NULL )
-		{
-			started_procs_tmp = started_procs;
-			while ( started_procs_tmp != NULL)
-			{
-				if( g_strcmp0(elts->name, started_procs_tmp->name) == 0 )
-				{
-					elts->name = started_procs_tmp->name;
-					elts->pid = started_procs_tmp->pid;
-
-					hbox = createrow(elts, program_width, row_height);
-					gtk_container_add(GTK_CONTAINER(vbox), hbox);	
-					gtk_widget_show (hbox);
-					separator = gtk_hseparator_new();
-					gtk_container_add(GTK_CONTAINER(vbox), separator);	
-					gtk_widget_show (separator);
-
-					//get out of while-loop
-					started_procs_tmp = NULL;
-				}
-				else
-				{
-					started_procs_tmp = started_procs_tmp->prev;
-				}
-			}	
-			elts = elts->next;
-		}
 	}
 
-	freeproceslist(started_procs);
 
 	hbox = gtk_hbox_new (FALSE, 10);
  	// cancel button
@@ -322,7 +290,6 @@ int main (int argc, char **argv)
 
   gtk_main ();
 
-	freeMenuElements(programs_tmp);
   return 0;
 }
 
