@@ -21,8 +21,8 @@
 #include <string.h>
 #include "changeresolution.h"
 #include "listener.h"
-#include "../libs/parseconf/parseconf.h"
-#include "../libs/layout/layout.h"
+#include <parseconf.h>
+#include <layout.h>
 #include "appmanager.h"
 
 

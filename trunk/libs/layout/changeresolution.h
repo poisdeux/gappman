@@ -8,6 +8,9 @@
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
+#ifndef __GAPPMAN_CHANGERESOLUTION_H__
+#define __GAPPMAN_CHANGERESOLUTION_H__
+
 #include <X11/Xlib.h>
 #include <X11/extensions/Xrandr.h>
 
@@ -49,3 +52,4 @@ int gm_getpossibleresolutions (XRRScreenSize **sizes, int *size);
 */
 XRRScreenSize gm_getcurrentsize();
 
+#endif

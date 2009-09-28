@@ -17,8 +17,8 @@
 #include <sys/wait.h>
 #include <getopt.h>
 #include <string.h>
-#include <../../libs/parseconf/parseconf.h>
-#include <../../libs/layout/layout.h>
+#include <parseconf.h>
+#include <layout.h>
 
 static int DEBUG = 0;
 static int WINDOWED = 0;

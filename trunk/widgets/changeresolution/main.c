@@ -48,13 +48,14 @@ static void destroy_widget( GtkWidget *widget, gpointer data )
 static gboolean revert_to_old_res(GtkWidget *widget, GdkEvent *event, XRRScreenSize *size)
 {
 	printf("changeresolution: revert_to_old_res\n");
+	gm_changeresolution(size->width, size->height);
 }
 
 /**
 * \brief creates a popup dialog window that allows the user to stop a program
 * \param *elt pointer to menu_element structure that contains the program to be stopped
 */
-static void changeresolution( XRRScreenSize *size )
+static void changeresolution( XRRScreenSize size )
 {
 	GtkWidget *button, *buttonbox, *label, *confirmwin;
 	gchar* markup;
@@ -62,6 +63,8 @@ static void changeresolution( XRRScreenSize *size )
 
 	oldsize = gm_getcurrentsize();
 
+	gm_changeresolution(size.width, size.height);
+	
 	confirmwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
   gtk_window_set_transient_for (GTK_WINDOW(confirmwin), GTK_WINDOW(mainwin));
@@ -116,7 +119,7 @@ static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event,
   if( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
   {
 		gtk_widget_set_sensitive(GTK_WIDGET(widget), FALSE);	
-		changeresolution(size);
+		changeresolution((XRRScreenSize*) size);
 		gtk_widget_set_sensitive(GTK_WIDGET(widget), TRUE);	
   }
 
@@ -126,7 +129,7 @@ static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event,
 
 static GtkWidget* createrow(XRRScreenSize size, int width, int height)
 {
-  GtkWidget *button, *hbox, *statuslabel;
+  GtkWidget *button, *hbox, *label;
 	gchar *markup;
 	GtkWidget *alignment;
 	int status;
@@ -136,21 +139,17 @@ static GtkWidget* createrow(XRRScreenSize size, int width, int height)
 	// Need to expand menu_elt structure to contain PID status.
   button = create_empty_button(width, height, process_startprogram_event, (void*) &size);
 
-	statuslabel = gtk_label_new("");
+	label = gtk_label_new("");
 
 	markup = g_markup_printf_escaped ("<span size=\"%d\">%dx%d</span>", fontsize, size.width, size.height);
-	gtk_label_set_markup (GTK_LABEL (statuslabel), markup);
+	gtk_label_set_markup (GTK_LABEL (label), markup);
 	g_free (markup);
-
-	//center labeltext
-	alignment = gtk_alignment_new(1.0, 1.0, 0, 0);
-	gtk_container_add(GTK_CONTAINER(alignment), statuslabel);
-	gtk_widget_show(statuslabel);
-	
+	gtk_container_add(GTK_CONTAINER(button), label);
+  gtk_widget_show(label);
 	gtk_container_add(GTK_CONTAINER(hbox), button);
 	gtk_widget_show(button);	
-	gtk_container_add(GTK_CONTAINER(hbox), alignment);
-	gtk_widget_show(alignment);
+	//gtk_container_add(GTK_CONTAINER(hbox), alignment);
+	//gtk_widget_show(alignment);
 
 	return hbox;
 }
@@ -256,6 +255,9 @@ int main (int argc, char **argv)
 	}
 	else
 	{
+		//get generic fontsize from gappman
+		fontsize = gm_get_fontsize();
+
 	 	//Make window transparent
  	 	//gtk_window_set_opacity (GTK_WINDOW (mainwin), 0.8);
  	

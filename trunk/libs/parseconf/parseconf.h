@@ -8,6 +8,9 @@
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
+#ifndef __GAPPMAN_PARSECONF_H__
+#define __GAPPMAN_PARSECONF_H__
+
 #include <gtk/gtk.h>
 #include <libxml/xmlreader.h>
 
@@ -36,7 +39,7 @@ struct menu_element
   const xmlChar *exec; //!< absolute path to executable
   const xmlChar *logo; //!< absolute path to image file
   int autostart; //!< a value of 1 will start program at startup, 0 will not.
-  int printlabel; //!< If set to 1 the label should be printed. Otherwise do not print a textlabel
+  int printlabel; //!< If set to 1 the name should be printed alongside the button. Otherwise do not print a textlabel
   char **args; //!< array of strings containing arguments that need to be passed to the executable
   int numArguments; //!< will hold the total amount of elements in the args array
 	int pid; //!< should hold the process ID of the process that was started by this menu_element
@@ -111,3 +114,5 @@ menu_elements* getPrograms();
 * \return pointer to menu_elements structure
 */
 menu_elements* getActions();
+
+#endif

@@ -18,8 +18,8 @@
 #include <sys/wait.h>
 #include <getopt.h>
 #include <string.h>
-#include <../../libs/parseconf/parseconf.h>
-#include <../../libs/layout/layout.h>
+#include <parseconf.h>
+#include <layout.h>
 #include <sys/types.h>
 #include <signal.h>
 #include "connect.h"

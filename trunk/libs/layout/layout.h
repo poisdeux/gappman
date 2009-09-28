@@ -1,5 +1,5 @@
 /***
- * \file appmanager.c
+ * \file layout.h
  *
  *
  *
@@ -8,9 +8,17 @@
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
+#ifndef __GAPPMAN_LAYOUT_H__
+#define __GAPPMAN_LAYOUT_H__
 
 #include <gtk/gtk.h>
 #include <parseconf.h>
+
+/**
+* \brief returns the generic fontsize for gappman
+* \return int the fontsize
+*/
+int gm_get_fontsize();
 
 /**
 * \brief callback function to quit the program
@@ -76,4 +84,4 @@ GtkWidget* create_empty_button ( int max_width, int max_height, gboolean (*proce
 */
 GtkWidget* createbuttons( menu_elements *elts, int screen_width, int screen_height, gboolean(*processevent)(GtkWidget*, GdkEvent*, menu_elements*));
 
-
+#endif

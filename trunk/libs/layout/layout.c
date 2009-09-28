@@ -5,8 +5,14 @@
 #include <string.h>
 
 static int DEBUG = 0;
+static int fontsize = 10*1024; //< the default generic fontsize for all elements. This usually gets updated by menu building functions below.
 
 #define MAXCHARSINLABEL 15;
+
+int gm_get_fontsize()
+{
+	return fontsize;
+}
 
 /**
 * \brief callback function to quit the program
@@ -110,7 +116,7 @@ GtkWidget* load_image(menu_elements *elt, int max_width, int max_height)
 * \param max_height maximum allowed height the image may have 
 * \return GtkWidget pointer 
 */
-GtkWidget* image_label_box_hor (menu_elements *elt, gchar* labeltext, int max_width, int max_height)
+GtkWidget* image_label_box_hor (menu_elements *elt, int max_width, int max_height)
 {
     GtkWidget *box;
     GtkWidget *label;
@@ -125,10 +131,10 @@ GtkWidget* image_label_box_hor (menu_elements *elt, gchar* labeltext, int max_wi
     gtk_box_pack_start (GTK_BOX (box), image, FALSE, FALSE, 3);
     gtk_widget_show (image);
 
-    if(labeltext != NULL)
+    if(elt->printlabel != 0)
     { 
       /* Create a label for the button */
-      label = gtk_label_new (labeltext);
+      label = gtk_label_new (elt->name);
       gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 3);
       gtk_widget_show (label);
     }
@@ -143,7 +149,7 @@ GtkWidget* image_label_box_hor (menu_elements *elt, gchar* labeltext, int max_wi
 * \param max_width maximum allowed width the image may have
 * \param max_height maximum allowed height the image may have  
 */
-GtkWidget* image_label_box_vert (menu_elements *elt, gchar* labeltext, int fontsize, int max_width, int max_height)
+GtkWidget* image_label_box_vert (menu_elements *elt, int max_width, int max_height)
 {
     GtkWidget *box;
     GtkWidget *label;
@@ -159,17 +165,14 @@ GtkWidget* image_label_box_vert (menu_elements *elt, gchar* labeltext, int fonts
     gtk_box_pack_start (GTK_BOX (box), image, FALSE, FALSE, 3);
     gtk_widget_show (image);
 
-    if(labeltext != NULL)
+		if((elt->printlabel != 0) && (elt->name != NULL))
     { 
-      label = gtk_label_new ("");
-			if(fontsize != -1)
-			{
-				markup = g_markup_printf_escaped ("<span size=\"%d\">%s</span>", fontsize, labeltext);
-  			gtk_label_set_markup (GTK_LABEL (label), markup);
-		  	g_free (markup);
-			}
-      gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 3);
-      gtk_widget_show (label);
+     	label = gtk_label_new ("");
+			markup = g_markup_printf_escaped ("<span size=\"%d\">%s</span>", fontsize, elt->name);
+  		gtk_label_set_markup (GTK_LABEL (label), markup);
+		 	g_free (markup);
+     	gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 3);
+     	gtk_widget_show (label);
     }
 
     return box;
@@ -388,17 +391,7 @@ GtkWidget* createbutton ( menu_elements *elt, int fontsize, int max_width, int m
 
   if( elt->logo != NULL )
   {
-    if(elt->printlabel == 0)
-    {
-      //NO LABEL THANK YOU VERY MUCH
-      imagelabelbox = image_label_box_vert(elt , NULL, fontsize, max_width, max_height);
-    }
-    else
-    {
-      //LABEL PLEASE
-			printf("Button label size = %d\n", fontsize);
-      imagelabelbox = image_label_box_vert(elt , (gchar*) elt->name, fontsize, max_width, max_height);
-    }
+    imagelabelbox = image_label_box_vert(elt, max_width, max_height);
     if (DEBUG > 0)
     {
       printf("createbutton:  button_width: %d button_height: %d ratio: %.4f\n", width, height, ratio);
@@ -448,7 +441,6 @@ GtkWidget* createbuttons( menu_elements *elts, int screen_width, int screen_heig
   int box_width, box_height;
   float alignment_x = -1.0;
   float alignment_y = -1.0;
-	int fontsize = -1;
 
   box_width = calculateBoxLength(screen_width, elts->menu_width);
   box_height = calculateBoxLength(screen_height, elts->menu_height);
