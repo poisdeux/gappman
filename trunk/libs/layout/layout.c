@@ -349,7 +349,7 @@ static void parseAlignment(float *alignment_x, float *alignment_y, char** alignm
 * \param max_height button height
 * \param *processevent callback function which must be called when button is pressed.
 */
-GtkWidget* create_empty_button ( int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, void *data ), void *data)
+GtkWidget* create_empty_button ( int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, void* ), void *data)
 {
   GtkWidget *button, *imagelabelbox;
   GdkPixbuf *pixbuf;

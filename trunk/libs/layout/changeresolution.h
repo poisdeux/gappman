@@ -48,8 +48,8 @@ int gm_getpossibleresolutions (XRRScreenSize **sizes, int *size);
 
 /**
 * \brief returns the current screen resolution
-* \return XRRScreenSize struct that will hold the resolution
+* \return XRRScreenSize* pointer to a XRRScreenSize struct that will hold the resolution
 */
-XRRScreenSize gm_getcurrentsize();
+XRRScreenSize* gm_getcurrentsize();
 
 #endif

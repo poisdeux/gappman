@@ -48,22 +48,24 @@ static void destroy_widget( GtkWidget *widget, gpointer data )
 static gboolean revert_to_old_res(GtkWidget *widget, GdkEvent *event, XRRScreenSize *size)
 {
 	printf("changeresolution: revert_to_old_res\n");
-	gm_changeresolution(size->width, size->height);
+	printf("DEBUG %dx%d\n", size->width, size->height);
+	//gm_changeresolution(size->width, size->height);
 }
 
 /**
 * \brief creates a popup dialog window that allows the user to stop a program
 * \param *elt pointer to menu_element structure that contains the program to be stopped
 */
-static void changeresolution( XRRScreenSize size )
+static void changeresolution( XRRScreenSize *size )
 {
 	GtkWidget *button, *buttonbox, *label, *confirmwin;
 	gchar* markup;
-	XRRScreenSize oldsize;
+	XRRScreenSize *oldsize;
 
 	oldsize = gm_getcurrentsize();
-
-	gm_changeresolution(size.width, size.height);
+ 
+	printf("DEBUG: %p => %dx%d\n", size, size->width, size->height);
+	//gm_changeresolution(size->width, size->height);
 	
 	confirmwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
@@ -94,7 +96,7 @@ static void changeresolution( XRRScreenSize size )
 	gtk_label_set_markup (GTK_LABEL (label), markup);
 	g_free (markup);
 	button = gtk_button_new();
- 	g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (revert_to_old_res), &oldsize);
+ 	g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (revert_to_old_res), oldsize);
 	gtk_container_add(GTK_CONTAINER(button), label);
   gtk_widget_show(label);
   gtk_container_add(GTK_CONTAINER(buttonbox), button);
@@ -114,12 +116,12 @@ static void changeresolution( XRRScreenSize size )
 */
 static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event, void *size )
 {
-
   //Only start program  if spacebar or mousebutton is pressed
   if( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
   {
 		gtk_widget_set_sensitive(GTK_WIDGET(widget), FALSE);	
-		changeresolution((XRRScreenSize*) size);
+		printf("DEBUG: %p => ...\n", size);
+		changeresolution(size);
 		gtk_widget_set_sensitive(GTK_WIDGET(widget), TRUE);	
   }
 
@@ -127,7 +129,7 @@ static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event,
 }
 
 
-static GtkWidget* createrow(XRRScreenSize size, int width, int height)
+static GtkWidget* createrow(XRRScreenSize* size, int width, int height)
 {
   GtkWidget *button, *hbox, *label;
 	gchar *markup;
@@ -136,12 +138,13 @@ static GtkWidget* createrow(XRRScreenSize size, int width, int height)
 	
 	hbox = gtk_hbox_new (FALSE, 10);
 
+	printf("DEBUG: %p => %dx%d\n", size, size->width, size->height);
 	// Need to expand menu_elt structure to contain PID status.
-  button = create_empty_button(width, height, process_startprogram_event, (void*) &size);
+  button = create_empty_button(width, height, process_startprogram_event, size);
 
 	label = gtk_label_new("");
 
-	markup = g_markup_printf_escaped ("<span size=\"%d\">%dx%d</span>", fontsize, size.width, size.height);
+	markup = g_markup_printf_escaped ("<span size=\"%d\">%dx%d</span>", fontsize, size->width, size->height);
 	gtk_label_set_markup (GTK_LABEL (label), markup);
 	g_free (markup);
 	gtk_container_add(GTK_CONTAINER(button), label);
@@ -265,7 +268,7 @@ int main (int argc, char **argv)
 
 		for(i = 0; i < nsize; i++)
 		{
-			hbox = createrow(sizes[i], dialog_width, row_height);
+			hbox = createrow(&sizes[i], dialog_width, row_height);
 			gtk_container_add(GTK_CONTAINER(vbox), hbox);	
 			gtk_widget_show (hbox);
 			separator = gtk_hseparator_new();
