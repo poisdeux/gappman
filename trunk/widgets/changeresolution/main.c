@@ -45,11 +45,13 @@ static void destroy_widget( GtkWidget *widget, gpointer data )
 	gtk_widget_destroy(GTK_WIDGET(data));
 }
 
-static gboolean revert_to_old_res(GtkWidget *widget, GdkEvent *event, XRRScreenSize *size)
+static gboolean revert_to_old_res(GtkWidget *widget, XRRScreenSize *size)
 {
 	printf("changeresolution: revert_to_old_res\n");
-	printf("DEBUG %dx%d\n", size->width, size->height);
-	//gm_changeresolution(size->width, size->height);
+	printf("DEBUG: %p => %dx%d\n", size, size->width, size->height);
+	fflush(stdout);
+	gm_changeresolution(size->width, size->height);
+	return FALSE;
 }
 
 /**
@@ -61,11 +63,15 @@ static void changeresolution( XRRScreenSize *size )
 	GtkWidget *button, *buttonbox, *label, *confirmwin;
 	gchar* markup;
 	XRRScreenSize *oldsize;
+	int nr;
 
-	oldsize = gm_getcurrentsize();
- 
+	if (gm_getpossibleresolutions(&oldsize, &nr) != SUCCES)
+	{
+		//could not get current resolution so bailing out
+		return;
+	}
 	printf("DEBUG: %p => %dx%d\n", size, size->width, size->height);
-	//gm_changeresolution(size->width, size->height);
+	gm_changeresolution(size->width, size->height);
 	
 	confirmwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
@@ -96,7 +102,8 @@ static void changeresolution( XRRScreenSize *size )
 	gtk_label_set_markup (GTK_LABEL (label), markup);
 	g_free (markup);
 	button = gtk_button_new();
- 	g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (revert_to_old_res), oldsize);
+ 	g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (revert_to_old_res), &oldsize[0]);
+ 	g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (destroy_widget), confirmwin);
 	gtk_container_add(GTK_CONTAINER(button), label);
   gtk_widget_show(label);
   gtk_container_add(GTK_CONTAINER(buttonbox), button);
@@ -120,7 +127,6 @@ static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event,
   if( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
   {
 		gtk_widget_set_sensitive(GTK_WIDGET(widget), FALSE);	
-		printf("DEBUG: %p => ...\n", size);
 		changeresolution(size);
 		gtk_widget_set_sensitive(GTK_WIDGET(widget), TRUE);	
   }
@@ -138,7 +144,6 @@ static GtkWidget* createrow(XRRScreenSize* size, int width, int height)
 	
 	hbox = gtk_hbox_new (FALSE, 10);
 
-	printf("DEBUG: %p => %dx%d\n", size, size->width, size->height);
 	// Need to expand menu_elt structure to contain PID status.
   button = create_empty_button(width, height, process_startprogram_event, size);
 
@@ -176,6 +181,7 @@ int main (int argc, char **argv)
   GdkScreen *screen;
   GdkWindow *rootwin;
   GtkWidget *button;
+	GtkWidget *dialog;
   GtkWidget *labelimagebox;
   GtkWidget *vbox;
   GtkWidget *hbox;
@@ -251,15 +257,26 @@ int main (int argc, char **argv)
                       G_CALLBACK (destroy), NULL);
   }
 	
+	//get generic fontsize from gappman
+	fontsize = gm_get_fontsize();
+	
 	ret_value = gm_getpossibleresolutions(&sizes, &nsize);
-	if(ret_value != SUCCES)
+	if(ret_value == SUCCES)
 	{
-		g_warning("Error could not get possible resolutions (error_type: %d)\n", ret_value); 		
+		g_warning("Error could not get possible resolutions (error_type: %d)\n", ret_value); 
+ 		dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW(mainwin), 
+			GTK_DIALOG_DESTROY_WITH_PARENT, 
+			GTK_MESSAGE_ERROR, 
+			GTK_BUTTONS_CLOSE, 
+			"<span size=\"%d\">Changing screen resolution is not supported.</span>", fontsize);
+ 		g_signal_connect_swapped (dialog, "response",
+                           G_CALLBACK (destroy),
+                           dialog);
+	
+  	gtk_widget_show (dialog);
 	}
 	else
 	{
-		//get generic fontsize from gappman
-		fontsize = gm_get_fontsize();
 
 	 	//Make window transparent
  	 	//gtk_window_set_opacity (GTK_WINDOW (mainwin), 0.8);
@@ -275,22 +292,20 @@ int main (int argc, char **argv)
 			gtk_container_add(GTK_CONTAINER(vbox), separator);	
 			gtk_widget_show (separator);
 		}
+		hbox = gtk_hbox_new (FALSE, 10);
+ 		// cancel button
+ 		button = gtk_button_new_with_label("Cancel");
+ 		g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (gtk_main_quit), NULL);
+ 	 	gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
+ 	 	gtk_widget_show(button);
 
+		gtk_container_add(GTK_CONTAINER(vbox), hbox);
+		gtk_widget_show (hbox);	
+ 		gtk_container_add (GTK_CONTAINER (mainwin), vbox);
+ 	 	gtk_widget_show (vbox);
+  	gtk_widget_show (mainwin);
 	}
-
-
-	hbox = gtk_hbox_new (FALSE, 10);
- 	// cancel button
- 	button = gtk_button_new_with_label("Cancel");
- 	g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (gtk_main_quit), NULL);
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
-  gtk_widget_show(button);
-
-	gtk_container_add(GTK_CONTAINER(vbox), hbox);
-	gtk_widget_show (hbox);	
- 	gtk_container_add (GTK_CONTAINER (mainwin), vbox);
-  gtk_widget_show (vbox);
-  gtk_widget_show (mainwin);
+	
 
   gtk_main ();
 

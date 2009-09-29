@@ -28,14 +28,6 @@ int gm_getpossibleresolutions (XRRScreenSize **sizes, int *nsize)
 	return SUCCES;
 }
 
-XRRScreenSize* gm_getcurrentsize()
-{
-	XRRScreenSize *sizes;
-	int nr;
-	gm_getpossibleresolutions(&sizes, &nr);
-	return &sizes[0];
-}
-
 int gm_changeresolution (int width, int height)
 {
   XRRScreenSize *sizes;
