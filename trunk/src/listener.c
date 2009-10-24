@@ -12,6 +12,7 @@
 #include "listener.h"
 
 #define SEND_PROCESS_LIST 1;
+#define SEND_FONTSIZE 2;
 
 static int parsemessage(gchar *msg)
 {
@@ -24,6 +25,11 @@ static int parsemessage(gchar *msg)
 	{
 		msg_id = SEND_PROCESS_LIST;
 	}
+	else if(g_strcmp0(msg, "showfontsize\n") == 0)
+	{
+		msg_id = SEND_FONTSIZE;
+	}
+	return msg_id;	
 }
 
 static void writemsg(GIOChannel* gio, gchar* msg)
@@ -43,12 +49,10 @@ static void writemsg(GIOChannel* gio, gchar* msg)
 	}
 }
 
-static void answerclient(GIOChannel* gio, int msg_id)
+static void sendprocesslist(GIOChannel* gio)
 {
 	struct appwidgetinfo* appw_list;
-	gsize* bytes_written = NULL;
 	gchar* msg = NULL;
-
 	msg = (gchar*) malloc((256 + 16) * sizeof(gchar));
 	
 	appw_list = get_started_apps();
@@ -72,6 +76,24 @@ static void answerclient(GIOChannel* gio, int msg_id)
 	}
 
 	free(msg);
+}
+
+static void answerclient(GIOChannel* gio, int msg_id)
+{
+	gsize* bytes_written = NULL;
+	gchar* msg = NULL;
+
+	if (msg_id == SEND_PROCESS_LIST)
+	{
+			sendprocesslist(gio);
+	}
+	else if (msg_id == SEND_FONTSIZE)
+	{
+			msg = (gchar*) malloc(16 * sizeof(gchar));
+			g_sprintf(msg, "fontsize::%d", gm_get_fontsize());
+			writemsg(gio, msg);
+			free(msg);
+	}
 }
 
 static gboolean handleconnection( GIOChannel* gio , GIOCondition cond, gpointer data )

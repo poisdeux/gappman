@@ -279,6 +279,23 @@ static void destroy( GtkWidget *widget,
     gtk_main_quit ();
 }
 
+static void show_error_dialog(const gchar* message, GtkWidget *mainwin)
+{
+	GtkWidget *dialog;
+
+	g_warning("show_error_dialog: %d %s", fontsize, message);
+
+  dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW(mainwin),
+    GTK_DIALOG_DESTROY_WITH_PARENT,
+    GTK_MESSAGE_ERROR,
+    GTK_BUTTONS_CLOSE,
+    "<span size=\"%d\">%s</span>", fontsize, message);
+  g_signal_connect_swapped (dialog, "response",
+                         G_CALLBACK (destroy),
+                         dialog);
+
+  gtk_widget_show (dialog);
+}
 
 /**
 * \brief main function setting up the UI
@@ -300,6 +317,7 @@ int main (int argc, char **argv)
   int dialog_height;
 	int program_width;
 	int row_height;
+	int status;
   int c;
   time_t timestruct;
 	struct proceslist* started_procs = NULL;
@@ -369,9 +387,33 @@ int main (int argc, char **argv)
                       G_CALLBACK (destroy), NULL);
   }
 
+	//The size is 1024th of a point. We reserve 30% for the statuscolumn
+	//so we have dialog_width/3 * 1024 points available for a max of 8
+	//characters
+	//fontsize=1024*(dialog_width/2)/8;
 	vbox = gtk_vbox_new(FALSE, 10);
 
-	started_procs = getProceslistFromGappman(2103, "localhost");
+	status = getInfoFromGappman(2103, "localhost", &started_procs, &fontsize);
+
+	switch(status)
+	{
+		case 0:
+			break;;
+		case 1:
+			show_error_dialog("Could not resolve hostname: localhost", mainwin);
+			break;;
+		case 2:
+			show_error_dialog("Could not connect to gappman.\nCheck that gappman is running.", mainwin);
+			break;;
+		case 3:
+			show_error_dialog("Could not sent message to localhost.\nCheck that gappman is running", mainwin);
+			break;;
+		case 4:
+			show_error_dialog("Could not disconnect from gappman.", mainwin);
+			break;;
+		default:
+			break;;
+	}
 
 	if( started_procs != NULL )
 	{
@@ -386,11 +428,7 @@ int main (int argc, char **argv)
  	 //gtk_window_set_opacity (GTK_WINDOW (mainwin), 0.8);
   
  	
-		//The size is 1024th of a point. We reserve 30% for the statuscolumn
-		//so we have dialog_width/3 * 1024 points available for a max of 8
-		//characters
-		fontsize=1024*(dialog_width/2)/8;
-		program_width=dialog_width-(dialog_width/2);
+				program_width=dialog_width-(dialog_width/2);
 		row_height=dialog_height/getNumberOfElements();
 		
 		elts = getPrograms();

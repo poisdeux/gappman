@@ -113,6 +113,10 @@ static void changeresolution( XRRScreenSize *size )
 	gtk_widget_show(buttonbox);
 	gtk_widget_show(confirmwin);
 	gtk_widget_grab_focus(button);
+	
+	//We add a timer to return to the original resolution
+	//after 10 seconds
+	//g_timeout_add_seconds (10, )
 }
 
 /**
@@ -261,7 +265,7 @@ int main (int argc, char **argv)
 	fontsize = gm_get_fontsize();
 	
 	ret_value = gm_getpossibleresolutions(&sizes, &nsize);
-	if(ret_value == SUCCES)
+	if(ret_value != SUCCES)
 	{
 		g_warning("Error could not get possible resolutions (error_type: %d)\n", ret_value); 
  		dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW(mainwin), 
