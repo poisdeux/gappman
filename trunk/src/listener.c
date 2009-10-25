@@ -8,11 +8,12 @@
 #include <stdlib.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <layout.h>
 #include "appmanager.h"
 #include "listener.h"
 
-#define SEND_PROCESS_LIST 1;
-#define SEND_FONTSIZE 2;
+#define SEND_PROCESS_LIST 1
+#define SEND_FONTSIZE 2
 
 static int parsemessage(gchar *msg)
 {
@@ -83,16 +84,17 @@ static void answerclient(GIOChannel* gio, int msg_id)
 	gsize* bytes_written = NULL;
 	gchar* msg = NULL;
 
-	if (msg_id == SEND_PROCESS_LIST)
+	switch(msg_id)
 	{
+		case SEND_PROCESS_LIST:
 			sendprocesslist(gio);
-	}
-	else if (msg_id == SEND_FONTSIZE)
-	{
+			break;;
+		case SEND_FONTSIZE:
 			msg = (gchar*) malloc(16 * sizeof(gchar));
 			g_sprintf(msg, "fontsize::%d", gm_get_fontsize());
 			writemsg(gio, msg);
 			free(msg);
+			break;;
 	}
 }
 

@@ -21,7 +21,7 @@ struct proceslist {
 *			3: Could not send message
 *			4: Could not shutdown channel/disconnect
 */
-int getProceslistFromGappman(int portno, const char* hostname, struct proceslist **startedprocs);
+int getInfoFromGappman(int portno, const char* hostname, struct proceslist **startedprocs, int *fontsize);
 
 /**
 * \brief Frees the proceslist structure

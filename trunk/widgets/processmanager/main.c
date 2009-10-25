@@ -391,7 +391,7 @@ int main (int argc, char **argv)
 	//so we have dialog_width/3 * 1024 points available for a max of 8
 	//characters
 	//fontsize=1024*(dialog_width/2)/8;
-	vbox = gtk_vbox_new(FALSE, 10);
+	fontsize=gm_get_fontsize();
 
 	status = getInfoFromGappman(2103, "localhost", &started_procs, &fontsize);
 
@@ -415,6 +415,8 @@ int main (int argc, char **argv)
 			break;;
 	}
 
+	vbox = gtk_vbox_new(FALSE, 10);
+
 	if( started_procs != NULL )
 	{
 		loadConf(conffile);
@@ -427,73 +429,74 @@ int main (int argc, char **argv)
 	  //Make window transparent
  	 //gtk_window_set_opacity (GTK_WINDOW (mainwin), 0.8);
   
- 	
-				program_width=dialog_width-(dialog_width/2);
-		row_height=dialog_height/getNumberOfElements();
+ 		if( getNumberOfElements() > 0 )
+		{
+			program_width=dialog_width-(dialog_width/2);
+			row_height=dialog_height/getNumberOfElements();
+
+			elts = getPrograms();
+			programs_tmp = elts;
+	
+			while ( elts != NULL )
+			{
+				started_procs_tmp = started_procs;
+				while ( started_procs_tmp != NULL)
+				{
+					if( g_strcmp0(elts->name, started_procs_tmp->name) == 0 )
+					{
+						elts->name = started_procs_tmp->name;
+						elts->pid = started_procs_tmp->pid;
+	
+						hbox = createrow(elts, program_width, row_height);
+						gtk_container_add(GTK_CONTAINER(vbox), hbox);	
+						gtk_widget_show (hbox);
+						separator = gtk_hseparator_new();
+						gtk_container_add(GTK_CONTAINER(vbox), separator);	
+						gtk_widget_show (separator);
+	
+						//get out of while-loop
+						started_procs_tmp = NULL;
+					}
+					else
+					{
+						started_procs_tmp = started_procs_tmp->prev;
+					}
+				}	
+				elts = elts->next;
+			}
+
+			elts = getActions();
+			actions_tmp = elts;
+	
+			while ( elts != NULL )
+			{
+				started_procs_tmp = started_procs;
+				while ( started_procs_tmp != NULL)
+				{
+					if( g_strcmp0(elts->name, started_procs_tmp->name) == 0 )
+					{
+						elts->name = started_procs_tmp->name;
+						elts->pid = started_procs_tmp->pid;
 		
-		elts = getPrograms();
-		programs_tmp = elts;
+						hbox = createrow(elts, program_width, row_height);
+						gtk_container_add(GTK_CONTAINER(vbox), hbox);	
+						gtk_widget_show (hbox);
+						separator = gtk_hseparator_new();
+						gtk_container_add(GTK_CONTAINER(vbox), separator);	
+						gtk_widget_show (separator);
 
-		while ( elts != NULL )
-		{
-			started_procs_tmp = started_procs;
-			while ( started_procs_tmp != NULL)
-			{
-				if( g_strcmp0(elts->name, started_procs_tmp->name) == 0 )
-				{
-					elts->name = started_procs_tmp->name;
-					elts->pid = started_procs_tmp->pid;
-
-					hbox = createrow(elts, program_width, row_height);
-					gtk_container_add(GTK_CONTAINER(vbox), hbox);	
-					gtk_widget_show (hbox);
-					separator = gtk_hseparator_new();
-					gtk_container_add(GTK_CONTAINER(vbox), separator);	
-					gtk_widget_show (separator);
-
-					//get out of while-loop
-					started_procs_tmp = NULL;
-				}
-				else
-				{
-					started_procs_tmp = started_procs_tmp->prev;
-				}
-			}	
+						//get out of while-loop
+						started_procs_tmp = NULL;
+					}
+					else
+					{
+						started_procs_tmp = started_procs_tmp->prev;
+					}
+				}	
 			elts = elts->next;
-		}
-
-		elts = getActions();
-		actions_tmp = elts;
-
-		while ( elts != NULL )
-		{
-			started_procs_tmp = started_procs;
-			while ( started_procs_tmp != NULL)
-			{
-				if( g_strcmp0(elts->name, started_procs_tmp->name) == 0 )
-				{
-					elts->name = started_procs_tmp->name;
-					elts->pid = started_procs_tmp->pid;
-
-					hbox = createrow(elts, program_width, row_height);
-					gtk_container_add(GTK_CONTAINER(vbox), hbox);	
-					gtk_widget_show (hbox);
-					separator = gtk_hseparator_new();
-					gtk_container_add(GTK_CONTAINER(vbox), separator);	
-					gtk_widget_show (separator);
-
-					//get out of while-loop
-					started_procs_tmp = NULL;
-				}
-				else
-				{
-					started_procs_tmp = started_procs_tmp->prev;
-				}
-			}	
-			elts = elts->next;
+			}
 		}
 	}
-
 	freeproceslist(started_procs);
 
 	hbox = gtk_hbox_new (FALSE, 10);

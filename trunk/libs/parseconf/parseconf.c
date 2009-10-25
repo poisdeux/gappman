@@ -431,8 +431,8 @@ void loadConf(const char *filename) {
         ret = xmlTextReaderRead(reader);
 
         // first attribute must be the name of the program 
-	program_name = xmlTextReaderName(reader);
-	//printf("DEBUG: Program_name: %s\n", program_name);
+				program_name = xmlTextReaderName(reader);
+				//printf("DEBUG: Program_name: %s\n", program_name);
 
         while (ret == 1) {
           name = xmlTextReaderName(reader);
@@ -463,13 +463,12 @@ void loadConf(const char *filename) {
         if (ret != 0) {
             fprintf(stderr, "%s : failed to parse\n", filename);
         }
-
     } else {
         fprintf(stderr, "Unable to open %s\n", filename);
     }
-    /**
+ 		 /**
      * Cleanup function for the XML library.
      */
     xmlCleanupParser();
-
+   
 }

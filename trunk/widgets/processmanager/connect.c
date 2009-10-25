@@ -49,7 +49,7 @@ static void parseFontsizeMessage(int *fontsize, gchar *msg)
 		{
 			printf("DEBUG: (parseFontsizeMessage) processing fontsize\n");
 			fflush(stdout);
-			*fontsize = contentssplit[i+1];
+			*fontsize = atoi(contentssplit[i+1]);
 		}
 		i++; 
 	}
@@ -143,7 +143,7 @@ int getInfoFromGappman(int portno, const char* hostname, struct proceslist **sta
 
   while( g_io_channel_read_line( gio, &msg, &len, NULL,  &gerror) != G_IO_STATUS_EOF )
   {
-    g_debug(stdout, "MESSAGE RECEIVED: %s\n", msg);
+    g_debug("MESSAGE RECEIVED: %s\n", msg);
 		parseProceslistMessage(startedprocs, msg);
   }
 	
@@ -170,7 +170,7 @@ int getInfoFromGappman(int portno, const char* hostname, struct proceslist **sta
 
   while( g_io_channel_read_line( gio, &msg, &len, NULL,  &gerror) != G_IO_STATUS_EOF )
   {
-    g_debug(stdout, "MESSAGE RECEIVED: %s\n", msg);
+    g_debug("MESSAGE RECEIVED: %s\n", msg);
 		parseFontsizeMessage(fontsize, msg);
   }
 
