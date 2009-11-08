@@ -393,7 +393,11 @@ int main (int argc, char **argv)
 	//characters
 	//fontsize=1024*(dialog_width/2)/8;
 	status = getFontsizeFromGappman(2103, "localhost", &fontsize);;
-	
+	if (status != 0)
+	{
+		//fallback on default
+		fontsize=gm_get_fontsize();
+	}	
 	status = getStartedProcsFromGappman(2103, "localhost", &started_procs);
 
 	switch(status)
