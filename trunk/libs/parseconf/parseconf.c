@@ -409,11 +409,7 @@ void static processMenuElements(const char* element_name, const char* group_elem
   }
 }
 
-/**
-* \brief load the configuration file and parses it to create the menu_elements structures for each program.
-* \param  *filename the name of the configuration file with the path
-*/
-void loadConf(const char *filename) {
+int loadConf(const char *filename) {
     xmlTextReaderPtr reader;
     int ret;
     xmlChar *name;
@@ -465,10 +461,11 @@ void loadConf(const char *filename) {
         }
     } else {
         fprintf(stderr, "Unable to open %s\n", filename);
+				return 1;
     }
  		 /**
      * Cleanup function for the XML library.
      */
     xmlCleanupParser();
-   
+		return 0;
 }

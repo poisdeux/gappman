@@ -64,8 +64,9 @@ typedef struct menu_element menu_elements;
 /**
 * \brief load the configuration file and parses it to create the menu_elements structures.
 * \param  *filename the name of the configuration file with the path
+* \return int 0 if configuration file was succesfully loaded, >0 otherwise 
 */
-void loadConf(const char *filename);
+int loadConf(const char *filename);
 
 /**
 * \brief relinguishes the memory occupied by menu_element structures

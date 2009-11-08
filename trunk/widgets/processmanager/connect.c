@@ -37,6 +37,7 @@ static struct proceslist* createnewproceslist(struct proceslist* procs)
 	}
 	return newproc;
 }
+
 static void parseFontsizeMessage(int *fontsize, gchar *msg)
 {
 	gchar** contentssplit = NULL;
@@ -80,16 +81,11 @@ static void parseProceslistMessage(struct proceslist** procs, gchar *msg)
 	}
 }
 
-int getInfoFromGappman(int portno, const char* hostname, struct proceslist **startedprocs, int *fontsize)
+int connectToGappman(int portno, const char* hostname)
 {
-  gsize len;
-  gchar *msg;
-  int status, sockfd, n, sourceid;
   struct sockaddr_in serv_addr;
   struct hostent *server;
-  int bytes_written;
-  GIOChannel* gio = NULL;
-  GError *gerror = NULL;
+	int sockfd;
 
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (sockfd < 0)
@@ -101,7 +97,7 @@ int getInfoFromGappman(int portno, const char* hostname, struct proceslist **sta
   if (server == NULL)
   {
     g_warning("Error: could not find host %s", hostname);
-		return 1;
+		return -1;
   }
 
   memset((char *) &serv_addr, 0, sizeof(serv_addr));
@@ -112,8 +108,86 @@ int getInfoFromGappman(int portno, const char* hostname, struct proceslist **sta
   if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
   {
     g_warning("Error: could not connect.\n");
-    return 2;
+		return -2;
   }
+	return sockfd;
+}
+
+int getFontsizeFromGappman(int portno, const char* hostname, int *fontsize)
+{
+  gsize len;
+  gchar *msg;
+  int status, sockfd, n, sourceid;
+  int bytes_written;
+  GIOChannel* gio = NULL;
+  GError *gerror = NULL;
+
+  sockfd = connectToGappman(portno, hostname);
+	if(sockfd < 0)
+	{
+		return abs(sockfd);
+	}
+
+  gio = g_io_channel_unix_new (sockfd);
+  g_io_channel_set_buffer_size (gio, 0);
+  g_io_channel_set_line_term (gio, NULL, 2);
+  g_io_channel_set_encoding (gio, "UTF-8", NULL);
+
+
+	msg = g_strdup("showfontsize\n");
+	status = g_io_channel_write_chars(gio, (const gchar*) msg, -1, &bytes_written, &gerror);
+  if( status == G_IO_STATUS_ERROR )
+  {
+    g_warning("test-listener: %s\n", gerror->message );
+		return 3;
+  }
+
+  status = g_io_channel_flush( gio, &gerror);
+  if( status == G_IO_STATUS_ERROR )
+  {
+    g_error("test-listener: %s\n", gerror->message );
+  }
+
+  if( status == G_IO_STATUS_NORMAL )
+  {
+    g_debug("MESSAGE SENT: %s\n", msg);
+  }
+
+	g_free(msg);
+
+  while( g_io_channel_read_line( gio, &msg, &len, NULL,  &gerror) != G_IO_STATUS_EOF )
+  {
+    g_debug("MESSAGE RECEIVED: %s\n", msg);
+		parseFontsizeMessage(fontsize, msg);
+		g_debug("Fontsize = %d\n", *fontsize);
+  }
+
+  status = g_io_channel_shutdown( gio, TRUE, &gerror);
+  if ( status == G_IO_STATUS_ERROR )
+  {
+     g_debug("test-listener (handlemessage): %s\n", gerror->message);
+			return 4;
+  }
+	g_debug("connect finished\n");
+	fflush(stdout);
+
+	return 0;
+}
+
+int getStartedProcsFromGappman(int portno, const char* hostname, struct proceslist **startedprocs)
+{
+  gsize len;
+  gchar *msg;
+  int status, sockfd, n, sourceid;
+  int bytes_written;
+  GIOChannel* gio = NULL;
+  GError *gerror = NULL;
+
+  sockfd = connectToGappman(portno, hostname);
+	if(sockfd < 0)
+	{
+		return abs(sockfd);
+	}
 
   gio = g_io_channel_unix_new (sockfd);
   g_io_channel_set_buffer_size (gio, 0);
@@ -147,33 +221,6 @@ int getInfoFromGappman(int portno, const char* hostname, struct proceslist **sta
 		parseProceslistMessage(startedprocs, msg);
   }
 	
-	msg = g_strdup("showfontsize\n");
-	status = g_io_channel_write_chars(gio, (const gchar*) msg, -1, &bytes_written, &gerror);
-  if( status == G_IO_STATUS_ERROR )
-  {
-    g_warning("test-listener: %s\n", gerror->message );
-		return 3;
-  }
-
-  status = g_io_channel_flush( gio, &gerror);
-  if( status == G_IO_STATUS_ERROR )
-  {
-    g_error("test-listener: %s\n", gerror->message );
-  }
-
-  if( status == G_IO_STATUS_NORMAL )
-  {
-    g_debug("MESSAGE SENT: %s\n", msg);
-  }
-
-	g_free(msg);
-
-  while( g_io_channel_read_line( gio, &msg, &len, NULL,  &gerror) != G_IO_STATUS_EOF )
-  {
-    g_debug("MESSAGE RECEIVED: %s\n", msg);
-		parseFontsizeMessage(fontsize, msg);
-  }
-
   status = g_io_channel_shutdown( gio, TRUE, &gerror);
   if ( status == G_IO_STATUS_ERROR )
   {
@@ -181,7 +228,7 @@ int getInfoFromGappman(int portno, const char* hostname, struct proceslist **sta
 			return 4;
   }
 
-	printf("DEBUG: connect finished\n");
+	g_debug("connect finished\n");
 	fflush(stdout);
 
 	return 0;

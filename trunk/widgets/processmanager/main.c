@@ -245,7 +245,6 @@ static GtkWidget* createrow(menu_elements *elt, int width, int height)
 	
 	hbox = gtk_hbox_new (FALSE, 10);
 
-	// Need to expand menu_elt structure to contain PID status.
   elt->widget = createbutton(elt, fontsize, width, height, process_startprogram_event);
 
 	statuslabel = gtk_label_new("");
@@ -311,7 +310,9 @@ int main (int argc, char **argv)
   GtkWidget *align;
   GtkWidget *separator;
   GtkWidget *table;
-  menu_elements *actions_tmp, *programs_tmp, *elts;
+  menu_elements *actions_tmp = NULL;
+  menu_elements *programs_tmp = NULL;
+	menu_elements *elts = NULL;
   const char* conffile = "/etc/gappman/processmanager.xml";
   int dialog_width;
   int dialog_height;
@@ -391,9 +392,9 @@ int main (int argc, char **argv)
 	//so we have dialog_width/3 * 1024 points available for a max of 8
 	//characters
 	//fontsize=1024*(dialog_width/2)/8;
-	fontsize=gm_get_fontsize();
-
-	status = getInfoFromGappman(2103, "localhost", &started_procs, &fontsize);
+	status = getFontsizeFromGappman(2103, "localhost", &fontsize);;
+	
+	status = getStartedProcsFromGappman(2103, "localhost", &started_procs);
 
 	switch(status)
 	{
@@ -419,17 +420,11 @@ int main (int argc, char **argv)
 
 	if( started_procs != NULL )
 	{
-		loadConf(conffile);
-	
-		//printMenuElements(programs);
-		//freeMenuElements(programs);
-		//return 0;
-	
- 
-	  //Make window transparent
- 	 //gtk_window_set_opacity (GTK_WINDOW (mainwin), 0.8);
-  
- 		if( getNumberOfElements() > 0 )
+		if ( loadConf(conffile) != 0 )
+		{	
+			show_error_dialog("Could not load gappman configuration file\n", mainwin);
+		}	
+ 		else if( getNumberOfElements() > 0 )
 		{
 			program_width=dialog_width-(dialog_width/2);
 			row_height=dialog_height/getNumberOfElements();
@@ -495,22 +490,30 @@ int main (int argc, char **argv)
 				}	
 			elts = elts->next;
 			}
+			freeproceslist(started_procs);
+
+			hbox = gtk_hbox_new (FALSE, 10);
+ 			// cancel button
+ 			button = gtk_button_new_with_label("Cancel");
+ 			g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (gtk_main_quit), NULL);
+ 		  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
+ 		  gtk_widget_show(button);
+		
+			gtk_container_add(GTK_CONTAINER(vbox), hbox);
+			gtk_widget_show (hbox);	
+ 			gtk_container_add (GTK_CONTAINER (mainwin), vbox);
+ 		  gtk_widget_show (vbox);
+ 		  gtk_widget_show (mainwin);
+		}
+		else
+		{
+			g_warning("No elements defined in configuration file %s\n", conffile);
 		}
 	}
-	freeproceslist(started_procs);
-
-	hbox = gtk_hbox_new (FALSE, 10);
- 	// cancel button
- 	button = gtk_button_new_with_label("Cancel");
- 	g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (gtk_main_quit), NULL);
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
-  gtk_widget_show(button);
-
-	gtk_container_add(GTK_CONTAINER(vbox), hbox);
-	gtk_widget_show (hbox);	
- 	gtk_container_add (GTK_CONTAINER (mainwin), vbox);
-  gtk_widget_show (vbox);
-  gtk_widget_show (mainwin);
+	else
+	{
+		show_error_dialog("No programs received from gappman.", mainwin);
+	}
 
   gtk_main ();
 
