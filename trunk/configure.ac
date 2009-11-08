@@ -66,6 +66,7 @@ src/Makefile
 libs/Makefile
 libs/parseconf/Makefile
 libs/layout/Makefile
+libs/connect/Makefile
 widgets/Makefile
 widgets/shutdown/Makefile
 widgets/processmanager/Makefile

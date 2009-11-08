@@ -19,6 +19,7 @@
 #include <string.h>
 #include <parseconf.h>
 #include <layout.h>
+#include <gm_connect.h>
 
 static int DEBUG = 0;
 static int WINDOWED = 0;
