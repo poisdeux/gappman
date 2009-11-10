@@ -159,7 +159,9 @@ int main (int argc, char **argv)
   int screen_width;
   int screen_height;
   int c;
+  int fontsize;
   time_t timestruct;
+	PangoFontDescription *font_desc;	
 
   gtk_init (&argc, &argv);
 
@@ -207,7 +209,16 @@ int main (int argc, char **argv)
 
   /** Load configuration elements */
   //printf("DEBUG: Loading configuration file\n");
-  loadConf(conffile);
+  if(loadConf(conffile) != 0)
+	{
+		g_error("Error could not load configuration: %s", conffile);
+	}
+
+	if(getFontsizeFromGappman(2103, "localhost", &fontsize) == 0)
+	{
+		gm_set_fontsize(fontsize);
+	}
+
   actions = getActions();
   //printf("DEBUG: Done loading configuration file\n");
 
@@ -248,9 +259,9 @@ int main (int argc, char **argv)
   }
 
 	hbox = gtk_hbox_new (FALSE, 10); 
+
   // cancel button
-  button = gtk_button_new_with_label("Cancel");
-	g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (gtk_main_quit), NULL);
+	button = gm_create_cancel_button(gtk_main_quit);
   gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
   gtk_widget_show(button);
 
@@ -259,9 +270,13 @@ int main (int argc, char **argv)
 
   gtk_container_add (GTK_CONTAINER (mainwin), vbox);
   gtk_widget_show (vbox); 
+
+	//make sure the widget grabs keyboard and mouse focus
+	gtk_grab_add(mainwin);
+
   gtk_widget_show (mainwin);
  
-  gtk_window_set_focus(GTK_WINDOW (mainwin), button); 
+  //gtk_window_set_focus(GTK_WINDOW (mainwin), button); 
   gtk_main ();
 
   freeMenuElements( actions );

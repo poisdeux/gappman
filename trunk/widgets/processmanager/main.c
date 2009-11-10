@@ -282,7 +282,7 @@ static void show_error_dialog(const gchar* message, GtkWidget *mainwin)
 {
 	GtkWidget *dialog;
 
-	g_warning("show_error_dialog: %d %s", fontsize, message);
+	g_warning("%s", message);
 
   dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW(mainwin),
     GTK_DIALOG_DESTROY_WITH_PARENT,
@@ -393,7 +393,11 @@ int main (int argc, char **argv)
 	//characters
 	//fontsize=1024*(dialog_width/2)/8;
 	status = getFontsizeFromGappman(2103, "localhost", &fontsize);;
-	if (status != 0)
+	if (status == 0)
+	{
+		gm_set_fontsize(fontsize);
+	}
+	else
 	{
 		//fallback on default
 		fontsize=gm_get_fontsize();
@@ -498,8 +502,7 @@ int main (int argc, char **argv)
 
 			hbox = gtk_hbox_new (FALSE, 10);
  			// cancel button
- 			button = gtk_button_new_with_label("Cancel");
- 			g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (gtk_main_quit), NULL);
+ 			button = gm_create_cancel_button(gtk_main_quit);
  		  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
  		  gtk_widget_show(button);
 		

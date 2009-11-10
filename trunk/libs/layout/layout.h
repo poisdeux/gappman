@@ -21,6 +21,19 @@
 int gm_get_fontsize();
 
 /**
+* \brief sets the generic fontsize for gappman
+* \param int the fontsize
+*/
+void gm_set_fontsize( int size );
+
+/**
+* \brief creates a basic cancel button
+* \param void pointer to callback function that should be called when button is clicked
+* \return GtkWidget pointer to the new button
+*/
+GtkWidget *gm_create_cancel_button(void *callbackfunc);
+
+/**
 * \brief callback function to quit the program
 * \param *widget pointer to widget to destroy
 * \param data mandatory argument for callback function, may be NULL.

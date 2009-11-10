@@ -14,6 +14,28 @@ int gm_get_fontsize()
 	return fontsize;
 }
 
+void gm_set_fontsize(int size)
+{
+	fontsize = size;
+}
+
+GtkWidget *gm_create_cancel_button(void *callbackfunc)
+{
+	GtkWidget *button;
+	GtkWidget *label;
+	gchar *markup;
+
+  label = gtk_label_new("");   
+  markup = g_markup_printf_escaped ("<span size=\"%d\">Cancel</span>", fontsize); 
+  gtk_label_set_markup (GTK_LABEL (label), markup); 
+  g_free (markup); 
+  button = gtk_button_new(); 
+  gtk_container_add(GTK_CONTAINER(button), label); 
+  gtk_widget_show(label);
+  g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (callbackfunc), NULL);
+	return button;
+}
+
 /**
 * \brief callback function to quit the program
 * \param *widget pointer to widget to destroy
@@ -460,7 +482,7 @@ GtkWidget* createbuttons( menu_elements *elts, int screen_width, int screen_heig
 
   button_width = box_width/elts_per_row;
 	//The size metric is 1024th of a point. 
-	fontsize = (1024*button_width*2)/MAXCHARSINLABEL;
+	//fontsize = (1024*button_width*2)/MAXCHARSINLABEL;
 
   parseAlignment(&alignment_x, &alignment_y, elts->orientation);
 
@@ -489,8 +511,6 @@ GtkWidget* createbuttons( menu_elements *elts, int screen_width, int screen_heig
 
       gtk_container_add (GTK_CONTAINER (vbox), align);
       gtk_widget_show (align);
-
-
     }
 
     next = cur->next;

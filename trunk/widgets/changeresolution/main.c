@@ -21,6 +21,7 @@
 #include <sys/types.h>
 #include <signal.h>
 #include <layout.h>
+#include <gm_connect.h>
 #include <changeresolution.h>
 
 static int WINDOWED = 0;
@@ -262,7 +263,14 @@ int main (int argc, char **argv)
   }
 	
 	//get generic fontsize from gappman
-	fontsize = gm_get_fontsize();
+	if(getFontsizeFromGappman(2103, "localhost", &fontsize) == 0)
+  {
+    gm_set_fontsize(fontsize);
+  }
+	else
+	{
+		fontsize = gm_get_fontsize();
+	}
 	
 	ret_value = gm_getpossibleresolutions(&sizes, &nsize);
 	if(ret_value != SUCCES)
@@ -298,8 +306,7 @@ int main (int argc, char **argv)
 		}
 		hbox = gtk_hbox_new (FALSE, 10);
  		// cancel button
- 		button = gtk_button_new_with_label("Cancel");
- 		g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (gtk_main_quit), NULL);
+ 		button = gm_create_cancel_button(gtk_main_quit); 
  	 	gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
  	 	gtk_widget_show(button);
 
