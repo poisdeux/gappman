@@ -482,7 +482,7 @@ GtkWidget* createbuttons( menu_elements *elts, int screen_width, int screen_heig
 
   button_width = box_width/elts_per_row;
 	//The size metric is 1024th of a point. 
-	//fontsize = (1024*button_width*2)/MAXCHARSINLABEL;
+	fontsize = (1024*button_width*2)/MAXCHARSINLABEL;
 
   parseAlignment(&alignment_x, &alignment_y, elts->orientation);
 
