@@ -15,6 +15,14 @@
 #include <parseconf.h>
 
 /**
+* \brief shows an error dialog with regards to gappman fontsize
+* \param message pointer to char that will hold the message
+* \param mainwin pointer to main window GtkWidget
+* \param callback pointer to callback function that should be called when OK button is pressed
+*/
+void show_error_dialog(const gchar* message, GtkWidget *mainwin, void* callback);
+
+/**
 * \brief returns the generic fontsize for gappman
 * \return int the fontsize
 */

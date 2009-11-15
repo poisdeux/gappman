@@ -278,24 +278,6 @@ static void destroy( GtkWidget *widget,
     gtk_main_quit ();
 }
 
-static void show_error_dialog(const gchar* message, GtkWidget *mainwin)
-{
-	GtkWidget *dialog;
-
-	g_warning("%s", message);
-
-  dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW(mainwin),
-    GTK_DIALOG_DESTROY_WITH_PARENT,
-    GTK_MESSAGE_ERROR,
-    GTK_BUTTONS_CLOSE,
-    "<span size=\"%d\">%s</span>", fontsize, message);
-  g_signal_connect_swapped (dialog, "response",
-                         G_CALLBACK (destroy),
-                         dialog);
-
-  gtk_widget_show (dialog);
-}
-
 /**
 * \brief main function setting up the UI
 */
@@ -409,16 +391,16 @@ int main (int argc, char **argv)
 		case 0:
 			break;;
 		case 1:
-			show_error_dialog("Could not resolve hostname: localhost", mainwin);
+			show_error_dialog("Could not resolve hostname: localhost", mainwin, destroy);
 			break;;
 		case 2:
-			show_error_dialog("Could not connect to gappman.\nCheck that gappman is running.", mainwin);
+			show_error_dialog("Could not connect to gappman.\nCheck that gappman is running.", mainwin, destroy);
 			break;;
 		case 3:
-			show_error_dialog("Could not sent message to localhost.\nCheck that gappman is running", mainwin);
+			show_error_dialog("Could not sent message to localhost.\nCheck that gappman is running", mainwin, destroy);
 			break;;
 		case 4:
-			show_error_dialog("Could not disconnect from gappman.", mainwin);
+			show_error_dialog("Could not disconnect from gappman.", mainwin, destroy);
 			break;;
 		default:
 			break;;
@@ -430,7 +412,7 @@ int main (int argc, char **argv)
 	{
 		if ( loadConf(conffile) != 0 )
 		{	
-			show_error_dialog("Could not load gappman configuration file\n", mainwin);
+			show_error_dialog("Could not load gappman configuration file\n", mainwin, destroy);
 		}	
  		else if( getNumberOfElements() > 0 )
 		{
@@ -519,7 +501,7 @@ int main (int argc, char **argv)
 	}
 	else
 	{
-		show_error_dialog("No programs received from gappman.", mainwin);
+		show_error_dialog("No programs received from gappman.", mainwin, destroy);
 	}
 
   gtk_main ();

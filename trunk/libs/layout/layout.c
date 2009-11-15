@@ -9,6 +9,62 @@ static int fontsize = 10*1024; //< the default generic fontsize for all elements
 
 #define MAXCHARSINLABEL 15;
 
+void show_error_dialog(const gchar* message, GtkWidget *mainwin, void *callback)
+{
+  GtkWidget *dialog;
+	GtkWidget *window;
+	GtkWidget *vbox;
+	GtkWidget *hbox;
+	GtkWidget *button;
+	GtkWidget *label;
+	gchar *markup;
+	GdkPixbuf *pixbuf;
+	GtkWidget *stock_image;
+	GtkStyle *style;
+	GtkIconSet *iconset;
+
+  g_warning("%s", message);
+
+	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	
+	gtk_window_set_frame_dimensions (GTK_WINDOW(window), 5, 5, 5, 5);
+	vbox = gtk_vbox_new(FALSE, 0);
+
+	hbox = gtk_hbox_new(FALSE, 0);
+	pixbuf = gtk_widget_render_icon(window, GTK_STOCK_DIALOG_ERROR,  GTK_ICON_SIZE_DIALOG, NULL);
+	stock_image = gtk_image_new_from_pixbuf(pixbuf);
+	gtk_box_pack_start (GTK_BOX (hbox), stock_image, FALSE, FALSE, 0);
+	gtk_widget_show (stock_image);
+
+ 	label = gtk_label_new ("");
+	markup = g_markup_printf_escaped ("<span size=\"%d\">%s</span>", fontsize, message);
+ 	gtk_label_set_markup (GTK_LABEL (label), markup);
+ 	g_free (markup);
+	gtk_misc_set_padding (GTK_MISC (label), 5, 5);
+ 	gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
+ 	gtk_widget_show (label);
+
+ 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
+	gtk_widget_show (hbox);
+
+	label = gtk_label_new("");
+  markup = g_markup_printf_escaped ("<span size=\"%d\">Close</span>", fontsize);
+  gtk_label_set_markup (GTK_LABEL (label), markup);
+  g_free (markup);
+  button = gtk_button_new();
+  gtk_container_add(GTK_CONTAINER(button), label);
+  gtk_widget_show(label);
+	g_signal_connect_swapped (G_OBJECT (button), "clicked",
+			      G_CALLBACK (callback),
+			      G_OBJECT (window));
+ 	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 0);
+  gtk_widget_show(button);
+	
+	gtk_container_add(GTK_CONTAINER(window), vbox);
+  gtk_widget_show (vbox);
+  gtk_widget_show (window);
+}
+
 int gm_get_fontsize()
 {
 	return fontsize;
