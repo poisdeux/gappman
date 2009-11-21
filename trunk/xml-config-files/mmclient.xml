@@ -53,4 +53,10 @@
 			<printlabel>1</printlabel>
     </program>
   </programs>
+	<panel>
+		<widget>
+			<name>Network manager</name>
+			<module>./widgets/netman/gm_netman.so</module>
+		<widget>
+	</panel>
 </appmanager>

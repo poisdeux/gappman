@@ -6,10 +6,12 @@
 
 static int DEBUG = 0;
 static int fontsize = 10*1024; //< the default generic fontsize for all elements. This usually gets updated by menu building functions below.
+static int	screen_width = 800;
+static int	screen_height = 600;
 
 #define MAXCHARSINLABEL 15;
 
-void show_error_dialog(const gchar* message, GtkWidget *mainwin, void *callback)
+void gm_show_error_dialog(const gchar* message, GtkWidget *mainwin, void *callback)
 {
   GtkWidget *dialog;
 	GtkWidget *window;
@@ -75,6 +77,12 @@ void gm_set_fontsize(int size)
 	fontsize = size;
 }
 
+void gm_set_window_geometry(int width, int height)
+{
+	screen_width = width;
+	screen_height = height;
+}
+
 GtkWidget *gm_create_cancel_button(void *callbackfunc)
 {
 	GtkWidget *button;
@@ -136,7 +144,7 @@ static GdkPixbuf* scale_image(GtkWidget *image, int max_width, int max_height)
 * \param max_height maximum height image may have
 * \return GtkWidget pointer to image
 */
-GtkWidget* load_image(menu_elements *elt, int max_width, int max_height)
+static GtkWidget* load_image(menu_elements *elt, int max_width, int max_height)
 {
   GtkWidget *image;
   GdkPixbuf *pixbuf;
@@ -194,7 +202,7 @@ GtkWidget* load_image(menu_elements *elt, int max_width, int max_height)
 * \param max_height maximum allowed height the image may have 
 * \return GtkWidget pointer 
 */
-GtkWidget* image_label_box_hor (menu_elements *elt, int max_width, int max_height)
+static GtkWidget* image_label_box_hor (menu_elements *elt, int max_width, int max_height)
 {
     GtkWidget *box;
     GtkWidget *label;
@@ -227,7 +235,7 @@ GtkWidget* image_label_box_hor (menu_elements *elt, int max_width, int max_heigh
 * \param max_width maximum allowed width the image may have
 * \param max_height maximum allowed height the image may have  
 */
-GtkWidget* image_label_box_vert (menu_elements *elt, int max_width, int max_height)
+static GtkWidget* image_label_box_vert (menu_elements *elt, int max_width, int max_height)
 {
     GtkWidget *box;
     GtkWidget *label;
@@ -258,8 +266,8 @@ GtkWidget* image_label_box_vert (menu_elements *elt, int max_width, int max_heig
 
 /**
 * \brief function to calculate the absolute width based upon the total available width
-* \param total_width Total available width for the box element
-* \param *box_width Pointer to a struct length holding the length value and type of the box
+* \param total_length Total available width for the box element
+* \param *box_length Pointer to a struct length holding the length value and type of the box
 * \return box width in amount of pixels
 */
 static int calculateBoxLength(int total_length, struct length *box_length)
@@ -335,24 +343,22 @@ static gboolean dehighlight_button ( GtkWidget *widget, GdkEvent *event, menu_el
 }
 
 /**
-* \brief Calculates the amount of elements per row to evenly spread all elements on a surface of screen_heightx screen_width.
-* \param screen_height total screen height
-* \param screen_width total screen width
-* \param amount_of_elements number of elements that should be placed in the screen_height x screen_width area
+* \brief Calculates the amount of elements per row to evenly spread all elements on a surface of box_height x box_width.
+* \param amount_of_elements number of elements that should be placed in the box_height x box_width area
 */
-static int calculateAmountOfElementsPerColumn(int screen_height, int screen_width, int amount_of_elements)
+static int calculateAmountOfElementsPerColumn(int box_width, int box_height, int amount_of_elements)
 {
   double rows;
   double ratio;
-  ratio = (double) MAX(screen_height, screen_width) / (double) MIN(screen_height, screen_width);
+  ratio = (double) MAX(box_height, box_width) / (double) MIN(box_height, box_width);
   rows = sqrt(amount_of_elements/ratio);
 
   if (DEBUG > 0)
   {
-    printf("calculateAmountOfElementsPerColumn: screen_width=%d, screen_height=%d, ratio=%f, rows=%f, round(%f*%f)=%d\n", screen_width, screen_height, ratio, rows, ratio, rows, (int) round(rows * ratio));
+    printf("calculateAmountOfElementsPerColumn: box_width=%d, box_height=%d, ratio=%f, rows=%f, round(%f*%f)=%d\n", box_width, box_height, ratio, rows, ratio, rows, (int) round(rows * ratio));
   }
   //Check orientation and adjust accordingly
-  if ( screen_height > screen_width )
+  if ( box_height > box_width )
   {
     return (int) round(rows);
   }
@@ -427,7 +433,7 @@ static void parseAlignment(float *alignment_x, float *alignment_y, char** alignm
 * \param max_height button height
 * \param *processevent callback function which must be called when button is pressed.
 */
-GtkWidget* create_empty_button ( int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, void* ), void *data)
+GtkWidget* gm_create_empty_button ( int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, void* ), void *data)
 {
   GtkWidget *button, *imagelabelbox;
   GdkPixbuf *pixbuf;
@@ -460,7 +466,7 @@ GtkWidget* create_empty_button ( int max_width, int max_height, gboolean (*proce
 * \param *elt pointer to menu_element struct that contains the logo image filename.
 * \param max_width button width
 */
-GtkWidget* createbutton ( menu_elements *elt, int fontsize, int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, menu_elements*) )
+GtkWidget* gm_createbutton ( menu_elements *elt, int fontsize, int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, menu_elements*) )
 {
   GtkWidget *button, *imagelabelbox;
   GdkPixbuf *pixbuf;
@@ -505,12 +511,48 @@ GtkWidget* createbutton ( menu_elements *elt, int fontsize, int max_width, int m
 }
 
 /**
+* \brief Create a single button
+* \param *elt pointer to menu_element struct that contains the logo image filename.
+* \param width button width
+* \param height button height
+*/
+static GtkWidget* createpanelelement( menu_elements *elt, int width, int height)
+{
+	GModule *module;
+	
+	if( ! g_module_supported() )
+	{
+		return NULL;
+	}
+	
+	module = g_module_open(elt->module, G_MODULE_BIND_LAZY);
+
+	if(!module)
+	{
+		g_warning("Could not load module %s\n%s", elt->module, g_module_error());
+	}
+	else
+	{
+		if(!g_module_symbol (module, "gm_module_init", (gpointer *) &(elt->gm_module_init)))
+		{
+			g_warning("Could not get function gm_module_init from %s\n%s", 
+				elt->module, g_module_error()); 
+		}
+		//g_module_symbol (module, "gm_module_start", elt->gm_module_start);
+		//g_module_symbol (module, "gm_module_stop", elt->gm_module_stop);
+		//g_module_symbol (module, "gm_module_set_icon_size", elt->gm_module_set_icon_size);
+		//g_module_symbol (module, "gm_module_get_widget", elt->gm_module_get_widget);
+	}
+	//elt->gm_module_set_icon_size(width, height);
+	elt->gm_module_init();
+	//return elt->gm_module_get_widget();
+}
+
+/**
 * \brief Create the button layout using the available screen height and width
 * \param *elts pointer to first menu_elements structure
-* \param screen_height total screen height
-* \param screen_width total screen width
 */
-GtkWidget* createbuttons( menu_elements *elts, int screen_width, int screen_height, gboolean(processevent)(GtkWidget*, GdkEvent*, menu_elements*))
+GtkWidget* gm_createbuttons( menu_elements *elts, gboolean(processevent)(GtkWidget*, GdkEvent*, menu_elements*))
 {
   menu_elements *next, *cur;
   GtkWidget* button, *hbox, *vbox, *align;
@@ -530,7 +572,7 @@ GtkWidget* createbuttons( menu_elements *elts, int screen_width, int screen_heig
 
   vbox = gtk_vbox_new (FALSE, 0);
 
-  elts_per_row = calculateAmountOfElementsPerColumn(box_height, box_width, getNumberOfElements());
+  elts_per_row = calculateAmountOfElementsPerColumn(box_width, box_height, getNumberOfElements());
   if ( elts_per_row < 1 )
   {
     elts_per_row = 1;
@@ -570,7 +612,88 @@ GtkWidget* createbuttons( menu_elements *elts, int screen_width, int screen_heig
     }
 
     next = cur->next;
-    button = createbutton(cur, fontsize, button_width, box_height, processevent);
+    button = gm_createbutton(cur, fontsize, button_width, box_height, processevent);
+    gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 1);
+    gtk_widget_show (button);
+    cur = next;
+    count++;
+  }
+
+  align = gtk_alignment_new (alignment_x, alignment_y, (float) box_width/screen_width, (float) box_height/screen_height);
+
+  gtk_container_add (GTK_CONTAINER (align), vbox);
+  gtk_widget_show (align);
+  gtk_widget_show (vbox);
+
+  return align;
+}
+
+/**
+* \brief Creates the panel layout using the available screen height and width
+* \param *elts pointer to first menu_elements structure
+* \return GtkWidget pointer to container holding the panel 
+*/
+GtkWidget* gm_createpanel( menu_elements *elts)
+{
+  menu_elements *next, *cur;
+  GtkWidget* button, *hbox, *vbox, *align;
+  struct appm_alignment *alignment;
+  int elts_per_row, count, button_width;
+  int box_width, box_height;
+  float alignment_x = -1.0;
+  float alignment_y = -1.0;
+
+  box_width = calculateBoxLength(screen_width, elts->menu_width);
+  box_height = calculateBoxLength(screen_height, elts->menu_height);
+
+  if ( DEBUG > 0 )
+  {
+    printf("Creating button layout with screen width %d and screen height %d\n", screen_width, screen_height);
+  }
+
+  vbox = gtk_vbox_new (FALSE, 0);
+
+  elts_per_row = calculateAmountOfElementsPerColumn(box_width, box_height, getNumberOfElements());
+  if ( elts_per_row < 1 )
+  {
+    elts_per_row = 1;
+  }
+
+  button_width = box_width/elts_per_row;
+	//The size metric is 1024th of a point. 
+	fontsize = (1024*button_width*2)/MAXCHARSINLABEL;
+
+  parseAlignment(&alignment_x, &alignment_y, elts->orientation);
+
+  if (DEBUG > 0)
+  {
+    printf("createbuttons: box_height=%d, box_width=%d, numberElts=%d, elts_per_row=%d, button_width=%d\n", box_height, box_width, getNumberOfElements(), elts_per_row, button_width);
+    printf("Alignment settings: gtk_alignment_new (%f, %f, %f, %f)\n", alignment_x, alignment_y, ((float) box_width/screen_width), ((float) box_height/screen_height));
+    fflush(stdout);
+  }
+
+  cur=elts;
+  count = 0;
+  while(cur != NULL)
+  {
+    if( (count % elts_per_row) == 0 )
+    {
+      if (DEBUG > 0)
+      {
+        printf("Creating new row: %d\n", count % elts_per_row );
+      }
+      hbox = gtk_hbox_new (FALSE, 0);
+
+      align = gtk_alignment_new (alignment_x, alignment_y, (float) box_width/screen_width, (float) box_height/screen_height);
+      gtk_container_add (GTK_CONTAINER (align), hbox);
+      gtk_widget_show (hbox);
+
+      gtk_container_add (GTK_CONTAINER (vbox), align);
+      gtk_widget_show (align);
+    }
+
+    next = cur->next;
+    button = createpanelelement(cur, button_width, box_height);
     gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 1);
     gtk_widget_show (button);
     cur = next;

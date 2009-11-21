@@ -399,6 +399,8 @@ int main (int argc, char **argv)
   screen_width =  gdk_screen_get_width (screen);
   screen_height = gdk_screen_get_height (screen);
 
+	gm_set_window_geometry(window_width, window_height);
+
   mainwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   
   //Keep the main window below all other windows
@@ -429,18 +431,28 @@ int main (int argc, char **argv)
 
   if ( actions != NULL )
   {
-    align = createbuttons( actions, window_width, window_height , &process_startprogram_event );
+    align = gm_createbuttons( actions, &process_startprogram_event );
     gtk_container_add (GTK_CONTAINER (vbox), align);
     gtk_widget_show (align);
   }
 
   if ( programs != NULL )
   {
-    align = createbuttons( programs, window_width, window_height, &process_startprogram_event );
+    align = gm_createbuttons( programs, &process_startprogram_event );
     gtk_container_add (GTK_CONTAINER (vbox), align);
     gtk_widget_show (align);
   }
 
+	/* Preliminary framework to support panel like
+	* notification/status widgets
+	
+	if ( panel != NULL )
+	{
+		align = gm_createpanel( panel, window_width, window_height ); 
+    gtk_container_add (GTK_CONTAINER (vbox), align);
+    gtk_widget_show (align);
+	}
+	*/
   gtk_container_add (GTK_CONTAINER (mainwin), vbox);
   gtk_widget_show (vbox);
   gtk_widget_show (mainwin);

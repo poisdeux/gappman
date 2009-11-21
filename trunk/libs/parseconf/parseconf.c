@@ -16,6 +16,7 @@ static int numberElts;
 static char *program_menu_alignment;
 static menu_elements* programs;
 static menu_elements* actions;
+static menu_elements* panel_elts;
 static char *program_name;
 static char *cache_location;
 
@@ -95,28 +96,16 @@ static void addArgument(menu_elements *elt, char *argument)
   elt->args[elt->numArguments - 1] = (char *) argument;
 }
 
-/**
-* \brief Get the path of the cache location on disk
-* \return string
-*/
 char* getCachelocation()
 {
 	return cache_location;
 }
 
-/**
-* \brief Get the name of the program as specified in the configuration file
-* \return string 
-*/
 char* getProgramname()
 {
 	return program_name;
 }
 
-/**
-* \brief Get the orientation of the program menu area
-* \param orientation Orientation top, bottom, left or right
-*/
 xmlChar* getAlignment()
 {
   return program_menu_alignment;
@@ -179,6 +168,10 @@ processMenuElement(xmlTextReaderPtr reader, menu_elements *elt, const char* elem
             fprintf(stderr, "Error: could not parse resolution value: %s", value);
           }
         }
+        else if( strcmp((char *) name, "module") == 0 )
+				{
+					elt->module = value;
+				}
       }
 
       if( strcmp((char *) xmlTextReaderName(reader), element_name) == 0 && xmlTextReaderNodeType(reader) == 15 )
@@ -287,6 +280,11 @@ void freeMenuElements( menu_elements *elt )
 //    fflush(stdout);
     free((xmlChar *) elt->exec);
 
+//    printf("menu_element free: exec %s\n", elt->exec);
+//    fflush(stdout);
+    free((xmlChar *) elt->module);
+
+
 //    printf("menu_element free: logo %s\n", elt->logo);
 //    fflush(stdout);
     free((xmlChar *) elt->logo);
@@ -310,23 +308,21 @@ void freeMenuElements( menu_elements *elt )
 	}
 }
 
-/**
-* \brief returns the menu_elements structure that contains the programs
-* \return pointer to menu_elements structure
-*/
 menu_elements* getPrograms()
 {
   return programs;
 }
 
-/**
-* \brief returns the menu_elements structure that contains the actions
-* \return pointer to menu_elements structure
-*/
 menu_elements* getActions()
 {
   return actions;
 }
+
+menu_elements* getPanelelts()
+{
+  return panel_elts;
+}
+
 
 /**
 * \brief creates the menu_elements structures
@@ -418,19 +414,21 @@ int loadConf(const char *filename) {
     //Initialize
     programs = NULL;
     actions = NULL;
+    panel_elts = NULL;
     cache_location = NULL;
     program_name = NULL;
 
     reader = xmlReaderForFile(filename, NULL, 0);
-    if (reader != NULL) {
-
+    if (reader != NULL) 
+		{
         ret = xmlTextReaderRead(reader);
 
         // first attribute must be the name of the program 
 				program_name = xmlTextReaderName(reader);
 				//printf("DEBUG: Program_name: %s\n", program_name);
 
-        while (ret == 1) {
+        while (ret == 1) 
+				{
           name = xmlTextReaderName(reader);
           if( strcmp((char *) name, "programs") == 0 && xmlTextReaderNodeType(reader) == 1)
           {
@@ -440,14 +438,18 @@ int loadConf(const char *filename) {
           {
             processMenuElements("action", "actions", reader, &actions);
           }
-	  if( strcmp((char *) name, "cachelocation") == 0 && xmlTextReaderNodeType(reader) == 1) 
-	  { 
+					else if( strcmp((char *) name, "panel") == 0 && xmlTextReaderNodeType(reader) == 1)
+          {
+            processMenuElements("widget", "panel", reader, &panel_elts);
+          }
+	  			if( strcmp((char *) name, "cachelocation") == 0 && xmlTextReaderNodeType(reader) == 1) 
+	  			{ 
             ret = xmlTextReaderRead(reader);
-	    cache_location = xmlTextReaderValue(reader);
-	    //printf("DEBUG: Cache_location: %s\n",cache_location);
-	  }
-	  else
-	  {
+	    			cache_location = xmlTextReaderValue(reader);
+	    			//printf("DEBUG: Cache_location: %s\n",cache_location);
+	  			}
+	  			else
+	  			{
             ret = xmlTextReaderRead(reader);
           }
         }
@@ -456,10 +458,13 @@ int loadConf(const char *filename) {
 	 * Free up the reader
 	*/
         xmlFreeTextReader(reader);
-        if (ret != 0) {
+        if (ret != 0) 
+				{
             fprintf(stderr, "%s : failed to parse\n", filename);
         }
-    } else {
+    } 
+		else 
+		{
         fprintf(stderr, "Unable to open %s\n", filename);
 				return 1;
     }

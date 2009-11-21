@@ -252,7 +252,7 @@ int main (int argc, char **argv)
   {
     //timestruct = time(NULL);    
     //printf("DEBUG: creating buttons\n");
-    align = createbuttons( actions, screen_width, screen_height, &process_startprogram_event );
+    align = gm_createbuttons( actions, &process_startprogram_event );
     gtk_container_add (GTK_CONTAINER (vbox), align);
     gtk_widget_show (align);
     //printf("DEBUG: finished creating buttons in %f seconds\n", difftime(time(NULL), timestruct));

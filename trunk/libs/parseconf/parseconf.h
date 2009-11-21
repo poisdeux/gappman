@@ -14,6 +14,8 @@
 #include <gtk/gtk.h>
 #include <libxml/xmlreader.h>
 
+typedef void (* GM_MODULE_INIT) (void);
+
 /**
 * Enumeration for length types.
 * Currently supported types are: PERCENTAGE and PIXELS
@@ -38,12 +40,18 @@ struct menu_element
   const xmlChar *name; //!< holds the name of the program
   const xmlChar *exec; //!< absolute path to executable
   const xmlChar *logo; //!< absolute path to image file
+  const xmlChar *module; //!< absolute path to module for panel
   int autostart; //!< a value of 1 will start program at startup, 0 will not.
   int printlabel; //!< If set to 1 the name should be printed alongside the button. Otherwise do not print a textlabel
   char **args; //!< array of strings containing arguments that need to be passed to the executable
   int numArguments; //!< will hold the total amount of elements in the args array
 	int pid; //!< should hold the process ID of the process that was started by this menu_element
   struct menu_element *next; //!< pointer to the next menu_element structure
+	GM_MODULE_INIT *gm_module_init; //!< pointer to the init function for a panel module
+	gpointer *gm_module_start; //!< pointer to the start function for a panel module
+	gpointer *gm_module_stop; //!< pointer to the stop function for a panel module
+	gpointer *gm_module_set_icon_size; //!< pointer to the set icon size function for a panel module
+	gpointer *gm_module_get_widget; //!< pointer to the get widget function for a panel module
 };
 
 /**
@@ -115,5 +123,12 @@ menu_elements* getPrograms();
 * \return pointer to menu_elements structure
 */
 menu_elements* getActions();
+
+/**
+* \brief returns the menu_elements structure that contains the panel elements
+* \return pointer to menu_elements structure
+*/
+menu_elements* getPanelelts();
+
 
 #endif

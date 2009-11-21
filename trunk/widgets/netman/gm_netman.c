@@ -1,5 +1,5 @@
 /***
- * \file main.c
+ * \file gm_netman.c_ 
  *
  * 
  *
@@ -10,6 +10,42 @@
  */
 
 #include <gm_netman.h>
+#include <gmodule.h>
+
+GtkWidget *button = NULL;
+
+G_MODULE_EXPORT gboolean
+int gm_module_init()
+{
+		
+	return 0;
+}
+
+G_MODULE_EXPORT gboolean
+int gm_module_start()
+{
+	return 0;
+}
+
+G_MODULE_EXPORT gboolean
+int gm_module_stop()
+{
+	return 0;
+}
+
+G_MODULE_EXPORT gboolean
+void gm_module_set_icon_size(int width, int height)
+{
+
+}
+
+G_MODULE_EXPORT gboolean
+GtkWidget *gm_module_get_widget()
+{
+	return button;
+}
+
+
 
 GType gm_netman_get_type()
 {

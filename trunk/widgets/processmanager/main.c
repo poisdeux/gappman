@@ -245,7 +245,7 @@ static GtkWidget* createrow(menu_elements *elt, int width, int height)
 	
 	hbox = gtk_hbox_new (FALSE, 10);
 
-  elt->widget = createbutton(elt, fontsize, width, height, process_startprogram_event);
+  elt->widget = gm_createbutton(elt, fontsize, width, height, process_startprogram_event);
 
 	statuslabel = gtk_label_new("");
 	status = get_status(elt->pid);
@@ -391,16 +391,16 @@ int main (int argc, char **argv)
 		case 0:
 			break;;
 		case 1:
-			show_error_dialog("Could not resolve hostname: localhost", mainwin, destroy);
+			gm_show_error_dialog("Could not resolve hostname: localhost", mainwin, destroy);
 			break;;
 		case 2:
-			show_error_dialog("Could not connect to gappman.\nCheck that gappman is running.", mainwin, destroy);
+			gm_show_error_dialog("Could not connect to gappman.\nCheck that gappman is running.", mainwin, destroy);
 			break;;
 		case 3:
-			show_error_dialog("Could not sent message to localhost.\nCheck that gappman is running", mainwin, destroy);
+			gm_show_error_dialog("Could not sent message to localhost.\nCheck that gappman is running", mainwin, destroy);
 			break;;
 		case 4:
-			show_error_dialog("Could not disconnect from gappman.", mainwin, destroy);
+			gm_show_error_dialog("Could not disconnect from gappman.", mainwin, destroy);
 			break;;
 		default:
 			break;;
@@ -412,7 +412,7 @@ int main (int argc, char **argv)
 	{
 		if ( loadConf(conffile) != 0 )
 		{	
-			show_error_dialog("Could not load gappman configuration file\n", mainwin, destroy);
+			gm_show_error_dialog("Could not load gappman configuration file\n", mainwin, destroy);
 		}	
  		else if( getNumberOfElements() > 0 )
 		{
@@ -501,7 +501,7 @@ int main (int argc, char **argv)
 	}
 	else
 	{
-		show_error_dialog("No programs received from gappman.", mainwin, destroy);
+		gm_show_error_dialog("No programs received from gappman.", mainwin, destroy);
 	}
 
   gtk_main ();
