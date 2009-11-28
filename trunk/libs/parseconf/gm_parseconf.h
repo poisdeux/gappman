@@ -47,7 +47,7 @@ struct menu_element
   int numArguments; //!< will hold the total amount of elements in the args array
 	int pid; //!< should hold the process ID of the process that was started by this menu_element
   struct menu_element *next; //!< pointer to the next menu_element structure
-	GM_MODULE_INIT *gm_module_init; //!< pointer to the init function for a panel module
+	GM_MODULE_INIT gm_module_init; //!< pointer to the init function for a panel module
 	gpointer *gm_module_start; //!< pointer to the start function for a panel module
 	gpointer *gm_module_stop; //!< pointer to the stop function for a panel module
 	gpointer *gm_module_set_icon_size; //!< pointer to the set icon size function for a panel module

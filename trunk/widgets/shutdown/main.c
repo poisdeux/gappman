@@ -17,8 +17,8 @@
 #include <sys/wait.h>
 #include <getopt.h>
 #include <string.h>
-#include <parseconf.h>
-#include <layout.h>
+#include <gm_parseconf.h>
+#include <gm_layout.h>
 #include <gm_connect.h>
 
 static int DEBUG = 0;

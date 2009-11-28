@@ -1,8 +1,8 @@
 #include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
-#include <../parseconf/parseconf.h>
 #include <math.h>
 #include <string.h>
+#include <gm_layout.h>
 
 static int DEBUG = 0;
 static int fontsize = 10*1024; //< the default generic fontsize for all elements. This usually gets updated by menu building functions below.

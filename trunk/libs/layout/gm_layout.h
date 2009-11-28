@@ -12,7 +12,7 @@
 #define __GAPPMAN_LAYOUT_H__
 
 #include <gtk/gtk.h>
-#include <parseconf.h>
+#include <gm_parseconf.h>
 
 /**
 * \brief shows an error dialog with regards to gappman fontsize

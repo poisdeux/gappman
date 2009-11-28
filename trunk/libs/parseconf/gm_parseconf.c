@@ -9,7 +9,7 @@
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
 
-#include "parseconf.h"
+#include "gm_parseconf.h"
 #include <string.h>
 
 static int numberElts;

@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <netdb.h>
 #include <unistd.h>
-#include <layout.h>
+#include <gm_layout.h>
 #include "appmanager.h"
 #include "listener.h"
 

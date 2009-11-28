@@ -1,8 +1,8 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
-noinst_LTLIBRARIES = libparseconf.la
-libparseconf_la_SOURCES = parseconf.c parseconf.h
-include_HEADERS = parseconf.h
-libparseconf_la_CPPFLAGS = @LIBXML_INCLUDES@
-libparseconf_la_CPPFLAGS += @GTK_INCLUDES@
-libparseconf_la_LIBADD = @LIBXML_OBJS@
-libparseconf_la_LIBADD += @GTK_OBJS@
+lib_LTLIBRARIES = libgm_parseconf.la
+libgm_parseconf_la_SOURCES = gm_parseconf.c gm_parseconf.h
+include_HEADERS = gm_parseconf.h
+libgm_parseconf_la_CPPFLAGS = @LIBXML_INCLUDES@
+libgm_parseconf_la_CPPFLAGS += @GTK_INCLUDES@
+libgm_parseconf_la_LIBADD = @LIBXML_OBJS@
+libgm_parseconf_la_LIBADD += @GTK_OBJS@

@@ -1,7 +1,7 @@
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
 #include <stdlib.h>
-#include "changeresolution.h"
+#include <gm_changeresolution.h>
 
 
 int gm_getpossibleresolutions (XRRScreenSize **sizes, int *nsize)

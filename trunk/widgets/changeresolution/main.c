@@ -20,9 +20,9 @@
 #include <string.h>
 #include <sys/types.h>
 #include <signal.h>
-#include <layout.h>
+#include <gm_layout.h>
 #include <gm_connect.h>
-#include <changeresolution.h>
+#include <gm_changeresolution.h>
 
 static int WINDOWED = 0;
 static GtkWidget *mainwin;
