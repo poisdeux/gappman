@@ -19,7 +19,7 @@
 #include <getopt.h>
 #include <sys/socket.h>
 #include <string.h>
-#include "changeresolution.h"
+#include <gm_changeresolution.h>
 #include "listener.h"
 #include <gm_parseconf.h>
 #include <gm_layout.h>
@@ -111,7 +111,7 @@ static gint check_app_status(struct appwidgetinfo* local_appw)
     free(local_appw);
     
     //Change resolution back to menu resolution
-    changeresolution(screen_width, screen_height);
+    gm_changeresolution(screen_width, screen_height);
     
     //Stop glib timer
     return FALSE;
@@ -198,7 +198,7 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
     
     if( elt->app_width > 0 && elt->app_height > 0 )
     {
-      changeresolution(elt->app_width, elt->app_height);
+      gm_changeresolution(elt->app_width, elt->app_height);
     }
       
     childpid = fork();
