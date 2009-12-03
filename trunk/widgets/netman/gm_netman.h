@@ -10,7 +10,7 @@
  */
 
 #ifndef __GM_NETMAN_H__
-#ifdef __GM_NETMAN_H__
+#define __GM_NETMAN_H__
 
 #include <glib.h>
 #include <gdk/gdk.h>

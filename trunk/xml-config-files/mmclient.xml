@@ -54,9 +54,9 @@
     </program>
   </programs>
 	<panel>
-		<widget>
+		<applet>
 			<name>Network manager</name>
-			<module>./widgets/netman/gm_netman.so</module>
-		<widget>
+			<objectfile>./widgets/netman/.libs/libgm_netman.so</objectfile>
+		</applet>
 	</panel>
 </appmanager>

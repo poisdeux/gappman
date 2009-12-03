@@ -73,4 +73,11 @@ GtkWidget* gm_create_empty_button ( int max_width, int max_height, gboolean (*pr
 */
 GtkWidget* gm_createbuttons( menu_elements *elts, gboolean(*processevent)(GtkWidget*, GdkEvent*, menu_elements*));
 
+/**
+* \brief Creates the panel layout using the available screen height and width
+* \param *elts pointer to first menu_elements structure
+* \return GtkWidget pointer to container holding the panel
+*/
+GtkWidget* gm_createpanel( menu_elements *elts);
+
 #endif

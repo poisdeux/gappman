@@ -31,6 +31,7 @@ enum length_types {
 */
 struct menu_element
 {
+	int *amount_of_elements; //!< total number of elements
   struct length *menu_width;
   struct length *menu_height;
   int app_width;
@@ -128,7 +129,7 @@ menu_elements* getActions();
 * \brief returns the menu_elements structure that contains the panel elements
 * \return pointer to menu_elements structure
 */
-menu_elements* getPanelelts();
+menu_elements* getPanel();
 
 
 #endif

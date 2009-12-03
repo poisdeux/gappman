@@ -131,14 +131,12 @@ processMenuElement(xmlTextReaderPtr reader, menu_elements *elt, const char* elem
       if ( xmlTextReaderNodeType(reader) == 1 )
       {
         name = xmlTextReaderName(reader);
-	//printf("DEBUG: Attribute: %s\n", name);
       }
       else if ( xmlTextReaderNodeType(reader) == 3 )
       {
         value = xmlTextReaderValue(reader);
         if( strcmp((char *) name, "name") == 0 )
         {
-          //printf("DEBUG: processProgram: %s\n", value);
           elt->name = value;
         }
         else if( strcmp((char *) name, "printlabel") == 0 )
@@ -168,7 +166,7 @@ processMenuElement(xmlTextReaderPtr reader, menu_elements *elt, const char* elem
             fprintf(stderr, "Error: could not parse resolution value: %s", value);
           }
         }
-        else if( strcmp((char *) name, "module") == 0 )
+        else if( strcmp((char *) name, "objectfile") == 0 )
 				{
 					elt->module = value;
 				}
@@ -250,61 +248,32 @@ void freeMenuElements( menu_elements *elt )
 
 	if (elt != NULL)
 	{
-	//free shared elements
-//	printf("Freeing shared elements\n");
-//	fflush(stdout);
-//  printf("menu_element free: menu_width\n");
-//  fflush(stdout);
-  free(elt->menu_width);
-//  printf("menu_element free: menu_height\n");
-//  fflush(stdout);
-  free(elt->menu_height);
-//  printf("menu_element free: orientation\n");
-	i = 0;
-	while(elt->orientation[i] != NULL)
-	{
-//		printf("Length: %d String: %s\n", strlen(elt->orientation[i]), elt->orientation[i]);
-//  	fflush(stdout);		
-  	free(elt->orientation[i]);
-		i=i+1;
-	}
-//	printf("Freeing individual element\n");
-//	fflush(stdout);
-	while(elt != NULL)
-  {
-//    printf("menu_element free: name %s\n", elt->name);
-//    fflush(stdout);
-    free((xmlChar *) elt->name);
+		free(elt->amount_of_elements);
+	  free(elt->menu_width);
+ 	 	free(elt->menu_height);
+		i = 0;
+		while(elt->orientation[i] != NULL)
+		{
+	 	 	free(elt->orientation[i]);
+			i=i+1;
+		}
+		while(elt != NULL)
+		{
+			free((xmlChar *) elt->name);
+			free((xmlChar *) elt->exec);
+			free((xmlChar *) elt->module);
+			free((xmlChar *) elt->logo);
 
-//    printf("menu_element free: exec %s\n", elt->exec);
-//    fflush(stdout);
-    free((xmlChar *) elt->exec);
+			for (i = 0; i < elt->numArguments; i++)
+			{
+ 				free(elt->args[i]);
+			}
+			free(elt->args);
 
-//    printf("menu_element free: exec %s\n", elt->exec);
-//    fflush(stdout);
-    free((xmlChar *) elt->module);
-
-
-//    printf("menu_element free: logo %s\n", elt->logo);
-//    fflush(stdout);
-    free((xmlChar *) elt->logo);
-
-    for (i = 0; i < elt->numArguments; i++)
-    {
-//    printf("menu_element free: args[%d]\n", i);
-//    fflush(stdout);
-    free(elt->args[i]);
-    }
-//    printf("menu_element free: args\n");
-//    fflush(stdout);
-    free(elt->args);
-
-  	next = elt->next;
-//    printf("menu_element free: elt\n");
-//    fflush(stdout);
-    free(elt);
-    elt = next;
-  }
+			next = elt->next;
+			free(elt);
+			elt = next;
+  	}
 	}
 }
 
@@ -318,7 +287,7 @@ menu_elements* getActions()
   return actions;
 }
 
-menu_elements* getPanelelts()
+menu_elements* getPanel()
 {
   return panel_elts;
 }
@@ -341,12 +310,14 @@ void static processMenuElements(const char* element_name, const char* group_elem
 	char* align;
   int width;
   int height;
+  int *number_elts;
   menu_elements *prev;
   struct length *menu_width;
   struct length *menu_height;
   char** orient;
   prev = NULL;
 
+	number_elts = (int*) malloc (sizeof(int));
   menu_width = (struct length *) malloc (sizeof(struct length));
   menu_height = (struct length *) malloc (sizeof(struct length));
   orient = (char **) malloc (sizeof(char));
@@ -373,26 +344,23 @@ void static processMenuElements(const char* element_name, const char* group_elem
       (*elts)->orientation = orient;
       
       prev = *elts;
-      //printf("DEBUG: processMenuElements: %s\n", name);
       processMenuElement(reader, *elts, element_name);
-      numberElts++;
+			(*number_elts)++;
+    	(*elts)->amount_of_elements = number_elts;
     }
    
 		//parse global parameters 
     if( strcmp((char *) name, group_element_name) == 0 && xmlTextReaderNodeType(reader) == 15)
     {
-      //printf("DEBUG: processMenuElements: %s\n", name);
       if (xmlTextReaderHasAttributes(reader))
       {
         parseLength(xmlTextReaderGetAttribute (reader, "width"), menu_width);
         parseLength(xmlTextReaderGetAttribute (reader, "height"), menu_height);
-        printf("DEBUG: menu_width %d, menu_height %d\n", menu_width->value, menu_height->value);
         align = xmlTextReaderGetAttribute (reader, "align");
 				i = 0;
      		result = strtok(align, ",");
 				while(result != NULL)
 				{
-						//printf("DEBUG: orient: %s\n", result);
 						orient[i] = (char*) malloc ( strlen(result) * sizeof(char) );
 						orient[i] = strcpy(orient[i], result);
 						i=i+1;
@@ -425,7 +393,6 @@ int loadConf(const char *filename) {
 
         // first attribute must be the name of the program 
 				program_name = xmlTextReaderName(reader);
-				//printf("DEBUG: Program_name: %s\n", program_name);
 
         while (ret == 1) 
 				{
@@ -440,13 +407,12 @@ int loadConf(const char *filename) {
           }
 					else if( strcmp((char *) name, "panel") == 0 && xmlTextReaderNodeType(reader) == 1)
           {
-            processMenuElements("widget", "panel", reader, &panel_elts);
+            processMenuElements("applet", "panel", reader, &panel_elts);
           }
 	  			if( strcmp((char *) name, "cachelocation") == 0 && xmlTextReaderNodeType(reader) == 1) 
 	  			{ 
             ret = xmlTextReaderRead(reader);
 	    			cache_location = xmlTextReaderValue(reader);
-	    			//printf("DEBUG: Cache_location: %s\n",cache_location);
 	  			}
 	  			else
 	  			{

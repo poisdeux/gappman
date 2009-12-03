@@ -333,6 +333,7 @@ int main (int argc, char **argv)
   GtkStyle  *style;
   menu_elements *actions;
   menu_elements *programs;
+  menu_elements *panel;
   const char* conffile = "./conf.xml";
   const char* bgimage = NULL;
   int c;
@@ -394,6 +395,7 @@ int main (int argc, char **argv)
   loadConf(conffile);
   programs = getPrograms();
   actions = getActions();
+	panel = getPanel();
 
   screen = gdk_screen_get_default ();
   screen_width =  gdk_screen_get_width (screen);
@@ -445,14 +447,13 @@ int main (int argc, char **argv)
 
 	/* Preliminary framework to support panel like
 	* notification/status widgets
-	
+	*/	
 	if ( panel != NULL )
 	{
-		align = gm_createpanel( panel, window_width, window_height ); 
+		align = gm_createpanel( panel ); 
     gtk_container_add (GTK_CONTAINER (vbox), align);
     gtk_widget_show (align);
 	}
-	*/
   gtk_container_add (GTK_CONTAINER (mainwin), vbox);
   gtk_widget_show (vbox);
   gtk_widget_show (mainwin);
@@ -474,6 +475,7 @@ int main (int argc, char **argv)
 	printf("Closing up. Goodbye\n");
   freeMenuElements( programs );
   freeMenuElements( actions );
+  freeMenuElements( panel );
   
 	return 0;
 }
