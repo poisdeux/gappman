@@ -71,6 +71,7 @@ widgets/Makefile
 widgets/shutdown/Makefile
 widgets/processmanager/Makefile
 widgets/changeresolution/Makefile
+widgets/netman/Makefile
 ])
 
 AC_OUTPUT

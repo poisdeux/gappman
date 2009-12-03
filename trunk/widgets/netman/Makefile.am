@@ -1,12 +1,10 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
-#bin_PROGRAMS = netman
-processmanager_SOURCES = gm_netman.c
-processmanager_CPPFLAGS = @GTK_INCLUDES@
-processmanager_CPPFLAGS += @LIBXML_INCLUDES@
-processmanager_CPPFLAGS += -I$(top_builddir)/libs/parseconf
-processmanager_CPPFLAGS += -I$(top_builddir)/libs/layout
-processmanager_LDADD = @GTK_OBJS@
-processmanager_LDADD += @LIBXML_OBJS@
-processmanager_LDADD += $(top_builddir)/libs/parseconf/libparseconf.la
-processmanager_LDADD += $(top_builddir)/libs/layout/liblayout.la
+lib_LTLIBRARIES = libgm_netman.la
+libgm_netman_la_SOURCES = gm_netman.c
+include_HEADERS = gm_netman.h
+libgm_netman_la_CPPFLAGS = @GTK_INCLUDES@
+libgm_netman_la_CPPFLAGS += @LIBXML_INCLUDES@
+libgm_netman_la_CPPFLAGS += -I$(top_builddir)/libs/parseconf
+libgm_netman_la_LIBADD = @GTK_OBJS@
+libgm_netman_la_LIBADD += $(top_builddir)/libs/parseconf/libgm_parseconf.la
 
