@@ -1,7 +1,6 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
 lib_LTLIBRARIES = libgm_netman.la
 libgm_netman_la_SOURCES = gm_netman.c
-include_HEADERS = gm_netman.h
 libgm_netman_la_CPPFLAGS = @GTK_INCLUDES@
 libgm_netman_la_CPPFLAGS += @LIBXML_INCLUDES@
 libgm_netman_la_CPPFLAGS += -I$(top_builddir)/libs/parseconf

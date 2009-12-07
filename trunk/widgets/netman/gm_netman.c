@@ -9,7 +9,6 @@
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
 
-#include <gm_netman.h>
 #include <gmodule.h>
 
 GtkWidget *button = NULL;
