@@ -14,9 +14,6 @@
 #include <gtk/gtk.h>
 #include <libxml/xmlreader.h>
 
-typedef void (* GM_MODULE_INIT) (void);
-typedef GtkWidget* (* GM_MODULE_WIDGET) (void);
-
 /**
 * Enumeration for length types.
 * Currently supported types are: PERCENTAGE and PIXELS
@@ -53,7 +50,7 @@ struct menu_element
 	gpointer *gm_module_start; //!< pointer to the start function for a panel module
 	gpointer *gm_module_stop; //!< pointer to the stop function for a panel module
 	gpointer *gm_module_set_icon_size; //!< pointer to the set icon size function for a panel module
-	GM_MODULE_WIDGET gm_module_get_widget; //!< pointer to the get widget function for a panel module
+	gpointer *gm_module_get_widget; //!< pointer to the get widget function for a panel module
 };
 
 /**
@@ -125,12 +122,6 @@ menu_elements* getPrograms();
 * \return pointer to menu_elements structure
 */
 menu_elements* getActions();
-
-/**
-* \brief returns the menu_elements structure that contains the panel elements
-* \return pointer to menu_elements structure
-*/
-menu_elements* getPanel();
 
 
 #endif

@@ -501,6 +501,7 @@ GtkWidget* gm_createbutton ( menu_elements *elt, int fontsize, int max_width, in
 static GtkWidget* createpanelelement( menu_elements *elt, int width, int height)
 {
 	GModule *module;
+	GtkWidget *widget;
 	
 	if( ! g_module_supported() )
 	{
@@ -520,6 +521,11 @@ static GtkWidget* createpanelelement( menu_elements *elt, int width, int height)
 			g_warning("Could not get function gm_module_init from %s\n%s", 
 				elt->module, g_module_error()); 
 		}
+		if(!g_module_symbol (module, "gm_module_get_widget", (gpointer *) &(elt->gm_module_get_widget)))
+		{
+			g_warning("Could not get function gm_module_get_widget from %s\n%s", 
+				elt->module, g_module_error()); 
+		}
 		//g_module_symbol (module, "gm_module_start", elt->gm_module_start);
 		//g_module_symbol (module, "gm_module_stop", elt->gm_module_stop);
 		//g_module_symbol (module, "gm_module_set_icon_size", elt->gm_module_set_icon_size);
@@ -527,7 +533,7 @@ static GtkWidget* createpanelelement( menu_elements *elt, int width, int height)
 	}
 	//elt->gm_module_set_icon_size(width, height);
 	elt->gm_module_init();
-	//return elt->gm_module_get_widget();
+	return elt->gm_module_get_widget();
 }
 
 GtkWidget* gm_createbuttons( menu_elements *elts, gboolean(processevent)(GtkWidget*, GdkEvent*, menu_elements*))
