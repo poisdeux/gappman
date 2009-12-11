@@ -24,104 +24,56 @@ enum length_types {
 };
 
 /**
-* \struct menu_element
+* \struct nm_element
 * \brief structure to hold the attributes to create the button to start a program
 */
-struct menu_element
+struct nm_element
 {
 	int *amount_of_elements; //!< total number of elements
-  struct length *menu_width;
-  struct length *menu_height;
-  int app_width;
-  int app_height;
-  char **orientation;
-	GtkWidget *widget; //!< widget associated with this menu_element. Usually a GtkButton.
   const xmlChar *name; //!< holds the name of the program
   const xmlChar *exec; //!< absolute path to executable
-  const xmlChar *logo; //!< absolute path to image file
-  const xmlChar *module; //!< absolute path to module for panel
-  int autostart; //!< a value of 1 will start program at startup, 0 will not.
-  int printlabel; //!< If set to 1 the name should be printed alongside the button. Otherwise do not print a textlabel
+  const xmlChar *logosuccess; //!< absolute path to image file
+  const xmlChar *logofail; //!< absolute path to image file
   char **args; //!< array of strings containing arguments that need to be passed to the executable
   int numArguments; //!< will hold the total amount of elements in the args array
-	int pid; //!< should hold the process ID of the process that was started by this menu_element
-  struct menu_element *next; //!< pointer to the next menu_element structure
-	GM_MODULE_INIT gm_module_init; //!< pointer to the init function for a panel module
-	gpointer *gm_module_start; //!< pointer to the start function for a panel module
-	gpointer *gm_module_stop; //!< pointer to the stop function for a panel module
-	gpointer *gm_module_set_icon_size; //!< pointer to the set icon size function for a panel module
-	gpointer *gm_module_get_widget; //!< pointer to the get widget function for a panel module
+	int pid; //!< should hold the process ID of the process that was started by this nm_element
+	int success; //!< should hold the exit value of the executable (*exec) that represents the success state
+  struct nm_element *next; //!< pointer to the next nm_element structure
 };
 
 /**
-* \struct length
-* \brief structure to hold the length type (pixel, percentage) and its value. 
+* \typedef nm_elements
 */
-struct length
-{
-  enum length_types type; //!< Type of the value, i.e. percentage or pixels?
-  int value; //!< Actual length value without metric indicator, e.g. % or px.
-};
+typedef struct nm_element nm_elements;
 
 /**
-* \typedef menu_elements
-*/
-typedef struct menu_element menu_elements;
-
-/**
-* \brief load the configuration file and parses it to create the menu_elements structures.
+* \brief load the configuration file and parses it to create the nm_elements structures.
 * \param  *filename the name of the configuration file with the path
 * \return int 0 if configuration file was succesfully loaded, >0 otherwise 
 */
-int loadConf(const char *filename);
+int nm_load_conf(const char *filename);
 
 /**
-* \brief relinguishes the memory occupied by menu_element structures
-* \param *elt first menu_element structure
+* \brief relinguishes the memory occupied by nm_element structures
+* \param *elt first nm_element structure
 */
-void freeMenuElements( menu_elements *elt );
-
-/**
-* \brief prints the elements of a menu_element structure
-* \param *elt menu_element structure that should be printed
-*/
-void printMenuElements( menu_elements *elt );
-
-/**
-* \brief returns the total number of menu_elements
-* \return integer
-*/
-int getNumberOfElements();
+void nm_free_elements( nm_elements *elt );
 
 /**
 * \brief Get the path of the cache location on disk
 * \return string
 */
-char* getCachelocation();
+char* nm_get_cache_location();
 
 /**
-* \brief Get the name of the program as specified in the configuration file
-* \return string
+* \brief returns the nm_elements structure that contains the stati 
+* \return pointer to nm_elements structure
 */
-char* getProgramname();
+nm_elements* nm_get_stati();
 
 /**
-* \brief Get the alignment of the program menu area
-* \return String: [[top|left|bottom|right|center],...]
+* \brief returns the nm_elements structure that contains the actions
+* \return pointer to nm_elements structure
 */
-xmlChar* getAlignment();
-
-/**
-* \brief returns the menu_elements structure that contains the programs
-* \return pointer to menu_elements structure
-*/
-menu_elements* getPrograms();
-
-/**
-* \brief returns the menu_elements structure that contains the actions
-* \return pointer to menu_elements structure
-*/
-menu_elements* getActions();
-
-
+nm_elements* nm_get_actions();
 #endif

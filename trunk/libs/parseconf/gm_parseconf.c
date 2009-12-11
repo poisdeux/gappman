@@ -55,6 +55,7 @@ struct menu_element* createMenuElement()
   elt->exec = NULL;
   elt->next = NULL;
   elt->args = NULL;
+	elt->module_conffile = NULL;
   elt->autostart = 0;
   elt->printlabel = 0;
   elt->app_height = -1;
@@ -170,6 +171,10 @@ processMenuElement(xmlTextReaderPtr reader, menu_elements *elt, const char* elem
 				{
 					elt->module = value;
 				}
+			  else if( strcmp((char *) name, "conffile") == 0 )
+				{
+					elt->module_conffile = value;
+				}	
       }
 
       if( strcmp((char *) xmlTextReaderName(reader), element_name) == 0 && xmlTextReaderNodeType(reader) == 15 )

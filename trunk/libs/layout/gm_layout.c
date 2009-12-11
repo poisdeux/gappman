@@ -526,6 +526,14 @@ static GtkWidget* createpanelelement( menu_elements *elt, int width, int height)
 			g_warning("Could not get function gm_module_get_widget from %s\n%s", 
 				elt->module, g_module_error()); 
 		}
+		if(elt->module_conffile != NULL)
+		{
+			if(!g_module_symbol (module, "gm_module_set_conffile", (gpointer *) &(elt->gm_module_set_conffile)))
+			{
+				g_warning("Could not get function gm_module_get_widget from %s\n%s", 
+					elt->module, g_module_error()); 
+			}
+		}
 		//g_module_symbol (module, "gm_module_start", elt->gm_module_start);
 		//g_module_symbol (module, "gm_module_stop", elt->gm_module_stop);
 		//g_module_symbol (module, "gm_module_set_icon_size", elt->gm_module_set_icon_size);

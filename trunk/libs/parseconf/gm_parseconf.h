@@ -43,6 +43,7 @@ struct menu_element
   const xmlChar *exec; //!< absolute path to executable
   const xmlChar *logo; //!< absolute path to image file
   const xmlChar *module; //!< absolute path to module for panel
+  const xmlChar *module_conffile; //!< absolute path to module configuration file
   int autostart; //!< a value of 1 will start program at startup, 0 will not.
   int printlabel; //!< If set to 1 the name should be printed alongside the button. Otherwise do not print a textlabel
   char **args; //!< array of strings containing arguments that need to be passed to the executable
@@ -53,6 +54,7 @@ struct menu_element
 	gpointer *gm_module_start; //!< pointer to the start function for a panel module
 	gpointer *gm_module_stop; //!< pointer to the stop function for a panel module
 	gpointer *gm_module_set_icon_size; //!< pointer to the set icon size function for a panel module
+	gpointer *gm_module_set_conffile; //!< pointer to the set configuration file function for a panel module
 	GM_MODULE_WIDGET gm_module_get_widget; //!< pointer to the get widget function for a panel module
 };
 

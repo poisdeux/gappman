@@ -25,7 +25,7 @@
     <program>
       <name>MythTV</name>
       <exec>/usr/bin/mythfrontend</exec>
-      <logo>./logos/mythtv.png</logo>
+      <!--<logo>./logos/mythtv.png</logo>-->
       <autostart>0</autostart>
 			<printlabel>1</printlabel>
     </program>
@@ -53,7 +53,7 @@
 			<printlabel>1</printlabel>
     </program>
   </programs>
-	<panel>
+	<panel width="10%" height="20%" align="top,right">
 		<applet>
 			<name>Network manager</name>
 			<objectfile>./widgets/netman/.libs/libgm_netman.so</objectfile>
