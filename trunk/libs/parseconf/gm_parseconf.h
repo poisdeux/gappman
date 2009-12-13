@@ -99,6 +99,12 @@ void printMenuElements( menu_elements *elt );
 int getNumberOfElements();
 
 /**
+* \brief Get the alignment of the program menu area
+* \return String: [[top|left|bottom|right|center],...]
+*/
+xmlChar* getAlignment();
+
+/**
 * \brief Get the path of the cache location on disk
 * \return string
 */
@@ -109,12 +115,6 @@ char* getCachelocation();
 * \return string
 */
 char* getProgramname();
-
-/**
-* \brief Get the alignment of the program menu area
-* \return String: [[top|left|bottom|right|center],...]
-*/
-xmlChar* getAlignment();
 
 /**
 * \brief returns the menu_elements structure that contains the programs

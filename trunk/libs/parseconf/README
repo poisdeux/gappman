@@ -80,6 +80,7 @@ The attributes <width> and <height> can be specified in amount of pixels or in p
 The <autostart> attribute can have values 0 or 1. If set to 1 the program will be started when appmanager is started.
 
 If <cachelocation> is specified the system will first look for a cached version of the scaled images. If it cannot find an image it will scale the image pointed by <logo>, scale it, and save the scaled version in the directory specified by <cachelocation>.
+NOTE: <name> should be unique among all programs, actions and panel elements if you want to use the <cachelocation> functionality
 
 The panel section defines the shared objects that should be included in the panel. See the netman widget for an example of how to create a panel widget.
 The <conffile> is optional and only needed if the module requires it.

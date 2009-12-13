@@ -146,12 +146,15 @@ static GdkPixbuf* scale_image(GtkWidget *image, int max_width, int max_height)
 /**
 * \brief loads image and scales it making sure the image fits inside
 * max_width*max_height maintaining the correct aspect ratio
-* \param imagefile filename of the image on disk
+* \param elt_name name of the element
+* \param elt_logo filename of the logo image to load 
+* \param cacheloc directory where the cached images are kept
+* \param programname name of the main program that calls this function (i.e. gappman, netman, etc.)
 * \param max_width maximum width image may have
 * \param max_height maximum height image may have
 * \return GtkWidget pointer to image
 */
-static GtkWidget* load_image(menu_elements *elt, int max_width, int max_height)
+GtkWidget* load_image(char* elt_name, char* elt_logo, char* cacheloc, char* programname, int max_width, int max_height)
 {
   GtkWidget *image;
   GdkPixbuf *pixbuf;
@@ -162,16 +165,16 @@ static GtkWidget* load_image(menu_elements *elt, int max_width, int max_height)
   // Paths can be of arbitrary lengt.
   // Filenames can not be longer than 255 chars
   // Width and height will not exceed 9999 (4 chars)
-  if ( getCachelocation() != NULL )
+  if ( cacheloc != NULL )
   {
-    stringlength = strlen(getCachelocation()) + 255 + 8;
+    stringlength = strlen(cacheloc) + 255 + 8;
 
     cachedfile = (char*) malloc(stringlength * sizeof(char) + 1);
   
     //Filename of cached image should conform to
     //CACHEDLOCATION/PROGRAMNAME-BUTTONNAME-WIDTHxHEIGHT
-    sprintf(cachedfile, "%s/%s-%s-%dx%d", getCachelocation(), getProgramname(), 
-    	elt->name, max_width, max_height);
+    sprintf(cachedfile, "%s/%s-%s-%dx%d", cacheloc, programname, 
+    	elt_name, max_width, max_height);
     fflush(stdout);
 
     fp = fopen(cachedfile, "rw");
@@ -181,7 +184,7 @@ static GtkWidget* load_image(menu_elements *elt, int max_width, int max_height)
     }
     else
     {
-    	image = gtk_image_new_from_file ((char*) elt->logo);
+    	image = gtk_image_new_from_file ((char*) elt_logo);
 			pixbuf = scale_image(image, max_width, max_height); 
       gtk_image_set_from_pixbuf(GTK_IMAGE(image), pixbuf);
 			gdk_pixbuf_save(pixbuf, cachedfile, "png", NULL, "compression", "9", NULL);	
@@ -191,7 +194,7 @@ static GtkWidget* load_image(menu_elements *elt, int max_width, int max_height)
   }
   else
   {
-    image = gtk_image_new_from_file ((char*) elt->logo);
+    image = gtk_image_new_from_file ((char*) elt_logo);
     gtk_image_set_from_pixbuf(GTK_IMAGE(image), scale_image(image, max_width, max_height));
   }
   
@@ -217,7 +220,7 @@ static GtkWidget* image_label_box_hor (menu_elements *elt, int max_width, int ma
     gtk_container_set_border_width (GTK_CONTAINER (box), 2);
 
     /* Now on to the image stuff */
-    image = load_image(elt, max_width, max_height);
+		image = load_image((char*) elt->name, (char*) elt->logo, getCachelocation(), getProgramname(), max_width, max_height);
     gtk_box_pack_start (GTK_BOX (box), image, FALSE, FALSE, 3);
     gtk_widget_show (image);
 
@@ -251,7 +254,7 @@ static GtkWidget* image_label_box_vert (menu_elements *elt, int max_width, int m
     gtk_container_set_border_width (GTK_CONTAINER (box), 2);
 
     /* Now on to the image stuff */
-    image = load_image(elt, max_width, max_height);
+		image = load_image((char*) elt->name, (char*) elt->logo, getCachelocation(), getProgramname(), max_width, max_height);
     gtk_box_pack_start (GTK_BOX (box), image, FALSE, FALSE, 3);
     gtk_widget_show (image);
 
@@ -465,7 +468,7 @@ GtkWidget* gm_createbutton ( menu_elements *elt, int fontsize, int max_width, in
   }
 
   button = gtk_button_new ();
-  gtk_container_add(GTK_CONTAINER(button), imagelabelbox);
+  //gtk_container_add(GTK_CONTAINER(button), imagelabelbox);
   gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
 
   if( elt->logo != NULL )

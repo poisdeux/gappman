@@ -9,6 +9,7 @@
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
 
+#include <glib.h>
 #include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib/gprintf.h>
@@ -340,6 +341,7 @@ int main (int argc, char **argv)
 	GIOChannel* gio;
 
   gtk_init (&argc, &argv);
+	if (!g_thread_supported ()) g_thread_init (NULL);
 
   while (1) {
       int option_index = 0;

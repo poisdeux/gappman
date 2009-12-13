@@ -4,8 +4,10 @@ AC_PREREQ(2.61)
 AC_INIT([gappman], [0.31a], [m.brekhof@gmail.com])
 
 AC_SUBST(GTK_INCLUDES)
+AC_SUBST(GTHREAD_INCLUDES)
 AC_SUBST(LIBXML_INCLUDES)
 AC_SUBST(GTK_OBJS)
+AC_SUBST(GTHREAD_OBJS)
 AC_SUBST(LIBXML_OBJS)
 
 AC_USE_SYSTEM_EXTENSIONS
@@ -43,6 +45,12 @@ echo "Error: libxml2 not found!"; exit 1
 
 AC_SEARCH_LIBS([gtk_main], [gtk-x11-2.0], [
 GTK_INCLUDES=`pkg-config --cflags gtk+-2.0`
+], [
+echo "Error: gtk+-2.0 not found!"; exit 1
+], [])
+
+AC_SEARCH_LIBS([g_thread_init], [gthread-2.0], [
+GTHREAD_INCLUDES=`pkg-config --cflags gthread-2.0`
 ], [
 echo "Error: gtk+-2.0 not found!"; exit 1
 ], [])

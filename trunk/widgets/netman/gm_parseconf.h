@@ -15,15 +15,6 @@
 #include <libxml/xmlreader.h>
 
 /**
-* Enumeration for length types.
-* Currently supported types are: PERCENTAGE and PIXELS
-*/
-enum length_types {
-  PERCENTAGE,
-  PIXELS
-};
-
-/**
 * \struct nm_element
 * \brief structure to hold the attributes to create the button to start a program
 */
