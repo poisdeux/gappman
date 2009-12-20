@@ -9,14 +9,14 @@
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
 
-#include "gm_parseconf.h"
+#include "nm_parseconf.h"
 #include <string.h>
 
 static nm_elements* stati;
 static nm_elements* actions;
 static char *cache_location;
 
-struct nm_element* create_nm_element()
+struct nm_element* create_nm_element(nm_elements* prev)
 {
   struct nm_element *elt;
   elt = (nm_elements *) malloc(sizeof(nm_elements));
@@ -26,9 +26,20 @@ struct nm_element* create_nm_element()
 	elt->success = 0;
   elt->name = NULL;
   elt->exec = NULL;
-  elt->next = NULL;
+  elt->next = prev;
   elt->args = NULL;
 	elt->pid = -1;
+  elt->numArguments = 0;
+	if (prev == NULL)
+	{
+		elt->amount_of_elements = (int*) malloc (sizeof(int));
+		*(elt->amount_of_elements) = 1;
+	}
+	else
+	{
+		elt->amount_of_elements = prev->amount_of_elements;
+		*(elt->amount_of_elements) = *(elt->amount_of_elements) + 1;
+	}
   return elt;
 }
 
@@ -60,7 +71,7 @@ process_nm_element(xmlTextReaderPtr reader, nm_elements *elt, const char* elemen
     int ret = 1;
     
     if (name == NULL)
-	name = BAD_CAST "--";
+			name = BAD_CAST "--";
 
     while ( ret == 1 )
     {
@@ -74,6 +85,7 @@ process_nm_element(xmlTextReaderPtr reader, nm_elements *elt, const char* elemen
         value = xmlTextReaderValue(reader);
         if( strcmp((char *) name, "name") == 0 )
         {
+					printf("DEBUG: parsing %s\n", value);
           elt->name = value;
         }
         else if( strcmp((char *) name, "exec") == 0 )
@@ -166,31 +178,26 @@ nm_elements* nm_get_actions()
 void static process_nm_elements(const char* element_name, const char* group_element_name, xmlTextReaderPtr reader, nm_elements **elts)
 {
   int ret = 1;
-	int i;
   xmlChar *name;
-	char* result;
-	char* align;
-  int *number_elts;
   nm_elements *prev;
   prev = NULL;
 
-	number_elts = (int*) malloc (sizeof(int));
-  
+
   while (ret)
   {
     ret = xmlTextReaderRead(reader);
     name = xmlTextReaderName(reader);
-
 		// Parse new status or action and create a new nm_element for it.
     if( strcmp((char *) name, element_name) == 0 && xmlTextReaderNodeType(reader) == 1)
     {
-      *elts = create_nm_element();
-      (*elts)->numArguments = 0;
-      (*elts)->next = prev;
-      
+      *elts = create_nm_element(prev);
       prev = *elts;
       process_nm_element(reader, *elts, element_name);
-    	(*elts)->amount_of_elements = prev->amount_of_elements + 1;
+    }
+		//check if we found the closing tag
+		if( strcmp(name, group_element_name) == 0 && xmlTextReaderNodeType(reader) == 15 )
+    {
+       ret = 0;
     }
   }
 }

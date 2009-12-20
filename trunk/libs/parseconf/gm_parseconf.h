@@ -14,8 +14,12 @@
 #include <gtk/gtk.h>
 #include <libxml/xmlreader.h>
 
-typedef void (* GM_MODULE_INIT) (void);
+typedef int (* GM_MODULE_INIT) (void);
 typedef GtkWidget* (* GM_MODULE_WIDGET) (void);
+typedef void (* GM_MODULE_SET_ICON_SIZE) (int width, int height);
+typedef void (* GM_MODULE_SET_CONFFILE) (const char* filename);
+typedef int (* GM_MODULE_START) (void);
+typedef int (* GM_MODULE_STOP) (void);
 
 /**
 * Enumeration for length types.
@@ -51,10 +55,10 @@ struct menu_element
 	int pid; //!< should hold the process ID of the process that was started by this menu_element
   struct menu_element *next; //!< pointer to the next menu_element structure
 	GM_MODULE_INIT gm_module_init; //!< pointer to the init function for a panel module
-	gpointer *gm_module_start; //!< pointer to the start function for a panel module
-	gpointer *gm_module_stop; //!< pointer to the stop function for a panel module
-	gpointer *gm_module_set_icon_size; //!< pointer to the set icon size function for a panel module
-	gpointer *gm_module_set_conffile; //!< pointer to the set configuration file function for a panel module
+	GM_MODULE_START gm_module_start; //!< pointer to the start function for a panel module
+	GM_MODULE_STOP gm_module_stop; //!< pointer to the stop function for a panel module
+	GM_MODULE_SET_ICON_SIZE gm_module_set_icon_size; //!< pointer to the set icon size function for a panel module
+	GM_MODULE_SET_CONFFILE gm_module_set_conffile; //!< pointer to the set configuration file function for a panel module
 	GM_MODULE_WIDGET gm_module_get_widget; //!< pointer to the get widget function for a panel module
 };
 

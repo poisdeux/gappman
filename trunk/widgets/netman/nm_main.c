@@ -13,8 +13,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/wait.h>
-//#include <gm_layout.h>
-#include "gm_parseconf.h"
+#include "nm_parseconf.h"
+#include "nm_layout.h"
 
 static GtkWidget *button = NULL;
 static int button_width = 50;
@@ -61,21 +61,25 @@ static int check_network_status()
 	wait(&status);
 	if( status == 0 )
 	{
-		return 0;
+		gtk_button_set_image(GTK_BUTTON(button), image_success);
 	}
-	return 1;
+	else
+	{
+		gtk_button_set_image(GTK_BUTTON(button), image_fail);
+	}
+	free(args);
+	return TRUE;
 }
 
 G_MODULE_EXPORT int gm_module_init()
 {
-	printf("Woohoo netman speaking!\n");		
 
 	nm_load_conf(conffile);
 	stati = nm_get_stati();
 	actions = nm_get_actions();
 
 	button = gtk_button_new();
-	//image_fail = load_image(stati->name, getCachedlocation(), getProgramname(), stati->logofail, button_width, button_height);	
+	image_fail = nm_load_image((char*) stati->name, (char*) stati->logofail, nm_get_cache_location(), "netman", button_width, button_height);	
 	//image_success = load_image(stati->name, getCachedlocation(), getProgramname(), stati->logosuccess, button_width, button_height);	
 	gtk_button_set_image(GTK_BUTTON(button), image_fail);
   gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
@@ -90,16 +94,7 @@ G_MODULE_EXPORT void gm_module_set_conffile(const char* filename)
 
 G_MODULE_EXPORT int gm_module_start()
 {
-	int status;
-	status = check_network_status();		
-	if( status == 0 )
-	{
-		gtk_button_set_image(GTK_BUTTON(button), image_success);
-	}
-	else
-	{
-		gtk_button_set_image(GTK_BUTTON(button), image_fail);
-	}
+	g_timeout_add(1000, (GSourceFunc) check_network_status, NULL);
 	return 0;
 }
 

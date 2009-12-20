@@ -354,7 +354,7 @@ void static processMenuElements(const char* element_name, const char* group_elem
     	(*elts)->amount_of_elements = number_elts;
     }
    
-		//parse global parameters 
+		//parse global parameters when endtag for groupelement is found 
     if( strcmp((char *) name, group_element_name) == 0 && xmlTextReaderNodeType(reader) == 15)
     {
       if (xmlTextReaderHasAttributes(reader))
@@ -373,6 +373,7 @@ void static processMenuElements(const char* element_name, const char* group_elem
 				}
 				orient[i] = NULL;
       }
+			//this should end parsing this group of elements
       ret = 0;
     }
   }

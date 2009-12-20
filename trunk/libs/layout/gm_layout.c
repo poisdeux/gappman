@@ -143,18 +143,7 @@ static GdkPixbuf* scale_image(GtkWidget *image, int max_width, int max_height)
   return gdk_pixbuf_scale_simple(pixbuf, width, height, GDK_INTERP_BILINEAR);
 }
  
-/**
-* \brief loads image and scales it making sure the image fits inside
-* max_width*max_height maintaining the correct aspect ratio
-* \param elt_name name of the element
-* \param elt_logo filename of the logo image to load 
-* \param cacheloc directory where the cached images are kept
-* \param programname name of the main program that calls this function (i.e. gappman, netman, etc.)
-* \param max_width maximum width image may have
-* \param max_height maximum height image may have
-* \return GtkWidget pointer to image
-*/
-GtkWidget* load_image(char* elt_name, char* elt_logo, char* cacheloc, char* programname, int max_width, int max_height)
+GtkWidget* gm_load_image(char* elt_name, char* elt_logo, char* cacheloc, char* programname, int max_width, int max_height)
 {
   GtkWidget *image;
   GdkPixbuf *pixbuf;
@@ -220,7 +209,7 @@ static GtkWidget* image_label_box_hor (menu_elements *elt, int max_width, int ma
     gtk_container_set_border_width (GTK_CONTAINER (box), 2);
 
     /* Now on to the image stuff */
-		image = load_image((char*) elt->name, (char*) elt->logo, getCachelocation(), getProgramname(), max_width, max_height);
+		image = gm_load_image((char*) elt->name, (char*) elt->logo, getCachelocation(), getProgramname(), max_width, max_height);
     gtk_box_pack_start (GTK_BOX (box), image, FALSE, FALSE, 3);
     gtk_widget_show (image);
 
@@ -254,7 +243,7 @@ static GtkWidget* image_label_box_vert (menu_elements *elt, int max_width, int m
     gtk_container_set_border_width (GTK_CONTAINER (box), 2);
 
     /* Now on to the image stuff */
-		image = load_image((char*) elt->name, (char*) elt->logo, getCachelocation(), getProgramname(), max_width, max_height);
+		image = gm_load_image((char*) elt->name, (char*) elt->logo, getCachelocation(), getProgramname(), max_width, max_height);
     gtk_box_pack_start (GTK_BOX (box), image, FALSE, FALSE, 3);
     gtk_widget_show (image);
 
@@ -533,17 +522,37 @@ static GtkWidget* createpanelelement( menu_elements *elt, int width, int height)
 		{
 			if(!g_module_symbol (module, "gm_module_set_conffile", (gpointer *) &(elt->gm_module_set_conffile)))
 			{
-				g_warning("Could not get function gm_module_get_widget from %s\n%s", 
+				g_warning("Could not get function gm_module_set_conffile from %s\n%s", 
 					elt->module, g_module_error()); 
 			}
+			else
+			{
+				elt->gm_module_set_conffile(elt->module_conffile);
+			}
 		}
-		//g_module_symbol (module, "gm_module_start", elt->gm_module_start);
-		//g_module_symbol (module, "gm_module_stop", elt->gm_module_stop);
-		//g_module_symbol (module, "gm_module_set_icon_size", elt->gm_module_set_icon_size);
-		//g_module_symbol (module, "gm_module_get_widget", elt->gm_module_get_widget);
+		if(!g_module_symbol (module, "gm_module_set_icon_size", (gpointer *) &(elt->gm_module_set_icon_size)))
+		{
+			g_warning("Could not get function gm_module_set_icon_size from %s\n%s", 
+				elt->module, g_module_error()); 
+		}
+		else
+		{
+			elt->gm_module_set_icon_size(width, height);
+		}
+
+		elt->gm_module_init();
+
+		if(!g_module_symbol (module, "gm_module_start", (gpointer *) &(elt->gm_module_start)))
+		{
+			g_warning("Could not get function gm_module_set_icon_size from %s\n%s", 
+				elt->module, g_module_error()); 
+		}
+		else
+		{
+			elt->gm_module_start();	
+		}
 	}
-	//elt->gm_module_set_icon_size(width, height);
-	elt->gm_module_init();
+		
 	return elt->gm_module_get_widget();
 }
 

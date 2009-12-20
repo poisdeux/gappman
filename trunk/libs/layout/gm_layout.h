@@ -15,6 +15,19 @@
 #include <gm_parseconf.h>
 
 /**
+* \brief loads image and scales it making sure the image fits inside
+* max_width*max_height maintaining the correct aspect ratio
+* \param elt_name name of the element
+* \param elt_logo filename of the logo image to load 
+* \param cacheloc directory where the cached images are kept
+* \param programname name of the main program that calls this function (i.e. gappman, netman, etc.)
+* \param max_width maximum width image may have
+* \param max_height maximum height image may have
+* \return GtkWidget pointer to image
+*/
+GtkWidget* gm_load_image(char* elt_name, char* elt_logo, char* cacheloc, char* programname, int max_width, int max_height);
+
+/**
 * \brief shows an error dialog with regards to gappman fontsize
 * \param message pointer to char that will hold the message
 * \param mainwin pointer to main window GtkWidget

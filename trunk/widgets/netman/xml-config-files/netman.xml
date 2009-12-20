@@ -1,0 +1,34 @@
+<netman>
+  <cachelocation>/tmp/</cachelocation>
+	<stati>
+    <status>
+      <name>Network up or down</name>
+			<exec>ping</exec>
+			<arg>-c</arg>
+			<arg>1</arg>
+			<arg>10.0.0.1</arg>
+      <success>0</success>
+      <logosuccess>./widgets/netman/logos/network-up.png</logosuccess>
+			<logofail>./logos/network-down.png</logofail>
+    </status>
+    <status>
+      <name>Hostname lookup up or down</name>
+			<exec>host</exec>
+			<arg>google.com</arg>
+      <success>0</success>
+      <logosuccess>./widgets/netman/logos/network-up.png</logosuccess>
+			<logofail>./widgets/netman/logos/network-down.png</logofail>
+    </status>
+  </stati>
+	<actions width="30%" height="10%" align="center">
+		<action>
+      <name>Restart network</name>
+      <exec>if-restart</exec>
+      <arg>eth0</arg>
+      <logoprogress>./logos/network-restart1.png</logoprogress>
+      <logoprogress>./logos/network-restart2.png</logoprogress>
+      <logoprogress>./logos/network-restart3.png</logoprogress>
+    </action>
+	</actions>
+</netman>
+
