@@ -1,13 +1,12 @@
-#summary One-sentence summary of this page.
+#summary The main program
 
 = Introduction =
 
-Add your content here.
+Gappman creates and manages the main User Interface (UI).
+It runs as a daemon listening to requests from applets/widgets and
+starts applications.
 
-
-= Details =
-
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+The idea is that gappman calculates the best setup for the UI and
+draws and places the buttons on the screen to provide an evenly spaced
+layout. It tracks started applications and provides applets with details 
+about the UI layout and started applications. 
