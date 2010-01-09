@@ -1,5 +1,5 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
-SUBDIRS = libs src widgets
+SUBDIRS = libs src applets
 dist_doc_DATA = README
 EXTRA_DIST = xml-config-files/*.xml logos/*.png ChangeLog
 

@@ -75,11 +75,11 @@ libs/Makefile
 libs/parseconf/Makefile
 libs/layout/Makefile
 libs/connect/Makefile
-widgets/Makefile
-widgets/shutdown/Makefile
-widgets/processmanager/Makefile
-widgets/changeresolution/Makefile
-widgets/netman/Makefile
+applets/Makefile
+applets/shutdown/Makefile
+applets/processmanager/Makefile
+applets/changeresolution/Makefile
+applets/netman/Makefile
 ])
 
 AC_OUTPUT

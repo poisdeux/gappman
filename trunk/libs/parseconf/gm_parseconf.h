@@ -18,7 +18,7 @@ typedef int (* GM_MODULE_INIT) (void);
 typedef GtkWidget* (* GM_MODULE_WIDGET) (void);
 typedef void (* GM_MODULE_SET_ICON_SIZE) (int width, int height);
 typedef void (* GM_MODULE_SET_CONFFILE) (const char* filename);
-typedef int (* GM_MODULE_START) (void);
+typedef void* (* GM_MODULE_START) (void);
 typedef int (* GM_MODULE_STOP) (void);
 
 /**

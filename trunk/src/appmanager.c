@@ -25,7 +25,7 @@
 #include <gm_parseconf.h>
 #include <gm_layout.h>
 #include "appmanager.h"
-
+#include <pthread.h>
 
 struct appwidgetinfo* global_appw;
 
@@ -319,6 +319,29 @@ static void destroy( GtkWidget *widget,
 }
 
 /**
+*	\brief starts the elements in the panel
+* \param *panel pointer to the menu_elements structures holding the panel elementts
+*/
+static void start_panel (menu_elements *panel)
+{
+	menu_elements *tmp;
+	tmp = panel;
+	while (panel != NULL )
+	{
+		if (!g_thread_create(tmp->gm_module_start(), NULL, FALSE, NULL))
+		{
+			g_error("Failed to create thread");
+		}
+		printf("DEBUG: 1\n");
+		fflush(stdout);
+		panel = tmp->next;
+		tmp = panel;
+		printf("DEBUG: 2\n");
+		fflush(stdout);
+	}
+}
+
+/**
 * \brief main function setting up the UI
 */
 int main (int argc, char **argv)
@@ -340,10 +363,16 @@ int main (int argc, char **argv)
   int c;
 	GIOChannel* gio;
 
-  gtk_init (&argc, &argv);
-	if (!g_thread_supported ()) g_thread_init (NULL);
+	//Needs to be called before any another glib function
+	if (!g_thread_supported ())
+	{ 
+		g_message("Threads supported");
+		g_thread_init (NULL);
+		gdk_threads_init();
+	}
 
-  while (1) {
+  gtk_init (&argc, &argv);
+	  while (1) {
       int option_index = 0;
       static struct option long_options[] = {
           {"width", 1, 0, 'w'},
@@ -455,6 +484,7 @@ int main (int argc, char **argv)
 		align = gm_createpanel( panel ); 
     gtk_container_add (GTK_CONTAINER (vbox), align);
     gtk_widget_show (align);
+		start_panel( panel );
 	}
   gtk_container_add (GTK_CONTAINER (mainwin), vbox);
   gtk_widget_show (vbox);
@@ -466,8 +496,11 @@ int main (int argc, char **argv)
 	{
 		fprintf(stderr, "Error: could not start listener.\n");
 	}
-  
+
+	gdk_threads_enter();  
   gtk_main ();
+  gdk_threads_leave();
+
 
 	if ( ! gappman_close_listener(gio) )
 	{

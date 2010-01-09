@@ -508,6 +508,12 @@ static GtkWidget* createpanelelement( menu_elements *elt, int width, int height)
 	}
 	else
 	{
+		if(!g_module_symbol (module, "gm_module_start", (gpointer *) &(elt->gm_module_start)))
+		{
+			g_warning("Could not get function gm_module_start from %s\n%s", 
+				elt->module, g_module_error()); 
+		}
+
 		if(!g_module_symbol (module, "gm_module_init", (gpointer *) &(elt->gm_module_init)))
 		{
 			g_warning("Could not get function gm_module_init from %s\n%s", 
@@ -542,15 +548,6 @@ static GtkWidget* createpanelelement( menu_elements *elt, int width, int height)
 
 		elt->gm_module_init();
 
-		if(!g_module_symbol (module, "gm_module_start", (gpointer *) &(elt->gm_module_start)))
-		{
-			g_warning("Could not get function gm_module_set_icon_size from %s\n%s", 
-				elt->module, g_module_error()); 
-		}
-		else
-		{
-			elt->gm_module_start();	
-		}
 	}
 		
 	return elt->gm_module_get_widget();

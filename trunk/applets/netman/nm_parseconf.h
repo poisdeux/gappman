@@ -8,8 +8,8 @@
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
-#ifndef __GAPPMAN_PARSECONF_H__
-#define __GAPPMAN_PARSECONF_H__
+#ifndef __GAPPMAN_NM_PARSECONF_H__
+#define __GAPPMAN_NM_PARSECONF_H__
 
 #include <gtk/gtk.h>
 #include <libxml/xmlreader.h>
