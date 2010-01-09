@@ -2,16 +2,6 @@
   <cachelocation>/tmp/</cachelocation>
 	<stati>
     <status>
-      <name>Network up or down</name>
-			<exec>/bin/ping</exec>
-			<arg>-c</arg>
-			<arg>1</arg>
-			<arg>10.0.0.1</arg>
-      <success>0</success>
-      <logosuccess>./applets/netman/logos/network-up.png</logosuccess>
-			<logofail>./logos/network-down.png</logofail>
-    </status>
-    <status>
       <name>Hostname lookup up or down</name>
 			<exec>/usr/bin/host</exec>
 			<arg>google.com</arg>
@@ -19,7 +9,18 @@
       <logosuccess>./applets/netman/logos/network-up.png</logosuccess>
 			<logofail>./applets/netman/logos/network-down.png</logofail>
     </status>
-  </stati>
+   <status>
+      <name>Network up or down</name>
+			<exec>/bin/ping</exec>
+			<arg>-q</arg>
+			<arg>-c</arg>
+			<arg>1</arg>
+			<arg>127.0.0.1</arg>
+      <success>0</success>
+      <logosuccess>./applets/netman/logos/network-up.png</logosuccess>
+			<logofail>./applets/netman/logos/network-down.png</logofail>
+    </status>
+   </stati>
 	<actions width="30%" height="10%" align="center">
 		<action>
       <name>Restart network</name>

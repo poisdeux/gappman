@@ -328,16 +328,13 @@ static void start_panel (menu_elements *panel)
 	tmp = panel;
 	while (panel != NULL )
 	{
-		if (!g_thread_create(tmp->gm_module_start(), NULL, FALSE, NULL))
+		printf("DEBUG: starting thread\n");
+		if (!g_thread_create((GThreadFunc) tmp->gm_module_start, NULL, FALSE, NULL))
 		{
 			g_error("Failed to create thread");
 		}
-		printf("DEBUG: 1\n");
-		fflush(stdout);
 		panel = tmp->next;
 		tmp = panel;
-		printf("DEBUG: 2\n");
-		fflush(stdout);
 	}
 }
 
@@ -476,6 +473,16 @@ int main (int argc, char **argv)
     gtk_widget_show (align);
   }
 
+	gtk_widget_show (vbox);
+  gtk_widget_show (mainwin);
+
+  autostartprograms( programs );
+
+	if ( ! gappman_start_listener(&gio, "localhost", 2103) )
+	{
+		fprintf(stderr, "Error: could not start listener.\n");
+	}
+
 	/* Preliminary framework to support panel like
 	* notification/status widgets
 	*/	
@@ -487,15 +494,7 @@ int main (int argc, char **argv)
 		start_panel( panel );
 	}
   gtk_container_add (GTK_CONTAINER (mainwin), vbox);
-  gtk_widget_show (vbox);
-  gtk_widget_show (mainwin);
-
-  autostartprograms( programs );
-
-	if ( ! gappman_start_listener(&gio, "localhost", 2103) )
-	{
-		fprintf(stderr, "Error: could not start listener.\n");
-	}
+  
 
 	gdk_threads_enter();  
   gtk_main ();

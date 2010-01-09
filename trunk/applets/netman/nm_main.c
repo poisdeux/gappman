@@ -17,87 +17,103 @@
 #include "nm_parseconf.h"
 //#include "nm_layout.h"
 
-static GtkWidget *button = NULL;
-static int button_width = 50;
-static int button_height = 50;
+static GtkWidget *event_box = NULL;
+static int event_box_width = 50;
+static int event_box_height = 50;
+static int current_status = -2;
 static nm_elements* stati = NULL;
 static nm_elements* actions = NULL;
 static const char* conffile = "./applets/netman/xml-config-files/netman.xml";
-GtkWidget *image_success = NULL;
-GtkWidget *image_fail = NULL;
+static GtkWidget *image_success = NULL;
+static GtkWidget *image_fail = NULL;
+static char **args;
 
 static gint check_network_status()
 {
-	char **args;
-  int i;
-  int status;
+  int status = -1;
   int ret;
   __pid_t childpid;
   FILE *fp;
 
-	sleep(200);
-	return TRUE;
-  /**
-    Create argument list. First element should be the filename
-    of the executable and last element needs to be NULL.
-    see man exec for more details
-  */
-  args = (char **) malloc((stati->numArguments + 2)* sizeof(char *));
-  args[0] = (char *) stati->exec;
-  for ( i = 0; i < stati->numArguments; i++ )
-  {
-    args[i+1] = stati->args[i];
-  }
-  args[i+1] = NULL;
-
-	printf("check_network: 1\n");
+  
   fp = fopen((char *) stati->exec,"r");
   if( fp )
   {
 		fclose(fp);
+
     childpid = fork();
     if ( childpid == 0 )
     {
-			printf("DEBUG: Executing: %s with args: ", stati->exec);
-        for ( i = 0; i < stati->numArguments; i++ )
-        {
-          printf("%s ", args[i+1]);
-        }
       execvp((char *) stati->exec, args);
       _exit(0);
 		}
-		wait(&status);
-		printf("check_network: returned status %d\n", status);
-		if( status == 0 )
+
+		while( status == -1 )
 		{
-			gtk_button_set_image(GTK_BUTTON(button), image_success);
-		}
-		else
+			waitpid(childpid, &status, WNOHANG); 
+			sleep(1);
+		} 
+
+		printf("check_network: returned status %d: current_status %d\n", status, current_status);
+		if ( current_status != status )
 		{
-			gtk_button_set_image(GTK_BUTTON(button), image_fail);
+			current_status = status;
+			if( status == 0 )
+			{
+				gtk_container_remove(GTK_CONTAINER(event_box), image_fail);
+				gtk_container_add(GTK_CONTAINER(event_box), image_success);
+				gtk_widget_show(image_success);
+				return TRUE;
+			}
+			else
+			{
+				gtk_container_remove(GTK_CONTAINER(event_box), image_success);
+				gtk_container_add(GTK_CONTAINER(event_box), image_fail);
+				gtk_widget_show(image_fail);
+				return FALSE;
+			}
 		}
 	}
 	else
 	{
 		g_warning("Could not open %s\n", stati->exec);
 	}
-	free(args);
-	printf("TEST: end of check_network\n");
-	return TRUE;
 }
 
 G_MODULE_EXPORT int gm_module_init()
 {
+  int i;
 
 	nm_load_conf(conffile);
+
 	stati = nm_get_stati();
 	actions = nm_get_actions();
 
-	button = gtk_button_new();
-	image_fail = gm_load_image((char*) stati->name, (char*) stati->logofail, nm_get_cache_location(), "netman", button_width, button_height);	
-	gtk_button_set_image(GTK_BUTTON(button), image_fail);
-  gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
-	
+	event_box = gtk_event_box_new();
+
+	image_fail = gm_load_image((char*) stati->name, (char*) stati->logofail, nm_get_cache_location(), "netman-fail", event_box_width, event_box_height);	
+	image_success = gm_load_image((char*) stati->name, (char*) stati->logosuccess, nm_get_cache_location(), "netman-success", event_box_width, event_box_height);	
+	gtk_container_add(GTK_CONTAINER(event_box), image_fail);
+	gtk_widget_show(image_fail);
+	/*g_signal_connect (G_OBJECT (event_box),
+                      "event_box_press_event",
+                      G_CALLBACK (event_box_press_callback),
+                      image);
+	*/
+
+	/**
+    Create argument list. First element should be the filename
+    of the executable and last element needs to be NULL.
+    see man exec for more details
+  */
+  args = (char **) malloc((stati->numArguments + 2)* sizeof(char *));
+  args[0] = (char *) stati->exec;
+  for (i = 0; i < stati->numArguments; i++ )
+  {
+    args[i+1] = stati->args[i];
+  }
+  args[i+1] = NULL;
+
 	return 0;
 }
 
@@ -108,24 +124,27 @@ G_MODULE_EXPORT void gm_module_set_conffile(const char* filename)
 
 G_MODULE_EXPORT GThreadFunc gm_module_start()
 {
-	//check_network_status();
-	g_timeout_add(10000, (GSourceFunc) check_network_status, NULL);
-	return 0;
+	while(1)
+	{
+		check_network_status();
+		sleep(10);
+	}
 }
 
 G_MODULE_EXPORT int gm_module_stop()
 {
+	free(args);	
 	return 0;
 }
 
 G_MODULE_EXPORT void gm_module_set_icon_size(int width, int height)
 {
-	button_width = width;
-	button_height = height;
+	event_box_width = width;
+	event_box_height = height;
 }
 
 G_MODULE_EXPORT GtkWidget *gm_module_get_widget()
 {
-	return button;
+	return event_box;
 }
 
