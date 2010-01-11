@@ -1,0 +1,18 @@
+pixmap_path "/usr/share/backgrounds/:/usr/share/wallpapers/"
+
+style "background-style"
+{
+  # set the background to black
+  bg[NORMAL] = "#000000"
+  bg_pixmap[NORMAL] = "All-Good-People-1.jpg"
+}
+
+style "button-style"
+{
+  fg[NORMAL] = "#A0A0A0"
+  GtkWidget::focus-line-width = 1
+}
+
+class "GtkWidget" style "background-style"
+class "GtkButton" style "button-style"
+
