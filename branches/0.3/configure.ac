@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT([appmanager], [0.3], [m.brekhof@gmail.com])
+AC_INIT([appmanager], [0.3.1], [m.brekhof@gmail.com])
 
 AC_SUBST(GTK_INCLUDES)
 AC_SUBST(LIBXML_INCLUDES)
