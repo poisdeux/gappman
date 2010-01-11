@@ -1,0 +1,75 @@
+-----------------------------------------------------------------------------
+1. Introduction
+-----------------------------------------------------------------------------
+
+libparseconf is a library to load the gappman configuration files and 
+populate the menu_elements structures.
+
+-----------------------------------------------------------------------------
+2. XML Configuration file format
+-----------------------------------------------------------------------------
+
+<gappman>
+  <cachelocation>DIRECTORYPATH</cachelocation>
+  <actions width="<WIDTH>" height="<HEIGHT>" align="[[top|left|bottom|right|center],...]">
+    <action>
+      <name>ACTIONNAME</name>
+      <printlabel>0|1</printlabel>
+      <logo>LOGOIMAGEFILENAME</logo>
+      <resolution>WIDTHxHEIGHT</resolution>
+      <exec>EXECUTABLEFILENAME</exec>
+      <arg>ARGUMENT</arg>
+      <arg>ARGUMENT</arg>
+    </action>
+    ...
+    ...
+    ...
+    <action>
+      <name>ACTIONNAME</name>
+      <printlabel>0|1</printlabel>
+      <logo>LOGOIMAGEFILENAME</logo>
+      <resolution>WIDTHxHEIGHT</resolution>
+      <exec>EXECUTABLEFILENAME</exec>
+      <arg>ARGUMENT</arg>
+      <arg>ARGUMENT</arg>
+    </action>
+  </actions>
+  <programs width="<WIDTH>" height="<HEIGHT>" align="[[top|left|bottom|right|center],...]">
+    <program>
+      <name>PROGRAMNAME</name>
+      <printlabel>0|1</printlabel>
+      <logo>LOGOIMAGEFILENAME</logo>
+      <resolution>WIDTHxHEIGHT</resolution>
+      <exec>EXECUTABLEFILENAME</exec>
+      <arg>ARGUMENT</arg>
+      ...
+      ...
+      ...
+      <arg>ARGUMENT</arg>
+      <autostart>[1|0]</autostart>
+    </program>
+    ...
+    ...
+    ...
+    <program>
+      <name>PROGRAMNAME</name>
+      <printlabel>0|1</printlabel>
+      <logo>LOGOIMAGEFILENAME</logo>
+      <resolution>WIDTHxHEIGHT</resolution>
+      <exec>EXECUTABLEFILENAME</exec>
+      <arg>ARGUMENT</arg>
+      ...
+      ...
+      ...
+      <arg>ARGUMENT</arg>
+      <autostart>[1|0]</autostart>
+    </program>
+  </programs>
+</gappman>
+
+<printlabel> is optional and defaults to FALSE. If set to true the <name> of the program or action is used as textlabel for the button.
+The attributes <width> and <height> can be specified in amount of pixels or in percentages. The latter should be followed by a % sign, for example: 50%. Percentages will be relative to the total screen width and height. Note that this does not count for the resolution element, which takes only width and height values in pixels.
+<arg> and <resolution> are optional. If no <resolution> is given the default screen resolution will be used. 
+The <autostart> attribute can have values 0 or 1. If set to 1 the program will be started when appmanager is started.
+
+If <cachelocation> is specified the system will first look for a cached version of the scaled images. If it cannot find an image it will scale the image pointed by <logo>, scale it, and save the scaled version in the directory specified by <cachelocation>.

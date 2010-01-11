@@ -1,0 +1,223 @@
+
+The processmanager widget must obtain the list of programs from gappman.
+This cannot be obtained from the configuration file as the PIDs are 
+needed to manage the processes. These are known when the program is 
+started and therefore not available from the configuration file.
+
+Processmanager should show the Programname, Logo, and State in a
+table format:
+
++------+-------------+-------+
+| Logo | Programname | State |
++------+-------------+-------+
+| .... |     ....    |  ...  |
++------+-------------+-------+
+| .... |     ....    |  ...  |
++------+--------+----+-------+
+| CANCEL |
++--------+
+
+Selection should be highlighted per row and pressing spacebar should
+provide the user with a dialog allowing her to choose what action to
+perform.
+
++------------------+------------------+
+| Programname      | State            |
++------------------+---------+--------+
+| button:          | button: |
+| Stop PROGRAMNAME | Cancel  |
++------------------+---------+
+
+When the stop button is pressed the signals sent are depended on the state
+of the program.
+
+* Running: TERM 
+* Sleeping (Interruptible): TERM 
+* Waiting (Uninterruptible): KILL
+* Stopped: KILL
+* Zombie: Restart parent process
+
+Zombie processes are a bit harder to kill. The parent should be restarted
+or killed. This would be gappman and it should be able to handle the HUP
+signal. Zombie processes would indicate a bug in gappman as these are not
+supposed to happen.
+
+
+=== Server code to be added to gappman (needs to be rewritten to GTK)
+
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <wait.h>
+#include <signal.h>
+
+static void handlesignal(int sig, siginfo_t *si, void *unused)
+{
+        fprintf(stdout, "Child exited.\n");
+        wait(0);
+}
+
+void readmessage(int sockfd)
+{
+        int n;
+        char buffer[256];
+
+        memset(buffer, 0, 256);
+        n = read(sockfd,buffer,255);
+        if (n < 0)
+        {
+                fprintf(stderr, "Error: failed to read from socket.\n");
+        }
+        printf("Here is the message: %s",buffer);
+
+        n = write(sockfd,"I got your message",18);
+        if (n < 0)
+        {
+                fprintf(stderr, "Error: could not write to socket.\n");
+        }
+}
+
+int main(int argc, char *argv[])
+{
+        int sockfd, newsockfd, portno, clilen, pid, status;
+        struct sockaddr_in serv_addr, cli_addr;
+        struct sigaction sa;
+
+        if(argc < 2)
+        {
+                fprintf(stderr, "Error: no port defined\n");
+                exit(1);
+        }
+
+        sockfd = socket(AF_INET, SOCK_STREAM, 0);
+        if(sockfd < 0)
+        {
+                fprintf(stderr, "Error: could not open socket\n");
+        }
+
+        memset((char *) &serv_addr, 0, sizeof(serv_addr));
+        portno=atoi(argv[1]);
+        serv_addr.sin_family = AF_INET;
+        serv_addr.sin_port = htons(portno);
+        serv_addr.sin_addr.s_addr = INADDR_ANY;
+
+        if(bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
+        {
+                fprintf(stderr, "Error: could not bind to %d:%d\n", serv_addr.sin_addr.s_addr, serv_addr.sin_port);
+        }
+
+        listen(sockfd, 5);
+
+        clilen = sizeof(cli_addr);
+
+        sa.sa_flags = SA_NOCLDWAIT;
+        sigemptyset(&sa.sa_mask);
+        sa.sa_sigaction = handlesignal;
+        if ( sigaction(SIGCHLD, &sa, NULL) == -1 )
+        {
+                fprintf(stderr, "Error: could not add action to signal SIGCHLD.\n");
+        }
+
+        while(1)
+        {
+                newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
+                if (newsockfd < 0)
+                {
+                        fprintf(stderr, "Error: accepting message failed.\n");
+                }
+                else
+                {
+                        pid = fork();
+                        if ( pid < 0 )
+                        {
+                                fprintf(stderr, "Error: could not fork.\n");
+                        }
+                        if ( pid == 0 )
+                        {
+                                close(sockfd);
+                                readmessage(newsockfd);
+                                exit(0);
+                        }
+                        else
+                        {
+                                waitpid(pid, NULL, WNOHANG);
+                                close(newsockfd);
+                        }
+                }
+        }
+        return 0;
+}
+
+
+=== Client code
+
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <stdlib.h>
+#include <string.h>
+
+int main(int argc, char *argv[])
+{
+  int sockfd, portno, n;
+  struct sockaddr_in serv_addr;
+  struct hostent *server;
+
+        char buffer[256];
+        if (argc < 3)
+        {
+                fprintf(stderr,"usage %s hostname port", argv[0]);
+                exit(0);
+        }
+
+        portno = atoi(argv[2]);
+        sockfd = socket(AF_INET, SOCK_STREAM, 0);
+        if (sockfd < 0)
+  {
+                fprintf(stderr, "Error: could not open socket.\n");
+        }
+
+        server = gethostbyname(argv[1]);
+        if (server == NULL)
+        {
+        fprintf(stderr,"Error: could not find host %s", argv[1]);
+        exit(0);
+        }
+
+        memset((char *) &serv_addr, 0, sizeof(serv_addr));
+        serv_addr.sin_family = AF_INET;
+        memcpy((char *)server->h_addr, (char *)&serv_addr.sin_addr.s_addr, server->h_length);
+        serv_addr.sin_port = htons(portno);
+
+        if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
+  {
+                fprintf(stderr, "Error: could not connect.\n");
+        }
+
+        printf("Please enter the message: ");
+  memset(buffer, 0, 256);
+  fgets(buffer,255,stdin);
+
+  n = write(sockfd,buffer,strlen(buffer));
+  if (n < 0)
+        {
+    fprintf(stderr, "Error: could not write to socket.\n");
+  }
+
+        memset(buffer,0,256);
+  n = read(sockfd,buffer,255);
+  if (n < 0)
+        {
+    fprintf(stderr, "Error: could not read from socket.\n");
+  }
+  printf("%s ",buffer);
+  return 0;
+}
+
+

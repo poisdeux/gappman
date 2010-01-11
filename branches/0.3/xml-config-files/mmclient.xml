@@ -1,0 +1,55 @@
+<appmanager>
+  <actions width="20%" height="10%" align="top,left">
+    <action>
+      <name>Shutdown machine</name>
+      <exec>ngc</exec>
+      <arg>-0</arg>
+      <logo>./logos/exit.png</logo>
+    </action>
+    <action>
+      <name>Network restart</name>
+      <exec>/bin/ls</exec>
+      <arg>-la</arg>
+      <arg>/usr</arg>
+      <logo>./logos/network-restart.png</logo>
+    </action>
+    <action>
+      <name>Kill application</name>
+      <exec></exec>
+      <arg></arg>
+      <logo>./logos/mythtv.png</logo>
+    </action>
+  </actions>
+  <programs width="100%" height="20%" align="bottom,center">
+    <program>
+      <name>MythTV</name>
+      <exec>/usr/bin/mythfrontend</exec>
+      <logo>./logos/mythtv.png</logo>
+      <autostart>0</autostart>
+			<printlabel>1</printlabel>
+    </program>
+    <program>
+      <name>NX Desktop</name>
+      <exec>/usr/NX/bin/nxclient</exec>
+      <logo>./logos/nxclient-icon.png</logo>
+      <autostart>0</autostart>
+			<printlabel>1</printlabel>
+    </program>
+    <program>
+      <name>MythTV</name>
+      <resolution>800x600</resolution>
+      <exec>/usr/bin/mythfrontend</exec>
+      <logo>./logos/mythtv.png</logo>
+      <autostart>0</autostart>
+			<printlabel>1</printlabel>
+    </program>
+    <program>
+      <name>Stepmania</name>
+      <exec>/usr/bin/stepmania</exec>
+      <resolution>640x480</resolution>
+      <logo>./logos/stepmania.png</logo>
+      <autostart>0</autostart>
+			<printlabel>1</printlabel>
+    </program>
+  </programs>
+</appmanager>
