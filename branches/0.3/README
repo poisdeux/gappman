@@ -1,0 +1,120 @@
+-----------------------------------------------------------------------------
+1. Introduction
+-----------------------------------------------------------------------------
+
+This is an application launcher utility that uses a XML configuration file to
+specify the applications and logo images which should be included in the
+menu. The menu is automatically created by scaling and placing the buttons to 
+provide an evenly spaced layout.
+
+This is very convenient when developing applications for homogeneous platforms
+where the display size may vary considerably, e.g. mobile devices, HD 
+television screens, computer screens.
+
+Features:
+
+* Automatic scaling and placing of buttons
+* Supports two types of buttons; actions and programs. Here, action means starting a management application like configuring the X server, restarting the system, setting up network, etc.. Programs are applications which fullfill the actual purpose of the system. E.g. mediaplayer, remote desktop, webbrowsing, etc. etc..
+* Change screen resolution when a program is started and change it back to original when program quits.
+* Fully configurable using one XML configuration file.
+
+
+-----------------------------------------------------------------------------
+2. Installation
+-----------------------------------------------------------------------------
+
+The tarball version can be build as follows:
+
+	./configure
+	make && make install
+
+When you want to build the SVN version you will first need to create the 
+configure script:
+
+	aclocal
+	autoconf
+	automake --add-missing
+
+Now you should be able to build appmanager as usual:
+
+	./configure
+	make && make install
+
+
+-----------------------------------------------------------------------------
+3. Running the application
+-----------------------------------------------------------------------------
+
+The program can be executed as follows from the source tarball after building it:
+
+src/appmanager --conffile xml-config-files/mmclient.xml
+
+This will start appmanager using the sample configuration file in "xml-config-files" and
+a screen width of 800 and screen height of 600 pixels.
+
+Use --help to get information on more supported options.
+
+
+-----------------------------------------------------------------------------
+4. XML Configuration file format
+-----------------------------------------------------------------------------
+
+<appmanager>
+  <actions width="<WIDTH>" height="<HEIGHT>" align="[[top|left|bottom|right|center],...]">
+    <action>
+      <name>ACTIONNAME</name>
+      <logo>LOGOIMAGEFILENAME</logo>
+      <resolution>WIDTHxHEIGHT</resolution>
+      <exec>EXECUTABLEFILENAME</exec>
+      <arg>ARGUMENT</arg>
+      <arg>ARGUMENT</arg>
+    </action>
+    ...
+    ...
+    ...
+    <action>
+      <name>ACTIONNAME</name>
+      <logo>LOGOIMAGEFILENAME</logo>
+      <resolution>WIDTHxHEIGHT</resolution>
+      <exec>EXECUTABLEFILENAME</exec>
+      <arg>ARGUMENT</arg>
+      <arg>ARGUMENT</arg>
+    </action>
+  </actions>
+  <programs width="<WIDTH>" height="<HEIGHT>" align="[[top|left|bottom|right|center],...]">
+    <program>
+      <name>PROGRAMNAME</name>
+      <logo>LOGOIMAGEFILENAME</logo>
+      <resolution>WIDTHxHEIGHT</resolution>
+      <exec>EXECUTABLEFILENAME</exec>
+      <arg>ARGUMENT</arg>
+      ...
+      ...
+      ...
+      <arg>ARGUMENT</arg>
+      <autostart>[1|0]</autostart>
+    </program>
+    ...
+    ...
+    ...
+    <program>
+      <name>PROGRAMNAME</name>
+      <logo>LOGOIMAGEFILENAME</logo>
+      <resolution>WIDTHxHEIGHT</resolution>
+      <exec>EXECUTABLEFILENAME</exec>
+      <arg>ARGUMENT</arg>
+      ...
+      ...
+      ...
+      <arg>ARGUMENT</arg>
+      <autostart>[1|0]</autostart>
+    </program>
+  </programs>
+</appmanager>
+
+The attributes width and height can be specified in amount of pixels or in percentages. 
+The latter will be relative to the total screen width and height. Note that this does not count for the resolution element, which takes only width and height values in pixels.
+
+The autostart attribute can have values 0 or 1. If set to 1 the program will be started when appmanager is started.
+
+
