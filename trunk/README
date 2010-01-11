@@ -62,3 +62,75 @@ Use --help to get information on more supported options.
 
 The layout is defined in XML configuration files which are parsed by 
 libparseconf see the README in libs/parseconf for more details.
+
+
+-----------------------------------------------------------------------------
+5. Making a release
+-----------------------------------------------------------------------------
+
+-- Making a new release version from trunk
+
+1. Edit the Changelog and raise the version number in configure.ac
+
+2. Commit the changes on the trunk
+
+svn commit -m "New release version VERSION"
+
+3. Make a branch to test and debug the release
+
+svn copy https://gappman.googlecode.com/svn/trunk/ \
+	https://gappman.googlecode.com/svn/branches/RELEASEVERSION
+
+4. After testing and debugging commit the changes, if any. 
+
+svn commit -m "New maintenance release version VERSION"
+
+5. Make a release version
+
+svn copy https://gappman.googlecode.com/svn/branches/RELEASEVERSION \
+  https://gappman.googlecode.com/svn/tags/release-RELEASEVERSION
+
+
+-- Making a maintenance release
+
+To release a bugfix version after the initial release you can make a maintenance release.
+Maintenance releases should be tested on the branch and result in a RELEASEVERSION.x
+	 where x is a subnumber starting at 1 and increased with every new maintenance release
+
+1. Edit the Changelog and raise the version number in configure.ac
+
+2. Commit the changes on the branch
+
+svn commit -m "New release version VERSION"
+
+3. Make a maintenance release version
+ 
+svn copy https://gappman.googlecode.com/svn/branches/RELEASEVERSION \
+  https://gappman.googlecode.com/svn/tags/release-RELEASEVERSION.x
+
+
+
+-- Create a downloadable version of the release
+
+1. Go to the release version
+
+cd tags/release-RELEASEVERSION.x
+
+2. Create the makefiles
+
+libtoolize --copy
+aclocal
+autoconf
+automake --add-missing
+/configure
+
+1. Create the tarball as follows:
+
+make dist
+
+2. Copy the tarball to the website.
+
+
+
+
+
