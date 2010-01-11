@@ -6,8 +6,10 @@ appmanager_SOURCES = changeresolution.c parseconf.c appmanager.c
 # appmanager_CFLAGS = @CFLAGS@
 appmanager_CPPFLAGS = @GTK_INCLUDES@
 appmanager_CPPFLAGS += @LIBXML_INCLUDES@
+appmanager_CPPFLAGS += @XRANDR_INCLUDES@
 appmanager_LDADD = @GTK_OBJS@
 appmanager_LDADD += @LIBXML_OBJS@
+appmanager_LDADD += @XRANDR_OBJS@
 appmanagerdir = ../src
 appmanager.$(OBJEXT): parseconf.o
 

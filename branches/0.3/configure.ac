@@ -5,8 +5,10 @@ AC_INIT([appmanager], [0.3], [m.brekhof@gmail.com])
 
 AC_SUBST(GTK_INCLUDES)
 AC_SUBST(LIBXML_INCLUDES)
+AC_SUBST(XRANDR_INCLUDES)
 AC_SUBST(GTK_OBJS)
 AC_SUBST(LIBXML_OBJS)
+AC_SUBST(XRANDR_OBJS)
 
 AC_USE_SYSTEM_EXTENSIONS
 AC_CHECK_FUNCS([localtime_r pow sqrt])
@@ -40,6 +42,12 @@ AC_SEARCH_LIBS([gtk_main], [gtk-x11-2.0], [
 GTK_INCLUDES=`pkg-config --cflags gtk+-2.0`
 ], [
 echo "Error: gtk+-2.0 not found!"; exit 1
+], [])
+
+AC_SEARCH_LIBS([XRRSetScreenConfigAndRate], [Xrandr], [
+XRANDR_INCLUDES=`pkg-config --cflags libxml-2.0`
+], [
+echo "Error: libXrandr not found!"; exit 1
 ], [])
 
 AC_CONFIG_SRCDIR(src)
