@@ -4,6 +4,10 @@
 
 The shutdown applet provides the user with several (configurable) options to shutdown the system.
 
+= Screenshot =
+
+<a href="http://www.flickr.com/photos/sfeerbeheer/4296350468/" title="shutdown-screenshot by poisdeux, on Flickr"><img src="http://farm5.static.flickr.com/4016/4296350468_d2b9a99ef6_o.png" width="240" height="142" alt="shutdown-screenshot" /></a>
+
 = Configuration =
 
 A sample configuration file is as follows:
@@ -36,5 +40,3 @@ A sample configuration file is as follows:
   </actions>
 </shutdown>
 }}} 
-
-
