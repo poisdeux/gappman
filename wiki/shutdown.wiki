@@ -10,7 +10,7 @@ The shutdown applet provides the user with several (configurable) options to shu
 
 = Configuration =
 
-A sample configuration file is as follows:
+This is the configuration file that was used to create the above screenshot:
 
 {{{
 <shutdown>
