@@ -5,7 +5,5 @@ libgm_netman_la_CPPFLAGS = @GTK_INCLUDES@
 libgm_netman_la_CPPFLAGS += @LIBXML_INCLUDES@
 libgm_netman_la_CPPFLAGS += -I$(top_builddir)/libs/layout
 libgm_netman_la_CPPFLAGS += -I$(top_builddir)/libs/parseconf
-libgm_netman_la_LIBADD = @LIBXML_OBJS@
-libgm_netman_la_LIBADD += @GTK_OBJS@
-libgm_netman_la_LIBADD += $(top_builddir)/libs/parseconf/libgm_parseconf.la
+libgm_netman_la_LIBADD = $(top_builddir)/libs/parseconf/libgm_parseconf.la
 
