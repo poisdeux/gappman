@@ -1,0 +1,10 @@
+#summary Simple application to send signals to apps started by GAppMan
+
+= Introduction =
+
+ProcessManager asks GAppMan which applications have been started and retrieves status
+information from the kernel. It provides the user a summary of the applications and their status and allows the user to stop one or more apps.
+
+= Screenshot =
+
+= Configuration =
