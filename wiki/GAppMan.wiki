@@ -9,4 +9,58 @@ starts applications.
 The idea is that gappman calculates the best setup for the UI and
 draws and places the buttons on the screen to provide an evenly spaced
 layout. It tracks started applications and provides applets with details 
-about the UI layout and started applications. 
+about the UI layout and started applications.
+
+= Screenshot =
+
+<a href="http://www.flickr.com/photos/sfeerbeheer/4296852049/" title="gappman-screenshot1 by poisdeux, on Flickr"><img src="http://farm5.static.flickr.com/4025/4296852049_be3849aed7_o.png" width="640" height="400" alt="gappman-screenshot1" /></a>
+
+= Configuration =
+
+The screenshot above was created using the following configuration file for GAppMan.
+
+{{{
+<appmanager>
+  <cachelocation>/tmp</cachelocation>
+  <actions width="20%" height="10%" align="top,left">
+    <action>
+      <name>Shutdown machine</name>
+      <exec>ngc</exec>
+      <arg>-0</arg>
+      <logo>./logos/exit.png</logo>
+    </action>
+    <action>
+      <name>Network restart</name>
+      <exec>/usr/bin/xeyes</exec>
+      <arg>-fg</arg>
+      <arg>blue</arg>
+      <logo>./logos/network-restart.png</logo>
+    </action>
+  </actions>
+  <programs width="100%" height="20%" align="bottom,center">
+    <program>
+      <name>NX Desktop</name>
+      <exec>/usr/NX/bin/nxclient</exec>
+      <logo>./logos/nxclient-icon.png</logo>
+      <autostart>0</autostart>
+      <printlabel>1</printlabel>
+    </program>
+    <program>
+      <name>MythTV</name>
+      <resolution>800x600</resolution>
+      <exec>/usr/bin/mythfrontend</exec>
+      <logo>./logos/mythtv.png</logo>
+      <autostart>0</autostart>
+      <printlabel>1</printlabel>
+    </program>
+    <program>
+      <name>Stepmania</name>
+      <exec>/usr/bin/stepmania</exec>
+      <resolution>640x480</resolution>
+      <logo>./logos/stepmania.png</logo>
+      <autostart>0</autostart>
+      <printlabel>1</printlabel>
+    </program>
+  </programs>
+</appmanager>
+}}}
