@@ -22,7 +22,16 @@ Instead of killing gappman a restart will be tried.
 
 The program can be executed as follows from the source tarball after building it:
 
-./processmanager servername port
+./processmanager [servername] [port] --conffile gappmanxmlconfigurationfile 
 
 Use --help to get information on more supported options.
 
+The gappmanxmlconfigurationfile is needed to get the images used for the buttons
+to start the applications.
+
+-----------------------------------------------------------------------------
+3. Known issues
+-----------------------------------------------------------------------------
+
+* Program segfaults if no configuration file is found. Program should fallback
+  to a text-only version.

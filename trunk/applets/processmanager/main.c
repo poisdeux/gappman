@@ -413,91 +413,87 @@ int main (int argc, char **argv)
 		if ( loadConf(conffile) != 0 )
 		{	
 			gm_show_error_dialog("Could not load gappman configuration file\n", mainwin, destroy);
-		}	
- 		else if( getNumberOfElements() > 0 )
-		{
-			program_width=dialog_width-(dialog_width/2);
-			row_height=dialog_height/getNumberOfElements();
+		}
+	
 
-			elts = getPrograms();
-			programs_tmp = elts;
-	
-			while ( elts != NULL )
-			{
-				started_procs_tmp = started_procs;
-				while ( started_procs_tmp != NULL)
-				{
-					if( g_strcmp0(elts->name, started_procs_tmp->name) == 0 )
-					{
-						elts->name = started_procs_tmp->name;
-						elts->pid = started_procs_tmp->pid;
-	
-						hbox = createrow(elts, program_width, row_height);
-						gtk_container_add(GTK_CONTAINER(vbox), hbox);	
-						gtk_widget_show (hbox);
-						separator = gtk_hseparator_new();
-						gtk_container_add(GTK_CONTAINER(vbox), separator);	
-						gtk_widget_show (separator);
-	
-						//get out of while-loop
-						started_procs_tmp = NULL;
-					}
-					else
-					{
-						started_procs_tmp = started_procs_tmp->prev;
-					}
-				}	
-				elts = elts->next;
-			}
-
-			elts = getActions();
-			actions_tmp = elts;
-	
-			while ( elts != NULL )
-			{
-				started_procs_tmp = started_procs;
-				while ( started_procs_tmp != NULL)
-				{
-					if( g_strcmp0(elts->name, started_procs_tmp->name) == 0 )
-					{
-						elts->name = started_procs_tmp->name;
-						elts->pid = started_procs_tmp->pid;
+		elts = getPrograms();
+		programs_tmp = elts;
 		
-						hbox = createrow(elts, program_width, row_height);
-						gtk_container_add(GTK_CONTAINER(vbox), hbox);	
-						gtk_widget_show (hbox);
-						separator = gtk_hseparator_new();
-						gtk_container_add(GTK_CONTAINER(vbox), separator);	
-						gtk_widget_show (separator);
+		program_width=dialog_width-(dialog_width/2);
+		row_height=dialog_height/(*elts->amount_of_elements);
+		g_debug("dialog_width = %d, dialog_height = %d, amount_of_elemets = %d\n", dialog_width, dialog_height, *elts->amount_of_elements); 
 
-						//get out of while-loop
-						started_procs_tmp = NULL;
-					}
-					else
-					{
-						started_procs_tmp = started_procs_tmp->prev;
-					}
-				}	
+		while ( elts != NULL )
+		{
+			started_procs_tmp = started_procs;
+			while ( started_procs_tmp != NULL)
+			{
+				if( g_strcmp0(elts->name, started_procs_tmp->name) == 0 )
+				{
+					elts->name = started_procs_tmp->name;
+					elts->pid = started_procs_tmp->pid;
+
+					hbox = createrow(elts, program_width, row_height);
+					gtk_container_add(GTK_CONTAINER(vbox), hbox);	
+					gtk_widget_show (hbox);
+					separator = gtk_hseparator_new();
+					gtk_container_add(GTK_CONTAINER(vbox), separator);	
+					gtk_widget_show (separator);
+
+					//get out of while-loop
+					started_procs_tmp = NULL;
+				}
+				else
+				{
+					started_procs_tmp = started_procs_tmp->prev;
+				}
+			}	
 			elts = elts->next;
-			}
-			freeproceslist(started_procs);
+		}
 
-			hbox = gtk_hbox_new (FALSE, 10);
- 			// cancel button
- 			button = gm_create_cancel_button(gtk_main_quit);
- 		  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
- 		  gtk_widget_show(button);
-		
-			gtk_container_add(GTK_CONTAINER(vbox), hbox);
-			gtk_widget_show (hbox);	
- 			gtk_container_add (GTK_CONTAINER (mainwin), vbox);
- 		  gtk_widget_show (vbox);
- 		  gtk_widget_show (mainwin);
-		}
-		else
+		elts = getActions();
+		actions_tmp = elts;
+
+		while ( elts != NULL )
 		{
-			g_warning("No elements defined in configuration file %s\n", conffile);
+			started_procs_tmp = started_procs;
+			while ( started_procs_tmp != NULL)
+			{
+				if( g_strcmp0(elts->name, started_procs_tmp->name) == 0 )
+				{
+					elts->name = started_procs_tmp->name;
+					elts->pid = started_procs_tmp->pid;
+	
+					hbox = createrow(elts, program_width, row_height);
+					gtk_container_add(GTK_CONTAINER(vbox), hbox);	
+					gtk_widget_show (hbox);
+					separator = gtk_hseparator_new();
+					gtk_container_add(GTK_CONTAINER(vbox), separator);	
+					gtk_widget_show (separator);
+
+					//get out of while-loop
+					started_procs_tmp = NULL;
+				}
+				else
+				{
+					started_procs_tmp = started_procs_tmp->prev;
+				}
+			}	
+		  elts = elts->next;
 		}
+		freeproceslist(started_procs);
+
+		hbox = gtk_hbox_new (FALSE, 10);
+		// cancel button
+		button = gm_create_cancel_button(gtk_main_quit);
+	  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
+	  gtk_widget_show(button);
+	
+		gtk_container_add(GTK_CONTAINER(vbox), hbox);
+		gtk_widget_show (hbox);	
+		gtk_container_add (GTK_CONTAINER (mainwin), vbox);
+	  gtk_widget_show (vbox);
+	  gtk_widget_show (mainwin);
 	}
 	else
 	{
