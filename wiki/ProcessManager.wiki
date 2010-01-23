@@ -8,3 +8,7 @@ information from the kernel. It provides the user a summary of the applications 
 = Screenshot =
 
 <a href="http://www.flickr.com/photos/sfeerbeheer/4297945098/" title="processmanager-screenshot1 by poisdeux, on Flickr"><img src="http://farm5.static.flickr.com/4024/4297945098_1c68d7b195_o.png" width="209" height="368" alt="processmanager-screenshot1" /></a>
+
+= Configuration =
+
+ProcessManager requires the same configuration file gappman uses to retrieve the logo images used by gappman for the buttons to start the applications.
