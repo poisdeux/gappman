@@ -1,0 +1,14 @@
+#summary a dynamic screen resolution changer
+
+= Introduction =
+
+The ChangeResolution applet allows you to change the screen resolution using the XRandR support of the Xorg (Window Manager).
+
+= Screenshot =
+
+<a href="http://www.flickr.com/photos/sfeerbeheer/4296834891/" title="changeresolution-screenshot1 by poisdeux, on Flickr"><img src="http://farm5.static.flickr.com/4065/4296834891_273d04a708_o.png" width="81" height="321" alt="changeresolution-screenshot1" /></a>
+
+= TODO =
+
+   * Save (new) default screen resolution to use when starting up an application. This also means GAppMan itself.
+   * Add GAppMan dynamic fontsize support
