@@ -1,4 +1,5 @@
 #summary a dynamic screen resolution changer
+#sidebar TableOfContents
 
 = Introduction =
 
