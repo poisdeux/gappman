@@ -1,31 +1,52 @@
-<programs height="10%">
-  <program>
-    <name>mythtv</name>
-    <exec>./testarguments.sh</exec>
-    <args>argument 1</args>
-    <args>argument 2</args>
-    <logo>/usr/share/pixmaps/mythtv.png</logo>
-  </program>
-  <program>
-    <name>stepmania</name>
-    <exec>/usr/bin/xclock</exec>
-    <args>-digital</args>
-    <logo>/usr/share/pixmaps/stepmania.png</logo>
-  </program>
-  <program>
-    <name>pygames</name>
-    <exec>/usr/bin/xeyes</exec>
-    <args>-geometry 200</args>
-    <logo>/usr/share/pixmaps/pygame_logo.gif</logo>
-  </program>
-  <program>
-    <name>mythtv</name>
-    <exec>/usr/bin/gnome-screenshot</exec>
-    <logo>/usr/share/pixmaps/mythtv.png</logo>
-  </program>
-  <program>
-    <name>stepmania</name>
-    <exec>/usr/bin/xclock</exec>
-    <logo>/usr/share/pixmaps/stepmania.png</logo>
-  </program>
-</programs>
+<appmanager>
+  <actions width="20%" height="10%" align="top,left">
+    <action>
+      <name>Shutdown</name>
+      <exec>./applets/shutdown/shutdown</exec>
+			<arg>-c ./applets/shutdown/xml-config-files/shutdown.xml</arg>
+      <logo>./applets/shutdown/logos/shutdown.png</logo>
+    </action>
+    <action>
+      <name>Processmanager</name>
+      <exec>./applets/processmanager/processmanager</exec>
+			<arg>-c ./xml-config-files/conf.xml</arg>
+      <logo>./applets/processmanager/logos/clanbomber.png</logo>
+    </action>
+    <action>
+      <name>Change resolution</name>
+      <exec>./applets/changeresolution/changeresolution</exec>
+      <logo>./applets/changeresolution/logos/randr.png</logo>
+    </action>
+  </actions>
+  <programs width="100%" height="20%" align="bottom,center">
+    <program>
+      <name>NX Desktop</name>
+      <exec>/usr/NX/bin/nxclient</exec>
+      <logo>./logos/nxclient-icon.png</logo>
+      <autostart>0</autostart>
+			<printlabel>1</printlabel>
+    </program>
+    <program>
+      <name>MythTV</name>
+      <resolution>800x600</resolution>
+      <exec>/usr/bin/mythfrontend</exec>
+      <logo>./logos/mythtv.png</logo>
+      <autostart>0</autostart>
+			<printlabel>1</printlabel>
+    </program>
+    <program>
+      <name>Stepmania</name>
+      <exec>/usr/bin/stepmania</exec>
+      <resolution>640x480</resolution>
+      <logo>./logos/stepmania.png</logo>
+      <autostart>0</autostart>
+			<printlabel>1</printlabel>
+    </program>
+  </programs>
+	<panel width="10%" height="20%" align="top,right">
+		<applet>
+			<name>Network manager</name>
+			<objectfile>./applets/netman/.libs/libgm_netman.so</objectfile>
+		</applet>
+	</panel>
+</appmanager>
