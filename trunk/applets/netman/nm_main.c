@@ -21,22 +21,20 @@ static GtkWidget *event_box = NULL;
 static int event_box_width = 50;
 static int event_box_height = 50;
 static int current_status = -2;
-static nm_elements* stati = NULL;
-static nm_elements* actions = NULL;
 static const char* conffile = "./applets/netman/xml-config-files/netman.xml";
 static GtkWidget *image_success = NULL;
 static GtkWidget *image_fail = NULL;
 static char **args;
 
-static gint check_network_status()
+static gint check_network(nm_elements* elt)
 {
-  int status = -1;
+	int status = -1;
   int ret;
   __pid_t childpid;
   FILE *fp;
 
   
-  fp = fopen((char *) stati->exec,"r");
+  fp = fopen((char *) elt->exec,"r");
   if( fp )
   {
 		fclose(fp);
@@ -44,7 +42,7 @@ static gint check_network_status()
     childpid = fork();
     if ( childpid == 0 )
     {
-      execvp((char *) stati->exec, args);
+      execvp((char *) elt->exec, args);
       _exit(0);
 		}
 
@@ -53,8 +51,26 @@ static gint check_network_status()
 			waitpid(childpid, &status, WNOHANG); 
 			sleep(1);
 		} 
+	}
+	else
+	{
+		g_warning("Could not open %s\n", elt->exec);
+	}
+	printf("check_network: returned status %d: current_status %d\n", status, current_status);
+	return status;
+}
 
-		printf("check_network: returned status %d: current_status %d\n", status, current_status);
+static show_status()
+{
+	int status = -1;
+	nm_elements* stati;
+
+	stati = nm_get_stati();
+
+	while(stati != NULL)
+	{
+		printf("DEBUG: checking %s\n", stati->name);	
+		status = check_network(stati);
 		if ( current_status != status )
 		{
 			current_status = status;
@@ -73,16 +89,15 @@ static gint check_network_status()
 				return FALSE;
 			}
 		}
-	}
-	else
-	{
-		g_warning("Could not open %s\n", stati->exec);
+		stati = stati->next;
 	}
 }
 
 G_MODULE_EXPORT int gm_module_init()
 {
   int i;
+	nm_elements* stati;
+	nm_elements* actions;
 
 	nm_load_conf(conffile);
 
@@ -126,7 +141,7 @@ G_MODULE_EXPORT GThreadFunc gm_module_start()
 {
 	while(1)
 	{
-		check_network_status();
+		show_status();
 		sleep(10);
 	}
 }

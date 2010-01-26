@@ -548,9 +548,10 @@ static GtkWidget* createpanelelement( menu_elements *elt, int width, int height)
 
 		elt->gm_module_init();
 
+		return elt->gm_module_get_widget();
 	}
-		
-	return elt->gm_module_get_widget();
+	
+	return NULL;	
 }
 
 GtkWidget* gm_createbuttons( menu_elements *elts, gboolean(processevent)(GtkWidget*, GdkEvent*, menu_elements*))
@@ -615,7 +616,6 @@ GtkWidget* gm_createbuttons( menu_elements *elts, gboolean(processevent)(GtkWidg
 
 GtkWidget* gm_createpanel( menu_elements *elts)
 {
-  menu_elements *next, *cur;
   GtkWidget* button, *hbox, *vbox, *align;
   struct appm_alignment *alignment;
   int elts_per_row, count, button_width;
@@ -638,9 +638,8 @@ GtkWidget* gm_createpanel( menu_elements *elts)
 
   parseAlignment(&alignment_x, &alignment_y, elts->orientation);
 
-  cur=elts;
   count = 0;
-  while(cur != NULL)
+  while(elts != NULL)
   {
     if( (count % elts_per_row) == 0 )
     {
@@ -653,12 +652,13 @@ GtkWidget* gm_createpanel( menu_elements *elts)
       gtk_container_add (GTK_CONTAINER (vbox), align);
       gtk_widget_show (align);
     }
-
-    next = cur->next;
-		button = createpanelelement(cur, button_width, box_height);
-    gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 1);
-    gtk_widget_show (button);
-    cur = next;
+		button = createpanelelement(elts, button_width, box_height);
+		if (button != NULL)
+		{
+    	gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 1);
+    	gtk_widget_show (button);
+		}
+    elts = elts->next;
     count++;
   }
 

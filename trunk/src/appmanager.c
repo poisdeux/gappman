@@ -324,17 +324,17 @@ static void destroy( GtkWidget *widget,
 */
 static void start_panel (menu_elements *panel)
 {
-	menu_elements *tmp;
-	tmp = panel;
 	while (panel != NULL )
 	{
 		printf("DEBUG: starting thread\n");
-		if (!g_thread_create((GThreadFunc) tmp->gm_module_start, NULL, FALSE, NULL))
+		if(panel->gm_module_start != NULL)
 		{
-			g_error("Failed to create thread");
+			if (!g_thread_create((GThreadFunc) panel->gm_module_start, NULL, FALSE, NULL))
+			{
+				g_error("Failed to create thread");
+			}
 		}
-		panel = tmp->next;
-		tmp = panel;
+		panel = panel->next;
 	}
 }
 
