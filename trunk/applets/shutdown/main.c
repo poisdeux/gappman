@@ -21,15 +21,13 @@
 #include <gm_layout.h>
 #include <gm_connect.h>
 
-static int DEBUG = 0;
 static int WINDOWED = 0;
 
 static void usage()
 {
-  printf("usage: shutdown [--help] [--debug <LEVEL>] [--width <WIDTHINPIXELS>] [--height <HEIGHTINPIXELS>] [--conffile <FILENAME>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
+  printf("usage: shutdown [--help] [--width <WIDTHINPIXELS>] [--height <HEIGHTINPIXELS>] [--conffile <FILENAME>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
   printf("");
   printf("--help:\t\tshows this help text\n");
-  printf("--debug <LEVEL>:\t\tsets verbosity leven\n");
   printf("--width <WIDTHINPIXELS>:\t\twidth of the main window (default: screen width / 9)\n");
   printf("--height <HEIGHTINPIXELS:\t\theight of the main window (default: screen height / 9)\n");
   printf("--conffile <FILENAME>:\t\t configuration file specifying the program and actions (default: /etc/gappman/shutdown.xml)\n");
@@ -72,16 +70,6 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
     childpid = fork();
     if ( childpid == 0 )
     {
-      if(DEBUG == 2)
-      {
-        printf("Executing: %s with args: ", elt->exec);
-        for ( i = 0; i < elt->numArguments; i++ )
-        {
-          printf("%s ", args[i+1]);
-        }
-        printf("\n");
-      }
-
       execvp((char *) elt->exec, args);
       _exit(0);
     }
@@ -109,18 +97,6 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
 static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
 {
 
-  if (DEBUG == 2)
-  {
-    printf("process_startprogram_event\n");
-  }
-
-  if(DEBUG > 1)
-  {
-    if ( event->type == GDK_KEY_RELEASE )
-    {
-      printf("%s key pressed and has value %d\n", ((GdkEventKey*)event)->string, ((GdkEventKey*)event)->keyval);
-    }
-  }
 
   //Only start program  if spacebar or mousebutton is pressed
   if( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
@@ -171,7 +147,6 @@ int main (int argc, char **argv)
           {"width", 1, 0, 'w'},
           {"height", 1, 0, 'h'},
           {"conffile", 1, 0, 'c'},
-          {"debug", 1, 0, 'd'},
           {"help", 0, 0, 'i'},
           {"gtkrc", 1, 0, 'r'},
           {"windowed", 0, 0, 'j'},
@@ -192,9 +167,6 @@ int main (int argc, char **argv)
       case 'c':
           conffile=optarg;
           break;
-      case 'd':
-          DEBUG=atoi(optarg);
-          break;
       case 'r':
           gtk_rc_parse (optarg);
           break;
@@ -208,7 +180,6 @@ int main (int argc, char **argv)
   }
 
   /** Load configuration elements */
-  //printf("DEBUG: Loading configuration file\n");
   if(loadConf(conffile) != 0)
 	{
 		g_error("Error could not load configuration: %s", conffile);
@@ -220,7 +191,6 @@ int main (int argc, char **argv)
 	}
 
   actions = getActions();
-  //printf("DEBUG: Done loading configuration file\n");
 
   screen = gdk_screen_get_default ();
   screen_width =  gdk_screen_get_width (screen);
@@ -251,11 +221,9 @@ int main (int argc, char **argv)
   if ( actions != NULL )
   {
     //timestruct = time(NULL);    
-    //printf("DEBUG: creating buttons\n");
     align = gm_createbuttons( actions, &process_startprogram_event );
     gtk_container_add (GTK_CONTAINER (vbox), align);
     gtk_widget_show (align);
-    //printf("DEBUG: finished creating buttons in %f seconds\n", difftime(time(NULL), timestruct));
   }
 
 	hbox = gtk_hbox_new (FALSE, 10); 

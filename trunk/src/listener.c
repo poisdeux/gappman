@@ -20,7 +20,6 @@ static int parsemessage(gchar *msg)
 	static int state = 0;
 	int msg_id;
 
-	printf("DEBUG: state = %d\n", state);
 
 	if(g_strcmp0(msg, "listprocesses\n") == 0)
 	{
@@ -126,9 +125,6 @@ static gboolean handleconnection( GIOChannel* gio , GIOCondition cond, gpointer 
 		g_io_channel_set_buffer_size (new_gio, 0);
 		g_io_channel_set_encoding (new_gio, "UTF-8", NULL);
 		g_io_channel_set_line_term (new_gio, NULL, -1);
-
-		printf("DEBUG: handleconnection\n");
-		fflush(stdout);
 
 		status = g_io_channel_read_line(new_gio, &msg, &len, NULL,  &gerror);
 		if( status == G_IO_STATUS_ERROR )

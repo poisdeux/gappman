@@ -3,13 +3,15 @@
     <action>
       <name>Shutdown</name>
       <exec>./applets/shutdown/shutdown</exec>
-			<arg>-c ./applets/shutdown/xml-config-files/shutdown.xml</arg>
+			<arg>-c</arg>
+			<arg>applets/shutdown/xml-config-files/shutdown.xml</arg>
       <logo>./applets/shutdown/logos/shutdown.png</logo>
     </action>
     <action>
       <name>Processmanager</name>
       <exec>./applets/processmanager/processmanager</exec>
-			<arg>-c ./xml-config-files/conf.xml</arg>
+			<arg>-c</arg>
+			<arg>xml-config-files/conf.xml</arg>
       <logo>./applets/processmanager/logos/clanbomber.png</logo>
     </action>
     <action>

@@ -25,7 +25,6 @@ void gm_show_error_dialog(const gchar* message, GtkWidget *mainwin, void *callba
 	GtkIconSet *iconset;
 
   g_warning("%s", message);
-
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	
 	gtk_window_set_frame_dimensions (GTK_WINDOW(window), 5, 5, 5, 5);
@@ -150,6 +149,9 @@ GtkWidget* gm_load_image(char* elt_name, char* elt_logo, char* cacheloc, char* p
   char* cachedfile;
   size_t stringlength;
   FILE *fp;
+	gchar *stock_id;
+	GtkIconSize stock_size;
+
 
   // Paths can be of arbitrary lengt.
   // Filenames can not be longer than 255 chars
@@ -164,7 +166,6 @@ GtkWidget* gm_load_image(char* elt_name, char* elt_logo, char* cacheloc, char* p
     //CACHEDLOCATION/PROGRAMNAME-BUTTONNAME-WIDTHxHEIGHT
     sprintf(cachedfile, "%s/%s-%s-%dx%d", cacheloc, programname, 
     	elt_name, max_width, max_height);
-    fflush(stdout);
 
     fp = fopen(cachedfile, "rw");
     if ( fp )
@@ -174,11 +175,18 @@ GtkWidget* gm_load_image(char* elt_name, char* elt_logo, char* cacheloc, char* p
     else
     {
     	image = gtk_image_new_from_file ((char*) elt_logo);
-			pixbuf = scale_image(image, max_width, max_height); 
-      gtk_image_set_from_pixbuf(GTK_IMAGE(image), pixbuf);
-			gdk_pixbuf_save(pixbuf, cachedfile, "png", NULL, "compression", "9", NULL);	
-    }
-
+			if( gtk_image_get_storage_type(GTK_IMAGE(image)) == GTK_IMAGE_STOCK)
+			{
+				gtk_image_get_stock(GTK_IMAGE(image), &stock_id, &stock_size);
+				gtk_image_set_from_stock(GTK_IMAGE(image), stock_id, stock_size);	
+			}
+			else
+			{
+				pixbuf = scale_image(image, max_width, max_height); 
+      	gtk_image_set_from_pixbuf(GTK_IMAGE(image), pixbuf);
+				gdk_pixbuf_save(pixbuf, cachedfile, "png", NULL, "compression", "9", NULL);	
+    	}
+		}
     free(cachedfile);
   }
   else
@@ -186,7 +194,6 @@ GtkWidget* gm_load_image(char* elt_name, char* elt_logo, char* cacheloc, char* p
     image = gtk_image_new_from_file ((char*) elt_logo);
     gtk_image_set_from_pixbuf(GTK_IMAGE(image), scale_image(image, max_width, max_height));
   }
-  
   return image;
 }
 

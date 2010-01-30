@@ -48,8 +48,6 @@ static void parseFontsizeMessage(int *fontsize, gchar *msg)
 	{
 		if( g_strcmp0("fontsize", contentssplit[i]) == 0)
 		{
-			printf("DEBUG: (parseFontsizeMessage) processing fontsize\n");
-			fflush(stdout);
 			*fontsize = atoi(contentssplit[i+1]);
 		}
 		i++; 
@@ -66,15 +64,11 @@ static void parseProceslistMessage(struct proceslist** procs, gchar *msg)
 	{
 		if( g_strcmp0("name", contentssplit[i]) == 0)
 		{
-			printf("DEBUG: (parseMessage) processing name\n");
-			fflush(stdout);
 			*procs = createnewproceslist(*procs);
 			(*procs)->name = contentssplit[i+1];
 		}
 		else if ( g_strcmp0("pid", contentssplit[i]) == 0)
 		{
-			printf("DEBUG: (parseMessage) processing pid\n");
-			fflush(stdout);
 			(*procs)->pid = atoi(contentssplit[i+1]);
 		}
 		i++; 

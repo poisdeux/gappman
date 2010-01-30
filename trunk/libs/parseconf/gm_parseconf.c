@@ -14,8 +14,8 @@
 
 static int numberElts;
 static char *program_menu_alignment;
-static menu_elements* programs;
-static menu_elements* actions;
+static menu_elements* programs = NULL;
+static menu_elements* actions = NULL;
 static menu_elements* panel_elts;
 static char *program_name;
 static char *cache_location;
@@ -432,12 +432,12 @@ int loadConf(const char *filename) {
         xmlFreeTextReader(reader);
         if (ret != 0) 
 				{
-            fprintf(stderr, "%s : failed to parse\n", filename);
+            g_warning("%s : failed to parse\n", filename);
         }
     } 
 		else 
 		{
-        fprintf(stderr, "Unable to open %s\n", filename);
+        g_warning("Unable to open %s\n", filename);
 				return 1;
     }
  		 /**

@@ -85,7 +85,6 @@ process_nm_element(xmlTextReaderPtr reader, nm_elements *elt, const char* elemen
         value = xmlTextReaderValue(reader);
         if( strcmp((char *) name, "name") == 0 )
         {
-					printf("DEBUG: parsing %s\n", value);
           elt->name = value;
         }
         else if( strcmp((char *) name, "exec") == 0 )

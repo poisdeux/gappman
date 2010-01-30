@@ -30,6 +30,7 @@ static gint check_network(nm_elements* elt)
 {
 	int status = -1;
   int ret;
+  int i;
   __pid_t childpid;
   FILE *fp;
 
@@ -42,6 +43,19 @@ static gint check_network(nm_elements* elt)
     childpid = fork();
     if ( childpid == 0 )
     {
+			/**
+  		  Create argument list. First element should be the filename
+   		 of the executable and last element needs to be NULL.
+   		 see man exec for more details
+ 		 */
+  		args = (char **) malloc((elt->numArguments + 2)* sizeof(char *));
+  		args[0] = (char *) elt->exec;
+  		for (i = 0; i < elt->numArguments; i++ )
+ 		 	{
+		    args[i+1] = elt->args[i];
+ 			}
+  		args[i+1] = NULL;
+
       execvp((char *) elt->exec, args);
       _exit(0);
 		}
@@ -60,7 +74,7 @@ static gint check_network(nm_elements* elt)
 	return status;
 }
 
-static show_status()
+static void show_status()
 {
 	int status = -1;
 	nm_elements* stati;
@@ -69,7 +83,6 @@ static show_status()
 
 	while(stati != NULL)
 	{
-		printf("DEBUG: checking %s\n", stati->name);	
 		status = check_network(stati);
 		if ( current_status != status )
 		{
@@ -79,14 +92,12 @@ static show_status()
 				gtk_container_remove(GTK_CONTAINER(event_box), image_fail);
 				gtk_container_add(GTK_CONTAINER(event_box), image_success);
 				gtk_widget_show(image_success);
-				return TRUE;
 			}
 			else
 			{
 				gtk_container_remove(GTK_CONTAINER(event_box), image_success);
 				gtk_container_add(GTK_CONTAINER(event_box), image_fail);
 				gtk_widget_show(image_fail);
-				return FALSE;
 			}
 		}
 		stati = stati->next;
@@ -95,7 +106,6 @@ static show_status()
 
 G_MODULE_EXPORT int gm_module_init()
 {
-  int i;
 	nm_elements* stati;
 	nm_elements* actions;
 
@@ -116,19 +126,7 @@ G_MODULE_EXPORT int gm_module_init()
                       image);
 	*/
 
-	/**
-    Create argument list. First element should be the filename
-    of the executable and last element needs to be NULL.
-    see man exec for more details
-  */
-  args = (char **) malloc((stati->numArguments + 2)* sizeof(char *));
-  args[0] = (char *) stati->exec;
-  for (i = 0; i < stati->numArguments; i++ )
-  {
-    args[i+1] = stati->args[i];
-  }
-  args[i+1] = NULL;
-
+	
 	return 0;
 }
 

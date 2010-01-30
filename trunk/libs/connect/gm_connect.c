@@ -19,8 +19,6 @@ static void parseFontsizeMessage(int *fontsize, gchar *msg)
 	{
 		if( g_strcmp0("fontsize", contentssplit[i]) == 0)
 		{
-			printf("DEBUG: (parseFontsizeMessage) processing fontsize\n");
-			fflush(stdout);
 			*fontsize = atoi(contentssplit[i+1]);
 		}
 		i++; 

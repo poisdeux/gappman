@@ -6,21 +6,21 @@
       <printlabel>1</printlabel>
       <exec>ngc</exec>
       <arg>-0</arg>
-      <logo>./logos/system-shutdown.png</logo>
+      <logo>./applets/shutdown/logos/system-shutdown.png</logo>
     </action>
     <action>
       <name>Reboot</name>
       <printlabel>1</printlabel>
       <exec>ngc</exec>
       <arg>-6</arg>
-      <logo>./logos/system-restart.png</logo>
+      <logo>./applets/shutdown/logos/system-restart.png</logo>
     </action>
     <action>
       <name>Suspend</name>
       <printlabel>1</printlabel>
       <exec></exec>
       <arg></arg>
-      <logo>./logos/system-suspend.png</logo>
+      <logo>./applets/shutdown/logos/system-suspend.png</logo>
     </action>
   </actions>
 </shutdown>

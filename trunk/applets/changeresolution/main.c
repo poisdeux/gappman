@@ -48,9 +48,6 @@ static void destroy_widget( GtkWidget *widget, gpointer data )
 
 static gboolean revert_to_old_res(GtkWidget *widget, XRRScreenSize *size)
 {
-	printf("changeresolution: revert_to_old_res\n");
-	printf("DEBUG: %p => %dx%d\n", size, size->width, size->height);
-	fflush(stdout);
 	gm_changeresolution(size->width, size->height);
 	return FALSE;
 }
@@ -71,7 +68,6 @@ static void changeresolution( XRRScreenSize *size )
 		//could not get current resolution so bailing out
 		return;
 	}
-	printf("DEBUG: %p => %dx%d\n", size, size->width, size->height);
 	gm_changeresolution(size->width, size->height);
 	
 	confirmwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);

@@ -29,7 +29,6 @@
 
 struct appwidgetinfo* global_appw;
 
-static int DEBUG=0;
 static int KEEP_BELOW=0;
 static int WINDOWED=0;
 static int screen_width=-1;
@@ -65,12 +64,6 @@ static gint check_app_status(struct appwidgetinfo* local_appw)
  
   waitpid(local_appw->PID, &(local_appw->status), WNOHANG);
 
-  if(DEBUG == 2)
-  {
-    printf("Status of PID: %d is %d\n", local_appw->PID, local_appw->status);
-		fflush(stdout);
-  }
-  
   // Check if process is still running by sending a 0 signal
   // and check if process does not respond
   if( kill(local_appw->PID, 0) == -1 )
@@ -205,16 +198,6 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
     childpid = fork();
     if ( childpid == 0 )
     {
-      if(DEBUG == 2)
-      {
-        printf("DEBUG: Executing: %s with args: ", elt->exec);
-        for ( i = 0; i < elt->numArguments; i++ )
-        {
-          printf("%s ", args[i+1]);
-        }
-        printf("\n");
-      }
-      
       execvp((char *) elt->exec, args);
       _exit(0);
     }
@@ -248,19 +231,6 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
 static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
 {
   
-  if (DEBUG == 2)
-  {
-    printf("process_startprogram_event\n");
-  }
-
-  if(DEBUG > 1)
-  {
-    if ( event->type == GDK_KEY_RELEASE )
-    {
-      printf("%s key pressed and has value %d\n", ((GdkEventKey*)event)->string, ((GdkEventKey*)event)->keyval);
-    }
-  }
-  
   //Only start program  if spacebar or mousebutton is pressed
   if( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
   {
@@ -272,10 +242,9 @@ static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event,
 
 static void usage()
 {
-  printf("usage: appmanager [--keep-below] [--debug <LEVEL>] [--width <WIDTHINPIXELS>] [--height <HEIGHTINPIXELS>] [--conffile <FILENAME>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
+  printf("usage: appmanager [--keep-below] [--width <WIDTHINPIXELS>] [--height <HEIGHTINPIXELS>] [--conffile <FILENAME>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
   printf("");
   printf("--keep-below:\t\tKeeps the window at the bottom of the window manager's stack\n");
-  printf("--debug <LEVEL>:\t\tsets verbosity leven\n");
   printf("--width <WIDTHINPIXELS>:\t\twidth of the main window (default: screen width)\n");
   printf("--height <HEIGHTINPIXELS:\t\theight of the main window (default: screen height)\n");
   printf("--conffile <FILENAME>:\t\t configuration file specifying the program and actions (default: ./conf.xml)\n");
@@ -297,10 +266,6 @@ static void autostartprograms( menu_elements *elts )
   {
     if ( cur->autostart == 1 )
     {
-      if ( DEBUG > 0 )
-      {
-        printf("Autostarting %s\n", cur->name);
-      }
       startprogram( NULL, cur );
     }
     cur = cur->next;
@@ -326,7 +291,6 @@ static void start_panel (menu_elements *panel)
 {
 	while (panel != NULL )
 	{
-		printf("DEBUG: starting thread\n");
 		if(panel->gm_module_start != NULL)
 		{
 			if (!g_thread_create((GThreadFunc) panel->gm_module_start, NULL, FALSE, NULL))
@@ -375,7 +339,6 @@ int main (int argc, char **argv)
           {"width", 1, 0, 'w'},
           {"height", 1, 0, 'h'},
           {"conffile", 1, 0, 'c'},
-          {"debug", 1, 0, 'd'},
           {"help", 0, 0, 'i'},
           {"gtkrc", 1, 0, 'r'},
           {"keep-below", 0, 0, 'b'},
@@ -397,9 +360,6 @@ int main (int argc, char **argv)
           break;
       case 'c':
           conffile=optarg;
-          break;
-      case 'd':
-          DEBUG=atoi(optarg);
           break;
       case 'r':
           gtk_rc_parse (optarg);
