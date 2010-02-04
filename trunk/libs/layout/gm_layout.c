@@ -81,7 +81,7 @@ void gm_set_window_geometry(int width, int height)
 	screen_height = height;
 }
 
-GtkWidget *gm_create_cancel_button(void *callbackfunc)
+GtkWidget *gm_create_cancel_button(void *callbackfunc, void *data)
 {
 	GtkWidget *button;
 	GtkWidget *label;
@@ -94,7 +94,7 @@ GtkWidget *gm_create_cancel_button(void *callbackfunc)
   button = gtk_button_new(); 
   gtk_container_add(GTK_CONTAINER(button), label); 
   gtk_widget_show(label);
-  g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (callbackfunc), NULL);
+  g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (callbackfunc), data);
 	return button;
 }
 
@@ -584,6 +584,9 @@ GtkWidget* gm_createbuttons( menu_elements *elts, gboolean(processevent)(GtkWidg
 
   button_width = box_width/elts_per_row;
 	//The size metric is 1024th of a point. 
+	//Fontsize calculations conflicts when applets want to use this function.
+	//For instance the shutdown applet. Need to detach font calculation
+  //from this function or make sure it is only called once.
 	fontsize = (1024*button_width*2)/MAXCHARSINLABEL;
 
   parseAlignment(&alignment_x, &alignment_y, elts->orientation);

@@ -302,7 +302,7 @@ int main (int argc, char **argv)
 		}
 		hbox = gtk_hbox_new (FALSE, 10);
  		// cancel button
- 		button = gm_create_cancel_button(gtk_main_quit); 
+ 		button = gm_create_cancel_button(gtk_main_quit, NULL); 
  	 	gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
  	 	gtk_widget_show(button);
 

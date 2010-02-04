@@ -59,7 +59,7 @@ void gm_set_window_geometry(int width, int height);
 * \param void pointer to callback function that should be called when button is clicked
 * \return GtkWidget pointer to the new button
 */
-GtkWidget *gm_create_cancel_button(void *callbackfunc);
+GtkWidget *gm_create_cancel_button(void *callbackfunc, void *data);
 
 /**
 * \brief Create a single button possibly with a label

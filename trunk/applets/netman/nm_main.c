@@ -17,16 +17,16 @@
 #include "nm_parseconf.h"
 //#include "nm_layout.h"
 
-static GtkWidget *event_box = NULL;
-static int event_box_width = 50;
-static int event_box_height = 50;
+static GtkWidget *main_button = NULL;
+static int main_button_width = 50;
+static int main_button_height = 50;
 static int current_status = -2;
 static const char* conffile = "./applets/netman/xml-config-files/netman.xml";
 static GtkWidget *image_success = NULL;
 static GtkWidget *image_fail = NULL;
 static char **args;
 
-static gint check_network(nm_elements* elt)
+static gint exec_program(nm_elements* elt)
 {
 	int status = -1;
   int ret;
@@ -70,7 +70,6 @@ static gint check_network(nm_elements* elt)
 	{
 		g_warning("Could not open %s\n", elt->exec);
 	}
-	printf("check_network: returned status %d: current_status %d\n", status, current_status);
 	return status;
 }
 
@@ -83,20 +82,20 @@ static void show_status()
 
 	while(stati != NULL)
 	{
-		status = check_network(stati);
+		status = exec_program(stati);
 		if ( current_status != status )
 		{
 			current_status = status;
 			if( status == 0 )
 			{
-				gtk_container_remove(GTK_CONTAINER(event_box), image_fail);
-				gtk_container_add(GTK_CONTAINER(event_box), image_success);
+				gtk_container_remove(GTK_CONTAINER(main_button), image_fail);
+				gtk_container_add(GTK_CONTAINER(main_button), image_success);
 				gtk_widget_show(image_success);
 			}
 			else
 			{
-				gtk_container_remove(GTK_CONTAINER(event_box), image_success);
-				gtk_container_add(GTK_CONTAINER(event_box), image_fail);
+				gtk_container_remove(GTK_CONTAINER(main_button), image_success);
+				gtk_container_add(GTK_CONTAINER(main_button), image_fail);
 				gtk_widget_show(image_fail);
 			}
 		}
@@ -104,29 +103,76 @@ static void show_status()
 	}
 }
 
+static void start_action(GtkWidget* widget, nm_elements* action)
+{
+	exec_program(action);	
+}
+
+static void destroy_widget(GtkWidget* dummy, GtkWidget* widget)
+{
+	gtk_widget_destroy(widget);
+}
+
+static void show_menu()
+{
+	nm_elements* actions;
+	GtkWidget* vbox;
+	GtkWidget* button;
+	GtkWidget* menuwin;
+	GtkWidget* label;
+	gchar* markup;
+
+  menuwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_position(GTK_WINDOW (menuwin), GTK_WIN_POS_CENTER);
+	gtk_window_set_decorated (GTK_WINDOW (menuwin), FALSE);
+
+  vbox = gtk_vbox_new (FALSE, 10);
+
+	actions = nm_get_actions();
+
+	g_debug("fontsize = %d\n", gm_get_fontsize());
+	while(actions != NULL)
+	{
+		label = gtk_label_new("");
+  	markup = g_markup_printf_escaped ("<span size=\"%d\">%s</span>", gm_get_fontsize(), actions->name);
+  	gtk_label_set_markup (GTK_LABEL (label), markup);
+  	g_free (markup);
+  	button = gtk_button_new();
+  	gtk_container_add(GTK_CONTAINER(button), label);
+  	gtk_widget_show(label);
+  	g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (start_action), actions);
+  	gtk_container_add(GTK_CONTAINER(vbox), button);
+  	gtk_widget_show(button);
+
+		actions = actions->next;
+	}
+
+	button = gm_create_cancel_button(destroy_widget, menuwin);
+	gtk_container_add(GTK_CONTAINER(vbox), button);
+	gtk_widget_show(button);
+	gtk_widget_show(vbox);	
+  gtk_container_add(GTK_CONTAINER(menuwin), vbox);
+	gtk_widget_show(menuwin);
+}
+
 G_MODULE_EXPORT int gm_module_init()
 {
 	nm_elements* stati;
-	nm_elements* actions;
 
 	nm_load_conf(conffile);
 
 	stati = nm_get_stati();
-	actions = nm_get_actions();
 
-	event_box = gtk_event_box_new();
+	main_button = gtk_button_new();
 
-	image_fail = gm_load_image((char*) stati->name, (char*) stati->logofail, nm_get_cache_location(), "netman-fail", event_box_width, event_box_height);	
-	image_success = gm_load_image((char*) stati->name, (char*) stati->logosuccess, nm_get_cache_location(), "netman-success", event_box_width, event_box_height);	
-	gtk_container_add(GTK_CONTAINER(event_box), image_fail);
+	image_fail = gm_load_image((char*) stati->name, (char*) stati->logofail, nm_get_cache_location(), "netman-fail", main_button_width, main_button_height);	
+	image_success = gm_load_image((char*) stati->name, (char*) stati->logosuccess, nm_get_cache_location(), "netman-success", main_button_width, main_button_height);	
+	gtk_container_add(GTK_CONTAINER(main_button), image_fail);
 	gtk_widget_show(image_fail);
-	/*g_signal_connect (G_OBJECT (event_box),
-                      "event_box_press_event",
-                      G_CALLBACK (event_box_press_callback),
-                      image);
-	*/
-
-	
+	g_signal_connect (G_OBJECT (main_button),
+                      "clicked",
+                      G_CALLBACK (show_menu),
+                      NULL);
 	return 0;
 }
 
@@ -152,12 +198,12 @@ G_MODULE_EXPORT int gm_module_stop()
 
 G_MODULE_EXPORT void gm_module_set_icon_size(int width, int height)
 {
-	event_box_width = width;
-	event_box_height = height;
+	main_button_width = width;
+	main_button_height = height;
 }
 
 G_MODULE_EXPORT GtkWidget *gm_module_get_widget()
 {
-	return event_box;
+	return main_button;
 }
 

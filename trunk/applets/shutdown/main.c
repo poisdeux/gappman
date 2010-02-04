@@ -136,8 +136,6 @@ int main (int argc, char **argv)
   int screen_height;
   int c;
   int fontsize;
-  time_t timestruct;
-	PangoFontDescription *font_desc;	
 
   gtk_init (&argc, &argv);
 
@@ -187,6 +185,7 @@ int main (int argc, char **argv)
 
 	if(getFontsizeFromGappman(2103, "localhost", &fontsize) == 0)
 	{
+		g_debug("Setting fontsize to %d\n", fontsize);
 		gm_set_fontsize(fontsize);
 	}
 
@@ -220,7 +219,6 @@ int main (int argc, char **argv)
 
   if ( actions != NULL )
   {
-    //timestruct = time(NULL);    
     align = gm_createbuttons( actions, &process_startprogram_event );
     gtk_container_add (GTK_CONTAINER (vbox), align);
     gtk_widget_show (align);
@@ -229,7 +227,7 @@ int main (int argc, char **argv)
 	hbox = gtk_hbox_new (FALSE, 10); 
 
   // cancel button
-	button = gm_create_cancel_button(gtk_main_quit);
+	button = gm_create_cancel_button(gtk_main_quit, NULL);
   gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
   gtk_widget_show(button);
 
