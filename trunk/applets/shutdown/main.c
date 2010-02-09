@@ -185,7 +185,6 @@ int main (int argc, char **argv)
 
 	if(getFontsizeFromGappman(2103, "localhost", &fontsize) == 0)
 	{
-		g_debug("Setting fontsize to %d\n", fontsize);
 		gm_set_fontsize(fontsize);
 	}
 

@@ -37,12 +37,7 @@ static void writemsg(GIOChannel* gio, gchar* msg)
 	GIOError gerror = G_IO_ERROR_NONE;
 	gsize bytes_written;
 
-	g_printf("Sending message: %s\n", msg);
-	fflush(stdout);
-
 	gerror = g_io_channel_write(gio, msg, strlen(msg), &bytes_written);
-	g_printf("Send message: %s\n", msg);
-	fflush(stdout);
 	if( gerror != G_IO_ERROR_NONE )
 	{
 		g_warning("Error sending message: %s : bytes written %d\n", msg, bytes_written);
@@ -58,7 +53,6 @@ static void sendprocesslist(GIOChannel* gio)
 	appw_list = get_started_apps();
 	while(appw_list != NULL)
 	{
-		g_printf("Name: %s, PID: %d\n", appw_list->name, appw_list->PID);
 		if(strlen(appw_list->name) < 256)
 		{
 			g_sprintf(msg, "::name::%s", appw_list->name);
@@ -113,7 +107,7 @@ static gboolean handleconnection( GIOChannel* gio , GIOCondition cond, gpointer 
 	newsock = accept((int) data, (struct sockaddr *) &cli_addr, &clilen);
 	if(newsock < 0)
 	{
-		printf("Error on accept.\n");
+		g_debug("Error on accept.\n");
 		// we return TRUE to keep watch active.
 		return TRUE;
 	}
@@ -133,8 +127,6 @@ static gboolean handleconnection( GIOChannel* gio , GIOCondition cond, gpointer 
 		}
 		else
 		{
-			fprintf(stdout, "MESSAGE RECEIVED: %s (%d)\n", msg, len);
-			fflush(stdout);
 			msg_id = parsemessage(msg);
 			g_free(msg);
 			answerclient(new_gio, msg_id);
@@ -168,7 +160,7 @@ gboolean gappman_start_listener (GIOChannel** gio, const gchar *server, gint por
 		if ( listen(sock,5) != 0 )
 			return FALSE;
 	
-		fprintf(stdout, "Listening to port %d on %s\n", port, server);
+		g_message("Listening on port %d on %s\n", port, server);
 	}
 	else
 	{
@@ -179,7 +171,7 @@ gboolean gappman_start_listener (GIOChannel** gio, const gchar *server, gint por
 
 	if(! g_io_add_watch( *gio, G_IO_IN, handleconnection, (gpointer) sock ))
 	{
-		fprintf(stderr, "Cannot add watch on GIOChannel!\n");
+		g_warning("Cannot add watch on GIOChannel!\n");
 	}
 	return TRUE;
 }

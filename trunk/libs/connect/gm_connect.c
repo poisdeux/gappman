@@ -34,7 +34,7 @@ int connectToGappman(int portno, const char* hostname)
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (sockfd < 0)
   {
-    fprintf(stderr, "Error: could not open socket.\n");
+    g_warning("could not open socket.\n");
   }
 
   server = gethostbyname(hostname);
@@ -92,28 +92,19 @@ int getFontsizeFromGappman(int portno, const char* hostname, int *fontsize)
     g_error("test-listener: %s\n", gerror->message );
   }
 
-  if( status == G_IO_STATUS_NORMAL )
-  {
-    g_debug("MESSAGE SENT: %s\n", msg);
-  }
-
 	g_free(msg);
 
   while( g_io_channel_read_line( gio, &msg, &len, NULL,  &gerror) != G_IO_STATUS_EOF )
   {
-    g_debug("MESSAGE RECEIVED: %s\n", msg);
 		parseFontsizeMessage(fontsize, msg);
-		g_debug("Fontsize = %d\n", *fontsize);
   }
 
   status = g_io_channel_shutdown( gio, TRUE, &gerror);
   if ( status == G_IO_STATUS_ERROR )
   {
-     g_debug("test-listener (handlemessage): %s\n", gerror->message);
+     g_warning("test-listener (handlemessage): %s\n", gerror->message);
 			return 4;
   }
-	g_debug("connect finished\n");
-	fflush(stdout);
 
 	return 0;
 }

@@ -47,7 +47,7 @@ int gm_changeresolution (int width, int height)
   int i;
   GdkDisplay *gdk_dpy;
 
-	printf("changeresolution: %d x %d\n",width, height);  
+	g_debug("changeresolution: %d x %d\n",width, height);  
   gdk_dpy = gdk_display_get_default ();
   
   
@@ -83,7 +83,7 @@ int gm_changeresolution (int width, int height)
 		  }
 	}
 	if (size >= nsize) {
-	    fprintf (stderr,
+	    g_warning(
 		     "Size %dx%d not found in available modes not changing resolution\n", width, height);
 	    return error_type = SIZE_NOT_AVAILABLE;
 	}
@@ -116,7 +116,7 @@ int gm_changeresolution (int width, int height)
   //Change resolution if needed
   if ( size != current_size )
   {
-    fprintf(stdout, "Changing size to %dx%d, and rate to %-4d\n", sizes[size].width, sizes[size].height, rate);
+    g_debug("Changing size to %dx%d, and rate to %-4d\n", sizes[size].width, sizes[size].height, rate);
     //Grab X server while we mess with it.
     gdk_x11_display_grab ( gdk_dpy );
 

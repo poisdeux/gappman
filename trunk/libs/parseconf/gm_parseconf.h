@@ -91,12 +91,6 @@ int loadConf(const char *filename);
 void freeMenuElements( menu_elements *elt );
 
 /**
-* \brief prints the elements of a menu_element structure
-* \param *elt menu_element structure that should be printed
-*/
-void printMenuElements( menu_elements *elt );
-
-/**
 * \brief returns the total number of menu_elements
 * \return integer
 */

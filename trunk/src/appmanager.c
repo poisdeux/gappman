@@ -203,7 +203,7 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
     }
     else if (  childpid < 0 )
     {
-      printf("Failed to fork!\n");
+      g_warning("Failed to fork!\n");
       return FALSE;
     }
     else
@@ -214,7 +214,7 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
   }
   else 
   {
-    printf("File: %s not found!\n", (char *) elt->exec);
+    g_warning("File: %s not found!\n", (char *) elt->exec);
     return FALSE;
   }
 
@@ -440,7 +440,7 @@ int main (int argc, char **argv)
 
 	if ( ! gappman_start_listener(&gio, "localhost", 2103) )
 	{
-		fprintf(stderr, "Error: could not start listener.\n");
+		g_warning("Could not start listener.\n");
 	}
 
 	/* Preliminary framework to support panel like
@@ -463,10 +463,10 @@ int main (int argc, char **argv)
 
 	if ( ! gappman_close_listener(gio) )
 	{
-		fprintf(stderr, "Error: could not close listener.\n");
+		g_warning("Could not close listener.\n");
 	}
 
-	printf("Closing up. Goodbye\n");
+	g_message("Closing up. Goodbye\n");
   freeMenuElements( programs );
   freeMenuElements( actions );
   freeMenuElements( panel );

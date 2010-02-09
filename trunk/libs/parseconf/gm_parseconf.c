@@ -191,49 +191,6 @@ processMenuElement(xmlTextReaderPtr reader, menu_elements *elt, const char* elem
 
 
 /**
-* \brief prints the elements of a menu_element structure
-* \param *elt menu_element structure that should be printed
-*/
-void printMenuElements( menu_elements *elt )
-{
-  menu_elements *next;
-  int i ;
-	char *result = NULL;
-	char **orient = NULL;
-
-  while(elt != NULL)
-  {
-    printf("Element\t\tValue\n");
-    printf("-----\n");
-    printf("name:\t\t%s\n", elt->name);
-    printf("logo:\t\t%s\n", elt->logo);
-    printf("menuwidth:\t\t%d\n", elt->menu_width->value);
-    printf("menuheight:\t\t%d\n", elt->menu_height->value);
-    printf("app_width:\t\t%d\n", elt->app_width);
-    printf("app_height:\t\t%d\n", elt->app_height);
-		orient = elt->orientation;	
-	
-		i = 0;
-		while ( elt->orientation[i] != NULL)
-		{
-			printf("orientation:\t\t%s\n", elt->orientation[i++]);
-		}		
-		printf("autostart:\t\t%d\n", elt->autostart);
-		printf("printlabel:\t\t%d\n", elt->printlabel);
-    printf("exec:\t\t%s\n", elt->exec);
-    printf("numArguments:\t\t%d\n", elt->numArguments);
-    printf("args:\t\t");
-    for (i = 0; i < elt->numArguments; i++)
-    {
-      printf("%s ", elt->args[i]);
-    }
-    printf("\n");
-    next = elt->next;
-    elt = next;
-  }
-}
-
-/**
 * \brief returns the total number of menu_elements
 */
 int getNumberOfElements()
