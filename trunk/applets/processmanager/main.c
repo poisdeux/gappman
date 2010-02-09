@@ -117,21 +117,19 @@ static int kill_program( GtkWidget *widget, menu_elements *elt )
 	switch(status)
 	{
 		case 0|1:
-			g_debug("kill(%d, 15)\n", elt->pid); 
 			kill(elt->pid, 15);
 			break;;
 		case 2|3:
-			g_debug("kill(%d, 9)\n", elt->pid); 
 			kill(elt->pid, 9);
 			break;;
 		case 4:
 			g_debug("Oh my god! It's a zombie. Hit it with a shovel!\n");
 			return FALSE;;
 		case -2:
-			g_debug("Oops, could not find proces %d\n", elt->pid);
+			g_warning("Oops, could not find proces %d\n", elt->pid);
 			return TRUE;;
 		case -1:
-			g_debug("Huh? What should I do with status %d for proces %d\n", status, elt->pid);
+			g_warning("Huh? What should I do with status %d for proces %d\n", status, elt->pid);
 			return FALSE;;
 	}
 
@@ -299,10 +297,12 @@ int main (int argc, char **argv)
 	int row_height;
 	int status;
   int c;
+  int mypid;
   time_t timestruct;
 	struct proceslist* started_procs = NULL;
 	struct proceslist* started_procs_tmp = NULL;
 
+	mypid = getpid();
   gtk_init (&argc, &argv);
   screen = gdk_screen_get_default ();
   dialog_width =  gdk_screen_get_width (screen)/3;
@@ -409,52 +409,54 @@ int main (int argc, char **argv)
 		}
 		else	
 		{
-			program_elts   = getPrograms();
-			if(program_elts   != NULL)
+			program_elts = getPrograms();
+			if(program_elts != NULL)
 			{	
 				program_width=dialog_width-(dialog_width/2);
 				row_height=dialog_height/(*program_elts->amount_of_elements);
 			}
 
 			action_elts  = getActions();
-			if(action_elts  != NULL)
+			if(action_elts != NULL)
 			{	
 				row_height=dialog_height/(*action_elts->amount_of_elements);
 			}
 	
 			while  ( program_elts != NULL )
 			{
-				started_procs_tmp  = started_procs;
-				while  ( started_procs_tmp != NULL)
+				started_procs_tmp	 = started_procs;
+				while	 ( started_procs_tmp != NULL)
 				{
-					if(  g_strcmp0(program_elts->name, started_procs_tmp->name) == 0 )
+					if((	 g_strcmp0(program_elts->name, started_procs_tmp->name) == 0 ) && 
+							( started_procs_tmp->pid != mypid ))
 					{
-						program_elts->pid  = started_procs_tmp->pid;
+						program_elts->pid	 = started_procs_tmp->pid;
 	
-						hbox  = createrow(program_elts, program_width, row_height);
-						gtk_container_add(GTK_CONTAINER(vbox),  hbox);	
-						gtk_widget_show  (hbox);
-						separator  = gtk_hseparator_new();
-						gtk_container_add(GTK_CONTAINER(vbox),  separator);	
-						gtk_widget_show  (separator);
+						hbox	 = createrow(program_elts, program_width, row_height);
+						gtk_container_add(GTK_CONTAINER(vbox),	 hbox);	
+						gtk_widget_show	 (hbox);
+						separator	 = gtk_hseparator_new();
+						gtk_container_add(GTK_CONTAINER(vbox),	 separator);	
+						gtk_widget_show	 (separator);
 	
-						//get  out of while-loop
-						started_procs_tmp  = NULL;
+						//get	 out of while-loop
+						started_procs_tmp	 = NULL;
 					}
 					else
 					{
-							started_procs_tmp  = started_procs_tmp->prev;
+							started_procs_tmp	 = started_procs_tmp->prev;
 					}
 				}	
-				program_elts  = program_elts->next;
-			}
+				program_elts	 = program_elts->next;
+			}	
 		
 			while ( action_elts != NULL )
 			{
 				started_procs_tmp = started_procs;
 				while ( started_procs_tmp != NULL)
 				{
-					if( g_strcmp0(action_elts->name, started_procs_tmp->name) == 0 )
+					if(( g_strcmp0(action_elts->name, started_procs_tmp->name) == 0 ) &&
+							( started_procs_tmp->pid != mypid))
 					{
 						action_elts->pid = started_procs_tmp->pid;
 		
