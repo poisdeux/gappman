@@ -21,7 +21,7 @@ static GtkWidget *main_button = NULL;
 static int main_button_width = 50;
 static int main_button_height = 50;
 static int current_status = -2;
-static const char* conffile = "./applets/netman/xml-config-files/netman.xml";
+static const char* conffile = "./applets/netman/xml-config-files/netman.xml"; 
 static GtkWidget *image_success = NULL;
 static GtkWidget *image_fail = NULL;
 static char **args;
@@ -73,33 +73,38 @@ static gint exec_program(nm_elements* elt)
 	return status;
 }
 
-static void show_status()
+static int check_status()
 {
-	int status = -1;
+	int status_fail = 0;
 	nm_elements* stati;
 
 	stati = nm_get_stati();
 
 	while(stati != NULL)
 	{
-		status = exec_program(stati);
-		if ( current_status != status )
+		stati->status = exec_program(stati);
+		if (stati->status != stati->success)
 		{
-			current_status = status;
-			if( status == 0 )
-			{
-				gtk_container_remove(GTK_CONTAINER(main_button), image_fail);
-				gtk_container_add(GTK_CONTAINER(main_button), image_success);
-				gtk_widget_show(image_success);
-			}
-			else
-			{
-				gtk_container_remove(GTK_CONTAINER(main_button), image_success);
-				gtk_container_add(GTK_CONTAINER(main_button), image_fail);
-				gtk_widget_show(image_fail);
-			}
+			status_fail = 1;
 		}
 		stati = stati->next;
+	}
+	return status_fail;
+}
+
+static void show_status(int status)
+{
+	if( status == 0 )
+	{
+		gtk_container_remove(GTK_CONTAINER(main_button), image_fail);
+		gtk_container_add(GTK_CONTAINER(main_button), image_success);
+		gtk_widget_show(image_success);
+	}
+	else
+	{
+		gtk_container_remove(GTK_CONTAINER(main_button), image_success);
+		gtk_container_add(GTK_CONTAINER(main_button), image_fail);
+		gtk_widget_show(image_fail);
 	}
 }
 
@@ -130,7 +135,6 @@ static void show_menu()
 
 	actions = nm_get_actions();
 
-	g_debug("fontsize = %d\n", gm_get_fontsize());
 	while(actions != NULL)
 	{
 		label = gtk_label_new("");
@@ -183,9 +187,16 @@ G_MODULE_EXPORT void gm_module_set_conffile(const char* filename)
 
 G_MODULE_EXPORT GThreadFunc gm_module_start()
 {
+	int status = -1;
+	int prev_status = -1;
 	while(1)
 	{
-		show_status();
+		status = check_status();
+		if ( status != prev_status )
+		{
+			show_status(status);
+			prev_status = status;
+		}
 		sleep(10);
 	}
 }

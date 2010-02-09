@@ -28,6 +28,7 @@ struct nm_element
   char **args; //!< array of strings containing arguments that need to be passed to the executable
   int numArguments; //!< will hold the total amount of elements in the args array
 	int pid; //!< should hold the process ID of the process that was started by this nm_element
+	int status; //!< should hold the last exit value of the executable
 	int success; //!< should hold the exit value of the executable (*exec) that represents the success state
   struct nm_element *next; //!< pointer to the next nm_element structure
 };

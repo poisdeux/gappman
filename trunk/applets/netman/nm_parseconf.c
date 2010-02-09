@@ -245,12 +245,12 @@ int nm_load_conf(const char *filename) {
         xmlFreeTextReader(reader);
         if (ret != 0) 
 				{
-            fprintf(stderr, "%s : failed to parse\n", filename);
+            g_warning("failed to parse file %s\n", filename);
         }
     } 
 		else 
 		{
-        fprintf(stderr, "Unable to open %s\n", filename);
+        g_warning("Unable to open %s\n", filename);
 				return 1;
     }
  		 /**
