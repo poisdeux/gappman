@@ -13,10 +13,9 @@
 #include <string.h>
 
 static int numberElts;
-static char *program_menu_alignment;
 static menu_elements* programs = NULL;
 static menu_elements* actions = NULL;
-static menu_elements* panel_elts;
+static menu_elements* panel_elts = NULL;
 static char *program_name;
 static char *cache_location;
 
@@ -41,7 +40,6 @@ static void printElements(xmlTextReaderPtr reader)
       {
         printf("width: %s, ", xmlTextReaderGetAttribute (reader, "width"));
         printf("height: %s, ", xmlTextReaderGetAttribute (reader, "height"));
-        printf("orientation: %s\n", xmlTextReaderGetAttribute (reader, "orientation"));
       }
 }
 
@@ -61,6 +59,7 @@ struct menu_element* createMenuElement()
   elt->app_height = -1;
   elt->app_width = -1;
 	elt->pid = -1;
+  elt->numArguments = 0;
   return elt;
 }
 
@@ -105,11 +104,6 @@ char* getCachelocation()
 char* getProgramname()
 {
 	return program_name;
-}
-
-xmlChar* getAlignment()
-{
-  return program_menu_alignment;
 }
 
 /**
@@ -206,19 +200,15 @@ void freeMenuElements( menu_elements *elt )
 {
   menu_elements *next;
   int i;
-	char** orient;
 
 	if (elt != NULL)
 	{
 		free(elt->amount_of_elements);
 	  free(elt->menu_width);
- 	 	free(elt->menu_height);
-		i = 0;
-		while(elt->orientation[i] != NULL)
-		{
-	 	 	free(elt->orientation[i]);
-			i=i+1;
-		}
+	  free(elt->menu_height);
+ 	 	free(elt->hor_alignment);
+ 	 	free(elt->vert_alignment);
+		
 		while(elt != NULL)
 		{
 			free((xmlChar *) elt->name);
@@ -254,6 +244,36 @@ menu_elements* getPanel()
   return panel_elts;
 }
 
+static void parseAlignment(char* align, float *hor_align, int *vert_align)
+{
+	char* result;
+
+	result = strtok(align, ",");	
+  while( result != NULL ) 
+	{
+    if ( strcmp(result, "top") == 0 )
+    {
+      *vert_align = 0;
+    }
+    else if ( strcmp(result, "bottom") == 0 )
+    {
+      *vert_align = 2;
+    }
+ 		else if ( strcmp(result, "left") == 0 )
+    {
+      *hor_align = 0.0;
+    }
+    else if ( strcmp(result, "right") == 0 )
+    {
+      *hor_align = 1.0;
+    }
+    else if ( strcmp(result, "center") == 0 )
+    {
+			*hor_align = 0.5;
+    }
+		result = strtok(NULL, ",");
+  }
+}
 
 /**
 * \brief creates the menu_elements structures
@@ -269,26 +289,29 @@ void static processMenuElements(const char* element_name, const char* group_elem
 	int i;
   xmlChar *name;
 	char* result;
-	char* align;
   int width;
   int height;
   int *number_elts;
+  float *hor_align;
+  int *vert_align;
   menu_elements *prev;
   struct length *menu_width;
   struct length *menu_height;
-  char** orient;
   prev = NULL;
 
 	number_elts = (int*) malloc (sizeof(int));
+  hor_align = (float *) malloc (sizeof(float));
+  vert_align = (int *) malloc (sizeof(int));
   menu_width = (struct length *) malloc (sizeof(struct length));
   menu_height = (struct length *) malloc (sizeof(struct length));
-  orient = (char **) malloc (sizeof(char));
-  
+ 
   //Initial default values 100%
   menu_width->value = 100;
   menu_width->type = PERCENTAGE;
   menu_height->value = 100;
   menu_height->type = PERCENTAGE;
+	*hor_align = 0.5; //<! default center
+	*vert_align = 1; //<! default center
 
   while (ret)
   {
@@ -299,17 +322,19 @@ void static processMenuElements(const char* element_name, const char* group_elem
     if( strcmp((char *) name, element_name) == 0 && xmlTextReaderNodeType(reader) == 1)
     {
       *elts = createMenuElement();
-      (*elts)->numArguments = 0;
-      (*elts)->next = prev;
-      (*elts)->menu_width = menu_width;
-      (*elts)->menu_height = menu_height;
-      (*elts)->orientation = orient;
-      
-      prev = *elts;
-      processMenuElement(reader, *elts, element_name);
+   	  (*elts)->next = prev;
+
+			//the following struct items are shared among all elements of the same group
+  		(*elts)->menu_width = menu_width;
+  		(*elts)->menu_height = menu_height;
+ 			(*elts)->hor_alignment = hor_align; 
+  		(*elts)->vert_alignment = vert_align;
 			(*number_elts)++;
     	(*elts)->amount_of_elements = number_elts;
-    }
+
+      prev = *elts;
+      processMenuElement(reader, *elts, element_name);
+		 }
    
 		//parse global parameters when endtag for groupelement is found 
     if( strcmp((char *) name, group_element_name) == 0 && xmlTextReaderNodeType(reader) == 15)
@@ -318,17 +343,7 @@ void static processMenuElements(const char* element_name, const char* group_elem
       {
         parseLength(xmlTextReaderGetAttribute (reader, "width"), menu_width);
         parseLength(xmlTextReaderGetAttribute (reader, "height"), menu_height);
-        align = xmlTextReaderGetAttribute (reader, "align");
-				i = 0;
-     		result = strtok(align, ",");
-				while(result != NULL)
-				{
-						orient[i] = (char*) malloc ( strlen(result) * sizeof(char) );
-						orient[i] = strcpy(orient[i], result);
-						i=i+1;
-     				result = strtok(NULL, ",");
-				}
-				orient[i] = NULL;
+        parseAlignment(xmlTextReaderGetAttribute (reader, "align"), hor_align, vert_align);
       }
 			//this should end parsing this group of elements
       ret = 0;

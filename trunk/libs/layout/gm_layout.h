@@ -15,6 +15,14 @@
 #include <gm_parseconf.h>
 
 /**
+* \brief function to calculate the absolute width based upon the total available width
+* \param total_length Total available width for the box element
+* \param *box_length Pointer to a struct length holding the length value and type of the box
+* \return box width in amount of pixels
+*/
+int gm_calculate_box_length(int total_length, struct length *box_length);
+
+/**
 * \brief loads image and scales it making sure the image fits inside
 * max_width*max_height maintaining the correct aspect ratio
 * \param elt_name name of the element
@@ -84,7 +92,7 @@ GtkWidget* gm_create_empty_button ( int max_width, int max_height, gboolean (*pr
 * \param *elts pointer to first menu_elements structure
 * \param *processevent function pointer to function which should be used as callback when a button is pressed.
 */
-GtkWidget* gm_createbuttons( menu_elements *elts, gboolean(*processevent)(GtkWidget*, GdkEvent*, menu_elements*));
+GtkWidget* gm_create_buttonbox( menu_elements *elts, gboolean(*processevent)(GtkWidget*, GdkEvent*, menu_elements*));
 
 /**
 * \brief Creates the panel layout using the available screen height and width

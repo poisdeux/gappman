@@ -41,7 +41,8 @@ struct menu_element
   struct length *menu_height;
   int app_width;
   int app_height;
-  char **orientation;
+  float *hor_alignment; //<! horizontal alignment of group (NOT A SINGLE WIDGET). 0.0 = left, 0.5 = center, 1.0 = right 
+	int *vert_alignment; //<! vertical alignment of group (NOT A SINGLE WIDGET). 0 = top, 1 = center, 2 = bottom 
 	GtkWidget *widget; //!< widget associated with this menu_element. Usually a GtkButton.
   const xmlChar *name; //!< holds the name of the program
   const xmlChar *exec; //!< absolute path to executable

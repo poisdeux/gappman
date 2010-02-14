@@ -267,13 +267,7 @@ static GtkWidget* image_label_box_vert (menu_elements *elt, int max_width, int m
     return box;
 }
 
-/**
-* \brief function to calculate the absolute width based upon the total available width
-* \param total_length Total available width for the box element
-* \param *box_length Pointer to a struct length holding the length value and type of the box
-* \return box width in amount of pixels
-*/
-static int calculateBoxLength(int total_length, struct length *box_length)
+int gm_calculate_box_length(int total_length, struct length *box_length)
 {
   int length;
 
@@ -351,64 +345,6 @@ static int calculateAmountOfElementsPerColumn(int box_width, int box_height, int
   else
   {
     return (int) round(rows * ratio);
-  }
-}
-
-/**
-* \brief parses the alignment text retrieved from the gappman configuration file
-* \param alignment_x a float that will represent the alignment on the horizontal axis.
-* \param alignment_y a float that will represent the alignment on the vertical axis.
-* \param algignmentfromconf an array of strings that will hold the alignment text from the configuration file
-*/
-static void parseAlignment(float *alignment_x, float *alignment_y, char** alignmentfromconf)
-{
-	int i;
-
-	i = 0;	
-  while( alignmentfromconf[i] != NULL ) {
-    if ( strcmp(alignmentfromconf[i], "top") == 0 )
-    {
-      *alignment_y = 0.0;
-    }
-    else if ( strcmp(alignmentfromconf[i], "left") == 0 )
-    {
-      *alignment_x = 0.0;
-    }
-    else if ( strcmp(alignmentfromconf[i], "bottom") == 0 )
-    {
-      *alignment_y = 1.0;
-    }
-    else if ( strcmp(alignmentfromconf[i], "right") == 0 )
-    {
-      *alignment_x = 1.0;
-    }
-    else if ( strcmp(alignmentfromconf[i], "center") == 0 )
-    {
-      /**
-      * Only set the value if it has not been set previously
-      * otherwise you might undo a previous parsed alignment
-      * option
-      */
-      if (*alignment_y < 0.0)
-      {
-        *alignment_y = 0.5;
-      }
-      if (*alignment_x < 0.0)
-      {
-        *alignment_x = 0.5;
-      }
-    }
-		i = i + 1;
-  }
-
-  // Set initial values to 0
-  if (*alignment_y < 0.0)
-  {
-    *alignment_y = 0.0;
-  }
-  if (*alignment_x < 0.0)
-  {
-    *alignment_x = 0.0;
   }
 }
 
@@ -561,18 +497,15 @@ static GtkWidget* createpanelelement( menu_elements *elt, int width, int height)
 	return NULL;	
 }
 
-GtkWidget* gm_createbuttons( menu_elements *elts, gboolean(processevent)(GtkWidget*, GdkEvent*, menu_elements*))
+GtkWidget* gm_create_buttonbox( menu_elements *elts, gboolean(processevent)(GtkWidget*, GdkEvent*, menu_elements*))
 {
   menu_elements *next, *cur;
-  GtkWidget* button, *hbox, *vbox, *align;
-  struct appm_alignment *alignment;
+  GtkWidget* button, *hbox, *vbox;
   int elts_per_row, count, button_width;
   int box_width, box_height;
-  float alignment_x = -1.0;
-  float alignment_y = -1.0;
 
-  box_width = calculateBoxLength(screen_width, elts->menu_width);
-  box_height = calculateBoxLength(screen_height, elts->menu_height);
+  box_width = gm_calculate_box_length(screen_width, elts->menu_width);
+  box_height = gm_calculate_box_length(screen_height, elts->menu_height);
 
   vbox = gtk_vbox_new (FALSE, 0);
 
@@ -589,8 +522,6 @@ GtkWidget* gm_createbuttons( menu_elements *elts, gboolean(processevent)(GtkWidg
   //from this function or make sure it is only called once.
 	fontsize = (1024*button_width*2)/MAXCHARSINLABEL;
 
-  parseAlignment(&alignment_x, &alignment_y, elts->orientation);
-
   cur=elts;
   count = 0;
   while(cur != NULL)
@@ -599,12 +530,8 @@ GtkWidget* gm_createbuttons( menu_elements *elts, gboolean(processevent)(GtkWidg
     {
       hbox = gtk_hbox_new (FALSE, 0);
 
-      align = gtk_alignment_new (alignment_x, alignment_y, (float) box_width/screen_width, (float) box_height/screen_height);
-      gtk_container_add (GTK_CONTAINER (align), hbox);
+      gtk_container_add (GTK_CONTAINER (vbox), hbox);
       gtk_widget_show (hbox);
-
-      gtk_container_add (GTK_CONTAINER (vbox), align);
-      gtk_widget_show (align);
     }
 
     next = cur->next;
@@ -615,26 +542,17 @@ GtkWidget* gm_createbuttons( menu_elements *elts, gboolean(processevent)(GtkWidg
     count++;
   }
 
-  align = gtk_alignment_new (alignment_x, alignment_y, (float) box_width/screen_width, (float) box_height/screen_height);
-
-  gtk_container_add (GTK_CONTAINER (align), vbox);
-  gtk_widget_show (align);
-  gtk_widget_show (vbox);
-
-  return align;
+  return vbox;
 }
 
 GtkWidget* gm_createpanel( menu_elements *elts)
 {
-  GtkWidget* button, *hbox, *vbox, *align;
-  struct appm_alignment *alignment;
+  GtkWidget* button, *hbox, *vbox;
   int elts_per_row, count, button_width;
   int box_width, box_height;
-  float alignment_x = -1.0;
-  float alignment_y = -1.0;
 
-  box_width = calculateBoxLength(screen_width, elts->menu_width);
-  box_height = calculateBoxLength(screen_height, elts->menu_height);
+  box_width = gm_calculate_box_length(screen_width, elts->menu_width);
+  box_height = gm_calculate_box_length(screen_height, elts->menu_height);
 
   vbox = gtk_vbox_new (FALSE, 0);
 
@@ -646,8 +564,6 @@ GtkWidget* gm_createpanel( menu_elements *elts)
 
   button_width = box_width/elts_per_row;
 
-  parseAlignment(&alignment_x, &alignment_y, elts->orientation);
-
   count = 0;
   while(elts != NULL)
   {
@@ -655,12 +571,8 @@ GtkWidget* gm_createpanel( menu_elements *elts)
     {
       hbox = gtk_hbox_new (FALSE, 0);
 
-      align = gtk_alignment_new (alignment_x, alignment_y, (float) box_width/screen_width, (float) box_height/screen_height);
-      gtk_container_add (GTK_CONTAINER (align), hbox);
+      gtk_container_add (GTK_CONTAINER (vbox), hbox);
       gtk_widget_show (hbox);
-
-      gtk_container_add (GTK_CONTAINER (vbox), align);
-      gtk_widget_show (align);
     }
 		button = createpanelelement(elts, button_width, box_height);
 		if (button != NULL)
@@ -672,13 +584,7 @@ GtkWidget* gm_createpanel( menu_elements *elts)
     count++;
   }
 
-  align = gtk_alignment_new (alignment_x, alignment_y, (float) box_width/screen_width, (float) box_height/screen_height);
-
-  gtk_container_add (GTK_CONTAINER (align), vbox);
-  gtk_widget_show (align);
-  gtk_widget_show (vbox);
-
-  return align;
+  return vbox;
 }
 
 

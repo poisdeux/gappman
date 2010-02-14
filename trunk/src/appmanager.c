@@ -142,19 +142,6 @@ static void create_new_appwidgetinfo(int PID, GtkWidget *widget, gchar* name)
 }
 
 /**
-* \brief function to create and initialize an appm_alignment struct
-* \param *alignment Pointer to an appm_alignment struct
-*/
-static struct appm_alignment * create_appm_alignment_struct()
-{
-  struct appm_alignment *alignment;
-  alignment = (struct appm_alignment *) malloc(sizeof(struct appm_alignment));
-  alignment->x = -1.0; //<! set to negative value to be able to test if value has been set
-  alignment->y = -1.0; //<! set to negative value to be able to test if value has been set
-  return alignment;
-}
-
-/**
 * \brief Starts the program with any specified arguments by forking and letting the child (fork) start the program
 * \param widget pointer to GtkWidget of the button that was pressed to start the application
 * \param elt pointer to the menu_element structure for the application that needs to be started
@@ -302,6 +289,35 @@ static void start_panel (menu_elements *panel)
 	}
 }
 
+static void align_buttonbox (GtkWidget *hbox_top, GtkWidget *hbox_middle, GtkWidget *hbox_bottom, GtkWidget *buttonbox, menu_elements *elts)
+{
+	GtkWidget *hor_align;
+	int box_width;
+	int box_height;
+
+  box_width = gm_calculate_box_length(screen_width, elts->menu_width);
+  box_height = gm_calculate_box_length(screen_height, elts->menu_height);
+	//vertical alignment is calculated by dividing elts->vert_alignment by 2
+  //this results in hbox_top having 0.0, hbox_middle 0,5, and hbox_bottom 1.0
+  //to have the widgets aligned respectively to the top, center, or bottom
+	hor_align = gtk_alignment_new( *elts->hor_alignment, (float) *elts->vert_alignment/2, (float) box_width/screen_width, (float) box_height/screen_height);
+	gtk_container_add (GTK_CONTAINER (hor_align), buttonbox);
+	gtk_widget_show(hor_align);
+
+	switch ( *elts->vert_alignment )
+	{
+		case 0:
+			gtk_container_add (GTK_CONTAINER (hbox_top), hor_align);
+			break;;
+		case 1:
+			gtk_container_add (GTK_CONTAINER (hbox_middle), hor_align);
+			break;;
+		case 2:
+			gtk_container_add (GTK_CONTAINER (hbox_bottom), hor_align);
+			break;;
+	}
+}
+
 /**
 * \brief main function setting up the UI
 */
@@ -313,7 +329,10 @@ int main (int argc, char **argv)
   GtkWidget *window_bg;
   GtkWidget *picture_bg;
   GtkWidget *mainwin;
-  GtkWidget *align;
+  GtkWidget *buttonbox;
+  GtkWidget *hbox_top;
+  GtkWidget *hbox_middle;
+  GtkWidget *hbox_bottom;
   GtkWidget *vbox;
   GtkStyle  *style;
   menu_elements *actions;
@@ -417,22 +436,40 @@ int main (int argc, char **argv)
   
   gtk_window_set_default_size (GTK_WINDOW (mainwin), window_width, window_height);
 
-  vbox = gtk_vbox_new (TRUE, 0);
+  vbox = gtk_vbox_new (FALSE, 0);
+
+	hbox_top = gtk_hbox_new (FALSE, 0);
+	hbox_middle = gtk_hbox_new (FALSE, 0);
+	hbox_bottom = gtk_hbox_new (FALSE, 0);
 
   if ( actions != NULL )
   {
-    align = gm_createbuttons( actions, &process_startprogram_event );
-    gtk_container_add (GTK_CONTAINER (vbox), align);
-    gtk_widget_show (align);
+    buttonbox = gm_create_buttonbox( actions, &process_startprogram_event );
+    align_buttonbox(hbox_top, hbox_middle, hbox_bottom, buttonbox, actions);
+    gtk_widget_show (buttonbox);
   }
 
   if ( programs != NULL )
   {
-    align = gm_createbuttons( programs, &process_startprogram_event );
-    gtk_container_add (GTK_CONTAINER (vbox), align);
-    gtk_widget_show (align);
+    buttonbox = gm_create_buttonbox( programs, &process_startprogram_event );
+    align_buttonbox(hbox_top, hbox_middle, hbox_bottom, buttonbox, programs);
+    gtk_widget_show (buttonbox);
   }
 
+	if ( panel != NULL )
+	{
+		buttonbox = gm_createpanel( panel ); 
+    align_buttonbox(hbox_top, hbox_middle, hbox_bottom, buttonbox, panel);
+    gtk_widget_show (buttonbox);
+		start_panel( panel );
+	}
+  gtk_container_add (GTK_CONTAINER (vbox), hbox_top);
+  gtk_container_add (GTK_CONTAINER (vbox), hbox_middle);
+  gtk_container_add (GTK_CONTAINER (vbox), hbox_bottom);
+  gtk_container_add (GTK_CONTAINER (mainwin), vbox);
+ 	gtk_widget_show(hbox_top); 
+ 	gtk_widget_show(hbox_middle); 
+ 	gtk_widget_show(hbox_bottom); 
 	gtk_widget_show (vbox);
   gtk_widget_show (mainwin);
 
@@ -443,19 +480,7 @@ int main (int argc, char **argv)
 		g_warning("Could not start listener.\n");
 	}
 
-	/* Preliminary framework to support panel like
-	* notification/status widgets
-	*/	
-	if ( panel != NULL )
-	{
-		align = gm_createpanel( panel ); 
-    gtk_container_add (GTK_CONTAINER (vbox), align);
-    gtk_widget_show (align);
-		start_panel( panel );
-	}
-  gtk_container_add (GTK_CONTAINER (mainwin), vbox);
-  
-
+	
 	gdk_threads_enter();  
   gtk_main ();
   gdk_threads_leave();
