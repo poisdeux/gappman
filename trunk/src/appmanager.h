@@ -1,4 +1,5 @@
 #include <gtk/gtk.h>
+#include <gm_parseconf.h>
 
 /**
 * \brief Struct that holds all relevant info about started applications
@@ -7,8 +8,8 @@ struct appwidgetinfo
 {
   int PID; //<! Process ID of running app (child replaced through execvp)
   int status; //<! Process status which can be either running, sleeping, waiting, stopped, or zombie
-  GtkWidget *widget; //<! Button that started the process
-	gchar* name; //<! Name of the program 
+	struct menu_element *menu_elt;
+	GtkWidget *widget; //<! Button that started the process
   struct appwidgetinfo* prev; //<! Pointer to previous appwidgetinfo
   struct appwidgetinfo* next; //<! Pointer to previous appwidgetinfo
 };

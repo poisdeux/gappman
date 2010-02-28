@@ -53,9 +53,9 @@ static void sendprocesslist(GIOChannel* gio)
 	appw_list = get_started_apps();
 	while(appw_list != NULL)
 	{
-		if(strlen(appw_list->name) < 256)
+		if(strlen(appw_list->menu_elt->name) < 256)
 		{
-			g_sprintf(msg, "::name::%s", appw_list->name);
+			g_sprintf(msg, "::name::%s", appw_list->menu_elt->name);
 		}
 		else
 		{
@@ -123,10 +123,11 @@ static gboolean handleconnection( GIOChannel* gio , GIOCondition cond, gpointer 
 		status = g_io_channel_read_line(new_gio, &msg, &len, NULL,  &gerror);
 		if( status == G_IO_STATUS_ERROR )
 		{
-			g_error ("Listener (handleconnection): %s\n", gerror->message);
+			g_warning ("Listener (handleconnection): %s\n", gerror->message);
 		}
 		else
 		{
+			g_debug("Received: %s", msg);
 			msg_id = parsemessage(msg);
 			g_free(msg);
 			answerclient(new_gio, msg_id);
@@ -184,7 +185,7 @@ gboolean gappman_close_listener (GIOChannel* gio)
   status = g_io_channel_shutdown( gio, TRUE, &gerror);
   if( status == G_IO_STATUS_ERROR )
   {
-    g_error ("Listener (gappman_close_listener): %s\n", gerror->message);
+    g_warning("Listener (gappman_close_listener): %s\n", gerror->message);
 		return FALSE;
   }
 

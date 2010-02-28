@@ -61,7 +61,9 @@ static gint check_app_status(struct appwidgetinfo* local_appw)
   int status;
   FILE *fp;
   struct appwidgetinfo* tmp;
- 
+ 	struct menu_element* elt;
+
+
   waitpid(local_appw->PID, &(local_appw->status), WNOHANG);
 
   // Check if process is still running by sending a 0 signal
@@ -80,6 +82,8 @@ static gint check_app_status(struct appwidgetinfo* local_appw)
 			//local_appw only element in the list,
 			//so we reset the list.
 			global_appw = NULL;
+			//change resolution back to gappman menu resolution
+			gm_changeresolution(screen_width, screen_height);
 		}
 		else
 		{ 
@@ -87,11 +91,19 @@ static gint check_app_status(struct appwidgetinfo* local_appw)
 			{ 
 				tmp = local_appw->prev;
 				tmp->next = local_appw->next;
+				//we may need to change resolution to
+				//local_appw->prev if local_appw was
+				//last program started
+				elt = tmp->menu_elt;
 			}
+
 			if(local_appw->next != NULL)
 			{
 				tmp = local_appw->next;
 				tmp->prev = local_appw->prev;
+				//local_appw was not the last program
+				//started so we leave resolution unchanged
+				elt = NULL;
 			}
 			else
 			{
@@ -100,12 +112,18 @@ static gint check_app_status(struct appwidgetinfo* local_appw)
 				//the global_appw pointer
 				global_appw = local_appw->prev;
 			}
+		
+			if ( elt != NULL )
+			{	
+				if( elt->app_width > 0 && elt->app_height > 0 )
+    		{
+      		gm_changeresolution(elt->app_width, elt->app_height);
+    		}
+			}
 		}
+		
     //No need for local_appw anymore
     free(local_appw);
-    
-    //Change resolution back to menu resolution
-    gm_changeresolution(screen_width, screen_height);
     
     //Stop glib timer
     return FALSE;
@@ -120,15 +138,15 @@ static gint check_app_status(struct appwidgetinfo* local_appw)
 * \param widget pointer to the GtkWidget which belongs to the button of the application
 * \param name programname with PID 
 */
-static void create_new_appwidgetinfo(int PID, GtkWidget *widget, gchar* name)
+static void create_new_appwidgetinfo(int PID, GtkWidget *widget, struct menu_element *elt)
 {
   struct appwidgetinfo *local_appw;
   local_appw = (struct appwidgetinfo *) malloc(sizeof(struct appwidgetinfo));
   if( local_appw != NULL)
 	{
 		local_appw->PID = PID;
+  	local_appw->menu_elt = elt;
   	local_appw->widget = widget;
-  	local_appw->name = name;
 		local_appw->prev = global_appw;
 		local_appw->next = NULL;
 		if( global_appw != NULL )
@@ -195,7 +213,7 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
     }
     else
     {
-      create_new_appwidgetinfo(childpid, widget, (gchar*) elt->name);
+      create_new_appwidgetinfo(childpid, widget, elt);
 			g_timeout_add(1000, (GSourceFunc) check_app_status, (gpointer) global_appw);
     }
   }
