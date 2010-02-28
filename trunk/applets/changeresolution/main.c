@@ -23,6 +23,7 @@
 #include <gm_layout.h>
 #include <gm_connect.h>
 #include <gm_changeresolution.h>
+#include <gm_generic.h>
 
 static int WINDOWED = 0;
 static GtkWidget *mainwin;
@@ -48,7 +49,7 @@ static void destroy_widget( GtkWidget *widget, gpointer data )
 
 static gboolean revert_to_old_res(GtkWidget *widget, XRRScreenSize *size)
 {
-	gm_changeresolution(size->width, size->height);
+	gm_changeresolution(size[0].width, size[0].height);
 	return FALSE;
 }
 
@@ -60,15 +61,10 @@ static void changeresolution( XRRScreenSize *size )
 {
 	GtkWidget *button, *buttonbox, *label, *confirmwin;
 	gchar* markup;
-	XRRScreenSize *oldsize;
+	static XRRScreenSize *oldsize = NULL;
 	int nr;
 
-	if (gm_getpossibleresolutions(&oldsize, &nr) != SUCCES)
-	{
-		//could not get current resolution so bailing out
-		return;
-	}
-	gm_changeresolution(size->width, size->height);
+	gm_changeresolution(size[0].width, size[0].height);
 	
 	confirmwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
@@ -259,7 +255,7 @@ int main (int argc, char **argv)
   }
 	
 	//get generic fontsize from gappman
-	if(getFontsizeFromGappman(2103, "localhost", &fontsize) == 0)
+	if(gm_get_fontsize_from_gappman(2103, "localhost", &fontsize) == 0)
   {
     gm_set_fontsize(fontsize);
   }
@@ -269,7 +265,7 @@ int main (int argc, char **argv)
 	}
 	
 	ret_value = gm_getpossibleresolutions(&sizes, &nsize);
-	if(ret_value != SUCCES)
+	if(ret_value != GM_SUCCES)
 	{
 		g_warning("Error could not get possible resolutions (error_type: %d)\n", ret_value); 
  		dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW(mainwin), 

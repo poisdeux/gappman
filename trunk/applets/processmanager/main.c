@@ -22,6 +22,7 @@
 #include <gm_layout.h>
 #include <sys/types.h>
 #include <signal.h>
+#include <gm_connect.h>
 #include "connect.h"
 
 static int WINDOWED = 0;
@@ -367,7 +368,7 @@ int main (int argc, char **argv)
 	//so we have dialog_width/3 * 1024 points available for a max of 8
 	//characters
 	//fontsize=1024*(dialog_width/2)/8;
-	status = getFontsizeFromGappman(2103, "localhost", &fontsize);;
+	status = gm_get_fontsize_from_gappman(2103, "localhost", &fontsize);;
 	if (status == 0)
 	{
 		gm_set_fontsize(fontsize);

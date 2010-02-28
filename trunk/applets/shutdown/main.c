@@ -183,7 +183,7 @@ int main (int argc, char **argv)
 		g_error("Error could not load configuration: %s", conffile);
 	}
 
-	if(getFontsizeFromGappman(2103, "localhost", &fontsize) == 0)
+	if(gm_get_fontsize_from_gappman(2103, "localhost", &fontsize) == 0)
 	{
 		gm_set_fontsize(fontsize);
 	}

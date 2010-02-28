@@ -6,10 +6,11 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <string.h>
+#include <gm_generic.h>
 #include "gm_connect.h"
 
 
-static void parseFontsizeMessage(int *fontsize, gchar *msg)
+static void parse_fontsize_message(int *fontsize, gchar *msg)
 {
 	gchar** contentssplit = NULL;
 	int i = 0;
@@ -25,7 +26,7 @@ static void parseFontsizeMessage(int *fontsize, gchar *msg)
 	}
 }
 
-int connectToGappman(int portno, const char* hostname)
+int gm_connect_to_gappman(int portno, const char* hostname)
 {
   struct sockaddr_in serv_addr;
   struct hostent *server;
@@ -41,7 +42,7 @@ int connectToGappman(int portno, const char* hostname)
   if (server == NULL)
   {
     g_warning("Error: could not find host %s", hostname);
-		return -1;
+		return GM_COULD_NOT_RESOLVE_HOSTNAME;
   }
 
   memset((char *) &serv_addr, 0, sizeof(serv_addr));
@@ -52,60 +53,71 @@ int connectToGappman(int portno, const char* hostname)
   if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
   {
     g_warning("Error: could not connect.\n");
-		return -2;
+		return GM_COULD_NOT_CONNECT;
   }
 	return sockfd;
 }
 
-int getFontsizeFromGappman(int portno, const char* hostname, int *fontsize)
+static int create_gio_channel(int portno, const char* hostname, GIOChannel** gio)
+{
+	int sockfd;
+
+  sockfd = gm_connect_to_gappman(portno, hostname);
+	if(sockfd < 0)
+	{
+		return GM_COULD_NOT_CONNECT;
+	}
+
+  *gio = g_io_channel_unix_new (sockfd);
+  g_io_channel_set_buffer_size (*gio, 0);
+  g_io_channel_set_line_term (*gio, NULL, 2);
+  g_io_channel_set_encoding (*gio, "UTF-8", NULL);
+
+	return GM_SUCCES;
+}
+
+
+int gm_get_fontsize_from_gappman(int portno, const char* hostname, int *fontsize)
 {
   gsize len;
   gchar *msg;
-  int status, sockfd, n, sourceid;
+  int status, n, sourceid;
   int bytes_written;
   GIOChannel* gio = NULL;
   GError *gerror = NULL;
 
-  sockfd = connectToGappman(portno, hostname);
-	if(sockfd < 0)
-	{
-		return abs(sockfd);
-	}
-
-  gio = g_io_channel_unix_new (sockfd);
-  g_io_channel_set_buffer_size (gio, 0);
-  g_io_channel_set_line_term (gio, NULL, 2);
-  g_io_channel_set_encoding (gio, "UTF-8", NULL);
-
+	status = create_gio_channel(portno, hostname, &gio);
+	if ( status != GM_SUCCES )
+		return status; 
 
 	msg = g_strdup("showfontsize\n");
 	status = g_io_channel_write_chars(gio, (const gchar*) msg, -1, &bytes_written, &gerror);
   if( status == G_IO_STATUS_ERROR )
   {
-    g_warning("test-listener: %s\n", gerror->message );
-		return 3;
+    g_warning("gm_get_fontsize_from_gappman: %s\n", gerror->message );
+		return GM_COULD_NOT_SEND_MESSAGE; 
   }
 
   status = g_io_channel_flush( gio, &gerror);
   if( status == G_IO_STATUS_ERROR )
   {
-    g_error("test-listener: %s\n", gerror->message );
+    g_warning("gm_get_fontsize_from_gappman: %s\n", gerror->message );
   }
 
 	g_free(msg);
 
   while( g_io_channel_read_line( gio, &msg, &len, NULL,  &gerror) != G_IO_STATUS_EOF )
   {
-		parseFontsizeMessage(fontsize, msg);
+		parse_fontsize_message(fontsize, msg);
   }
 
   status = g_io_channel_shutdown( gio, TRUE, &gerror);
   if ( status == G_IO_STATUS_ERROR )
   {
-     g_warning("test-listener (handlemessage): %s\n", gerror->message);
-			return 4;
+    g_warning("gm_get_fontsize_from_gappman: %s\n", gerror->message );
+		return GM_COULD_NOT_DISCONNECT;
   }
 
-	return 0;
+	return GM_SUCCES;
 }
 
