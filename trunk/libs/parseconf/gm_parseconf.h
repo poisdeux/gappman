@@ -83,55 +83,55 @@ typedef struct menu_element menu_elements;
 * \param  *filename the name of the configuration file with the path
 * \return int 0 if configuration file was succesfully loaded, >0 otherwise 
 */
-int loadConf(const char *filename);
+int gm_load_conf(const char *filename);
 
 /**
 * \brief relinguishes the memory occupied by menu_element structures
 * \param *elt first menu_element structure
 */
-void freeMenuElements( menu_elements *elt );
+void gm_free_menu_elements( menu_elements *elt );
 
 /**
 * \brief returns the total number of menu_elements
 * \return integer
 */
-int getNumberOfElements();
+int gm_get_number_of_elements();
 
 /**
 * \brief Get the alignment of the program menu area
 * \return String: [[top|left|bottom|right|center],...]
 */
-xmlChar* getAlignment();
+xmlChar* gm_get_alignment();
 
 /**
 * \brief Get the path of the cache location on disk
 * \return string
 */
-char* getCachelocation();
+char* gm_get_cache_location();
 
 /**
 * \brief Get the name of the program as specified in the configuration file
 * \return string
 */
-char* getProgramname();
+char* gm_get_programname();
 
 /**
 * \brief returns the menu_elements structure that contains the programs
 * \return pointer to menu_elements structure
 */
-menu_elements* getPrograms();
+menu_elements* gm_get_programs();
 
 /**
 * \brief returns the menu_elements structure that contains the actions
 * \return pointer to menu_elements structure
 */
-menu_elements* getActions();
+menu_elements* gm_get_actions();
 
 /**
 * \brief returns the menu_elements structure that contains the panel elements
 * \return pointer to menu_elements structure
 */
-menu_elements* getPanel();
+menu_elements* gm_get_panel();
 
 
 #endif

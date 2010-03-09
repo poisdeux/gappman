@@ -3,6 +3,7 @@
 #include <math.h>
 #include <string.h>
 #include <gm_layout.h>
+#include <gm_parseconf.h>
 
 static int fontsize = 10*1024; //< the default generic fontsize for all elements. This usually gets updated by menu building functions below.
 static int	screen_width = 800;
@@ -216,7 +217,7 @@ static GtkWidget* image_label_box_hor (menu_elements *elt, int max_width, int ma
     gtk_container_set_border_width (GTK_CONTAINER (box), 2);
 
     /* Now on to the image stuff */
-		image = gm_load_image((char*) elt->name, (char*) elt->logo, getCachelocation(), getProgramname(), max_width, max_height);
+		image = gm_load_image((char*) elt->name, (char*) elt->logo, gm_get_cache_location(), gm_get_programname(), max_width, max_height);
     gtk_box_pack_start (GTK_BOX (box), image, FALSE, FALSE, 3);
     gtk_widget_show (image);
 
@@ -250,7 +251,7 @@ static GtkWidget* image_label_box_vert (menu_elements *elt, int max_width, int m
     gtk_container_set_border_width (GTK_CONTAINER (box), 2);
 
     /* Now on to the image stuff */
-		image = gm_load_image((char*) elt->name, (char*) elt->logo, getCachelocation(), getProgramname(), max_width, max_height);
+		image = gm_load_image((char*) elt->name, (char*) elt->logo, gm_get_cache_location(), gm_get_programname(), max_width, max_height);
     gtk_box_pack_start (GTK_BOX (box), image, FALSE, FALSE, 3);
     gtk_widget_show (image);
 
@@ -387,7 +388,7 @@ GtkWidget* gm_create_empty_button ( int max_width, int max_height, gboolean (*pr
 * \param *elt pointer to menu_element struct that contains the logo image filename.
 * \param max_width button width
 */
-GtkWidget* gm_createbutton ( menu_elements *elt, int fontsize, int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, menu_elements*) )
+GtkWidget* gm_create_button ( menu_elements *elt, int fontsize, int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, menu_elements*) )
 {
   GtkWidget *button, *imagelabelbox;
   GdkPixbuf *pixbuf;
@@ -535,7 +536,7 @@ GtkWidget* gm_create_buttonbox( menu_elements *elts, gboolean(processevent)(GtkW
     }
 
     next = cur->next;
-    button = gm_createbutton(cur, fontsize, button_width, box_height, processevent);
+    button = gm_create_button(cur, fontsize, button_width, box_height, processevent);
     gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 1);
     gtk_widget_show (button);
     cur = next;

@@ -28,15 +28,18 @@
 static int WINDOWED = 0;
 static GtkWidget *mainwin;
 static int fontsize;
+static menu_elements *programs;
+static int dialog_width;
+static int dialog_height;
 
 static void usage()
 {
-  printf("usage: changeresolution [--help] [--screenwidth <WIDTHINPIXELS>] [--screenheight <HEIGHTINPIXELS>] [--conffile <FILENAME>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
+  printf("usage: changeresolution [--help] [--screenwidth <WIDTHINPIXELS>] [--screenheight <HEIGHTINPIXELS>] [--gmconffile <FILENAME>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
   printf("");
   printf("--help:\t\tshows this help text\n");
   printf("--screenwidth <WIDTHINPIXELS>:\t\twidth of the main (gappman) window (default: screen width / 3)\n");
   printf("--screenheight <HEIGHTINPIXELS:\t\theight of the main (gappman) window (default: screen height / 3)\n");
-  printf("--conffile <FILENAME>:\t\t configuration file specifying the program and actions (default: /etc/gappman/processmanager.xml)\n");
+  printf("--gmconffile <FILENAME>:\t\t configuration file specifying the program and actions (default: /etc/gappman/conf.xml)\n");
   printf("--gtkrc <GTKRCFILENAME>:\t\t gtk configuration file which can be used for themeing\n");
   printf("--windowed:\t\t creates a border around the window\n");
 
@@ -53,16 +56,27 @@ static gboolean revert_to_old_res(GtkWidget *widget, XRRScreenSize *size)
 	return FALSE;
 }
 
+static gboolean set_default_res_for_program( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
+{
+	g_debug("Setting default resolution for %s\n", elt->name);
+	return TRUE;
+}
+
 /**
 * \brief creates a popup dialog window that allows the user to stop a program
 * \param *elt pointer to menu_element structure that contains the program to be stopped
 */
 static void changeresolution( XRRScreenSize *size )
 {
-	GtkWidget *button, *buttonbox, *label, *confirmwin;
+	GtkWidget *button;
+	GtkWidget *vbox;
+	GtkWidget *label;
+	GtkWidget *confirmwin;
 	gchar* markup;
 	static XRRScreenSize *oldsize = NULL;
 	int nr;
+	int button_height;
+	menu_elements *programs_tmp;
 
 	gm_changeresolution(size[0].width, size[0].height);
 	
@@ -77,18 +91,36 @@ static void changeresolution( XRRScreenSize *size )
   //Remove border
   gtk_window_set_decorated (GTK_WINDOW (confirmwin), FALSE);
 
-	buttonbox = gtk_hbutton_box_new();	
+	vbox = gtk_vbox_new(TRUE, 10);	
+
+	label = gtk_label_new("");
+	markup = g_markup_printf_escaped ("<span size=\"%d\">Make resolution default for program:</span>", fontsize);
+	gtk_label_set_markup (GTK_LABEL (label), markup);
+	g_free (markup);
+	gtk_container_add(GTK_CONTAINER(vbox), label);
+
+	programs_tmp = programs;
+	if (programs_tmp != NULL)
+	{
+		button_height = dialog_height/(*programs_tmp->amount_of_elements);
+		while(programs_tmp != NULL)
+		{
+			button = gm_create_button(programs_tmp, fontsize, dialog_width, button_height, set_default_res_for_program);
+			gtk_container_add(GTK_CONTAINER(vbox), button);
+			programs_tmp = programs_tmp->next;
+		}
+	}
 	
+	gtk_container_add(GTK_CONTAINER(vbox), gtk_hseparator_new());
+
 	label = gtk_label_new("");	
-	markup = g_markup_printf_escaped ("<span size=\"%d\">Keep resolution</span>", fontsize);
+	markup = g_markup_printf_escaped ("<span size=\"%d\">Keep resolution just this once.</span>", fontsize);
 	gtk_label_set_markup (GTK_LABEL (label), markup);
 	g_free (markup);
 	button = gtk_button_new();
 	gtk_container_add(GTK_CONTAINER(button), label);
-  gtk_widget_show(label);
  	g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (destroy_widget), confirmwin);
-	gtk_container_add(GTK_CONTAINER(buttonbox), button);
-	gtk_widget_show(button);
+	gtk_container_add(GTK_CONTAINER(vbox), button);
 
 	label = gtk_label_new("");	
 	markup = g_markup_printf_escaped ("<span size=\"%d\">Cancel</span>", fontsize);
@@ -98,15 +130,13 @@ static void changeresolution( XRRScreenSize *size )
  	g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (revert_to_old_res), &oldsize[0]);
  	g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (destroy_widget), confirmwin);
 	gtk_container_add(GTK_CONTAINER(button), label);
-  gtk_widget_show(label);
-  gtk_container_add(GTK_CONTAINER(buttonbox), button);
-  gtk_widget_show(button);
+  gtk_container_add(GTK_CONTAINER(vbox), button);
 
-	gtk_container_add(GTK_CONTAINER(confirmwin), buttonbox);
-	gtk_widget_show(buttonbox);
-	gtk_widget_show(confirmwin);
+	gtk_container_add(GTK_CONTAINER(confirmwin), vbox);
 	gtk_widget_grab_focus(button);
-	
+
+	gtk_widget_show_all(confirmwin);	
+
 	//We add a timer to return to the original resolution
 	//after 10 seconds
 	//g_timeout_add_seconds (10, )
@@ -184,8 +214,7 @@ int main (int argc, char **argv)
   GtkWidget *hbox;
   GtkWidget *align;
   GtkWidget *separator;
-  int dialog_width;
-  int dialog_height;
+
 	int row_height;
   int c;
 	int nsize;
@@ -255,15 +284,20 @@ int main (int argc, char **argv)
   }
 	
 	//get generic fontsize from gappman
-	if(gm_get_fontsize_from_gappman(2103, "localhost", &fontsize) == 0)
+	if(gm_get_fontsize_from_gappman(2103, "localhost", &fontsize) == GM_SUCCES)
   {
+		g_debug("YEAH");
     gm_set_fontsize(fontsize);
   }
 	else
 	{
+		g_debug("OOPS");
 		fontsize = gm_get_fontsize();
 	}
-	
+
+	gm_load_conf(conffile);
+	programs = gm_get_programs();
+
 	ret_value = gm_getpossibleresolutions(&sizes, &nsize);
 	if(ret_value != GM_SUCCES)
 	{

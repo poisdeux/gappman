@@ -417,10 +417,10 @@ int main (int argc, char **argv)
 	global_appw = NULL;
 
   /** Load configuration elements */
-  loadConf(conffile);
-  programs = getPrograms();
-  actions = getActions();
-	panel = getPanel();
+  gm_load_conf(conffile);
+  programs = gm_get_programs();
+  actions = gm_get_actions();
+	panel = gm_get_panel();
 
   screen = gdk_screen_get_default ();
   screen_width =  gdk_screen_get_width (screen);
@@ -510,9 +510,9 @@ int main (int argc, char **argv)
 	}
 
 	g_message("Closing up. Goodbye\n");
-  freeMenuElements( programs );
-  freeMenuElements( actions );
-  freeMenuElements( panel );
+  gm_free_menu_elements( programs );
+  gm_free_menu_elements( actions );
+  gm_free_menu_elements( panel );
   
 	return 0;
 }

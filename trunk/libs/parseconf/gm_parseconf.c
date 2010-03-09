@@ -96,12 +96,12 @@ static void addArgument(menu_elements *elt, char *argument)
   elt->args[elt->numArguments - 1] = (char *) argument;
 }
 
-char* getCachelocation()
+char* gm_get_cache_location()
 {
 	return cache_location;
 }
 
-char* getProgramname()
+char* gm_get_programname()
 {
 	return program_name;
 }
@@ -187,7 +187,7 @@ processMenuElement(xmlTextReaderPtr reader, menu_elements *elt, const char* elem
 /**
 * \brief returns the total number of menu_elements
 */
-int getNumberOfElements()
+int gm_get_number_of_elements()
 {
   return numberElts;
 }
@@ -196,7 +196,7 @@ int getNumberOfElements()
 * \brief relinguishes the memory occupied by menu_element structures
 * \param *elt first menu_element structure
 */
-void freeMenuElements( menu_elements *elt )
+void gm_free_menu_elements( menu_elements *elt )
 {
   menu_elements *next;
   int i;
@@ -229,22 +229,22 @@ void freeMenuElements( menu_elements *elt )
 	}
 }
 
-menu_elements* getPrograms()
+menu_elements* gm_get_programs()
 {
   return programs;
 }
 
-menu_elements* getActions()
+menu_elements* gm_get_actions()
 {
   return actions;
 }
 
-menu_elements* getPanel()
+menu_elements* gm_get_panel()
 {
   return panel_elts;
 }
 
-static void parseAlignment(char* align, float *hor_align, int *vert_align)
+static void gm_parse_alignment(char* align, float *hor_align, int *vert_align)
 {
 	char* result;
 
@@ -343,7 +343,7 @@ void static processMenuElements(const char* element_name, const char* group_elem
       {
         parseLength(xmlTextReaderGetAttribute (reader, "width"), menu_width);
         parseLength(xmlTextReaderGetAttribute (reader, "height"), menu_height);
-        parseAlignment(xmlTextReaderGetAttribute (reader, "align"), hor_align, vert_align);
+        gm_parse_alignment(xmlTextReaderGetAttribute (reader, "align"), hor_align, vert_align);
       }
 			//this should end parsing this group of elements
       ret = 0;
@@ -351,7 +351,7 @@ void static processMenuElements(const char* element_name, const char* group_elem
   }
 }
 
-int loadConf(const char *filename) {
+int gm_load_conf(const char *filename) {
     xmlTextReaderPtr reader;
     int ret;
     xmlChar *name;

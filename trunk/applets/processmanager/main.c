@@ -242,7 +242,7 @@ static GtkWidget* createrow(menu_elements *elt, int width, int height)
 	
 	hbox = gtk_hbox_new (FALSE, 10);
 
-  elt->widget = gm_createbutton(elt, fontsize, width, height, process_startprogram_event);
+  elt->widget = gm_create_button(elt, fontsize, width, height, process_startprogram_event);
 
 	statuslabel = gtk_label_new("");
 	status = get_status(elt->pid);
@@ -404,20 +404,20 @@ int main (int argc, char **argv)
 
 	if( started_procs != NULL )
 	{
-		if ( loadConf(conffile) != 0 )
+		if ( gm_load_conf(conffile) != 0 )
 		{	
 			gm_show_error_dialog("Could not load gappman configuration file\n", mainwin, destroy);
 		}
 		else	
 		{
-			program_elts = getPrograms();
+			program_elts = gm_get_programs();
 			if(program_elts != NULL)
 			{	
 				program_width=dialog_width-(dialog_width/2);
 				row_height=dialog_height/(*program_elts->amount_of_elements);
 			}
 
-			action_elts  = getActions();
+			action_elts  = gm_get_actions();
 			if(action_elts != NULL)
 			{	
 				row_height=dialog_height/(*action_elts->amount_of_elements);
@@ -500,8 +500,8 @@ int main (int argc, char **argv)
 	
   gtk_main ();
 
-	freeMenuElements( program_elts );
-	freeMenuElements( action_elts );
+	gm_free_menu_elements( program_elts );
+	gm_free_menu_elements( action_elts );
   return 0;
 }
 

@@ -178,7 +178,7 @@ int main (int argc, char **argv)
   }
 
   /** Load configuration elements */
-  if(loadConf(conffile) != 0)
+  if(gm_load_conf(conffile) != 0)
 	{
 		g_error("Error could not load configuration: %s", conffile);
 	}
@@ -188,7 +188,7 @@ int main (int argc, char **argv)
 		gm_set_fontsize(fontsize);
 	}
 
-  actions = getActions();
+  actions = gm_get_actions();
 
   screen = gdk_screen_get_default ();
   screen_width =  gdk_screen_get_width (screen);
@@ -244,7 +244,7 @@ int main (int argc, char **argv)
   //gtk_window_set_focus(GTK_WINDOW (mainwin), button); 
   gtk_main ();
 
-  freeMenuElements( actions );
+  gm_free_menu_elements( actions );
 
   return 0;
 }

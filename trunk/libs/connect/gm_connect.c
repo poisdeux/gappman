@@ -67,7 +67,6 @@ static int create_gio_channel(int portno, const char* hostname, GIOChannel** gio
 	{
 		return GM_COULD_NOT_CONNECT;
 	}
-
   *gio = g_io_channel_unix_new (sockfd);
   g_io_channel_set_buffer_size (*gio, 0);
   g_io_channel_set_line_term (*gio, NULL, 2);
@@ -90,6 +89,7 @@ int gm_get_fontsize_from_gappman(int portno, const char* hostname, int *fontsize
 	if ( status != GM_SUCCES )
 		return status; 
 
+	g_debug("STATUS: %d", status);
 	msg = g_strdup("showfontsize\n");
 	status = g_io_channel_write_chars(gio, (const gchar*) msg, -1, &bytes_written, &gerror);
   if( status == G_IO_STATUS_ERROR )
