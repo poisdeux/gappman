@@ -26,16 +26,16 @@ static void parse_fontsize_message(int *fontsize, gchar *msg)
 	}
 }
 
-int gm_connect_to_gappman(int portno, const char* hostname)
+int gm_connect_to_gappman(int portno, const char* hostname, int *sockfd)
 {
   struct sockaddr_in serv_addr;
   struct hostent *server;
-	int sockfd;
 
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (sockfd < 0)
+  *sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  if (*sockfd < 0)
   {
     g_warning("could not open socket.\n");
+		return GM_COULD_NOT_CONNECT;
   }
 
   server = gethostbyname(hostname);
@@ -50,21 +50,22 @@ int gm_connect_to_gappman(int portno, const char* hostname)
   memcpy((char *)server->h_addr, (char *)&serv_addr.sin_addr.s_addr, server->h_length);
   serv_addr.sin_port = htons(portno);
 
-  if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
+  if (connect(*sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
   {
     g_warning("Error: could not connect.\n");
 		return GM_COULD_NOT_CONNECT;
   }
-	return sockfd;
+	return GM_SUCCES;
 }
 
 static int create_gio_channel(int portno, const char* hostname, GIOChannel** gio)
 {
 	int sockfd;
+	int status;
 
-  sockfd = gm_connect_to_gappman(portno, hostname);
-	if(sockfd < 0)
-	{
+  status = gm_connect_to_gappman(portno, hostname, &sockfd);
+	if(status != GM_SUCCES)
+	{	
 		return GM_COULD_NOT_CONNECT;
 	}
   *gio = g_io_channel_unix_new (sockfd);
@@ -119,5 +120,56 @@ int gm_get_fontsize_from_gappman(int portno, const char* hostname, int *fontsize
   }
 
 	return GM_SUCCES;
+}
+
+int gm_send_and_receive_message(int portno, const char* hostname, gchar *msg, void (*callbackfunc)(gchar*))
+{
+  gsize len;
+  gchar *receive_msg;
+  int status, sockfd, n, sourceid;
+  int bytes_written;
+  GIOChannel* gio = NULL;
+  GError *gerror = NULL;
+
+  status = gm_connect_to_gappman(portno, hostname, &sockfd);
+  if(status != GM_SUCCES)
+  {
+    return status;
+  }
+
+  gio = g_io_channel_unix_new (sockfd);
+  g_io_channel_set_buffer_size (gio, 0);
+  g_io_channel_set_line_term (gio, NULL, 2);
+  g_io_channel_set_encoding (gio, "UTF-8", NULL);
+
+  status = g_io_channel_write_chars(gio, (const gchar*) msg, -1, &bytes_written, &gerror);
+  if( status == G_IO_STATUS_ERROR )
+  {
+    g_warning("%s\n", gerror->message );
+                return GM_COULD_NOT_SEND_MESSAGE;
+  }
+
+  status = g_io_channel_flush( gio, &gerror);
+  if( status == G_IO_STATUS_ERROR )
+  {
+    g_warning("%s\n", gerror->message );
+  }
+
+  if(callbackfunc != NULL)
+  {
+  	while( g_io_channel_read_line( gio, &receive_msg, &len, NULL,  &gerror) != G_IO_STATUS_EOF )
+  	{
+    	callbackfunc(receive_msg);
+  	}
+  }
+
+  status = g_io_channel_shutdown( gio, TRUE, &gerror);
+  if ( status == G_IO_STATUS_ERROR )
+  {
+        g_warning("handlemessage: %s\n", gerror->message);
+        return GM_COULD_NOT_DISCONNECT;
+  }
+
+  return GM_SUCCES;
 }
 

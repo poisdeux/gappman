@@ -16,6 +16,17 @@ int gm_get_fontsize_from_gappman(int portno, const char* hostname, int *fontsize
 * \brief Connects to gappman
 * \param portno portnumber gappman listens to
 * \param hostname servername of host that runs gappman
+* \param sockfd pointer to int which will hold the socket filedescriptor
 * \return filedescriptor
 */
-int gm_connect_to_gappman(int portno, const char* hostname);
+int gm_connect_to_gappman(int portno, const char* hostname, int *sockfd);
+
+/**
+* \brief connects to gappman and sends a message and may receive one or more answers.
+* \param portno portnumber gappman listens to
+* \param hostname servername of host that runs gappman
+* \param msg the message that should be sent to gappman
+* \param callbackfunc callback function that should handle each message received from gappman. If NULL no messages will be received.
+* \return integer value as defined in libs/generic/gm_generic.h
+*/
+int gm_send_and_receive_message(int portno, const char* hostname, gchar *msg, void (*callbackfunc)(gchar*));
