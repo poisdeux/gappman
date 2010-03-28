@@ -143,3 +143,27 @@ int gm_changeresolution (int width, int height)
 	
 	return GM_SUCCES;
 }
+
+int gm_get_current_size(XRRScreenSize* size)
+{	
+	int nsize;
+	SizeID size_id;
+  XRRScreenConfiguration *sc;
+  Rotation current_rotation;
+  GdkDisplay *gdk_dpy;
+	XRRScreenSize *sizes;
+
+  gdk_dpy = gdk_display_get_default ();
+
+	sc = XRRGetScreenInfo ( GDK_DISPLAY_XDISPLAY(gdk_dpy), GDK_ROOT_WINDOW() );
+
+  if (sc == NULL) 
+	 return GM_NO_SCREEN_CONFIGURATION;
+	
+	sizes = XRRConfigSizes(sc, &nsize);
+
+	size_id = XRRConfigCurrentConfiguration (sc, &current_rotation);
+
+	*size = sizes[size_id];
+	return GM_SUCCES;
+}

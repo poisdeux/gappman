@@ -95,8 +95,12 @@ GtkWidget *gm_create_cancel_button(void *callbackfunc, void *data)
   button = gtk_button_new(); 
   gtk_container_add(GTK_CONTAINER(button), label); 
   gtk_widget_show(label);
-  g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (callbackfunc), data);
-	return button;
+
+  if( callbackfunc != NULL)
+  {
+	  g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (callbackfunc), data);
+  }
+  return button;
 }
 
 /**
