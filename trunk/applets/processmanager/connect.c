@@ -7,6 +7,7 @@
 #include <netdb.h>
 #include <string.h>
 #include <gm_connect.h>
+#include <gm_generic.h>
 #include "connect.h"
 
 
@@ -69,10 +70,10 @@ int getStartedProcsFromGappman(int portno, const char* hostname, struct procesli
   GIOChannel* gio = NULL;
   GError *gerror = NULL;
 
-  sockfd = gm_connect_to_gappman(portno, hostname);
-	if(sockfd < 0)
+  status = gm_connect_to_gappman(portno, hostname, &sockfd);
+	if(status != GM_SUCCES)
 	{
-		return abs(sockfd);
+		return status;
 	}
 
   gio = g_io_channel_unix_new (sockfd);
