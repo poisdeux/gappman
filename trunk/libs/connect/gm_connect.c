@@ -90,8 +90,7 @@ int gm_get_fontsize_from_gappman(int portno, const char* hostname, int *fontsize
 	if ( status != GM_SUCCES )
 		return status; 
 
-	g_debug("STATUS: %d", status);
-	msg = g_strdup("showfontsize\n");
+	msg = g_strdup("::showfontsize::\n");
 	status = g_io_channel_write_chars(gio, (const gchar*) msg, -1, &bytes_written, &gerror);
   if( status == G_IO_STATUS_ERROR )
   {
@@ -159,7 +158,7 @@ int gm_send_and_receive_message(int portno, const char* hostname, gchar *msg, vo
   {
   	while( g_io_channel_read_line( gio, &receive_msg, &len, NULL,  &gerror) != G_IO_STATUS_EOF )
   	{
-    	callbackfunc(receive_msg);
+    		callbackfunc(receive_msg);
   	}
   }
 

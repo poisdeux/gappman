@@ -28,6 +28,7 @@
 #include <pthread.h>
 
 struct appwidgetinfo* global_appw;
+menu_elements *programs;
 
 static int KEEP_BELOW=0;
 static int WINDOWED=0;
@@ -42,10 +43,25 @@ struct appm_alignment
   float y;
 };
 
-/**
-* \brief returns the linked list of started applications
-* \return appwidgetinfo*
-*/
+void update_resolution(gchar* programname, int width, int height)
+{
+	menu_elements* elt = NULL;
+	if( programname != NULL )
+	{
+		elt = gm_search_elt_by_name(programname, programs);
+		if ( elt != NULL )
+		{
+			elt->app_width = width;
+			elt->app_height = height;
+		}
+	}
+	else
+	{
+		screen_width = width;
+		screen_height = height;	
+	}
+}
+
 struct appwidgetinfo* get_started_apps()
 {
 	return global_appw;
@@ -61,8 +77,7 @@ static gint check_app_status(struct appwidgetinfo* local_appw)
   int status;
   FILE *fp;
   struct appwidgetinfo* tmp;
- 	struct menu_element* elt;
-
+  struct menu_element* elt;
 
   waitpid(local_appw->PID, &(local_appw->status), WNOHANG);
 
@@ -116,9 +131,9 @@ static gint check_app_status(struct appwidgetinfo* local_appw)
 			if ( elt != NULL )
 			{	
 				if( elt->app_width > 0 && elt->app_height > 0 )
-    		{
-      		gm_changeresolution(elt->app_width, elt->app_height);
-    		}
+    				{
+      					gm_changeresolution(elt->app_width, elt->app_height);
+    				}
 			}
 		}
 		
@@ -354,7 +369,6 @@ int main (int argc, char **argv)
   GtkWidget *vbox;
   GtkStyle  *style;
   menu_elements *actions;
-  menu_elements *programs;
   menu_elements *panel;
   const char* conffile = "./conf.xml";
   const char* bgimage = NULL;

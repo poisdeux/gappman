@@ -14,20 +14,28 @@
 
 #define SEND_PROCESS_LIST 1
 #define SEND_FONTSIZE 2
+#define UPDATE_RES 3
 
 static int parsemessage(gchar *msg)
 {
 	static int state = 0;
 	int msg_id;
+        gchar** contentssplit = NULL;
+        int i = 0;
+        contentssplit = g_strsplit(msg, "::", 0);
 
-
-	if(g_strcmp0(msg, "listprocesses\n") == 0)
+	g_debug("parsemessage: %s", contentssplit[1]);
+	if(g_strcmp0(contentssplit[1], "listprocesses") == 0)
 	{
 		msg_id = SEND_PROCESS_LIST;
 	}
-	else if(g_strcmp0(msg, "showfontsize\n") == 0)
+	else if(g_strcmp0(contentssplit[1], "showfontsize") == 0)
 	{
 		msg_id = SEND_FONTSIZE;
+	}
+	else if(g_strcmp0(contentssplit[1], "updateres") == 0)
+	{
+		msg_id = UPDATE_RES;
 	}
 	return msg_id;	
 }
@@ -72,23 +80,10 @@ static void sendprocesslist(GIOChannel* gio)
 	free(msg);
 }
 
-static void answerclient(GIOChannel* gio, int msg_id)
+static void handle_update_resolution(gchar *msg)
 {
-	gsize* bytes_written = NULL;
-	gchar* msg = NULL;
-
-	switch(msg_id)
-	{
-		case SEND_PROCESS_LIST:
-			sendprocesslist(gio);
-			break;;
-		case SEND_FONTSIZE:
-			msg = (gchar*) malloc(16 * sizeof(gchar));
-			g_sprintf(msg, "fontsize::%d", gm_get_fontsize());
-			writemsg(gio, msg);
-			free(msg);
-			break;;
-	}
+	g_debug("update_resolution: received message: %s", msg);
+	
 }
 
 static gboolean handleconnection( GIOChannel* gio , GIOCondition cond, gpointer data )
@@ -101,7 +96,7 @@ static gboolean handleconnection( GIOChannel* gio , GIOCondition cond, gpointer 
 	int newsock;
 	struct sockaddr_in cli_addr;
 	int clilen;
-  GIOChannel* new_gio = NULL;
+  	GIOChannel* new_gio = NULL;
 	int msg_id;
 
 	newsock = accept((int) data, (struct sockaddr *) &cli_addr, &clilen);
@@ -129,8 +124,22 @@ static gboolean handleconnection( GIOChannel* gio , GIOCondition cond, gpointer 
 		{
 			g_debug("Received: %s", msg);
 			msg_id = parsemessage(msg);
+			switch(msg_id)
+			{
+				case SEND_PROCESS_LIST:
+					sendprocesslist(new_gio);
+					break;;
+				case SEND_FONTSIZE:
+					g_free(msg);
+					msg = (gchar*) malloc(16 * sizeof(gchar));
+					g_sprintf(msg, "fontsize::%d", gm_get_fontsize());
+					writemsg(new_gio, msg);
+					break;;
+				case UPDATE_RES:
+					handle_update_resolution(msg);
+					break;;
+			}
 			g_free(msg);
-			answerclient(new_gio, msg_id);
 		}
 		gappman_close_listener(new_gio);
 	}

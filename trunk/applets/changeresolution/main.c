@@ -78,7 +78,10 @@ static gboolean set_default_res_for_program( GtkWidget *widget, GdkEvent *event,
 	gm_get_current_size(&current_size);
   	msg = g_strdup_printf("::updateres::%s::%dx%d::", elt->name, current_size.width, current_size.height);
 	g_debug("Setting default resolution for %s\n", elt->name);
-	gm_send_and_receive_message(2103, "localhost", msg, NULL);
+	if( gm_send_and_receive_message(2103, "localhost", msg, NULL) != GM_SUCCES )
+	{
+		gm_show_error_dialog("Could not connect to gappman.", NULL, NULL);
+	}
 	return TRUE;
   }
 }
@@ -120,13 +123,13 @@ static void make_default_for_program( XRRScreenSize *size )
 	}
 	else
 	{
-		gm_show_error_dialog("No programs found.\nPlease check configuration file.", mainwin, destroy);
+		gm_show_error_dialog("No programs found.\nPlease check configuration file.", NULL, NULL);
 	}
 }
 
 /**
-* \brief creates a popup dialog window that allows the user to stop a program
-* \param *elt pointer to menu_element structure that contains the program to be stopped
+* \brief creates a popup dialog window that allows the user confirm the new resolution 
+* \param *size pointer to a XRRScreenSize struct that holds the new resolution
 */
 static void changeresolution( XRRScreenSize *size )
 {
@@ -144,7 +147,7 @@ static void changeresolution( XRRScreenSize *size )
 	
 	confirmwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
-  gtk_window_set_transient_for (GTK_WINDOW(confirmwin), GTK_WINDOW(mainwin));
+  	gtk_window_set_transient_for (GTK_WINDOW(confirmwin), GTK_WINDOW(mainwin));
 	gtk_window_set_position(GTK_WINDOW (confirmwin), GTK_WIN_POS_CENTER_ON_PARENT);
  
   //Make window transparent

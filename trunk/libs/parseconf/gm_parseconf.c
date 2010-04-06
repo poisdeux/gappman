@@ -418,3 +418,16 @@ int gm_load_conf(const char *filename) {
     xmlCleanupParser();
 		return 0;
 }
+
+
+menu_elements* gm_search_elt_by_name(gchar* name, menu_elements* programs)
+{
+	while( programs != NULL )
+	{
+		if ( g_strcmp0(name, programs->name) == 0 )
+		{
+			return programs;
+		}
+		programs = programs->next;
+	}
+}

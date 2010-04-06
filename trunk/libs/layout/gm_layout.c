@@ -11,6 +11,11 @@ static int	screen_height = 600;
 
 #define MAXCHARSINLABEL 15;
 
+static void destroy_widget( GtkWidget *widget, gpointer data )
+{
+        gtk_widget_destroy(widget);
+}
+
 void gm_show_error_dialog(const gchar* message, GtkWidget *mainwin, void *callback)
 {
   GtkWidget *dialog;
@@ -25,8 +30,17 @@ void gm_show_error_dialog(const gchar* message, GtkWidget *mainwin, void *callba
 	GtkStyle *style;
 	GtkIconSet *iconset;
 
-  g_warning("%s", message);
+	g_warning("%s", message);
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+
+        gtk_window_set_transient_for (GTK_WINDOW(window), GTK_WINDOW(mainwin));
+        gtk_window_set_position(GTK_WINDOW (window), GTK_WIN_POS_CENTER_ON_PARENT);
+
+  	//Make window transparent
+  	//gtk_window_set_opacity (GTK_WINDOW (window), 0.8);
+
+  	//Remove border
+  	gtk_window_set_decorated (GTK_WINDOW (window), FALSE);
 	
 	gtk_window_set_frame_dimensions (GTK_WINDOW(window), 5, 5, 5, 5);
 	vbox = gtk_vbox_new(FALSE, 0);
@@ -55,9 +69,18 @@ void gm_show_error_dialog(const gchar* message, GtkWidget *mainwin, void *callba
   button = gtk_button_new();
   gtk_container_add(GTK_CONTAINER(button), label);
   gtk_widget_show(label);
-	g_signal_connect_swapped (G_OBJECT (button), "clicked",
+	if( callback == NULL )
+	{
+		g_signal_connect_swapped (G_OBJECT (button), "clicked",
+			      G_CALLBACK (destroy_widget),
+			      window);
+	}
+	else
+	{
+		g_signal_connect_swapped (G_OBJECT (button), "clicked",
 			      G_CALLBACK (callback),
-			      G_OBJECT (window));
+			      window);
+	}
  	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 0);
   gtk_widget_show(button);
 	

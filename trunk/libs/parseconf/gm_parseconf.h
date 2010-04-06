@@ -36,7 +36,7 @@ enum length_types {
 */
 struct menu_element
 {
-	int *amount_of_elements; //!< total number of elements
+  int *amount_of_elements; //!< total number of elements
   struct length *menu_width;
   struct length *menu_height;
   int app_width;
@@ -133,5 +133,11 @@ menu_elements* gm_get_actions();
 */
 menu_elements* gm_get_panel();
 
+/**
+* \brief returns the menu element with the given name
+* \param name the programname of the menu element
+* \return pointer to the menu element structure
+*/
+menu_elements* gm_search_elt_by_name(gchar* name,  menu_elements *programs);
 
 #endif

@@ -36,10 +36,10 @@ int gm_calculate_box_length(int total_length, struct length *box_length);
 GtkWidget* gm_load_image(char* elt_name, char* elt_logo, char* cacheloc, char* programname, int max_width, int max_height);
 
 /**
-* \brief shows an error dialog with regards to gappman fontsize
+* \brief shows an error dialog with regards to gappman fontsize.
 * \param message pointer to char that will hold the message
 * \param mainwin pointer to main window GtkWidget
-* \param callback pointer to callback function that should be called when OK button is pressed
+* \param callback pointer to callback function that should be called when Close button is pressed. If NULL the default action will be taken which simply destroys this error dialog.
 */
 void gm_show_error_dialog(const gchar* message, GtkWidget *mainwin, void* callback);
 

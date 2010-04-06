@@ -81,7 +81,7 @@ int getStartedProcsFromGappman(int portno, const char* hostname, struct procesli
   g_io_channel_set_line_term (gio, NULL, 2);
   g_io_channel_set_encoding (gio, "UTF-8", NULL);
 
-	msg = g_strdup("listprocesses\n");
+	msg = g_strdup("::listprocesses::\n");
 	status = g_io_channel_write_chars(gio, (const gchar*) msg, -1, &bytes_written, &gerror);
   if( status == G_IO_STATUS_ERROR )
   {
