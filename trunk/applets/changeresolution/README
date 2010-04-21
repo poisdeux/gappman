@@ -5,8 +5,7 @@
 Changeresolution is a small GUI which will show you the available resolutions
 and let you choose a new resolution from these options. The new resolution
 will take effect immediately. The user will also have the option to make
-the change permanent by changing the X.org configuration or change gappman's
-configuration to have a specific program started with the given resolution.
+the change permanent for gappman or a specific program started through gappman.
 
 -----------------------------------------------------------------------------
 2. Running the application

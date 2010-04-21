@@ -507,27 +507,20 @@ int main (int argc, char **argv)
 
   autostartprograms( programs );
 
-	if ( ! gappman_start_listener(&gio, "localhost", 2103) )
-	{
-		g_warning("Could not start listener.\n");
-	}
+  gappman_start_listener(mainwin);
 
-	
-	gdk_threads_enter();  
+  gdk_threads_enter();  
   gtk_main ();
   gdk_threads_leave();
 
 
-	if ( ! gappman_close_listener(gio) )
-	{
-		g_warning("Could not close listener.\n");
-	}
+  gappman_close_listener(NULL);
 
-	g_message("Closing up. Goodbye\n");
+  g_message("Closing up. Goodbye\n");
   gm_free_menu_elements( programs );
   gm_free_menu_elements( actions );
   gm_free_menu_elements( panel );
   
-	return 0;
+  return 0;
 }
 

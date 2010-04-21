@@ -8,12 +8,108 @@
 static int fontsize = 10*1024; //< the default generic fontsize for all elements. This usually gets updated by menu building functions below.
 static int	screen_width = 800;
 static int	screen_height = 600;
+static int 	confirmation_answer = 0;
 
 #define MAXCHARSINLABEL 15;
 
 static void destroy_widget( GtkWidget *widget, gpointer data )
 {
         gtk_widget_destroy(widget);
+}
+
+int gm_show_confirmation_dialog(const gchar* message, const gchar* msg_button1, void* callback1, void* data1, const gchar* msg_button2, void* callback2, void* data2, GtkWidget *mainwin)
+{
+  GtkWidget *dialog;
+	GtkWidget *window;
+	GtkWidget *vbox;
+	GtkWidget *hbox;
+	GtkWidget *button;
+	GtkWidget *label;
+	gchar *markup;
+	GdkPixbuf *pixbuf;
+	GtkWidget *stock_image;
+	GtkStyle *style;
+	GtkIconSet *iconset;
+	int button1_pressed = 0;
+	int button2_pressed = 1;
+	
+	g_warning("%s", message);
+	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+
+        gtk_window_set_transient_for (GTK_WINDOW(window), GTK_WINDOW(mainwin));
+        gtk_window_set_position(GTK_WINDOW (window), GTK_WIN_POS_CENTER_ON_PARENT);
+
+  	//Make window transparent
+  	//gtk_window_set_opacity (GTK_WINDOW (window), 0.8);
+
+  	//Remove border
+  	gtk_window_set_decorated (GTK_WINDOW (window), FALSE);
+	
+	gtk_window_set_frame_dimensions (GTK_WINDOW(window), 5, 5, 5, 5);
+	vbox = gtk_vbox_new(FALSE, 0);
+
+	hbox = gtk_hbox_new(FALSE, 0);
+	pixbuf = gtk_widget_render_icon(window, GTK_STOCK_DIALOG_QUESTION,  GTK_ICON_SIZE_DIALOG, NULL);
+	stock_image = gtk_image_new_from_pixbuf(pixbuf);
+	gtk_box_pack_start (GTK_BOX (hbox), stock_image, FALSE, FALSE, 0);
+	gtk_widget_show (stock_image);
+
+ 	label = gtk_label_new ("");
+	markup = g_markup_printf_escaped ("<span size=\"%d\">%s</span>", fontsize, message);
+ 	gtk_label_set_markup (GTK_LABEL (label), markup);
+ 	g_free (markup);
+	gtk_misc_set_padding (GTK_MISC (label), 5, 5);
+ 	gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
+ 	gtk_widget_show (label);
+
+ 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
+	gtk_widget_show (hbox);
+
+	hbox = gtk_hbox_new(FALSE, 0);
+	label = gtk_label_new("");
+  markup = g_markup_printf_escaped ("<span size=\"%d\">%s</span>", fontsize, msg_button1);
+  gtk_label_set_markup (GTK_LABEL (label), markup);
+  g_free (markup);
+  button = gtk_button_new();
+  gtk_container_add(GTK_CONTAINER(button), label);
+  gtk_widget_show(label);
+  if( callback1 != NULL)
+  {
+    g_signal_connect_swapped (G_OBJECT (button), "clicked",
+			      G_CALLBACK (callback1),
+			      data1);
+  }
+  g_signal_connect_swapped(G_OBJECT (button), "clicked",
+			      G_CALLBACK (destroy_widget),
+			      window);
+
+  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
+  gtk_widget_show(button);
+
+  label = gtk_label_new("");
+  markup = g_markup_printf_escaped ("<span size=\"%d\">%s</span>", fontsize, msg_button2);
+  gtk_label_set_markup (GTK_LABEL (label), markup);
+  g_free (markup);
+  button = gtk_button_new();
+  gtk_container_add(GTK_CONTAINER(button), label);
+  gtk_widget_show(label);
+  g_signal_connect_swapped (G_OBJECT (button), "clicked",
+			      G_CALLBACK (destroy_widget),
+			      window);
+  if ( callback2 != NULL )
+  {
+    g_signal_connect_swapped (G_OBJECT (button), "clicked",
+			      G_CALLBACK (callback2),
+			      data2);
+  }
+  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
+  gtk_widget_show(button);
+  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
+  gtk_widget_show (hbox);
+
+  gtk_container_add(GTK_CONTAINER(window), vbox);
+  gtk_widget_show (vbox);
+  gtk_widget_show (window);
 }
 
 void gm_show_error_dialog(const gchar* message, GtkWidget *mainwin, void *callback)
@@ -69,19 +165,16 @@ void gm_show_error_dialog(const gchar* message, GtkWidget *mainwin, void *callba
   button = gtk_button_new();
   gtk_container_add(GTK_CONTAINER(button), label);
   gtk_widget_show(label);
-	if( callback == NULL )
-	{
-		g_signal_connect_swapped (G_OBJECT (button), "clicked",
+  g_signal_connect_swapped (G_OBJECT (button), "clicked",
 			      G_CALLBACK (destroy_widget),
 			      window);
-	}
-	else
-	{
-		g_signal_connect_swapped (G_OBJECT (button), "clicked",
+  if (callback != NULL)
+  {
+    g_signal_connect_swapped (G_OBJECT (button), "clicked",
 			      G_CALLBACK (callback),
 			      window);
-	}
- 	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 0);
+  }
+  gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 0);
   gtk_widget_show(button);
 	
 	gtk_container_add(GTK_CONTAINER(window), vbox);

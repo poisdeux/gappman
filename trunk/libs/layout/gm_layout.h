@@ -36,6 +36,15 @@ int gm_calculate_box_length(int total_length, struct length *box_length);
 GtkWidget* gm_load_image(char* elt_name, char* elt_logo, char* cacheloc, char* programname, int max_width, int max_height);
 
 /**
+* \brief shows a question dialog with regards to gappman fontsize.
+* \param message pointer to char that will hold the general question
+* \param msg_button1 pointer to char that will hold the message for the first button.
+* \param msg_button2 pointer to char that will hold the message for the second button.
+* \param mainwin pointer to main window GtkWidget
+*/
+int gm_show_confirmation_dialog(const gchar* message, const gchar* msg_button1, void* callback1, void* data1, const gchar* msg_button2, void* callback2, void* data2, GtkWidget *mainwin);
+
+/**
 * \brief shows an error dialog with regards to gappman fontsize.
 * \param message pointer to char that will hold the message
 * \param mainwin pointer to main window GtkWidget

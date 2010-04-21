@@ -44,6 +44,7 @@ static void parseProceslistMessage(struct proceslist** procs, gchar *msg)
 {
 	gchar** contentssplit = NULL;
 	int i = 0;
+	int state = 0;
 	contentssplit = g_strsplit(msg, "::", 0);
 	
 	while( contentssplit[i] != NULL )
@@ -52,10 +53,15 @@ static void parseProceslistMessage(struct proceslist** procs, gchar *msg)
 		{
 			*procs = createnewproceslist(*procs);
 			(*procs)->name = contentssplit[i+1];
+			state = 1;
 		}
 		else if ( g_strcmp0("pid", contentssplit[i]) == 0)
-		{
-			(*procs)->pid = atoi(contentssplit[i+1]);
+		{	
+			if ( state == 1 )
+			{
+				(*procs)->pid = atoi(contentssplit[i+1]);
+				state = 0;
+			}
 		}
 		i++; 
 	}
@@ -99,6 +105,7 @@ int getStartedProcsFromGappman(int portno, const char* hostname, struct procesli
 
   while( g_io_channel_read_line( gio, &msg, &len, NULL,  &gerror) != G_IO_STATUS_EOF )
   {
+	g_debug("TEST: message received: %s\n", msg);
 		parseProceslistMessage(startedprocs, msg);
   }
 	

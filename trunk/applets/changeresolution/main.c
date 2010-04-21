@@ -76,7 +76,7 @@ static gboolean set_default_res_for_program( GtkWidget *widget, GdkEvent *event,
   if( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
   {
 	gm_get_current_size(&current_size);
-  	msg = g_strdup_printf("::updateres::%s::%dx%d::", elt->name, current_size.width, current_size.height);
+  	msg = g_strdup_printf("::updateres::%s::%d::%d::", elt->name, current_size.width, current_size.height);
 	g_debug("Setting default resolution for %s\n", elt->name);
 	if( gm_send_and_receive_message(2103, "localhost", msg, NULL) != GM_SUCCES )
 	{

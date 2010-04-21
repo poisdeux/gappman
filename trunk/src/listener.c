@@ -16,6 +16,8 @@
 #define SEND_FONTSIZE 2
 #define UPDATE_RES 3
 
+static GIOChannel* gio; 
+
 static int parsemessage(gchar *msg)
 {
 	static int state = 0;
@@ -82,8 +84,34 @@ static void sendprocesslist(GIOChannel* gio)
 
 static void handle_update_resolution(gchar *msg)
 {
-	g_debug("update_resolution: received message: %s", msg);
-	
+        gchar** contentssplit = NULL;
+	gchar* name = NULL;
+        int i = 0;
+	int width, height;
+
+        contentssplit = g_strsplit(msg, "::", 5);
+
+	//Msg should contain 4 elements as according to protocol
+	for (i = 0; i < 5; i++)
+	{
+		if(contentssplit[i] == NULL)
+			return;
+	}
+
+	if( g_strcmp0(contentssplit[2], "general") == 0 )
+	{
+		name = NULL;
+	}
+	else
+	{
+		name = contentssplit[2];
+	}
+	width = atoi(contentssplit[3]);
+	height = atoi(contentssplit[4]);
+
+	update_resolution(name, width, height);
+
+	g_strfreev(contentssplit);
 }
 
 static gboolean handleconnection( GIOChannel* gio , GIOCondition cond, gpointer data )
@@ -147,55 +175,99 @@ static gboolean handleconnection( GIOChannel* gio , GIOCondition cond, gpointer 
 	return TRUE; 
 }
 
-gboolean gappman_start_listener (GIOChannel** gio, const gchar *server, gint port)
+gboolean gappman_start_listener (GtkWidget* win)
 {
 	int sock;
+	int s;
 	int sourceid;
 	struct hostent *host;
+	struct addrinfo hints;
+	struct addrinfo *result, *rp;
+	struct sockaddr_in addr;
+	const gchar *server = "localhost"; 
+	const gchar *port = "2103";
+	gboolean listener_started = TRUE;	
 
-	g_return_val_if_fail (server != NULL, FALSE);
-	g_return_val_if_fail (port > 0, FALSE);
-	if ((sock = socket (AF_INET, SOCK_STREAM, 0)) != -1)
+	g_debug("Starting listener: %s:%s", server, port);
+
+	memset(&hints, 0, sizeof(struct addrinfo));
+        hints.ai_family = AF_INET;    /* Allow IPv4 or IPv6 */
+        hints.ai_socktype = SOCK_STREAM; /* Datagram socket */
+        hints.ai_flags = 0;
+        hints.ai_protocol = 0;          /* Any protocol */
+
+	s = getaddrinfo(NULL, "2103", &hints, &result);
+        if (s != 0) {
+            g_warning("getaddrinfo: %s\n", gai_strerror(s));
+		listener_started = FALSE;	
+        }
+	else
 	{
-		struct sockaddr_in addr;
-		host = gethostbyname (server);
-		if (!host)
-			return FALSE;
-		addr.sin_addr = * (struct in_addr *) host->h_addr;
-		addr.sin_port = g_htons(port);
-		addr.sin_family = AF_INET;
-		if ( bind(sock, (struct sockaddr *) &addr, sizeof(addr)) < 0) 
-			return FALSE;
+		for (rp = result; rp != NULL; rp = rp->ai_next) 
+		{
+               		sock = socket(rp->ai_family, rp->ai_socktype,
+                            rp->ai_protocol);
 
-		if ( listen(sock,5) != 0 )
-			return FALSE;
+               		if (sock == -1)
+                  		continue;
+
+	               if (bind(sock, rp->ai_addr, rp->ai_addrlen) != -1)
+            		       break;                  /* Success */
+
+               		close(sock);
+           	}
+		if (rp == NULL) /* No address succeeded */
+		{               
+			g_debug("RP == NULL");	
+			listener_started = FALSE;	
+           	}
+
+           	freeaddrinfo(result);           /* No longer needed */
+
+		if( listener_started == TRUE )
+		{		
+			gio = g_io_channel_unix_new (sock);
+
+			if(! g_io_add_watch( gio, G_IO_IN, handleconnection, (gpointer) sock ))
+			{
+				g_warning("Cannot add watch on GIOChannel!\n");
+				listener_started = FALSE;	
+			}
+		}
+	}
 	
-		g_message("Listening on port %d on %s\n", port, server);
+	if ( listener_started == TRUE )
+	{	
+		g_message("Listening on port %s on %s\n", port, server);
+		return TRUE;
 	}
 	else
 	{
+		close(sock);
+		g_warning("Could not start listener");
+		gm_show_confirmation_dialog("Could not start listener.\nShould I try again?", "Restart listener", gappman_start_listener, win, "Cancel", NULL, NULL, win);
 		return FALSE;
 	}
-
-	*gio = g_io_channel_unix_new (sock);
-
-	if(! g_io_add_watch( *gio, G_IO_IN, handleconnection, (gpointer) sock ))
-	{
-		g_warning("Cannot add watch on GIOChannel!\n");
-	}
-	return TRUE;
 }
 
-gboolean gappman_close_listener (GIOChannel* gio)
+gboolean gappman_close_listener (GIOChannel* close_gio)
 {
 	GIOStatus status;
 	GError *gerror = NULL;
+	if ( close_gio == NULL )
+	{
+		close_gio = gio;
+	}
+  if(close_gio == NULL)
+  {  
+    return FALSE;
+  }
 
-  status = g_io_channel_shutdown( gio, TRUE, &gerror);
+  status = g_io_channel_shutdown( close_gio, TRUE, &gerror);
   if( status == G_IO_STATUS_ERROR )
   {
-    g_warning("Listener (gappman_close_listener): %s\n", gerror->message);
-		return FALSE;
+    	g_warning("Listener (gappman_close_listener): %s\n", gerror->message);
+	return FALSE;
   }
 
 	return TRUE;
