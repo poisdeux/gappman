@@ -1,3 +1,15 @@
+/***
+ * \file gm_changeresolution.c
+ *
+ * 
+ *
+ * GPL v2
+ *
+ * Authors:
+ *   Martijn Brekhof <m.brekhof@gmail.com>
+ */
+
+
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
 #include <stdlib.h>

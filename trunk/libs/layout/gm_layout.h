@@ -1,5 +1,5 @@
 /***
- * \file layout.h
+ * \file gm_layout.h
  *
  *
  *

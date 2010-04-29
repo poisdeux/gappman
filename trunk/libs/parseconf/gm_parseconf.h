@@ -1,5 +1,5 @@
 /**
- * \file parseconf.c
+ * \file gm_parseconf.h
  * \brief XML configuration file parser for menu elements
  * 
  *

@@ -1,3 +1,15 @@
+/***
+ * \file test.c
+ *
+ * 
+ *
+ * GPL v2
+ *
+ * Authors:
+ *   Martijn Brekhof <m.brekhof@gmail.com>
+ */
+
+
 #include "changeresolution.h"
 #include <getopt.h>
 #include <stdio.h>

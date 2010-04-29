@@ -1,3 +1,15 @@
+/***
+ * \file gm_connect.h
+ *
+ * 
+ *
+ * GPL v2
+ *
+ * Authors:
+ *   Martijn Brekhof <m.brekhof@gmail.com>
+ */
+
+
 /**
 * \brief Connects to gappman and requests the fontsize
 * \param portno portnumber gappman listens to

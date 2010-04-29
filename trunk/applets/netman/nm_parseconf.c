@@ -1,5 +1,5 @@
 /***
- * \file parseconf.c
+ * \file nm_parseconf.c
  *
  * 
  *

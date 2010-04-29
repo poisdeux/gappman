@@ -1,5 +1,5 @@
 /***
- * \file gm_netman.c_ 
+ * \file nm_main.c
  *
  * 
  *

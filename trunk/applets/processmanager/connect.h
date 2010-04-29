@@ -1,3 +1,15 @@
+/***
+ * \file connect.h
+ *
+ * 
+ *
+ * GPL v2
+ *
+ * Authors:
+ *   Martijn Brekhof <m.brekhof@gmail.com>
+ */
+
+
 #include <gtk/gtk.h>
 
 /**

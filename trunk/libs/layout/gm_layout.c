@@ -1,3 +1,15 @@
+/***
+ * \file gm_layout.c
+ *
+ * 
+ *
+ * GPL v2
+ *
+ * Authors:
+ *   Martijn Brekhof <m.brekhof@gmail.com>
+ */
+
+
 #include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <math.h>

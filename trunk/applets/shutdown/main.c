@@ -1,5 +1,5 @@
 /***
- * \file appmanager.c
+ * \file main.c
  *
  * 
  *

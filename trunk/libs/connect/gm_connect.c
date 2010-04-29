@@ -1,3 +1,15 @@
+/***
+ * \file gm_connect.c
+ *
+ * 
+ *
+ * GPL v2
+ *
+ * Authors:
+ *   Martijn Brekhof <m.brekhof@gmail.com>
+ */
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <glib.h>

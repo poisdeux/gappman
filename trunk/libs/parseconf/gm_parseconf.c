@@ -1,5 +1,5 @@
 /***
- * \file parseconf.c
+ * \file gm_parseconf.c
  *
  * 
  *

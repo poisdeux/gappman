@@ -1,3 +1,15 @@
+/***
+ * \file gm_generic.h
+ *
+ * 
+ *
+ * GPL v2
+ *
+ * Authors:
+ *   Martijn Brekhof <m.brekhof@gmail.com>
+ */
+
+
 #ifndef __GAPPMAN_GENERIC_H__
 #define __GAPPMAN_GENERIC_H__
 

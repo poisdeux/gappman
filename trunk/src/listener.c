@@ -1,3 +1,15 @@
+/***
+ * \file listener.c
+ *
+ * 
+ *
+ * GPL v2
+ *
+ * Authors:
+ *   Martijn Brekhof <m.brekhof@gmail.com>
+ */
+
+
 #include <stdio.h>
 #include <glib.h>
 #include <glib/gprintf.h>
