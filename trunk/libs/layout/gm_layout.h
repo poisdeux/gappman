@@ -26,7 +26,7 @@ int gm_calculate_box_length(int total_length, struct length *box_length);
 * \brief loads image and scales it making sure the image fits inside
 * max_width*max_height maintaining the correct aspect ratio
 * \param elt_name name of the element
-* \param elt_logo filename of the logo image to load 
+* \param elt_logo filename of the logo image to load
 * \param cacheloc directory where the cached images are kept
 * \param programname name of the main program that calls this function (i.e. gappman, netman, etc.)
 * \param max_width maximum width image may have
@@ -83,7 +83,7 @@ GtkWidget *gm_create_cancel_button(void *callbackfunc, void *data);
 * \param *elt pointer to menu_element struct that contains the logo image filename.
 * \param fontsize size of font used to set the label
 * \param max_width button width
-* \param max_height button height 
+* \param max_height button height
 * \param *processevent callback function that will be called when button is pressed
 */
 GtkWidget* gm_create_button ( menu_elements *elt, int fontsize, int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, menu_elements*) );
@@ -91,7 +91,7 @@ GtkWidget* gm_create_button ( menu_elements *elt, int fontsize, int max_width, i
 /**
 * \brief Create a single empty button
 * \param max_width button width
-* \param max_height button height 
+* \param max_height button height
 * \param *processevent callback function that will be called when button is pressed
 */
 GtkWidget* gm_create_empty_button ( int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, void*), void *data);

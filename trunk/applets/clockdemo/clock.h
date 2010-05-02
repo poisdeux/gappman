@@ -28,17 +28,17 @@ typedef struct _EggClockFaceClass	EggClockFaceClass;
 
 struct _EggClockFace
 {
-	GtkDrawingArea parent;
+    GtkDrawingArea parent;
 
-	/* < private > */
+    /* < private > */
 };
 
 struct _EggClockFaceClass
 {
-	GtkDrawingAreaClass parent_class;
+    GtkDrawingAreaClass parent_class;
 
-	void	(* time_changed)	(EggClockFace *clock,
-					 int hours, int minutes);
+    void	(* time_changed)	(EggClockFace *clock,
+                           int hours, int minutes);
 };
 
 GtkWidget *egg_clock_face_new (void);

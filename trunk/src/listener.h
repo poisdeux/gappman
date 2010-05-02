@@ -1,7 +1,7 @@
 /***
  * \file listener.h
  *
- * 
+ *
  *
  * GPL v2
  *
@@ -13,9 +13,9 @@
 #include <glib.h>
 
 /**
-* \brief Starts the gappman listener. Should be started only once. 
+* \brief Starts the gappman listener. Should be started only once.
 * \return TRUE if setting up the channel succeeded. False otherwise.
-*/ 
+*/
 gboolean gappman_start_listener (GtkWidget *win);
 
 /**

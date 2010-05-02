@@ -1,7 +1,7 @@
 /***
  * \file connect.h
  *
- * 
+ *
  *
  * GPL v2
  *
@@ -16,9 +16,9 @@
 * \brief struct to hold the process ID and program name retrieved from Gappman
 */
 struct proceslist {
-  int pid;
-  gchar* name;
-	struct proceslist* prev;
+    int pid;
+    gchar* name;
+    struct proceslist* prev;
 };
 
 /**

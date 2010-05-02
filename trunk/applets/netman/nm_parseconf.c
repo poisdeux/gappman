@@ -1,7 +1,7 @@
 /***
  * \file nm_parseconf.c
  *
- * 
+ *
  *
  * GPL v2
  *
@@ -18,29 +18,29 @@ static char *cache_location;
 
 struct nm_element* create_nm_element(nm_elements* prev)
 {
-  struct nm_element *elt;
-  elt = (nm_elements *) malloc(sizeof(nm_elements));
-  elt->numArguments = 0;
-  elt->logosuccess = NULL;
-  elt->logofail = NULL;
-	elt->success = 0;
-  elt->name = NULL;
-  elt->exec = NULL;
-  elt->next = prev;
-  elt->args = NULL;
-	elt->pid = -1;
-  elt->numArguments = 0;
-	if (prev == NULL)
-	{
-		elt->amount_of_elements = (int*) malloc (sizeof(int));
-		*(elt->amount_of_elements) = 1;
-	}
-	else
-	{
-		elt->amount_of_elements = prev->amount_of_elements;
-		*(elt->amount_of_elements) = *(elt->amount_of_elements) + 1;
-	}
-  return elt;
+    struct nm_element *elt;
+    elt = (nm_elements *) malloc(sizeof(nm_elements));
+    elt->numArguments = 0;
+    elt->logosuccess = NULL;
+    elt->logofail = NULL;
+    elt->success = 0;
+    elt->name = NULL;
+    elt->exec = NULL;
+    elt->next = prev;
+    elt->args = NULL;
+    elt->pid = -1;
+    elt->numArguments = 0;
+    if (prev == NULL)
+    {
+        elt->amount_of_elements = (int*) malloc (sizeof(int));
+        *(elt->amount_of_elements) = 1;
+    }
+    else
+    {
+        elt->amount_of_elements = prev->amount_of_elements;
+        *(elt->amount_of_elements) = *(elt->amount_of_elements) + 1;
+    }
+    return elt;
 }
 
 /**
@@ -50,14 +50,14 @@ struct nm_element* create_nm_element(nm_elements* prev)
 */
 static void add_argument(nm_elements *elt, char *argument)
 {
-  elt->numArguments++;
-  elt->args = (char **) realloc(elt->args, ((elt->numArguments) * sizeof(char *)));
-  elt->args[elt->numArguments - 1] = (char *) argument;
+    elt->numArguments++;
+    elt->args = (char **) realloc(elt->args, ((elt->numArguments) * sizeof(char *)));
+    elt->args[elt->numArguments - 1] = (char *) argument;
 }
 
 char* nm_get_cache_location()
 {
-	return cache_location;
+    return cache_location;
 }
 
 /**
@@ -69,55 +69,55 @@ static void
 process_nm_element(xmlTextReaderPtr reader, nm_elements *elt, const char* element_name ) {
     xmlChar *name, *value;
     int ret = 1;
-    
+
     if (name == NULL)
-			name = BAD_CAST "--";
+        name = BAD_CAST "--";
 
     while ( ret == 1 )
     {
 
-      if ( xmlTextReaderNodeType(reader) == 1 )
-      {
-        name = xmlTextReaderName(reader);
-      }
-      else if ( xmlTextReaderNodeType(reader) == 3 )
-      {
-        value = xmlTextReaderValue(reader);
-        if( strcmp((char *) name, "name") == 0 )
+        if ( xmlTextReaderNodeType(reader) == 1 )
         {
-          elt->name = value;
+            name = xmlTextReaderName(reader);
         }
-        else if( strcmp((char *) name, "exec") == 0 )
+        else if ( xmlTextReaderNodeType(reader) == 3 )
         {
-          elt->exec = value;
+            value = xmlTextReaderValue(reader);
+            if ( strcmp((char *) name, "name") == 0 )
+            {
+                elt->name = value;
+            }
+            else if ( strcmp((char *) name, "exec") == 0 )
+            {
+                elt->exec = value;
+            }
+            else if ( strcmp((char *) name, "logosuccess") == 0 )
+            {
+                elt->logosuccess = value;
+            }
+            else if ( strcmp((char *) name, "logofail") == 0 )
+            {
+                elt->logofail = value;
+            }
+            else if ( strcmp((char *) name, "arg") == 0 )
+            {
+                add_argument(elt, (char *) value);
+            }
+            else if ( strcmp((char *) name, "success") == 0 )
+            {
+                elt->success = atoi(value);
+            }
         }
-        else if( strcmp((char *) name, "logosuccess") == 0 )
-        {
-          elt->logosuccess = value;
-        }
-        else if( strcmp((char *) name, "logofail") == 0 )
-        {
-          elt->logofail = value;
-        }
-        else if( strcmp((char *) name, "arg") == 0 )
-        {
-          add_argument(elt, (char *) value);
-        }
-				else if( strcmp((char *) name, "success") == 0 )
-        {
-          elt->success = atoi(value);
-        }
-      }
 
-      if( strcmp((char *) xmlTextReaderName(reader), element_name) == 0 && xmlTextReaderNodeType(reader) == 15 )
-      { 
-        ret = 0;
+        if ( strcmp((char *) xmlTextReaderName(reader), element_name) == 0 && xmlTextReaderNodeType(reader) == 15 )
+        {
+            ret = 0;
 
-      }
-      else
-      {
-        ret = xmlTextReaderRead(reader);
-      }
+        }
+        else
+        {
+            ret = xmlTextReaderRead(reader);
+        }
     }
 }
 
@@ -127,42 +127,42 @@ process_nm_element(xmlTextReaderPtr reader, nm_elements *elt, const char* elemen
 */
 void nm_free_elements( nm_elements *elt )
 {
-  nm_elements *next;
-  int i;
-	char** orient;
+    nm_elements *next;
+    int i;
+    char** orient;
 
-	if (elt != NULL)
-	{
-		free(elt->amount_of_elements);
-		i = 0;
-		while(elt != NULL)
-		{
-			free((xmlChar *) elt->name);
-			free((xmlChar *) elt->exec);
-			free((xmlChar *) elt->logosuccess);
-			free((xmlChar *) elt->logofail);
+    if (elt != NULL)
+    {
+        free(elt->amount_of_elements);
+        i = 0;
+        while (elt != NULL)
+        {
+            free((xmlChar *) elt->name);
+            free((xmlChar *) elt->exec);
+            free((xmlChar *) elt->logosuccess);
+            free((xmlChar *) elt->logofail);
 
-			for (i = 0; i < elt->numArguments; i++)
-			{
- 				free(elt->args[i]);
-			}
-			free(elt->args);
+            for (i = 0; i < elt->numArguments; i++)
+            {
+                free(elt->args[i]);
+            }
+            free(elt->args);
 
-			next = elt->next;
-			free(elt);
-			elt = next;
-  	}
-	}
+            next = elt->next;
+            free(elt);
+            elt = next;
+        }
+    }
 }
 
 nm_elements* nm_get_stati()
 {
-  return stati;
+    return stati;
 }
 
 nm_elements* nm_get_actions()
 {
-  return actions;
+    return actions;
 }
 
 
@@ -176,29 +176,29 @@ nm_elements* nm_get_actions()
 */
 void static process_nm_elements(const char* element_name, const char* group_element_name, xmlTextReaderPtr reader, nm_elements **elts)
 {
-  int ret = 1;
-  xmlChar *name;
-  nm_elements *prev;
-  prev = NULL;
+    int ret = 1;
+    xmlChar *name;
+    nm_elements *prev;
+    prev = NULL;
 
 
-  while (ret)
-  {
-    ret = xmlTextReaderRead(reader);
-    name = xmlTextReaderName(reader);
-		// Parse new status or action and create a new nm_element for it.
-    if( strcmp((char *) name, element_name) == 0 && xmlTextReaderNodeType(reader) == 1)
+    while (ret)
     {
-      *elts = create_nm_element(prev);
-      prev = *elts;
-      process_nm_element(reader, *elts, element_name);
+        ret = xmlTextReaderRead(reader);
+        name = xmlTextReaderName(reader);
+        // Parse new status or action and create a new nm_element for it.
+        if ( strcmp((char *) name, element_name) == 0 && xmlTextReaderNodeType(reader) == 1)
+        {
+            *elts = create_nm_element(prev);
+            prev = *elts;
+            process_nm_element(reader, *elts, element_name);
+        }
+        //check if we found the closing tag
+        if ( strcmp(name, group_element_name) == 0 && xmlTextReaderNodeType(reader) == 15 )
+        {
+            ret = 0;
+        }
     }
-		//check if we found the closing tag
-		if( strcmp(name, group_element_name) == 0 && xmlTextReaderNodeType(reader) == 15 )
-    {
-       ret = 0;
-    }
-  }
 }
 
 int nm_load_conf(const char *filename) {
@@ -212,50 +212,50 @@ int nm_load_conf(const char *filename) {
     cache_location = NULL;
 
     reader = xmlReaderForFile(filename, NULL, 0);
-    if (reader != NULL) 
-		{
+    if (reader != NULL)
+    {
         ret = xmlTextReaderRead(reader);
 
-        while (ret == 1) 
-				{
-          name = xmlTextReaderName(reader);
-          if( strcmp((char *) name, "stati") == 0 && xmlTextReaderNodeType(reader) == 1)
-          {
-            process_nm_elements("status", "stati", reader, &stati);
-          }
-          else if( strcmp((char *) name, "actions") == 0 && xmlTextReaderNodeType(reader) == 1)
-          {
-            process_nm_elements("action", "actions", reader, &actions);
-          }
+        while (ret == 1)
+        {
+            name = xmlTextReaderName(reader);
+            if ( strcmp((char *) name, "stati") == 0 && xmlTextReaderNodeType(reader) == 1)
+            {
+                process_nm_elements("status", "stati", reader, &stati);
+            }
+            else if ( strcmp((char *) name, "actions") == 0 && xmlTextReaderNodeType(reader) == 1)
+            {
+                process_nm_elements("action", "actions", reader, &actions);
+            }
 
-	  			if( strcmp((char *) name, "cachelocation") == 0 && xmlTextReaderNodeType(reader) == 1) 
-	  			{ 
-            ret = xmlTextReaderRead(reader);
-	    			cache_location = xmlTextReaderValue(reader);
-	  			}
-	  			else
-	  			{
-            ret = xmlTextReaderRead(reader);
-          }
+            if ( strcmp((char *) name, "cachelocation") == 0 && xmlTextReaderNodeType(reader) == 1)
+            {
+                ret = xmlTextReaderRead(reader);
+                cache_location = xmlTextReaderValue(reader);
+            }
+            else
+            {
+                ret = xmlTextReaderRead(reader);
+            }
         }
 
-	/**
-	 * Free up the reader
-	*/
+        /**
+         * Free up the reader
+        */
         xmlFreeTextReader(reader);
-        if (ret != 0) 
-				{
+        if (ret != 0)
+        {
             g_warning("failed to parse file %s\n", filename);
         }
-    } 
-		else 
-		{
-        g_warning("Unable to open %s\n", filename);
-				return 1;
     }
- 		 /**
-     * Cleanup function for the XML library.
-     */
+    else
+    {
+        g_warning("Unable to open %s\n", filename);
+        return 1;
+    }
+    /**
+    * Cleanup function for the XML library.
+    */
     xmlCleanupParser();
-		return 0;
+    return 0;
 }

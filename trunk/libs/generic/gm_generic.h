@@ -1,7 +1,7 @@
 /***
  * \file gm_generic.h
  *
- * 
+ *
  *
  * GPL v2
  *
@@ -15,7 +15,7 @@
 
 /**
 * Enumeration for error types.
-* Currently supported types are: 
+* Currently supported types are:
 * SUCCES: no error
 * NO_RANDR_EXTENSION: X server has no support for the RANDR extension
 * NO_SCREEN_CONFIGURATION: could not get a screen configuration for the current display. This means that the xrandr extension is not available for the current screen.

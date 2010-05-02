@@ -1,7 +1,7 @@
 /**
  * \file nm_parseconf.h
  * \brief XML configuration file parser for menu elements
- * 
+ *
  *
  * GPL v2
  *
@@ -20,17 +20,17 @@
 */
 struct nm_element
 {
-	int *amount_of_elements; //!< total number of elements
-  const xmlChar *name; //!< holds the name of the program
-  const xmlChar *exec; //!< absolute path to executable
-  const xmlChar *logosuccess; //!< absolute path to image file
-  const xmlChar *logofail; //!< absolute path to image file
-  char **args; //!< array of strings containing arguments that need to be passed to the executable
-  int numArguments; //!< will hold the total amount of elements in the args array
-	int pid; //!< should hold the process ID of the process that was started by this nm_element
-	int status; //!< should hold the last exit value of the executable
-	int success; //!< should hold the exit value of the executable (*exec) that represents the success state
-  struct nm_element *next; //!< pointer to the next nm_element structure
+    int *amount_of_elements; //!< total number of elements
+    const xmlChar *name; //!< holds the name of the program
+    const xmlChar *exec; //!< absolute path to executable
+    const xmlChar *logosuccess; //!< absolute path to image file
+    const xmlChar *logofail; //!< absolute path to image file
+    char **args; //!< array of strings containing arguments that need to be passed to the executable
+    int numArguments; //!< will hold the total amount of elements in the args array
+    int pid; //!< should hold the process ID of the process that was started by this nm_element
+    int status; //!< should hold the last exit value of the executable
+    int success; //!< should hold the exit value of the executable (*exec) that represents the success state
+    struct nm_element *next; //!< pointer to the next nm_element structure
 };
 
 /**
@@ -41,7 +41,7 @@ typedef struct nm_element nm_elements;
 /**
 * \brief load the configuration file and parses it to create the nm_elements structures.
 * \param  *filename the name of the configuration file with the path
-* \return int 0 if configuration file was succesfully loaded, >0 otherwise 
+* \return int 0 if configuration file was succesfully loaded, >0 otherwise
 */
 int nm_load_conf(const char *filename);
 
@@ -58,7 +58,7 @@ void nm_free_elements( nm_elements *elt );
 char* nm_get_cache_location();
 
 /**
-* \brief returns the nm_elements structure that contains the stati 
+* \brief returns the nm_elements structure that contains the stati
 * \return pointer to nm_elements structure
 */
 nm_elements* nm_get_stati();

@@ -1,7 +1,7 @@
 /***
  * \file gm_parseconf.c
  *
- * 
+ *
  *
  * GPL v2
  *
@@ -21,46 +21,46 @@ static char *cache_location;
 
 static void printElements(xmlTextReaderPtr reader)
 {
-      printf("%d %d %s %d %d", 
-              xmlTextReaderDepth(reader),
-              xmlTextReaderNodeType(reader),
-              xmlTextReaderName(reader),
-              xmlTextReaderIsEmptyElement(reader),
-              xmlTextReaderHasValue(reader));
-      if (xmlTextReaderValue(reader) == NULL)
-          printf("\n");
-      else {
-          if (xmlStrlen(xmlTextReaderValue(reader)) > 40)
-              printf(" %.40s...\n", xmlTextReaderValue(reader));
-          else
-              printf(" %s\n", xmlTextReaderValue(reader));
-      }
+    printf("%d %d %s %d %d",
+           xmlTextReaderDepth(reader),
+           xmlTextReaderNodeType(reader),
+           xmlTextReaderName(reader),
+           xmlTextReaderIsEmptyElement(reader),
+           xmlTextReaderHasValue(reader));
+    if (xmlTextReaderValue(reader) == NULL)
+        printf("\n");
+    else {
+        if (xmlStrlen(xmlTextReaderValue(reader)) > 40)
+            printf(" %.40s...\n", xmlTextReaderValue(reader));
+        else
+            printf(" %s\n", xmlTextReaderValue(reader));
+    }
 
-      if (xmlTextReaderHasAttributes(reader))
-      {
+    if (xmlTextReaderHasAttributes(reader))
+    {
         printf("width: %s, ", xmlTextReaderGetAttribute (reader, "width"));
         printf("height: %s, ", xmlTextReaderGetAttribute (reader, "height"));
-      }
+    }
 }
 
 struct menu_element* createMenuElement()
 {
-  struct menu_element *elt;
-  elt = (menu_elements *) malloc(sizeof(menu_elements));
-  elt->numArguments = 0;
-  elt->logo = NULL;
-  elt->name = NULL;
-  elt->exec = NULL;
-  elt->next = NULL;
-  elt->args = NULL;
-	elt->module_conffile = NULL;
-  elt->autostart = 0;
-  elt->printlabel = 0;
-  elt->app_height = -1;
-  elt->app_width = -1;
-	elt->pid = -1;
-  elt->numArguments = 0;
-  return elt;
+    struct menu_element *elt;
+    elt = (menu_elements *) malloc(sizeof(menu_elements));
+    elt->numArguments = 0;
+    elt->logo = NULL;
+    elt->name = NULL;
+    elt->exec = NULL;
+    elt->next = NULL;
+    elt->args = NULL;
+    elt->module_conffile = NULL;
+    elt->autostart = 0;
+    elt->printlabel = 0;
+    elt->app_height = -1;
+    elt->app_width = -1;
+    elt->pid = -1;
+    elt->numArguments = 0;
+    return elt;
 }
 
 /**
@@ -70,18 +70,18 @@ struct menu_element* createMenuElement()
 */
 static void parseLength(xmlChar * length, struct length *str_length)
 {
-  if ( length != NULL )
-  {
-    str_length->value = atoi (strndup(length, strspn( length,  "0123456789")));
-    if ( strstr( length,  "%") != NULL )
+    if ( length != NULL )
     {
-      str_length->type = PERCENTAGE;
+        str_length->value = atoi (strndup(length, strspn( length,  "0123456789")));
+        if ( strstr( length,  "%") != NULL )
+        {
+            str_length->type = PERCENTAGE;
+        }
+        else
+        {
+            str_length->type = PIXELS;
+        }
     }
-    else
-    {
-      str_length->type = PIXELS;
-    }
-  }
 }
 
 /**
@@ -91,19 +91,19 @@ static void parseLength(xmlChar * length, struct length *str_length)
 */
 static void addArgument(menu_elements *elt, char *argument)
 {
-  elt->numArguments++;
-  elt->args = (char **) realloc(elt->args, ((elt->numArguments) * sizeof(char *)));
-  elt->args[elt->numArguments - 1] = (char *) argument;
+    elt->numArguments++;
+    elt->args = (char **) realloc(elt->args, ((elt->numArguments) * sizeof(char *)));
+    elt->args[elt->numArguments - 1] = (char *) argument;
 }
 
 char* gm_get_cache_location()
 {
-	return cache_location;
+    return cache_location;
 }
 
 char* gm_get_programname()
 {
-	return program_name;
+    return program_name;
 }
 
 /**
@@ -115,71 +115,71 @@ static void
 processMenuElement(xmlTextReaderPtr reader, menu_elements *elt, const char* element_name ) {
     xmlChar *name, *value;
     int ret = 1;
-    
+
     if (name == NULL)
-	name = BAD_CAST "--";
+        name = BAD_CAST "--";
 
     while ( ret == 1 )
     {
 //       printElements(reader);
 
-      if ( xmlTextReaderNodeType(reader) == 1 )
-      {
-        name = xmlTextReaderName(reader);
-      }
-      else if ( xmlTextReaderNodeType(reader) == 3 )
-      {
-        value = xmlTextReaderValue(reader);
-        if( strcmp((char *) name, "name") == 0 )
+        if ( xmlTextReaderNodeType(reader) == 1 )
         {
-          elt->name = value;
+            name = xmlTextReaderName(reader);
         }
-        else if( strcmp((char *) name, "printlabel") == 0 )
+        else if ( xmlTextReaderNodeType(reader) == 3 )
         {
-          elt->printlabel = atoi(value);
+            value = xmlTextReaderValue(reader);
+            if ( strcmp((char *) name, "name") == 0 )
+            {
+                elt->name = value;
+            }
+            else if ( strcmp((char *) name, "printlabel") == 0 )
+            {
+                elt->printlabel = atoi(value);
+            }
+            else if ( strcmp((char *) name, "exec") == 0 )
+            {
+                elt->exec = value;
+            }
+            else if ( strcmp((char *) name, "logo") == 0 )
+            {
+                elt->logo = value;
+            }
+            else if ( strcmp((char *) name, "arg") == 0 )
+            {
+                addArgument(elt, (char *) value);
+            }
+            else if ( strcmp((char *) name, "autostart") == 0 )
+            {
+                elt->autostart = atoi(value);
+            }
+            else if ( strcmp((char *) name, "resolution") == 0 )
+            {
+                if (sscanf (value, "%dx%d", &elt->app_width, &elt->app_height) != 2)
+                {
+                    fprintf(stderr, "Error: could not parse resolution value: %s", value);
+                }
+            }
+            else if ( strcmp((char *) name, "objectfile") == 0 )
+            {
+                elt->module = value;
+            }
+            else if ( strcmp((char *) name, "conffile") == 0 )
+            {
+                elt->module_conffile = value;
+            }
         }
-        else if( strcmp((char *) name, "exec") == 0 )
-        {
-          elt->exec = value;
-        }
-        else if( strcmp((char *) name, "logo") == 0 )
-        {
-          elt->logo = value;
-        }
-        else if( strcmp((char *) name, "arg") == 0 )
-        {
-          addArgument(elt, (char *) value);
-        }
-        else if( strcmp((char *) name, "autostart") == 0 )
-        {
-          elt->autostart = atoi(value);
-        }
-        else if( strcmp((char *) name, "resolution") == 0 )
-        {
-          if(sscanf (value, "%dx%d", &elt->app_width, &elt->app_height) != 2)
-          {
-            fprintf(stderr, "Error: could not parse resolution value: %s", value);
-          }
-        }
-        else if( strcmp((char *) name, "objectfile") == 0 )
-				{
-					elt->module = value;
-				}
-			  else if( strcmp((char *) name, "conffile") == 0 )
-				{
-					elt->module_conffile = value;
-				}	
-      }
 
-      if( strcmp((char *) xmlTextReaderName(reader), element_name) == 0 && xmlTextReaderNodeType(reader) == 15 )
-      { 
-        ret = 0;
+        if ( strcmp((char *) xmlTextReaderName(reader), element_name) == 0 && xmlTextReaderNodeType(reader) == 15 )
+        {
+            ret = 0;
 
-      }
-      else
-      {
-        ret = xmlTextReaderRead(reader);
-      }
+        }
+        else
+        {
+            ret = xmlTextReaderRead(reader);
+        }
     }
 }
 
@@ -189,7 +189,7 @@ processMenuElement(xmlTextReaderPtr reader, menu_elements *elt, const char* elem
 */
 int gm_get_number_of_elements()
 {
-  return numberElts;
+    return numberElts;
 }
 
 /**
@@ -198,81 +198,81 @@ int gm_get_number_of_elements()
 */
 void gm_free_menu_elements( menu_elements *elt )
 {
-  menu_elements *next;
-  int i;
+    menu_elements *next;
+    int i;
 
-	if (elt != NULL)
-	{
-		free(elt->amount_of_elements);
-	  free(elt->menu_width);
-	  free(elt->menu_height);
- 	 	free(elt->hor_alignment);
- 	 	free(elt->vert_alignment);
-		
-		while(elt != NULL)
-		{
-			free((xmlChar *) elt->name);
-			free((xmlChar *) elt->exec);
-			free((xmlChar *) elt->module);
-			free((xmlChar *) elt->logo);
+    if (elt != NULL)
+    {
+        free(elt->amount_of_elements);
+        free(elt->menu_width);
+        free(elt->menu_height);
+        free(elt->hor_alignment);
+        free(elt->vert_alignment);
 
-			for (i = 0; i < elt->numArguments; i++)
-			{
- 				free(elt->args[i]);
-			}
-			free(elt->args);
+        while (elt != NULL)
+        {
+            free((xmlChar *) elt->name);
+            free((xmlChar *) elt->exec);
+            free((xmlChar *) elt->module);
+            free((xmlChar *) elt->logo);
 
-			next = elt->next;
-			free(elt);
-			elt = next;
-  	}
-	}
+            for (i = 0; i < elt->numArguments; i++)
+            {
+                free(elt->args[i]);
+            }
+            free(elt->args);
+
+            next = elt->next;
+            free(elt);
+            elt = next;
+        }
+    }
 }
 
 menu_elements* gm_get_programs()
 {
-  return programs;
+    return programs;
 }
 
 menu_elements* gm_get_actions()
 {
-  return actions;
+    return actions;
 }
 
 menu_elements* gm_get_panel()
 {
-  return panel_elts;
+    return panel_elts;
 }
 
 static void gm_parse_alignment(char* align, float *hor_align, int *vert_align)
 {
-	char* result;
+    char* result;
 
-	result = strtok(align, ",");	
-  while( result != NULL ) 
-	{
-    if ( strcmp(result, "top") == 0 )
+    result = strtok(align, ",");
+    while ( result != NULL )
     {
-      *vert_align = 0;
+        if ( strcmp(result, "top") == 0 )
+        {
+            *vert_align = 0;
+        }
+        else if ( strcmp(result, "bottom") == 0 )
+        {
+            *vert_align = 2;
+        }
+        else if ( strcmp(result, "left") == 0 )
+        {
+            *hor_align = 0.0;
+        }
+        else if ( strcmp(result, "right") == 0 )
+        {
+            *hor_align = 1.0;
+        }
+        else if ( strcmp(result, "center") == 0 )
+        {
+            *hor_align = 0.5;
+        }
+        result = strtok(NULL, ",");
     }
-    else if ( strcmp(result, "bottom") == 0 )
-    {
-      *vert_align = 2;
-    }
- 		else if ( strcmp(result, "left") == 0 )
-    {
-      *hor_align = 0.0;
-    }
-    else if ( strcmp(result, "right") == 0 )
-    {
-      *hor_align = 1.0;
-    }
-    else if ( strcmp(result, "center") == 0 )
-    {
-			*hor_align = 0.5;
-    }
-		result = strtok(NULL, ",");
-  }
 }
 
 /**
@@ -285,70 +285,70 @@ static void gm_parse_alignment(char* align, float *hor_align, int *vert_align)
 */
 void static processMenuElements(const char* element_name, const char* group_element_name, xmlTextReaderPtr reader, menu_elements **elts)
 {
-  int ret = 1;
-	int i;
-  xmlChar *name;
-	char* result;
-  int width;
-  int height;
-  int *number_elts;
-  float *hor_align;
-  int *vert_align;
-  menu_elements *prev;
-  struct length *menu_width;
-  struct length *menu_height;
-  prev = NULL;
+    int ret = 1;
+    int i;
+    xmlChar *name;
+    char* result;
+    int width;
+    int height;
+    int *number_elts;
+    float *hor_align;
+    int *vert_align;
+    menu_elements *prev;
+    struct length *menu_width;
+    struct length *menu_height;
+    prev = NULL;
 
-	number_elts = (int*) malloc (sizeof(int));
-  hor_align = (float *) malloc (sizeof(float));
-  vert_align = (int *) malloc (sizeof(int));
-  menu_width = (struct length *) malloc (sizeof(struct length));
-  menu_height = (struct length *) malloc (sizeof(struct length));
- 
-  //Initial default values 100%
-  menu_width->value = 100;
-  menu_width->type = PERCENTAGE;
-  menu_height->value = 100;
-  menu_height->type = PERCENTAGE;
-	*hor_align = 0.5; //<! default center
-	*vert_align = 1; //<! default center
+    number_elts = (int*) malloc (sizeof(int));
+    hor_align = (float *) malloc (sizeof(float));
+    vert_align = (int *) malloc (sizeof(int));
+    menu_width = (struct length *) malloc (sizeof(struct length));
+    menu_height = (struct length *) malloc (sizeof(struct length));
 
-  while (ret)
-  {
-    ret = xmlTextReaderRead(reader);
-    name = xmlTextReaderName(reader);
+    //Initial default values 100%
+    menu_width->value = 100;
+    menu_width->type = PERCENTAGE;
+    menu_height->value = 100;
+    menu_height->type = PERCENTAGE;
+    *hor_align = 0.5; //<! default center
+    *vert_align = 1; //<! default center
 
-		// Parse new program or action and create a new menu_element for it.
-    if( strcmp((char *) name, element_name) == 0 && xmlTextReaderNodeType(reader) == 1)
+    while (ret)
     {
-      *elts = createMenuElement();
-   	  (*elts)->next = prev;
+        ret = xmlTextReaderRead(reader);
+        name = xmlTextReaderName(reader);
 
-			//the following struct items are shared among all elements of the same group
-  		(*elts)->menu_width = menu_width;
-  		(*elts)->menu_height = menu_height;
- 			(*elts)->hor_alignment = hor_align; 
-  		(*elts)->vert_alignment = vert_align;
-			(*number_elts)++;
-    	(*elts)->amount_of_elements = number_elts;
+        // Parse new program or action and create a new menu_element for it.
+        if ( strcmp((char *) name, element_name) == 0 && xmlTextReaderNodeType(reader) == 1)
+        {
+            *elts = createMenuElement();
+            (*elts)->next = prev;
 
-      prev = *elts;
-      processMenuElement(reader, *elts, element_name);
-		 }
-   
-		//parse global parameters when endtag for groupelement is found 
-    if( strcmp((char *) name, group_element_name) == 0 && xmlTextReaderNodeType(reader) == 15)
-    {
-      if (xmlTextReaderHasAttributes(reader))
-      {
-        parseLength(xmlTextReaderGetAttribute (reader, "width"), menu_width);
-        parseLength(xmlTextReaderGetAttribute (reader, "height"), menu_height);
-        gm_parse_alignment(xmlTextReaderGetAttribute (reader, "align"), hor_align, vert_align);
-      }
-			//this should end parsing this group of elements
-      ret = 0;
+            //the following struct items are shared among all elements of the same group
+            (*elts)->menu_width = menu_width;
+            (*elts)->menu_height = menu_height;
+            (*elts)->hor_alignment = hor_align;
+            (*elts)->vert_alignment = vert_align;
+            (*number_elts)++;
+            (*elts)->amount_of_elements = number_elts;
+
+            prev = *elts;
+            processMenuElement(reader, *elts, element_name);
+        }
+
+        //parse global parameters when endtag for groupelement is found
+        if ( strcmp((char *) name, group_element_name) == 0 && xmlTextReaderNodeType(reader) == 15)
+        {
+            if (xmlTextReaderHasAttributes(reader))
+            {
+                parseLength(xmlTextReaderGetAttribute (reader, "width"), menu_width);
+                parseLength(xmlTextReaderGetAttribute (reader, "height"), menu_height);
+                gm_parse_alignment(xmlTextReaderGetAttribute (reader, "align"), hor_align, vert_align);
+            }
+            //this should end parsing this group of elements
+            ret = 0;
+        }
     }
-  }
 }
 
 int gm_load_conf(const char *filename) {
@@ -365,69 +365,69 @@ int gm_load_conf(const char *filename) {
     program_name = NULL;
 
     reader = xmlReaderForFile(filename, NULL, 0);
-    if (reader != NULL) 
-		{
+    if (reader != NULL)
+    {
         ret = xmlTextReaderRead(reader);
 
-        // first attribute must be the name of the program 
-				program_name = xmlTextReaderName(reader);
+        // first attribute must be the name of the program
+        program_name = xmlTextReaderName(reader);
 
-        while (ret == 1) 
-				{
-          name = xmlTextReaderName(reader);
-          if( strcmp((char *) name, "programs") == 0 && xmlTextReaderNodeType(reader) == 1)
-          {
-            processMenuElements("program", "programs", reader, &programs);
-          }
-          else if( strcmp((char *) name, "actions") == 0 && xmlTextReaderNodeType(reader) == 1)
-          {
-            processMenuElements("action", "actions", reader, &actions);
-          }
-					else if( strcmp((char *) name, "panel") == 0 && xmlTextReaderNodeType(reader) == 1)
-          {
-            processMenuElements("applet", "panel", reader, &panel_elts);
-          }
-	  			if( strcmp((char *) name, "cachelocation") == 0 && xmlTextReaderNodeType(reader) == 1) 
-	  			{ 
-            ret = xmlTextReaderRead(reader);
-	    			cache_location = xmlTextReaderValue(reader);
-	  			}
-	  			else
-	  			{
-            ret = xmlTextReaderRead(reader);
-          }
+        while (ret == 1)
+        {
+            name = xmlTextReaderName(reader);
+            if ( strcmp((char *) name, "programs") == 0 && xmlTextReaderNodeType(reader) == 1)
+            {
+                processMenuElements("program", "programs", reader, &programs);
+            }
+            else if ( strcmp((char *) name, "actions") == 0 && xmlTextReaderNodeType(reader) == 1)
+            {
+                processMenuElements("action", "actions", reader, &actions);
+            }
+            else if ( strcmp((char *) name, "panel") == 0 && xmlTextReaderNodeType(reader) == 1)
+            {
+                processMenuElements("applet", "panel", reader, &panel_elts);
+            }
+            if ( strcmp((char *) name, "cachelocation") == 0 && xmlTextReaderNodeType(reader) == 1)
+            {
+                ret = xmlTextReaderRead(reader);
+                cache_location = xmlTextReaderValue(reader);
+            }
+            else
+            {
+                ret = xmlTextReaderRead(reader);
+            }
         }
 
-	/**
-	 * Free up the reader
-	*/
+        /**
+         * Free up the reader
+        */
         xmlFreeTextReader(reader);
-        if (ret != 0) 
-				{
+        if (ret != 0)
+        {
             g_warning("%s : failed to parse\n", filename);
         }
-    } 
-		else 
-		{
-        g_warning("Unable to open %s\n", filename);
-				return 1;
     }
- 		 /**
-     * Cleanup function for the XML library.
-     */
+    else
+    {
+        g_warning("Unable to open %s\n", filename);
+        return 1;
+    }
+    /**
+    * Cleanup function for the XML library.
+    */
     xmlCleanupParser();
-		return 0;
+    return 0;
 }
 
 
 menu_elements* gm_search_elt_by_name(gchar* name, menu_elements* programs)
 {
-	while( programs != NULL )
-	{
-		if ( g_strcmp0(name, programs->name) == 0 )
-		{
-			return programs;
-		}
-		programs = programs->next;
-	}
+    while ( programs != NULL )
+    {
+        if ( g_strcmp0(name, programs->name) == 0 )
+        {
+            return programs;
+        }
+        programs = programs->next;
+    }
 }

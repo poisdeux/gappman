@@ -1,7 +1,7 @@
 /***
  * \file appmanager.h
  *
- * 
+ *
  *
  * GPL v2
  *
@@ -14,15 +14,15 @@
 
 /**
 * \brief Struct that holds all relevant info about started applications
-*/ 
+*/
 struct appwidgetinfo
 {
-  int PID; //<! Process ID of running app (child replaced through execvp)
-  int status; //<! Process status which can be either running, sleeping, waiting, stopped, or zombie
-  struct menu_element *menu_elt;
-  GtkWidget *widget; //<! Button that started the process
-  struct appwidgetinfo* prev; //<! Pointer to previous appwidgetinfo
-  struct appwidgetinfo* next; //<! Pointer to previous appwidgetinfo
+    int PID; //<! Process ID of running app (child replaced through execvp)
+    int status; //<! Process status which can be either running, sleeping, waiting, stopped, or zombie
+    struct menu_element *menu_elt;
+    GtkWidget *widget; //<! Button that started the process
+    struct appwidgetinfo* prev; //<! Pointer to previous appwidgetinfo
+    struct appwidgetinfo* next; //<! Pointer to previous appwidgetinfo
 };
 
 

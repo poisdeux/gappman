@@ -1,7 +1,7 @@
 /**
  * \file gm_parseconf.h
  * \brief XML configuration file parser for menu elements
- * 
+ *
  *
  * GPL v2
  *
@@ -26,8 +26,8 @@ typedef int (* GM_MODULE_STOP) (void);
 * Currently supported types are: PERCENTAGE and PIXELS
 */
 enum length_types {
-  PERCENTAGE,
-  PIXELS
+    PERCENTAGE,
+    PIXELS
 };
 
 /**
@@ -36,41 +36,41 @@ enum length_types {
 */
 struct menu_element
 {
-  int *amount_of_elements; //!< total number of elements
-  struct length *menu_width;
-  struct length *menu_height;
-  int app_width;
-  int app_height;
-  float *hor_alignment; //<! horizontal alignment of group (NOT A SINGLE WIDGET). 0.0 = left, 0.5 = center, 1.0 = right 
-	int *vert_alignment; //<! vertical alignment of group (NOT A SINGLE WIDGET). 0 = top, 1 = center, 2 = bottom 
-	GtkWidget *widget; //!< widget associated with this menu_element. Usually a GtkButton.
-  const xmlChar *name; //!< holds the name of the program
-  const xmlChar *exec; //!< absolute path to executable
-  const xmlChar *logo; //!< absolute path to image file
-  const xmlChar *module; //!< absolute path to module for panel
-  const xmlChar *module_conffile; //!< absolute path to module configuration file
-  int autostart; //!< a value of 1 will start program at startup, 0 will not.
-  int printlabel; //!< If set to 1 the name should be printed alongside the button. Otherwise do not print a textlabel
-  char **args; //!< array of strings containing arguments that need to be passed to the executable
-  int numArguments; //!< will hold the total amount of elements in the args array
-	int pid; //!< should hold the process ID of the process that was started by this menu_element
-  struct menu_element *next; //!< pointer to the next menu_element structure
-	GM_MODULE_INIT gm_module_init; //!< pointer to the init function for a panel module
-	GM_MODULE_START gm_module_start; //!< pointer to the start function for a panel module
-	GM_MODULE_STOP gm_module_stop; //!< pointer to the stop function for a panel module
-	GM_MODULE_SET_ICON_SIZE gm_module_set_icon_size; //!< pointer to the set icon size function for a panel module
-	GM_MODULE_SET_CONFFILE gm_module_set_conffile; //!< pointer to the set configuration file function for a panel module
-	GM_MODULE_WIDGET gm_module_get_widget; //!< pointer to the get widget function for a panel module
+    int *amount_of_elements; //!< total number of elements
+    struct length *menu_width;
+    struct length *menu_height;
+    int app_width;
+    int app_height;
+    float *hor_alignment; //<! horizontal alignment of group (NOT A SINGLE WIDGET). 0.0 = left, 0.5 = center, 1.0 = right
+    int *vert_alignment; //<! vertical alignment of group (NOT A SINGLE WIDGET). 0 = top, 1 = center, 2 = bottom
+    GtkWidget *widget; //!< widget associated with this menu_element. Usually a GtkButton.
+    const xmlChar *name; //!< holds the name of the program
+    const xmlChar *exec; //!< absolute path to executable
+    const xmlChar *logo; //!< absolute path to image file
+    const xmlChar *module; //!< absolute path to module for panel
+    const xmlChar *module_conffile; //!< absolute path to module configuration file
+    int autostart; //!< a value of 1 will start program at startup, 0 will not.
+    int printlabel; //!< If set to 1 the name should be printed alongside the button. Otherwise do not print a textlabel
+    char **args; //!< array of strings containing arguments that need to be passed to the executable
+    int numArguments; //!< will hold the total amount of elements in the args array
+    int pid; //!< should hold the process ID of the process that was started by this menu_element
+    struct menu_element *next; //!< pointer to the next menu_element structure
+    GM_MODULE_INIT gm_module_init; //!< pointer to the init function for a panel module
+    GM_MODULE_START gm_module_start; //!< pointer to the start function for a panel module
+    GM_MODULE_STOP gm_module_stop; //!< pointer to the stop function for a panel module
+    GM_MODULE_SET_ICON_SIZE gm_module_set_icon_size; //!< pointer to the set icon size function for a panel module
+    GM_MODULE_SET_CONFFILE gm_module_set_conffile; //!< pointer to the set configuration file function for a panel module
+    GM_MODULE_WIDGET gm_module_get_widget; //!< pointer to the get widget function for a panel module
 };
 
 /**
 * \struct length
-* \brief structure to hold the length type (pixel, percentage) and its value. 
+* \brief structure to hold the length type (pixel, percentage) and its value.
 */
 struct length
 {
-  enum length_types type; //!< Type of the value, i.e. percentage or pixels?
-  int value; //!< Actual length value without metric indicator, e.g. % or px.
+    enum length_types type; //!< Type of the value, i.e. percentage or pixels?
+    int value; //!< Actual length value without metric indicator, e.g. % or px.
 };
 
 /**
@@ -81,7 +81,7 @@ typedef struct menu_element menu_elements;
 /**
 * \brief load the configuration file and parses it to create the menu_elements structures.
 * \param  *filename the name of the configuration file with the path
-* \return int 0 if configuration file was succesfully loaded, >0 otherwise 
+* \return int 0 if configuration file was succesfully loaded, >0 otherwise
 */
 int gm_load_conf(const char *filename);
 
