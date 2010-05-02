@@ -203,10 +203,13 @@ gboolean gappman_start_listener (GtkWidget* win)
 	g_debug("Starting listener: %s:%s", server, port);
 
 	memset(&hints, 0, sizeof(struct addrinfo));
-        hints.ai_family = AF_INET;    /* Allow IPv4 or IPv6 */
-        hints.ai_socktype = SOCK_STREAM; /* Datagram socket */
-        hints.ai_flags = 0;
-        hints.ai_protocol = 0;          /* Any protocol */
+        hints.ai_family = AF_UNSPEC;
+        hints.ai_socktype = SOCK_STREAM;
+        hints.ai_flags = AI_PASSIVE;
+        hints.ai_protocol = 0;
+	hints.ai_canonname = NULL;
+        hints.ai_addr = NULL;
+        hints.ai_next = NULL;
 
 	s = getaddrinfo(NULL, "2103", &hints, &result);
         if (s != 0) {
@@ -223,9 +226,11 @@ gboolean gappman_start_listener (GtkWidget* win)
                		if (sock == -1)
                   		continue;
 
-	               if (bind(sock, rp->ai_addr, rp->ai_addrlen) != -1)
+	               if (bind(sock, rp->ai_addr, rp->ai_addrlen) == 0)
+			{
+				g_debug("Bind succeeded on %s", rp->ai_canonname);
             		       break;                  /* Success */
-
+			}
                		close(sock);
            	}
 		if (rp == NULL) /* No address succeeded */
@@ -235,9 +240,13 @@ gboolean gappman_start_listener (GtkWidget* win)
            	}
 
            	freeaddrinfo(result);           /* No longer needed */
-
+		for (;;)
+		{
+			sleep(1);
+		}
 		if( listener_started == TRUE )
-		{		
+		{	
+			g_debug("Starting I/O channel");		
 			gio = g_io_channel_unix_new (sock);
 
 			if(! g_io_add_watch( gio, G_IO_IN, handleconnection, (gpointer) sock ))
