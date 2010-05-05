@@ -266,6 +266,7 @@ static GtkWidget* createrow(menu_elements *elt, int width, int height)
 static void destroy( GtkWidget *widget,
                      gpointer   data )
 {
+	g_debug("Processmanager says bye bye!");
     gtk_main_quit ();
 }
 
@@ -489,13 +490,13 @@ int main (int argc, char **argv)
             }
             else
             {
-                gm_show_error_dialog("No programs started by gappman.", mainwin, destroy);
+                gm_show_error_dialog("No programs started by gappman.", NULL, gtk_main_quit);
             }
         }
     }
     else
     {
-        gm_show_error_dialog("No programs started by gappman.", mainwin, destroy);
+        gm_show_error_dialog("No programs started by gappman.", NULL, gtk_main_quit);
     }
 
     gtk_main ();
