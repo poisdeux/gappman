@@ -177,15 +177,19 @@ void gm_show_error_dialog(const gchar* message, GtkWidget *mainwin, void *callba
     button = gtk_button_new();
     gtk_container_add(GTK_CONTAINER(button), label);
     gtk_widget_show(label);
-    g_signal_connect_swapped (G_OBJECT (button), "clicked",
+        if (callback != NULL)
+    {
+				g_debug("Adding callback");
+        g_signal_connect_swapped (G_OBJECT (button), "clicked",
+                                 G_CALLBACK (callback),
+                                  mainwin);
+    }
+		else
+		{
+			g_signal_connect_swapped (G_OBJECT (button), "clicked",
                               G_CALLBACK (destroy_widget),
                               window);
-    if (callback != NULL)
-    {
-        g_signal_connect_swapped (G_OBJECT (button), "clicked",
-                                  G_CALLBACK (callback),
-                                  window);
-    }
+		}
     gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 0);
     gtk_widget_show(button);
 
