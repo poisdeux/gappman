@@ -1,0 +1,4 @@
+* Make it possible to restart the Display Manager. 
+  This is sometimes needed when the monitor was not correctly detected at startup
+  or when you change monitors. For instance connecting a beamer that does not allow
+  for the same resolutions as the monitor does.
