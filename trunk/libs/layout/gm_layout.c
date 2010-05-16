@@ -177,19 +177,19 @@ void gm_show_error_dialog(const gchar* message, GtkWidget *mainwin, void *callba
     button = gtk_button_new();
     gtk_container_add(GTK_CONTAINER(button), label);
     gtk_widget_show(label);
-        if (callback != NULL)
+    if (callback != NULL)
     {
 				g_debug("Adding callback");
         g_signal_connect_swapped (G_OBJECT (button), "clicked",
                                  G_CALLBACK (callback),
                                   mainwin);
     }
-		else
-		{
-			g_signal_connect_swapped (G_OBJECT (button), "clicked",
+	else
+	{
+		g_signal_connect_swapped (G_OBJECT (button), "clicked",
                               G_CALLBACK (destroy_widget),
                               window);
-		}
+	}
     gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 0);
     gtk_widget_show(button);
 
@@ -214,14 +214,14 @@ void gm_set_window_geometry(int width, int height)
     screen_height = height;
 }
 
-GtkWidget *gm_create_cancel_button(void *callbackfunc, void *data)
+GtkWidget *gm_create_label_button(gchar* buttontext, void *callbackfunc, void *data)
 {
     GtkWidget *button;
     GtkWidget *label;
     gchar *markup;
 
     label = gtk_label_new("");
-    markup = g_markup_printf_escaped ("<span size=\"%d\">Cancel</span>", fontsize);
+    markup = g_markup_printf_escaped ("<span size=\"%d\">%s</span>", fontsize, buttontext);
     gtk_label_set_markup (GTK_LABEL (label), markup);
     g_free (markup);
     button = gtk_button_new();
@@ -682,7 +682,7 @@ GtkWidget* gm_create_buttonbox( menu_elements *elts, gboolean(processevent)(GtkW
     return vbox;
 }
 
-GtkWidget* gm_createpanel( menu_elements *elts)
+GtkWidget* gm_create_panel( menu_elements *elts)
 {
     GtkWidget* button, *hbox, *vbox;
     int elts_per_row, count, button_width;

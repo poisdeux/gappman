@@ -73,10 +73,12 @@ void gm_set_window_geometry(int width, int height);
 
 /**
 * \brief creates a basic cancel button
-* \param void pointer to callback function that should be called when button is clicked
+* \param buttontext string that should be used as label
+* \param callbackfunc void pointer to callback function that should be called when button is clicked
+* \param data void pointer to arguments that should be passed to callback function 
 * \return GtkWidget pointer to the new button
 */
-GtkWidget *gm_create_cancel_button(void *callbackfunc, void *data);
+GtkWidget *gm_create_label_button(gchar* buttontext, void *callbackfunc, void *data);
 
 /**
 * \brief Create a single button possibly with a label
@@ -108,6 +110,6 @@ GtkWidget* gm_create_buttonbox( menu_elements *elts, gboolean(*processevent)(Gtk
 * \param *elts pointer to first menu_elements structure
 * \return GtkWidget pointer to container holding the panel
 */
-GtkWidget* gm_createpanel( menu_elements *elts);
+GtkWidget* gm_create_panel( menu_elements *elts);
 
 #endif

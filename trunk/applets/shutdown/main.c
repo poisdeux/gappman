@@ -19,7 +19,7 @@
 #include <string.h>
 #include <gm_parseconf.h>
 #include <gm_layout.h>
-#include <gm_connect.h>
+#include <gm_generic.h>
 
 static int WINDOWED = 0;
 
@@ -183,11 +183,6 @@ int main (int argc, char **argv)
         g_error("Error could not load configuration: %s", conffile);
     }
 
-    if (gm_get_fontsize_from_gappman(2103, "localhost", &fontsize) == 0)
-    {
-        gm_set_fontsize(fontsize);
-    }
-
     actions = gm_get_actions();
 
     screen = gdk_screen_get_default ();
@@ -216,6 +211,8 @@ int main (int argc, char **argv)
     }
     vbox = gtk_vbox_new (FALSE, 10);
 
+    //We do not get the fontsize from gappman but let the buttonbox
+    //determine the right fontsize
     if ( actions != NULL )
     {
         align = gm_create_buttonbox( actions, &process_startprogram_event );
@@ -226,7 +223,7 @@ int main (int argc, char **argv)
     hbox = gtk_hbox_new (FALSE, 10);
 
     // cancel button
-    button = gm_create_cancel_button(gtk_main_quit, NULL);
+    button = gm_create_label_button("Cancel", gtk_main_quit, NULL);
     gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
     gtk_widget_show(button);
 

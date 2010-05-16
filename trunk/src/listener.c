@@ -27,8 +27,10 @@
 #define SEND_PROCESS_LIST 1
 #define SEND_FONTSIZE 2
 #define UPDATE_RES 3
+#define SEND_CONFPATH 4
 
 static GIOChannel* gio;
+static const gchar* confpath = "";
 
 static int parsemessage(gchar *msg)
 {
@@ -38,7 +40,6 @@ static int parsemessage(gchar *msg)
     int i = 0;
     contentssplit = g_strsplit(msg, "::", 0);
 
-    g_debug("parsemessage: %s", contentssplit[1]);
     if (g_strcmp0(contentssplit[1], "listprocesses") == 0)
     {
         msg_id = SEND_PROCESS_LIST;
@@ -50,6 +51,10 @@ static int parsemessage(gchar *msg)
     else if (g_strcmp0(contentssplit[1], "updateres") == 0)
     {
         msg_id = UPDATE_RES;
+    }
+    else if (g_strcmp0(contentssplit[1], "showconfpath") == 0)
+    {
+        msg_id = SEND_CONFPATH;
     }
     return msg_id;
 }
@@ -162,7 +167,6 @@ static gboolean handleconnection( GIOChannel* gio , GIOCondition cond, gpointer 
         }
         else
         {
-            g_debug("Received: %s", msg);
             msg_id = parsemessage(msg);
             switch (msg_id)
             {
@@ -178,10 +182,17 @@ static gboolean handleconnection( GIOChannel* gio , GIOCondition cond, gpointer 
             case UPDATE_RES:
                 handle_update_resolution(msg);
                 break;;
+            case SEND_CONFPATH:
+                g_free(msg);
+                msg = (gchar*) malloc((10 + strlen(confpath)) * sizeof(gchar));
+                g_sprintf(msg, "confpath::%s", confpath);
+                writemsg(new_gio, msg);
+                break;;
             }
             g_free(msg);
         }
         gappman_close_listener(new_gio);
+	close(newsock);
     }
     //Always return TRUE to keep watch active.
     return TRUE;
@@ -200,7 +211,6 @@ gboolean gappman_start_listener (GtkWidget* win)
     const gchar *port = "2103";
     gboolean listener_started = TRUE;
 
-    g_debug("Starting listener: %s:%s", server, port);
 
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_family = AF_INET;
@@ -245,7 +255,6 @@ gboolean gappman_start_listener (GtkWidget* win)
 
         if ( listener_started == TRUE )
         {
-            g_debug("Starting I/O channel");
             gio = g_io_channel_unix_new (sock);
 
             if (! g_io_add_watch( gio, G_IO_IN, handleconnection, (gpointer) sock ))
@@ -291,4 +300,9 @@ gboolean gappman_close_listener (GIOChannel* close_gio)
     }
 
     return TRUE;
+}
+
+void gappman_set_confpath(const gchar *path)
+{
+	confpath = path;
 }

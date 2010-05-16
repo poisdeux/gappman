@@ -77,7 +77,6 @@ static gboolean set_default_res_for_program( GtkWidget *widget, GdkEvent *event,
     {
         gm_get_current_size(&current_size);
         msg = g_strdup_printf("::updateres::%s::%d::%d::", elt->name, current_size.width, current_size.height);
-        g_debug("Setting default resolution for %s\n", elt->name);
         if ( gm_send_and_receive_message(2103, "localhost", msg, NULL) != GM_SUCCES )
         {
             gm_show_error_dialog("Could not connect to gappman.", NULL, NULL);
@@ -116,7 +115,7 @@ static void make_default_for_program( XRRScreenSize *size )
             gtk_container_add(GTK_CONTAINER(vbox), button);
             programs_tmp = programs_tmp->next;
         }
-        button = gm_create_cancel_button(destroy_widget, chooseprogramwin);
+        button = gm_create_label_button("Done", destroy_widget, chooseprogramwin);
         gtk_container_add(GTK_CONTAINER(vbox), button);
         gtk_container_add(GTK_CONTAINER(chooseprogramwin), vbox);
         gtk_widget_show_all(chooseprogramwin);
@@ -158,25 +157,13 @@ static void changeresolution( XRRScreenSize *size )
 
     vbox = gtk_vbox_new(TRUE, 10);
 
-    label = gtk_label_new("");
-    markup = g_markup_printf_escaped ("<span size=\"%d\">Set current resolution as default for program.</span>", fontsize);
-    gtk_label_set_markup (GTK_LABEL (label), markup);
-    g_free (markup);
-    button = gtk_button_new();
-    gtk_container_add(GTK_CONTAINER(button), label);
-    g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (make_default_for_program), size);
+    button = gm_create_label_button("Set resolution as default for program", make_default_for_program, size);
     gtk_container_add(GTK_CONTAINER(vbox), button);
 
-    label = gtk_label_new("");
-    markup = g_markup_printf_escaped ("<span size=\"%d\">Keep resolution just this once.</span>", fontsize);
-    gtk_label_set_markup (GTK_LABEL (label), markup);
-    g_free (markup);
-    button = gtk_button_new();
-    gtk_container_add(GTK_CONTAINER(button), label);
-    g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (destroy_widget), confirmwin);
+    button = gm_create_label_button("Keep resolution", destroy_widget, confirmwin);
     gtk_container_add(GTK_CONTAINER(vbox), button);
 
-    button = gm_create_cancel_button(revert_to_old_res, &oldsize);
+    button = gm_create_label_button("Change back to previous resolution", revert_to_old_res, &oldsize);
     g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (destroy_widget), confirmwin);
     gtk_container_add(GTK_CONTAINER(vbox), button);
 
@@ -258,6 +245,8 @@ int main (int argc, char **argv)
     int i;
     XRRScreenSize *sizes;
     const char* conffile = "/etc/gappman/conf.xml";
+    gchar* gappman_confpath;
+    static menu_elements *actions;
 
     gtk_init (&argc, &argv);
     screen = gdk_screen_get_default ();
@@ -329,8 +318,13 @@ int main (int argc, char **argv)
         fontsize = gm_get_fontsize();
     }
 
-    gm_load_conf(conffile);
-    programs = gm_get_programs();
+    //get configuration file path from gappman
+    if (gm_get_confpath_from_gappman(2103, "localhost", &gappman_confpath) == GM_SUCCES)
+    {
+    	gm_load_conf(gappman_confpath);
+    	programs = gm_get_programs();
+   		actions = gm_get_actions();
+    }
 
     ret_value = gm_getpossibleresolutions(&sizes, &nsize);
     if (ret_value != GM_SUCCES)
@@ -340,7 +334,6 @@ int main (int argc, char **argv)
     }
     else
     {
-
         //Make window transparent
         //gtk_window_set_opacity (GTK_WINDOW (mainwin), 0.8);
 
@@ -357,7 +350,7 @@ int main (int argc, char **argv)
         }
         hbox = gtk_hbox_new (FALSE, 10);
         // cancel button
-        button = gm_create_cancel_button(gtk_main_quit, NULL);
+        button = gm_create_label_button("Done", gtk_main_quit, NULL);
         gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
         gtk_widget_show(button);
 

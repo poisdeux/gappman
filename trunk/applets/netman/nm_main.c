@@ -151,7 +151,7 @@ static void show_menu()
         actions = actions->next;
     }
 
-    button = gm_create_cancel_button(destroy_widget, menuwin);
+    button = gm_create_label_button("Cancel", destroy_widget, menuwin);
     gtk_container_add(GTK_CONTAINER(vbox), button);
     gtk_widget_show(button);
     gtk_widget_show(vbox);

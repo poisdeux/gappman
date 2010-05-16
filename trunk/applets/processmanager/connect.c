@@ -104,31 +104,24 @@ int getStartedProcsFromGappman(int portno, const char* hostname, struct procesli
     if ( status == G_IO_STATUS_ERROR )
     {
         g_warning("%s\n", gerror->message );
-        return 3;
+        return GM_COULD_NOT_SEND_MESSAGE;
     }
 
-    status = g_io_channel_flush( gio, &gerror);
-    if ( status == G_IO_STATUS_ERROR )
-    {
-        g_warning("%s\n", gerror->message );
-    }
+    g_io_channel_flush( gio, &gerror);
 
     g_free(msg);
 
     while ( g_io_channel_read_line( gio, &msg, &len, NULL,  &gerror) != G_IO_STATUS_EOF )
     {
-        g_debug("TEST: message received: %s\n", msg);
         parseProceslistMessage(startedprocs, msg);
     }
 
     status = g_io_channel_shutdown( gio, TRUE, &gerror);
     if ( status == G_IO_STATUS_ERROR )
     {
-        g_warning("handlemessage: %s\n", gerror->message);
-        return 4;
+        g_warning("getStartedProcsFromGappman: %s\n", gerror->message);
+        return GM_COULD_NOT_DISCONNECT;
     }
 
-    fflush(stdout);
-
-    return 0;
+    return GM_SUCCES;
 }

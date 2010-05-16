@@ -23,6 +23,7 @@
 #include <sys/types.h>
 #include <signal.h>
 #include <gm_connect.h>
+#include <gm_generic.h>
 #include "connect.h"
 
 static int WINDOWED = 0;
@@ -124,7 +125,7 @@ static int kill_program( GtkWidget *widget, menu_elements *elt )
         kill(elt->pid, 9);
         break;;
     case 4:
-        g_debug("Oh my god! It's a zombie. Hit it with a shovel!\n");
+        g_debug("Oh my god! It's a zombie. Who's your daddy!?\n");
         return FALSE;;
     case -2:
         g_warning("Oops, could not find proces %d\n", elt->pid);
@@ -195,7 +196,7 @@ static void showprocessdialog( menu_elements *elt )
     gtk_container_add(GTK_CONTAINER(buttonbox), button);
     gtk_widget_show(button);
 
-    button = gm_create_cancel_button(destroy_widget, killdialogwin);
+    button = gm_create_label_button("Cancel", destroy_widget, killdialogwin);
     gtk_widget_show(label);
     gtk_container_add(GTK_CONTAINER(buttonbox), button);
     gtk_widget_show(button);
@@ -266,7 +267,6 @@ static GtkWidget* createrow(menu_elements *elt, int width, int height)
 static void destroy( GtkWidget *widget,
                      gpointer   data )
 {
-	g_debug("Processmanager says bye bye!");
     gtk_main_quit ();
 }
 
@@ -287,6 +287,7 @@ int main (int argc, char **argv)
     menu_elements *program_elts = NULL;
     menu_elements *action_elts = NULL;
     const char* conffile = "/etc/gappman/processmanager.xml";
+    gchar* gappman_confpath = "";
     int dialog_width;
     int dialog_height;
     int program_width;
@@ -371,134 +372,140 @@ int main (int argc, char **argv)
         //fallback on default
         fontsize=gm_get_fontsize();
     }
+
     status = getStartedProcsFromGappman(2103, "localhost", &started_procs);
 
-    switch (status)
-    {
-    case 0:
-        break;;
-    case 1:
-        gm_show_error_dialog("Could not resolve hostname: localhost", mainwin, destroy);
-        break;;
-    case 2:
-        gm_show_error_dialog("Could not connect to gappman.\nCheck that gappman is running.", mainwin, destroy);
-        break;;
-    case 3:
-        gm_show_error_dialog("Could not sent message to localhost.\nCheck that gappman is running", mainwin, destroy);
-        break;;
-    case 4:
-        gm_show_error_dialog("Could not disconnect from gappman.", mainwin, destroy);
-        break;;
-    default:
-        break;;
-    }
+	if ( status != GM_SUCCES )
+	{
+	    switch (status)
+   	 	{
+	    	case GM_SUCCES:
+  	      		break;;
+			case GM_COULD_NOT_RESOLVE_HOSTNAME:
+     			gm_show_error_dialog("Could not resolve hostname: localhost", mainwin, destroy);
+      			break;;
+	    	case GM_COULD_NOT_CONNECT:
+	       		gm_show_error_dialog("Could not connect to gappman.\nCheck that gappman is running.", mainwin, destroy);
+	        	break;;
+	    	case GM_COULD_NOT_SEND_MESSAGE:
+	        	gm_show_error_dialog("Could not sent message to localhost.\nCheck that gappman is running", mainwin, destroy);
+	        	break;;
+	    	case GM_COULD_NOT_DISCONNECT:
+	        	gm_show_error_dialog("Could not disconnect from gappman.", mainwin, destroy);
+	        	break;;
+	    default:
+				gm_show_error_dialog("An undefined error occured when contacting gappman.", mainwin, destroy);
+	        	break;;
+    	}
+	}
+	else
+	{
+      if ( started_procs == NULL )
+      {
+          gm_show_error_dialog("No programs started by gappman.", mainwin, destroy);
+	  }
+	  else if (gm_get_confpath_from_gappman(2103, "localhost", &gappman_confpath) != GM_SUCCES)
+	  {
+      	gm_show_error_dialog("Could not retrieve gappman configuration file\n", mainwin, destroy);
+	  }
+      else if ( gm_load_conf(gappman_confpath) != 0 )
+      {
+      	gm_show_error_dialog("Could not load gappman configuration file\n", mainwin, destroy);
+      }
+      else    
+	  {	
+      	vbox = gtk_vbox_new(FALSE, 10);
+		program_elts   = gm_get_programs();
+          if (program_elts != NULL)
+          {
+              //max width is 50% of screen width
+              program_width=dialog_width/2;
+              total_amount_of_elements += *program_elts->amount_of_elements;
+          }
 
-    vbox = gtk_vbox_new(FALSE, 10);
+          action_elts  = gm_get_actions();
+          if (action_elts != NULL)
+          {
+              total_amount_of_elements += *action_elts->amount_of_elements;
+          }
 
-    if ( started_procs != NULL )
-    {
-        if ( gm_load_conf(conffile) != 0 )
-        {
-            gm_show_error_dialog("Could not load gappman configuration file\n", mainwin, destroy);
-        }
-        else
-        {
-            program_elts = gm_get_programs();
-            if (program_elts != NULL)
-            {
-                //max width is 50% of screen width
-                program_width=dialog_width/2;
-                total_amount_of_elements += *program_elts->amount_of_elements;
-            }
+          row_height=dialog_height/total_amount_of_elements;
 
-            action_elts  = gm_get_actions();
-            if (action_elts != NULL)
-            {
-                total_amount_of_elements += *action_elts->amount_of_elements;
-            }
+          while  ( program_elts != NULL )
+          {
+              started_procs_tmp	 = started_procs;
+              while ( started_procs_tmp != NULL)
+              {
+                  if (( g_strcmp0(program_elts->name, started_procs_tmp->name) == 0 ) && ( started_procs_tmp->pid != mypid ))
+                  {
+                      no_progsacts_found = 0;
+                      program_elts->pid	 = started_procs_tmp->pid;
+                      hbox	 = createrow(program_elts, program_width, row_height);
+                      gtk_container_add(GTK_CONTAINER(vbox),	 hbox);
+                      gtk_widget_show	 (hbox);
+                      separator	 = gtk_hseparator_new();
+                      gtk_container_add(GTK_CONTAINER(vbox),	 separator);
+                      gtk_widget_show	 (separator);
 
-            row_height=dialog_height/total_amount_of_elements;
+                      //get	 out of while-loop
+                      started_procs_tmp	 = NULL;
+                  }
+                  else
+                  {
+                      started_procs_tmp	 = started_procs_tmp->prev;
+                  }
+              }
+              program_elts	 = program_elts->next;
+          }
 
-            while  ( program_elts != NULL )
-            {
-                started_procs_tmp	 = started_procs;
-                while ( started_procs_tmp != NULL)
-                {
-                    if (( g_strcmp0(program_elts->name, started_procs_tmp->name) == 0 ) && ( started_procs_tmp->pid != mypid ))
-                    {
-                        no_progsacts_found = 0;
-                        program_elts->pid	 = started_procs_tmp->pid;
-                        hbox	 = createrow(program_elts, program_width, row_height);
-                        gtk_container_add(GTK_CONTAINER(vbox),	 hbox);
-                        gtk_widget_show	 (hbox);
-                        separator	 = gtk_hseparator_new();
-                        gtk_container_add(GTK_CONTAINER(vbox),	 separator);
-                        gtk_widget_show	 (separator);
+          while ( action_elts != NULL )
+          {
+              started_procs_tmp = started_procs;
+              while ( started_procs_tmp != NULL)
+              {
+                  if (( g_strcmp0(action_elts->name, started_procs_tmp->name) == 0 ) && ( started_procs_tmp->pid != mypid))
+                  {
+                      no_progsacts_found = 0;
+                      action_elts->pid = started_procs_tmp->pid;
 
-                        //get	 out of while-loop
-                        started_procs_tmp	 = NULL;
-                    }
-                    else
-                    {
-                        started_procs_tmp	 = started_procs_tmp->prev;
-                    }
-                }
-                program_elts	 = program_elts->next;
-            }
+                      hbox = createrow(action_elts, program_width, row_height);
+                      gtk_container_add(GTK_CONTAINER(vbox), hbox);
+                      gtk_widget_show (hbox);
+                      separator = gtk_hseparator_new();
+                      gtk_container_add(GTK_CONTAINER(vbox), separator);
+                      gtk_widget_show (separator);
 
-            while ( action_elts != NULL )
-            {
-                started_procs_tmp = started_procs;
-                while ( started_procs_tmp != NULL)
-                {
-                    if (( g_strcmp0(action_elts->name, started_procs_tmp->name) == 0 ) && ( started_procs_tmp->pid != mypid))
-                    {
-                        no_progsacts_found = 0;
-                        action_elts->pid = started_procs_tmp->pid;
+                      //get out of while-loop
+                      started_procs_tmp = NULL;
+                  }
+                  else
+                  {
+                      started_procs_tmp = started_procs_tmp->prev;
+                  }
+              }
+              action_elts = action_elts->next;
+          }
+          freeproceslist(started_procs);
+          if ( no_progsacts_found == 0 )
+          {
+              hbox = gtk_hbox_new (FALSE, 10);
+              // cancel button
+              button = gm_create_label_button("Cancel", gtk_main_quit, NULL);
+              gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
+              gtk_widget_show(button);
 
-                        hbox = createrow(action_elts, program_width, row_height);
-                        gtk_container_add(GTK_CONTAINER(vbox), hbox);
-                        gtk_widget_show (hbox);
-                        separator = gtk_hseparator_new();
-                        gtk_container_add(GTK_CONTAINER(vbox), separator);
-                        gtk_widget_show (separator);
-
-                        //get out of while-loop
-                        started_procs_tmp = NULL;
-                    }
-                    else
-                    {
-                        started_procs_tmp = started_procs_tmp->prev;
-                    }
-                }
-                action_elts = action_elts->next;
-            }
-            freeproceslist(started_procs);
-            if ( no_progsacts_found == 0 )
-            {
-                hbox = gtk_hbox_new (FALSE, 10);
-                // cancel button
-                button = gm_create_cancel_button(gtk_main_quit, NULL);
-                gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
-                gtk_widget_show(button);
-
-                gtk_container_add(GTK_CONTAINER(vbox), hbox);
-                gtk_widget_show (hbox);
-                gtk_container_add (GTK_CONTAINER (mainwin), vbox);
-                gtk_widget_show (vbox);
-                gtk_widget_show (mainwin);
-            }
-            else
-            {
-                gm_show_error_dialog("No programs started by gappman.", NULL, gtk_main_quit);
-            }
-        }
-    }
-    else
-    {
-        gm_show_error_dialog("No programs started by gappman.", NULL, gtk_main_quit);
-    }
-
+              gtk_container_add(GTK_CONTAINER(vbox), hbox);
+              gtk_widget_show (hbox);
+              gtk_container_add (GTK_CONTAINER (mainwin), vbox);
+              gtk_widget_show (vbox);
+              gtk_widget_show (mainwin);
+          }
+          else
+          {
+              gm_show_error_dialog("No programs started by gappman.", mainwin, destroy);
+          }
+      }
+	}
     gtk_main ();
 
     gm_free_menu_elements( program_elts );

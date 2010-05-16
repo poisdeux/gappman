@@ -427,6 +427,10 @@ int main (int argc, char **argv)
         }
     }
 
+	//set confpath so other programs can retrieve
+	//the configuration file gappman used
+	gappman_set_confpath(conffile);
+
     /** INIT */
     global_appw = NULL;
 
@@ -490,7 +494,7 @@ int main (int argc, char **argv)
 
     if ( panel != NULL )
     {
-        buttonbox = gm_createpanel( panel );
+        buttonbox = gm_create_panel( panel );
         align_buttonbox(hbox_top, hbox_middle, hbox_bottom, buttonbox, panel);
         gtk_widget_show (buttonbox);
         start_panel( panel );

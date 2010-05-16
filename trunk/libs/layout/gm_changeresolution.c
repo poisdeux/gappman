@@ -119,7 +119,6 @@ int gm_changeresolution (int width, int height)
     short rate = -1;
     GdkDisplay *gdk_dpy;
 
-    g_debug("changeresolution: %d x %d\n",width, height);
     gdk_dpy = gdk_display_get_default ();
 
     sc = XRRGetScreenInfo ( GDK_DISPLAY_XDISPLAY(gdk_dpy), GDK_ROOT_WINDOW() );

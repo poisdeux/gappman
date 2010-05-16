@@ -25,3 +25,8 @@ gboolean gappman_start_listener (GtkWidget *win);
 */
 gboolean gappman_close_listener (GIOChannel* gio);
 
+/**
+* \brief sets the configuration file location so it can be send to clients asking for it.
+* \param *path string containing the absolute path to the configuration file for gappman.
+*/
+void gappman_set_confpath(const gchar *path);
