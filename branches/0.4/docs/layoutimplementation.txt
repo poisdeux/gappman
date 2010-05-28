@@ -1,0 +1,26 @@
+The main window is divided into three horizontal boxes and three vertical boxes.
+
+ left   middle   right
++-----+--------+-------+
+|     |        |       |  hbox_top
+|     |        |       |
++-----+--------+-------+
+|     |        |       |  hbox_middle
+|     |        |       |
++-----+--------+-------+
+|     |        |       |  hbox_bottom
+|     |        |       |
++-----+--------+-------+
+
+Alignment values can be "top", "center", "bottom", "left", and "right".
+
+top aligned elements should be added to hbox_top.
+bottom aligned elements should be added to hbox_bottom.
+center aligned elements should be added to hbox_middle if none of top or bottom is defined
+as alignment.
+
+Within the corresponding hbox the alignment will be either left, center, or right.
+
+The width and height of the hboxes are not fixed but will grow or shrink based
+on the button sizes.
+ 

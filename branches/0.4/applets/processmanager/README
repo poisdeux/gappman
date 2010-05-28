@@ -1,0 +1,34 @@
+-----------------------------------------------------------------------------
+1. Introduction
+-----------------------------------------------------------------------------
+
+The processmanager widget provides a GUI to send signals to processes started
+by gappman. It connects to the gappman listener and requests a list of started
+processes and their status. This list is used to generate a dialog which
+shows the process with its status. The user can select a process and 
+processmanager will give the user the ability to stop the process.
+
+Stopping a process is accomplished using a sequence of signals. First it will
+try to stop the process by sending it the SIGTERM signal. If the process does
+not respond it will send a SIGKILL signal.
+
+A special case is when the process to be stopped is in a zombie state. This
+means that we will need to kill the parent which will be gappman itself.
+Instead of killing gappman a restart will be tried.
+
+-----------------------------------------------------------------------------
+2. Running the application
+-----------------------------------------------------------------------------
+
+The program can be executed as follows from the source tarball after building it:
+
+./processmanager [servername] [port] 
+
+Use --help to get information on more supported options.
+
+The gappmanxmlconfigurationfile is needed to get the images used for the buttons
+to start the applications.
+
+-----------------------------------------------------------------------------
+3. Known issues
+-----------------------------------------------------------------------------

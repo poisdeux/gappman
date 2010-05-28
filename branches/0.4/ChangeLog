@@ -1,0 +1,32 @@
+2010-05-28  Martijn Brekhof  <m.brekhof@gmail.com>
+
+    * Improved automatic layout design. Now final layout is not dependant
+      on order in which the groups programs, actions, and panel are defined
+      in the xml configuration file for gappman 
+    * Gappman now listens to network connections to provide programs (applets)
+      with information about started applications and the fontsize to be used
+      to create a coherent interface
+    * Added libraries for common code; libconnect, libgeneric, liblayout, and libparseconf 
+		* Added text-label support for program and action buttons
+		* Added applets; shutdown, changeresolution, processmanager, netman
+    * Added new menu group called panel which containes dynamic applets
+    * Added module loading for dynamic applets	
+    * Changed name of appmanager command to gappman 
+	* Added bunch of applets
+
+2008-12-14  Martijn Brekhof  <m.brekhof@gmail.com>
+
+    * Release v0.3
+    * Added support for autostarting programs
+    * Added additionals icons
+    * Added support for xrandr extension
+    
+2008-10-27  Martijn Brekhof  <m.brekhof@gmail.com>
+
+    * Release v0.2
+    * Added support for action-buttons
+    * Added support for gtkrc configuration/theming
+
+2008-10-20  Martijn Brekhof  <m.brekhof@gmail.com>
+
+    * Released v0.1
