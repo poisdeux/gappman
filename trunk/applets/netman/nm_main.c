@@ -122,10 +122,15 @@ static void show_menu()
 {
     nm_elements* actions;
     GtkWidget* vbox;
+    GtkWidget* table;
     GtkWidget* button;
     GtkWidget* menuwin;
     GtkWidget* label;
+    GdkPixbuf *pixbuf;
+    GtkWidget *stock_image;
     gchar* markup;
+    nm_elements* stati;
+	int elt_nr = 0;
 
     menuwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     gtk_window_set_position(GTK_WINDOW (menuwin), GTK_WIN_POS_CENTER);
@@ -133,7 +138,38 @@ static void show_menu()
 
     vbox = gtk_vbox_new (FALSE, 10);
 
+    stati = nm_get_stati();
+
     actions = nm_get_actions();
+
+	table = gtk_table_new(2, *stati->amount_of_elements, TRUE);
+	while (stati != NULL)
+	{
+        markup = g_markup_printf_escaped ("<span size=\"%d\">%s</span>", gm_get_fontsize(), stati->name);
+		label = gtk_label_new("");
+        gtk_label_set_markup (GTK_LABEL (label), markup);
+        g_free (markup);
+		gtk_table_attach_defaults (GTK_TABLE (table), label, 0, 1, elt_nr, elt_nr+1);
+        gtk_widget_show(label);
+
+		if(stati->status == stati->success)
+		{
+			pixbuf = gtk_widget_render_icon(label, GTK_STOCK_OK, GTK_ICON_SIZE_BUTTON, NULL);
+		}
+		else
+		{
+			pixbuf = gtk_widget_render_icon(label, GTK_STOCK_NO, GTK_ICON_SIZE_BUTTON, NULL);
+		}
+	    stock_image = gtk_image_new_from_pixbuf(pixbuf);
+		gtk_table_attach_defaults (GTK_TABLE (table), stock_image, 1, 2, elt_nr, elt_nr+1);
+
+		gtk_widget_show (stock_image);
+
+        stati = stati->next;
+		elt_nr++;
+	}
+	gtk_container_add(GTK_CONTAINER (vbox), table);	
+	gtk_widget_show(table);
 
     while (actions != NULL)
     {

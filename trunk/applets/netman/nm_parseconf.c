@@ -28,6 +28,7 @@ struct nm_element* create_nm_element(nm_elements* prev)
     elt->exec = NULL;
     elt->next = prev;
     elt->args = NULL;
+    elt->status = 1; //default fail
     elt->pid = -1;
     elt->numArguments = 0;
     if (prev == NULL)
