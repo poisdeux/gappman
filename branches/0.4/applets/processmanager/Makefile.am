@@ -1,4 +1,5 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
+noinst_HEADERS = connect.h
 bin_PROGRAMS = processmanager
 processmanager_SOURCES = main.c connect.c
 processmanager_CPPFLAGS = @GTK_INCLUDES@

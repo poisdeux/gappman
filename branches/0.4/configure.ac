@@ -77,6 +77,7 @@ libs/Makefile
 libs/parseconf/Makefile
 libs/layout/Makefile
 libs/connect/Makefile
+libs/generic/Makefile
 applets/Makefile
 applets/shutdown/Makefile
 applets/processmanager/Makefile

@@ -1,5 +1,5 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
-noinst_HEADERS = listener.h
+noinst_HEADERS = listener.h appmanager.h
 bin_PROGRAMS = gappman 
 gappman_SOURCES = appmanager.c listener.c
 # appmanager_HEADERS = parseconf.h changeresolution.h
