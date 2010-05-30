@@ -1,12 +1,12 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
-bin_PROGRAMS = changeresolution
-changeresolution_SOURCES = main.c
-changeresolution_CPPFLAGS = @GTK_INCLUDES@
-changeresolution_CPPFLAGS += @LIBXML_INCLUDES@
-changeresolution_CPPFLAGS += -I$(top_builddir)/libs/layout 
-changeresolution_CPPFLAGS += -I$(top_builddir)/libs/parseconf
-changeresolution_CPPFLAGS += -I$(top_builddir)/libs/connect
-changeresolution_CPPFLAGS += -I$(top_builddir)/libs/generic
-changeresolution_LDADD = $(top_builddir)/libs/parseconf/libgm_parseconf.la
-changeresolution_LDADD += $(top_builddir)/libs/layout/libgm_layout.la
-changeresolution_LDADD += $(top_builddir)/libs/connect/libgm_connect.la
+bin_PROGRAMS = gmchangeresolution
+gmchangeresolution_SOURCES = main.c
+gmchangeresolution_CPPFLAGS = @GTK_INCLUDES@
+gmchangeresolution_CPPFLAGS += @LIBXML_INCLUDES@
+gmchangeresolution_CPPFLAGS += -I$(top_builddir)/libs/layout 
+gmchangeresolution_CPPFLAGS += -I$(top_builddir)/libs/parseconf
+gmchangeresolution_CPPFLAGS += -I$(top_builddir)/libs/connect
+gmchangeresolution_CPPFLAGS += -I$(top_builddir)/libs/generic
+gmchangeresolution_LDADD = $(top_builddir)/libs/parseconf/libgm_parseconf.la
+gmchangeresolution_LDADD += $(top_builddir)/libs/layout/libgm_layout.la
+gmchangeresolution_LDADD += $(top_builddir)/libs/connect/libgm_connect.la

@@ -2,8 +2,6 @@
 noinst_HEADERS = listener.h appmanager.h
 bin_PROGRAMS = gappman 
 gappman_SOURCES = appmanager.c listener.c
-# appmanager_HEADERS = parseconf.h changeresolution.h
-# appmanager_CFLAGS = @CFLAGS@
 gappman_CPPFLAGS = @GTK_INCLUDES@
 gappman_CPPFLAGS += @GTHREAD_INCLUDES@
 gappman_CPPFLAGS += @LIBXML_INCLUDES@

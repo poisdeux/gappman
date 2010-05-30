@@ -27,11 +27,6 @@ for top_builddir in . .. ../.. $ac_auxdir $ac_auxdir/..; do
 done
 AC_PROG_LIBTOOL
 
-CFLAGS=$PASSED_CFLAGS
-
-if test "$ac_cv_prog_cc_stdc" != "no"; then
-  CFLAGS+=$ac_cv_prog_cc_stdc
-fi
 
 AC_CHECK_PROG(HAVE_PKG_CONFIG, pkg-config, "yes", "no",)
 if test "$HAVE_PKG_CONFIG" = "no" ; then
@@ -39,7 +34,7 @@ if test "$HAVE_PKG_CONFIG" = "no" ; then
 fi
 
 
-AC_SEARCH_LIBS([xmlTextReaderRead], [xml2], [
+AC_SEARCH_LIBS(xmlTextReaderRead, xml2, [
 LIBXML_INCLUDES=`pkg-config --cflags libxml-2.0`
 ], [
 echo "Error: libxml2 not found!"; exit 1
