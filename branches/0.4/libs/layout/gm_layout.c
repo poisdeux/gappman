@@ -15,6 +15,7 @@
 #include <math.h>
 #include <string.h>
 #include <gm_layout.h>
+#include <gm_generic.h>
 #include <gm_parseconf.h>
 
 static int fontsize = 10*1024; //< the default generic fontsize for all elements. This usually gets updated by menu building functions below.
@@ -585,6 +586,7 @@ static GtkWidget* createpanelelement( menu_elements *elt, int width, int height)
     if (!module)
     {
         g_warning("Could not load module %s\n%s", elt->module, g_module_error());
+				return NULL;
     }
     else
     {
@@ -592,17 +594,20 @@ static GtkWidget* createpanelelement( menu_elements *elt, int width, int height)
         {
             g_warning("Could not get function gm_module_start from %s\n%s",
                       elt->module, g_module_error());
+						return NULL;
         }
 
         if (!g_module_symbol (module, "gm_module_init", (gpointer *) &(elt->gm_module_init)))
         {
             g_warning("Could not get function gm_module_init from %s\n%s",
                       elt->module, g_module_error());
+						return NULL;
         }
         if (!g_module_symbol (module, "gm_module_get_widget", (gpointer *) &(elt->gm_module_get_widget)))
         {
             g_warning("Could not get function gm_module_get_widget from %s\n%s",
                       elt->module, g_module_error());
+						return NULL;
         }
         if (elt->module_conffile != NULL)
         {
@@ -626,12 +631,14 @@ static GtkWidget* createpanelelement( menu_elements *elt, int width, int height)
             elt->gm_module_set_icon_size(width, height);
         }
 
-        elt->gm_module_init();
-
-        return elt->gm_module_get_widget();
+        if( elt->gm_module_init() != GM_SUCCES )
+				{
+					g_warning("Failed to initialize module %s", elt->module);
+					return NULL;
+				}
     }
 
-    return NULL;
+    return elt->gm_module_get_widget();
 }
 
 GtkWidget* gm_create_buttonbox( menu_elements *elts, gboolean(processevent)(GtkWidget*, GdkEvent*, menu_elements*))
@@ -687,6 +694,7 @@ GtkWidget* gm_create_panel( menu_elements *elts)
     GtkWidget* button, *hbox, *vbox;
     int elts_per_row, count, button_width;
     int box_width, box_height;
+		menu_elements *prev_elt;
 
     box_width = gm_calculate_box_length(screen_width, elts->menu_width);
     box_height = gm_calculate_box_length(screen_height, elts->menu_height);
@@ -702,6 +710,7 @@ GtkWidget* gm_create_panel( menu_elements *elts)
     button_width = box_width/elts_per_row;
 
     count = 0;
+		prev_elt = NULL;
     while (elts != NULL)
     {
         if ( (count % elts_per_row) == 0 )
@@ -716,12 +725,34 @@ GtkWidget* gm_create_panel( menu_elements *elts)
         {
             gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 1);
             gtk_widget_show (button);
-        }
-        elts = elts->next;
-        count++;
-    }
-
-    return vbox;
+        		prev_elt = elts;
+        		elts = elts->next;
+        		count++;
+				}
+				else
+				{
+					//remove element from list
+					if (prev_elt != NULL)
+					{
+						prev_elt->next = elts->next;
+						elts->next = NULL;
+						gm_free_menu_elements(elts);
+						elts = prev_elt->next;
+					}
+					else
+					{
+						prev_elt = elts->next;
+						elts->next = NULL;
+						gm_free_menu_elements(elts);
+						elts = prev_elt;
+					}
+				}
+		} 
+		
+		if (count == 0)
+			return NULL;
+		else
+    	return vbox;
 }
 
 

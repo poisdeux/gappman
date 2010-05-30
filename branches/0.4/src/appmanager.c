@@ -311,6 +311,7 @@ static void start_panel (menu_elements *panel)
 {
     while (panel != NULL )
     {
+				g_debug("Adding panel element");
         if (panel->gm_module_start != NULL)
         {
             if (!g_thread_create((GThreadFunc) panel->gm_module_start, NULL, FALSE, NULL))
@@ -495,9 +496,16 @@ int main (int argc, char **argv)
     if ( panel != NULL )
     {
         buttonbox = gm_create_panel( panel );
-        align_buttonbox(hbox_top, hbox_middle, hbox_bottom, buttonbox, panel);
-        gtk_widget_show (buttonbox);
-        start_panel( panel );
+        if( buttonbox != NULL )
+				{
+					align_buttonbox(hbox_top, hbox_middle, hbox_bottom, buttonbox, panel);
+        	gtk_widget_show (buttonbox);
+        	start_panel( panel );
+				}
+				else
+				{
+					panel = NULL;
+				}
     }
     gtk_container_add (GTK_CONTAINER (vbox), hbox_top);
     gtk_container_add (GTK_CONTAINER (vbox), hbox_middle);

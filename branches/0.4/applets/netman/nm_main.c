@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <gm_layout.h>
+#include <gm_generic.h>
 #include "nm_parseconf.h"
 //#include "nm_layout.h"
 
@@ -21,7 +22,7 @@ static GtkWidget *main_button = NULL;
 static int main_button_width = 50;
 static int main_button_height = 50;
 static int current_status = -2;
-static const char* conffile = "./applets/netman/xml-config-files/netman.xml";
+static const char* conffile = "/etc/gappman/netman.xml";
 static GtkWidget *image_success = NULL;
 static GtkWidget *image_fail = NULL;
 static char **args;
@@ -199,7 +200,8 @@ G_MODULE_EXPORT int gm_module_init()
 {
     nm_elements* stati;
 
-    nm_load_conf(conffile);
+    if(nm_load_conf(conffile) != 0)
+			return GM_COULD_NOT_LOAD_FILE;
 
     stati = nm_get_stati();
 
@@ -213,7 +215,7 @@ G_MODULE_EXPORT int gm_module_init()
                       "clicked",
                       G_CALLBACK (show_menu),
                       NULL);
-    return 0;
+    return GM_SUCCES;
 }
 
 G_MODULE_EXPORT void gm_module_set_conffile(const char* filename)
@@ -240,7 +242,7 @@ G_MODULE_EXPORT GThreadFunc gm_module_start()
 G_MODULE_EXPORT int gm_module_stop()
 {
     free(args);
-    return 0;
+    return GM_SUCCES;
 }
 
 G_MODULE_EXPORT void gm_module_set_icon_size(int width, int height)
