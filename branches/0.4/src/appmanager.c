@@ -311,7 +311,6 @@ static void start_panel (menu_elements *panel)
 {
     while (panel != NULL )
     {
-				g_debug("Adding panel element");
         if (panel->gm_module_start != NULL)
         {
             if (!g_thread_create((GThreadFunc) panel->gm_module_start, NULL, FALSE, NULL))
@@ -445,10 +444,11 @@ int main (int argc, char **argv)
     screen_width =  gdk_screen_get_width (screen);
     screen_height = gdk_screen_get_height (screen);
 
-		if (screen_width == -1)
+		if (window_width == -1)
 			window_width = screen_width;
-		if (screen_height == -1)
+		if (window_height == -1)
 			window_height = screen_height;
+
 
     gm_set_window_geometry(window_width, window_height);
 
