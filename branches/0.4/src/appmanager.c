@@ -329,12 +329,12 @@ static void align_buttonbox (GtkWidget *hbox_top, GtkWidget *hbox_middle, GtkWid
     int box_width;
     int box_height;
 
-    box_width = gm_calculate_box_length(screen_width, elts->menu_width);
-    box_height = gm_calculate_box_length(screen_height, elts->menu_height);
+    box_width = gm_calculate_box_length(window_width, elts->menu_width);
+    box_height = gm_calculate_box_length(window_height, elts->menu_height);
     //vertical alignment is calculated by dividing elts->vert_alignment by 2
     //this results in hbox_top having 0.0, hbox_middle 0,5, and hbox_bottom 1.0
     //to have the widgets aligned respectively to the top, center, or bottom
-    hor_align = gtk_alignment_new( *elts->hor_alignment, (float) *elts->vert_alignment/2, (float) box_width/screen_width, (float) box_height/screen_height);
+    hor_align = gtk_alignment_new( *elts->hor_alignment, (float) *elts->vert_alignment/2, (float) box_width/window_width, (float) box_height/window_height);
     gtk_container_add (GTK_CONTAINER (hor_align), buttonbox);
     gtk_widget_show(hor_align);
 
@@ -444,6 +444,11 @@ int main (int argc, char **argv)
     screen = gdk_screen_get_default ();
     screen_width =  gdk_screen_get_width (screen);
     screen_height = gdk_screen_get_height (screen);
+
+		if (screen_width == -1)
+			window_width = screen_width;
+		if (screen_height == -1)
+			window_height = screen_height;
 
     gm_set_window_geometry(window_width, window_height);
 
