@@ -280,7 +280,7 @@ static GdkPixbuf* scale_image(GtkWidget *image, int max_width, int max_height)
     return gdk_pixbuf_scale_simple(pixbuf, width, height, GDK_INTERP_BILINEAR);
 }
 
-GtkWidget* gm_load_image(char* elt_name, char* elt_logo, char* cacheloc, char* programname, int max_width, int max_height)
+GtkImage* gm_load_image(char* elt_name, char* elt_logo, char* cacheloc, char* programname, int max_width, int max_height)
 {
     GtkWidget *image;
     GdkPixbuf *pixbuf;
@@ -332,7 +332,7 @@ GtkWidget* gm_load_image(char* elt_name, char* elt_logo, char* cacheloc, char* p
         image = gtk_image_new_from_file ((char*) elt_logo);
         gtk_image_set_from_pixbuf(GTK_IMAGE(image), scale_image(image, max_width, max_height));
     }
-    return image;
+    return GTK_IMAGE(image);
 }
 
 /**
@@ -347,7 +347,7 @@ static GtkWidget* image_label_box_hor (menu_elements *elt, int max_width, int ma
 {
     GtkWidget *box;
     GtkWidget *label;
-    GtkWidget *image;
+    GtkImage *image;
 
     /* Create box for image and label */
     box = gtk_hbox_new (FALSE, 0);
@@ -355,8 +355,8 @@ static GtkWidget* image_label_box_hor (menu_elements *elt, int max_width, int ma
 
     /* Now on to the image stuff */
     image = gm_load_image((char*) elt->name, (char*) elt->logo, gm_get_cache_location(), gm_get_programname(), max_width, max_height);
-    gtk_box_pack_start (GTK_BOX (box), image, FALSE, FALSE, 3);
-    gtk_widget_show (image);
+    gtk_box_pack_start (GTK_BOX (box), GTK_WIDGET(image), FALSE, FALSE, 3);
+    gtk_widget_show (GTK_WIDGET(image));
 
     if (elt->printlabel != 0)
     {
@@ -380,7 +380,7 @@ static GtkWidget* image_label_box_vert (menu_elements *elt, int max_width, int m
 {
     GtkWidget *box;
     GtkWidget *label;
-    GtkWidget *image;
+    GtkImage *image;
     gchar *markup;
 
     /* Create box for image and label */
@@ -389,8 +389,8 @@ static GtkWidget* image_label_box_vert (menu_elements *elt, int max_width, int m
 
     /* Now on to the image stuff */
     image = gm_load_image((char*) elt->name, (char*) elt->logo, gm_get_cache_location(), gm_get_programname(), max_width, max_height);
-    gtk_box_pack_start (GTK_BOX (box), image, FALSE, FALSE, 3);
-    gtk_widget_show (image);
+    gtk_box_pack_start (GTK_BOX (box), GTK_WIDGET(image), FALSE, FALSE, 3);
+    gtk_widget_show (GTK_WIDGET(image));
 
     if ((elt->printlabel != 0) && (elt->name != NULL))
     {

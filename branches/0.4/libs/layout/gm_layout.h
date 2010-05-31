@@ -31,9 +31,9 @@ int gm_calculate_box_length(int total_length, struct length *box_length);
 * \param programname name of the main program that calls this function (i.e. gappman, netman, etc.)
 * \param max_width maximum width image may have
 * \param max_height maximum height image may have
-* \return GtkWidget pointer to image
+* \return GtkImage pointer to image
 */
-GtkWidget* gm_load_image(char* elt_name, char* elt_logo, char* cacheloc, char* programname, int max_width, int max_height);
+GtkImage* gm_load_image(char* elt_name, char* elt_logo, char* cacheloc, char* programname, int max_width, int max_height);
 
 /**
 * \brief shows a question dialog with regards to gappman fontsize.

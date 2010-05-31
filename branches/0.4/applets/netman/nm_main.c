@@ -16,15 +16,15 @@
 #include <gm_layout.h>
 #include <gm_generic.h>
 #include "nm_parseconf.h"
-//#include "nm_layout.h"
 
-static GtkWidget *main_button = NULL;
+static GtkButton *main_button = NULL;
 static int main_button_width = 50;
 static int main_button_height = 50;
 static int current_status = -2;
 static const char* conffile = "/etc/gappman/netman.xml";
-static GtkWidget *image_success = NULL;
-static GtkWidget *image_fail = NULL;
+static GtkImage *image_success = NULL;
+static GtkImage *image_fail = NULL;
+static GtkImage *button_image = NULL;
 static char **args;
 
 static gint exec_program(nm_elements* elt)
@@ -97,15 +97,11 @@ static void show_status(int status)
 {
     if ( status == 0 )
     {
-        gtk_container_remove(GTK_CONTAINER(main_button), image_fail);
-        gtk_container_add(GTK_CONTAINER(main_button), image_success);
-        gtk_widget_show(image_success);
+				gtk_button_set_image(main_button, GTK_WIDGET(image_success));
     }
     else
     {
-        gtk_container_remove(GTK_CONTAINER(main_button), image_success);
-        gtk_container_add(GTK_CONTAINER(main_button), image_fail);
-        gtk_widget_show(image_fail);
+				gtk_button_set_image(main_button, GTK_WIDGET(image_fail));
     }
 }
 
@@ -205,16 +201,21 @@ G_MODULE_EXPORT int gm_module_init()
 
     stati = nm_get_stati();
 
-    main_button = gtk_button_new();
+    main_button = GTK_BUTTON(gtk_button_new());
 
-    image_fail = gm_load_image((char*) stati->name, (char*) stati->logofail, nm_get_cache_location(), "netman-fail", main_button_width, main_button_height);
-    image_success = gm_load_image((char*) stati->name, (char*) stati->logosuccess, nm_get_cache_location(), "netman-success", main_button_width, main_button_height);
-    gtk_container_add(GTK_CONTAINER(main_button), image_fail);
-    gtk_widget_show(image_fail);
     g_signal_connect (G_OBJECT (main_button),
                       "clicked",
                       G_CALLBACK (show_menu),
                       NULL);
+
+    image_success = gm_load_image((char*) stati->name, (char*) stati->logosuccess, nm_get_cache_location(), "netman-success", main_button_width, main_button_height);
+    image_fail = gm_load_image((char*) stati->name, (char*) stati->logofail, nm_get_cache_location(), "netman-fail", main_button_width, main_button_height);
+
+    button_image = GTK_IMAGE(gtk_image_new());
+    //We start off in fail mode
+    gtk_button_set_image(main_button, GTK_WIDGET(image_fail));
+    gtk_widget_show(GTK_WIDGET(main_button));
+
     return GM_SUCCES;
 }
 
@@ -253,6 +254,6 @@ G_MODULE_EXPORT void gm_module_set_icon_size(int width, int height)
 
 G_MODULE_EXPORT GtkWidget *gm_module_get_widget()
 {
-    return main_button;
+    return GTK_WIDGET(main_button);
 }
 
