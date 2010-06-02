@@ -105,14 +105,22 @@ static void show_status(int status)
     }
 }
 
-static void start_action(GtkWidget* widget, nm_elements* action)
+static void start_action(GtkWidget* widget, GdkEvent *event, nm_elements* action)
 {
-    exec_program(action);
+		//Only start program  if spacebar or mousebutton is pressed
+    if ( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
+    {
+	    exec_program(action);
+		}
 }
 
-static void destroy_widget(GtkWidget* dummy, GtkWidget* widget)
+static void destroy_widget(GtkWidget* dummy, GdkEvent *event, GtkWidget* widget)
 {
-    gtk_widget_destroy(widget);
+		//Only start program  if spacebar or mousebutton is pressed
+    if ( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
+    {
+    	gtk_widget_destroy(widget);
+		}
 }
 
 static void show_menu()
@@ -127,12 +135,14 @@ static void show_menu()
     GtkWidget *stock_image;
     gchar* markup;
     nm_elements* stati;
-	int elt_nr = 0;
+		int elt_nr = 0;
 
     menuwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     gtk_window_set_position(GTK_WINDOW (menuwin), GTK_WIN_POS_CENTER);
     gtk_window_set_decorated (GTK_WINDOW (menuwin), FALSE);
+		gtk_widget_grab_focus(menuwin);
 
+		gtk_widget_set_name(menuwin, "gm_applet");
     vbox = gtk_vbox_new (FALSE, 10);
 
     stati = nm_get_stati();
@@ -142,12 +152,12 @@ static void show_menu()
 	table = gtk_table_new(2, *stati->amount_of_elements, TRUE);
 	while (stati != NULL)
 	{
-        markup = g_markup_printf_escaped ("<span size=\"%d\">%s</span>", gm_get_fontsize(), stati->name);
+    markup = g_markup_printf_escaped ("<span size=\"%d\">%s</span>", gm_get_fontsize(), stati->name);
 		label = gtk_label_new("");
-        gtk_label_set_markup (GTK_LABEL (label), markup);
-        g_free (markup);
+    gtk_label_set_markup (GTK_LABEL (label), markup);
+    g_free (markup);
 		gtk_table_attach_defaults (GTK_TABLE (table), label, 0, 1, elt_nr, elt_nr+1);
-        gtk_widget_show(label);
+    gtk_widget_show(label);
 
 		if(stati->status == stati->success)
 		{
@@ -157,12 +167,12 @@ static void show_menu()
 		{
 			pixbuf = gtk_widget_render_icon(label, GTK_STOCK_NO, GTK_ICON_SIZE_BUTTON, NULL);
 		}
-	    stock_image = gtk_image_new_from_pixbuf(pixbuf);
+	  stock_image = gtk_image_new_from_pixbuf(pixbuf);
 		gtk_table_attach_defaults (GTK_TABLE (table), stock_image, 1, 2, elt_nr, elt_nr+1);
 
 		gtk_widget_show (stock_image);
 
-        stati = stati->next;
+    stati = stati->next;
 		elt_nr++;
 	}
 	gtk_container_add(GTK_CONTAINER (vbox), table);	
@@ -174,10 +184,9 @@ static void show_menu()
         markup = g_markup_printf_escaped ("<span size=\"%d\">%s</span>", gm_get_fontsize(), actions->name);
         gtk_label_set_markup (GTK_LABEL (label), markup);
         g_free (markup);
-        button = gtk_button_new();
-        gtk_container_add(GTK_CONTAINER(button), label);
+        button = gm_create_empty_button(start_action, actions);
+				gtk_container_add(GTK_CONTAINER(button), label);
         gtk_widget_show(label);
-        g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (start_action), actions);
         gtk_container_add(GTK_CONTAINER(vbox), button);
         gtk_widget_show(button);
 

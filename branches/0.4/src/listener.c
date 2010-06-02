@@ -31,6 +31,7 @@
 
 static GIOChannel* gio;
 static const gchar* confpath = "";
+static const gchar* rcpath = "";
 
 static int parsemessage(gchar *msg)
 {
@@ -305,4 +306,9 @@ gboolean gappman_close_listener (GIOChannel* close_gio)
 void gappman_set_confpath(const gchar *path)
 {
 	confpath = path;
+}
+
+void gappman_set_rcpath(const gchar *path)
+{
+	rcpath = path;
 }

@@ -92,11 +92,9 @@ GtkWidget* gm_create_button ( menu_elements *elt, int fontsize, int max_width, i
 
 /**
 * \brief Create a single empty button
-* \param max_width button width
-* \param max_height button height
 * \param *processevent callback function that will be called when button is pressed
 */
-GtkWidget* gm_create_empty_button ( int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, void*), void *data);
+GtkWidget* gm_create_empty_button ( void* callbackfunc, void *data);
 
 /**
 * \brief Create the button layout using the available screen height and width

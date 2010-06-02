@@ -427,6 +427,7 @@ int main (int argc, char **argv)
         }
     }
 
+
 	//set confpath so other programs can retrieve
 	//the configuration file gappman used
 	gappman_set_confpath(conffile);
@@ -453,6 +454,8 @@ int main (int argc, char **argv)
     gm_set_window_geometry(window_width, window_height);
 
     mainwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+
+		gtk_widget_set_name(mainwin, "gm_mainwindow");
 
     //Keep the main window below all other windows
     if (KEEP_BELOW)

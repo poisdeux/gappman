@@ -207,7 +207,7 @@ static GtkWidget* createrow(XRRScreenSize* size, int width, int height)
     hbox = gtk_hbox_new (FALSE, 10);
 
     // Need to expand menu_elt structure to contain PID status.
-    button = gm_create_empty_button(width, height, process_startprogram_event, size);
+    button = gm_create_empty_button(process_startprogram_event, size);
 
     label = gtk_label_new("");
 

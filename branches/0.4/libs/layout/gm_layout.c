@@ -180,7 +180,6 @@ void gm_show_error_dialog(const gchar* message, GtkWidget *mainwin, void *callba
     gtk_widget_show(label);
     if (callback != NULL)
     {
-				g_debug("Adding callback");
         g_signal_connect_swapped (G_OBJECT (button), "clicked",
                                  G_CALLBACK (callback),
                                   mainwin);
@@ -225,14 +224,10 @@ GtkWidget *gm_create_label_button(gchar* buttontext, void *callbackfunc, void *d
     markup = g_markup_printf_escaped ("<span size=\"%d\">%s</span>", fontsize, buttontext);
     gtk_label_set_markup (GTK_LABEL (label), markup);
     g_free (markup);
-    button = gtk_button_new();
+    button = gm_create_empty_button(callbackfunc, data);
     gtk_container_add(GTK_CONTAINER(button), label);
     gtk_widget_show(label);
 
-    if ( callbackfunc != NULL)
-    {
-        g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (callbackfunc), data);
-    }
     return button;
 }
 
@@ -492,21 +487,23 @@ static int calculateAmountOfElementsPerColumn(int box_width, int box_height, int
 * \param max_height button height
 * \param *processevent callback function which must be called when button is pressed.
 */
-GtkWidget* gm_create_empty_button ( int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, void* ), void *data)
+GtkWidget* gm_create_empty_button ( void* callbackfunc, void *data)
 {
     GtkWidget *button, *imagelabelbox;
     GdkPixbuf *pixbuf;
     int width, height;
-    double ratio;
 
     button = gtk_button_new ();
     //gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
 
     gtk_button_set_focus_on_click(GTK_BUTTON(button), TRUE);
 
-    // Signals to start the program
-    g_signal_connect (G_OBJECT (button), "button_release_event", G_CALLBACK (processevent), data);
-    g_signal_connect (G_OBJECT (button), "key_release_event", G_CALLBACK (processevent), data);
+    if ( callbackfunc != NULL)
+    {
+    	// Signals to start the program
+    	g_signal_connect (G_OBJECT (button), "button_release_event", G_CALLBACK (callbackfunc), data);
+    	g_signal_connect (G_OBJECT (button), "key_release_event", G_CALLBACK (callbackfunc), data);
+    }
 
     // Signals to highlight the button
     g_signal_connect (G_OBJECT (button), "focus_in_event", G_CALLBACK (highlight_button), NULL);
@@ -545,8 +542,6 @@ GtkWidget* gm_create_button ( menu_elements *elt, int fontsize, int max_width, i
     {
         gtk_button_set_image(GTK_BUTTON(button), imagelabelbox);
     }
-
-    gtk_button_set_focus_on_click(GTK_BUTTON(button), TRUE);
 
     // Signals to start the program
     // process_startprogram_event must be replaced with argument passed to this function?!?

@@ -1,18 +1,48 @@
-pixmap_path "/usr/share/backgrounds/:/usr/share/wallpapers/"
+pixmap_path "/usr/share/backgrounds/"
 
-style "background-style"
+style "main-window-style"
 {
   # set the background to black
   bg[NORMAL] = "#000000"
-  bg_pixmap[NORMAL] = "All-Good-People-1.jpg"
+  bg_pixmap[NORMAL] = ""
+  fg[NORMAL] = "#A0A0A0"
+  fg[PRELIGHT] = "#B0B0B0"
+	fg[SELECTED] = "#404040"
+	fg[INSENSITIVE] = "#202020"
+}
+
+style "applet-style"
+{
+	bg[NORMAL] = "#404040"
+  bg_pixmap[NORMAL] = ""
+  fg[NORMAL] = "#A0A0A0"
+  fg[PRELIGHT] = "#B0B0B0"
+	fg[SELECTED] = "#404040"
+	fg[INSENSITIVE] = "#202020"
+}
+
+style "text-style"
+{
+	fg[NORMAL] = "#A0A0A0"
+	fg[INSENSITIVE] = "#202020"
 }
 
 style "button-style"
 {
-  fg[NORMAL] = "#A0A0A0"
-  GtkWidget::focus-line-width = 1
+  fg[NORMAL] = "#000000"
+  fg[PRELIGHT] = "#FFFFFF"
+	fg[SELECTED] = "#101010"
+	fg[ACTIVE] = "#AAAAAA"
+	fg[INSENSITIVE] = "#202020"
+  bg[NORMAL] = "#202020"
+  bg[PRELIGHT] = "#404040"
+	bg[SELECTED] = "#606060"
+	bg[ACTIVE] = "#808080"
+	bg[INSENSITIVE] = "#202020"
 }
 
-class "GtkWidget" style "background-style"
+class "GtkWindow" style "applet-style"
 class "GtkButton" style "button-style"
-
+class "GtkLabel" style "text-style"
+widget "gm_mainwindow" style "main-window-style"
+widget "gm_applet" style "applet-style"

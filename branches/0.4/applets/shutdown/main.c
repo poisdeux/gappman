@@ -132,8 +132,7 @@ int main (int argc, char **argv)
     GtkWidget *mainwin;
     menu_elements *actions;
     const char* conffile = "/etc/gappman/shutdown.xml";
-    int screen_width;
-    int screen_height;
+    const char* rcfile = "";
     int c;
     int fontsize;
 
@@ -142,8 +141,6 @@ int main (int argc, char **argv)
     while (1) {
         int option_index = 0;
         static struct option long_options[] = {
-            {"width", 1, 0, 'w'},
-            {"height", 1, 0, 'h'},
             {"conffile", 1, 0, 'c'},
             {"help", 0, 0, 'i'},
             {"gtkrc", 1, 0, 'r'},
@@ -156,12 +153,6 @@ int main (int argc, char **argv)
             break;
 
         switch (c) {
-        case 'w':
-            screen_width=atoi(optarg);
-            break;
-        case 'h':
-            screen_height=atoi(optarg);
-            break;
         case 'c':
             conffile=optarg;
             break;
@@ -186,8 +177,6 @@ int main (int argc, char **argv)
     actions = gm_get_actions();
 
     screen = gdk_screen_get_default ();
-    screen_width =  gdk_screen_get_width (screen);
-    screen_height =  gdk_screen_get_height (screen);
 
     mainwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
