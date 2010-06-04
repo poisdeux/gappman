@@ -111,7 +111,7 @@ static void make_default_for_program( XRRScreenSize *size )
         button_height = dialog_height/(*programs_tmp->amount_of_elements);
         while (programs_tmp != NULL)
         {
-            button = gm_create_button(programs_tmp, fontsize, dialog_width, button_height, set_default_res_for_program);
+            button = gm_create_button(programs_tmp, dialog_width, button_height, set_default_res_for_program);
             gtk_container_add(GTK_CONTAINER(vbox), button);
             programs_tmp = programs_tmp->next;
         }

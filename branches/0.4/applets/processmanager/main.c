@@ -189,11 +189,9 @@ static void showprocessdialog( menu_elements *elt )
     markup = g_markup_printf_escaped ("<span size=\"%d\">%s</span>", fontsize, g_strdup_printf("Stop %s", elt->name));
     gtk_label_set_markup (GTK_LABEL (label), markup);
     g_free (markup);
-    button = gtk_button_new();
+    button = gm_create_empty_button(kill_program, elt);
     gtk_container_add(GTK_CONTAINER(button), label);
     gtk_widget_show(label);
-    g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (kill_program), elt);
-    gtk_container_add(GTK_CONTAINER(buttonbox), button);
     gtk_widget_show(button);
 
     button = gm_create_label_button("Cancel", destroy_widget, killdialogwin);
@@ -237,7 +235,7 @@ static GtkWidget* createrow(menu_elements *elt, int width, int height)
 
     hbox = gtk_hbox_new (FALSE, 10);
 
-    elt->widget = gm_create_button(elt, fontsize, width, height, process_startprogram_event);
+    elt->widget = gm_create_button(elt, width, height, process_startprogram_event);
 
     statuslabel = gtk_label_new("");
     status = get_status(elt->pid);

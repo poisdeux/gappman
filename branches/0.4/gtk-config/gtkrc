@@ -29,16 +29,17 @@ style "text-style"
 
 style "button-style"
 {
-  fg[NORMAL] = "#000000"
+  fg[NORMAL] = "#404040"
   fg[PRELIGHT] = "#FFFFFF"
-	fg[SELECTED] = "#101010"
+	fg[SELECTED] = "#303030"
 	fg[ACTIVE] = "#AAAAAA"
 	fg[INSENSITIVE] = "#202020"
   bg[NORMAL] = "#202020"
-  bg[PRELIGHT] = "#404040"
-	bg[SELECTED] = "#606060"
+  bg[PRELIGHT] = "#202020"
+	bg[SELECTED] = "#202020"
 	bg[ACTIVE] = "#808080"
-	bg[INSENSITIVE] = "#202020"
+	bg[INSENSITIVE] = "#101010"
+	GtkButton::relief = GTK_RELIEF_NONE
 }
 
 class "GtkWindow" style "applet-style"

@@ -30,6 +30,15 @@ static void destroy_widget( GtkWidget *widget, gpointer data )
     gtk_widget_destroy(widget);
 }
 
+void gm_destroy_widget(GtkWidget* dummy, GdkEvent *event, GtkWidget* widget)
+{
+    //Only start program  if spacebar or mousebutton is pressed
+    if ( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
+    {
+      gtk_widget_destroy(widget);
+    }
+}
+
 int gm_show_confirmation_dialog(const gchar* message, const gchar* msg_button1, void* callback1, void* data1, const gchar* msg_button2, void* callback2, void* data2, GtkWidget *mainwin)
 {
     GtkWidget *dialog;
@@ -494,7 +503,7 @@ GtkWidget* gm_create_empty_button ( void* callbackfunc, void *data)
     int width, height;
 
     button = gtk_button_new ();
-    //gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
+    gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
 
     gtk_button_set_focus_on_click(GTK_BUTTON(button), TRUE);
 
@@ -522,40 +531,20 @@ GtkWidget* gm_create_empty_button ( void* callbackfunc, void *data)
 * \param *elt pointer to menu_element struct that contains the logo image filename.
 * \param max_width button width
 */
-GtkWidget* gm_create_button ( menu_elements *elt, int fontsize, int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, menu_elements*) )
+GtkWidget* gm_create_button ( menu_elements *elt, int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, menu_elements*) )
 {
     GtkWidget *button, *imagelabelbox;
     GdkPixbuf *pixbuf;
     int width, height;
     double ratio;
 
+    button = gm_create_empty_button(processevent, elt);
+
     if ( elt->logo != NULL )
     {
         imagelabelbox = image_label_box_vert(elt, max_width, max_height);
-    }
-
-    button = gtk_button_new ();
-    //gtk_container_add(GTK_CONTAINER(button), imagelabelbox);
-    gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
-
-    if ( elt->logo != NULL )
-    {
         gtk_button_set_image(GTK_BUTTON(button), imagelabelbox);
     }
-
-    // Signals to start the program
-    // process_startprogram_event must be replaced with argument passed to this function?!?
-    g_signal_connect (G_OBJECT (button), "button_release_event", G_CALLBACK (processevent), elt);
-    g_signal_connect (G_OBJECT (button), "key_release_event", G_CALLBACK (processevent), elt);
-
-    // Signals to highlight the button
-    g_signal_connect (G_OBJECT (button), "focus_in_event", G_CALLBACK (highlight_button), NULL);
-    g_signal_connect (G_OBJECT (button), "focus_out_event", G_CALLBACK (dehighlight_button), NULL);
-    g_signal_connect (G_OBJECT (button), "enter_notify_event", G_CALLBACK (highlight_button), NULL);
-    g_signal_connect (G_OBJECT (button), "leave_notify_event", G_CALLBACK (dehighlight_button), NULL);
-
-    // Signals to create button press effect when clicked
-    g_signal_connect (G_OBJECT (button), "button_press_event", G_CALLBACK (press_button), elt);
 
     return button;
 }
@@ -674,7 +663,7 @@ GtkWidget* gm_create_buttonbox( menu_elements *elts, gboolean(processevent)(GtkW
         }
 
         next = cur->next;
-        button = gm_create_button(cur, fontsize, button_width, box_height, processevent);
+        button = gm_create_button(cur, button_width, box_height, processevent);
         gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 1);
         gtk_widget_show (button);
         cur = next;
