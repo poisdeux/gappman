@@ -286,7 +286,7 @@ static GdkPixbuf* scale_image(GtkWidget *image, int max_width, int max_height)
 
 GtkImage* gm_load_image(char* elt_name, char* elt_logo, char* cacheloc, char* programname, int max_width, int max_height)
 {
-    GtkWidget *image;
+    GtkWidget *image = NULL;
     GdkPixbuf *pixbuf;
     char* cachedfile;
     size_t stringlength;

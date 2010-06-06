@@ -220,6 +220,11 @@ G_MODULE_EXPORT int gm_module_init()
     image_success = gm_load_image((char*) stati->name, (char*) stati->logosuccess, nm_get_cache_location(), "netman-success", main_button_width, main_button_height);
     image_fail = gm_load_image((char*) stati->name, (char*) stati->logofail, nm_get_cache_location(), "netman-fail", main_button_width, main_button_height);
 
+	//reference the images to prevent removal when switching images
+	//using gtk_button_set_image()
+	g_object_ref(image_fail);
+	g_object_ref(image_success);
+
     button_image = GTK_IMAGE(gtk_image_new());
     //We start off in fail mode
     gtk_button_set_image(main_button, GTK_WIDGET(image_fail));
@@ -252,6 +257,9 @@ G_MODULE_EXPORT GThreadFunc gm_module_start()
 G_MODULE_EXPORT int gm_module_stop()
 {
     free(args);
+	g_object_unref(image_success);
+	g_object_unref(image_fail);
+
     return GM_SUCCES;
 }
 
