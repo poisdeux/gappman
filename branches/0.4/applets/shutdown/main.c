@@ -212,7 +212,7 @@ int main (int argc, char **argv)
     hbox = gtk_hbox_new (FALSE, 10);
 
     // cancel button
-    button = gm_create_label_button("Cancel", gtk_main_quit, NULL);
+    button = gm_create_label_button("Cancel", gm_quit_program, NULL);
     gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
     gtk_widget_show(button);
 

@@ -39,6 +39,15 @@ void gm_destroy_widget(GtkWidget* dummy, GdkEvent *event, GtkWidget* widget)
     }
 }
 
+void gm_quit_program(GtkWidget* dummy, GdkEvent *event)
+{
+    //Only start program  if spacebar or mousebutton is pressed
+    if ( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
+    {
+      gtk_main_quit();
+    }
+}
+
 int gm_show_confirmation_dialog(const gchar* message, const gchar* msg_button1, void* callback1, void* data1, const gchar* msg_button2, void* callback2, void* data2, GtkWidget *mainwin)
 {
     GtkWidget *dialog;

@@ -23,6 +23,13 @@
 void gm_destroy_widget(GtkWidget* dummy, GdkEvent *event, GtkWidget* widget);
 
 /**
+* \brief quits program only if mousebutton or spacebar is pressed
+* \param dummy widget that emitted event
+* \param event event signal that triggered the function
+*/
+void gm_quit_program(GtkWidget* dummy, GdkEvent *event);
+
+/**
 * \brief function to calculate the absolute width based upon the total available width
 * \param total_length Total available width for the box element
 * \param *box_length Pointer to a struct length holding the length value and type of the box

@@ -57,17 +57,18 @@ static void destroy( GtkWidget *widget,
 }
 
 
-static void destroy_widget( GtkWidget *widget, gpointer data )
-{
-    gtk_widget_destroy(GTK_WIDGET(data));
-}
-
 static gboolean revert_to_old_res(GtkWidget *widget, XRRScreenSize* size)
 {
     gm_changeresolution(size->width, size->height);
     return FALSE;
 }
 
+/**
+* \brief Sends the new resolution as default for a program to gappman
+* \param *widget that called this function (usually through a callback construction)
+* \param *event event that triggered the widget
+* \param *elt menu_element pointer to the program for which the resolution must be updated
+*/
 static gboolean set_default_res_for_program( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
 {
     XRRScreenSize current_size;
@@ -85,13 +86,23 @@ static gboolean set_default_res_for_program( GtkWidget *widget, GdkEvent *event,
     }
 }
 
-static void make_default_for_program( XRRScreenSize *size )
+/**
+* \brief creates a popup dialog window that allows the user to set the new resolution as default for a program
+* \param *widget that called this function (usually through a callback construction)
+* \param *event event that triggered the widget
+* \param *size pointer to a XRRScreenSize struct that holds the new resolution
+*/
+static void make_default_for_program( GtkWidget *widget, GdkEvent *event, XRRScreenSize *size )
 {
     GtkWidget *button;
     GtkWidget *chooseprogramwin;
     GtkWidget *vbox;
     int button_height;
     menu_elements *programs_tmp;
+
+		// only show menu if spacebar or mousebutton were pressed
+    if ( ((GdkEventKey*)event)->keyval != 32 && ((GdkEventButton*)event)->button != 1)
+			return;
 
     chooseprogramwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
@@ -115,7 +126,7 @@ static void make_default_for_program( XRRScreenSize *size )
             gtk_container_add(GTK_CONTAINER(vbox), button);
             programs_tmp = programs_tmp->next;
         }
-        button = gm_create_label_button("Done", destroy_widget, chooseprogramwin);
+        button = gm_create_label_button("Done", gm_destroy_widget, chooseprogramwin);
         gtk_container_add(GTK_CONTAINER(vbox), button);
         gtk_container_add(GTK_CONTAINER(chooseprogramwin), vbox);
         gtk_widget_show_all(chooseprogramwin);
@@ -128,9 +139,11 @@ static void make_default_for_program( XRRScreenSize *size )
 
 /**
 * \brief creates a popup dialog window that allows the user confirm the new resolution
+* \param *widget that called this function (usually through a callback construction)
+* \param *event event that triggered the widget
 * \param *size pointer to a XRRScreenSize struct that holds the new resolution
 */
-static void changeresolution( XRRScreenSize *size )
+static void changeresolution(GtkWidget *widget, GdkEvent *event, XRRScreenSize *size )
 {
     GtkWidget *button;
     GtkWidget *vbox;
@@ -139,6 +152,10 @@ static void changeresolution( XRRScreenSize *size )
     gchar* markup;
     static XRRScreenSize oldsize;
     int nr;
+
+		// only show menu if spacebar or mousebutton were pressed
+    if ( ((GdkEventKey*)event)->keyval != 32 && ((GdkEventButton*)event)->button != 1)
+			return;
 
     gm_get_current_size(&oldsize);
 
@@ -158,13 +175,14 @@ static void changeresolution( XRRScreenSize *size )
     vbox = gtk_vbox_new(TRUE, 10);
 
     button = gm_create_label_button("Set resolution as default for program", make_default_for_program, size);
+		g_signal_connect (G_OBJECT (button), "pressed", G_CALLBACK(gm_destroy_widget), confirmwin);
     gtk_container_add(GTK_CONTAINER(vbox), button);
 
-    button = gm_create_label_button("Keep resolution", destroy_widget, confirmwin);
+    button = gm_create_label_button("Keep resolution", gm_destroy_widget, confirmwin);
     gtk_container_add(GTK_CONTAINER(vbox), button);
 
     button = gm_create_label_button("Change back to previous resolution", revert_to_old_res, &oldsize);
-    g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (destroy_widget), confirmwin);
+    g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (gm_destroy_widget), confirmwin);
     gtk_container_add(GTK_CONTAINER(vbox), button);
 
     gtk_container_add(GTK_CONTAINER(confirmwin), vbox);
@@ -177,26 +195,6 @@ static void changeresolution( XRRScreenSize *size )
     //g_timeout_add_seconds (10, )
 }
 
-/**
-* \brief function that starts any program as defined by the structure *elt.
-* \param *widget pointer to the button widget which has the process_startprogram_event connected through a signal
-* \param *event the GdkEvent that occured. Space key and left mousebutton are valid actions.
-* \param *elt menu_element structure containing the filename and arguments of the program that should be started
-*/
-static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event, void *size )
-{
-    //Only start program  if spacebar or mousebutton is pressed
-    if ( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
-    {
-        gtk_widget_set_sensitive(GTK_WIDGET(widget), FALSE);
-        changeresolution(size);
-        gtk_widget_set_sensitive(GTK_WIDGET(widget), TRUE);
-    }
-
-    return TRUE;
-}
-
-
 static GtkWidget* createrow(XRRScreenSize* size, int width, int height)
 {
     GtkWidget *button, *hbox, *label;
@@ -206,8 +204,7 @@ static GtkWidget* createrow(XRRScreenSize* size, int width, int height)
 
     hbox = gtk_hbox_new (FALSE, 10);
 
-    // Need to expand menu_elt structure to contain PID status.
-    button = gm_create_empty_button(process_startprogram_event, size);
+    button = gm_create_empty_button(changeresolution, size);
 
     label = gtk_label_new("");
 
@@ -350,7 +347,7 @@ int main (int argc, char **argv)
         }
         hbox = gtk_hbox_new (FALSE, 10);
         // cancel button
-        button = gm_create_label_button("Done", gtk_main_quit, NULL);
+        button = gm_create_label_button("Done", gm_quit_program, NULL);
         gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
         gtk_widget_show(button);
 
