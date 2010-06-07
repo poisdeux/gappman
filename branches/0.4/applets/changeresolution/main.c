@@ -27,6 +27,7 @@
 
 static int WINDOWED = 0;
 static GtkWidget *mainwin;
+static GtkWidget *confirmwin;
 static int fontsize;
 static menu_elements *programs;
 static int dialog_width;
@@ -92,7 +93,7 @@ static gboolean set_default_res_for_program( GtkWidget *widget, GdkEvent *event,
 * \param *event event that triggered the widget
 * \param *size pointer to a XRRScreenSize struct that holds the new resolution
 */
-static void make_default_for_program( GtkWidget *widget, GdkEvent *event, XRRScreenSize *size )
+static gboolean make_default_for_program( GtkWidget *widget, GdkEvent *event, XRRScreenSize *size )
 {
     GtkWidget *button;
     GtkWidget *chooseprogramwin;
@@ -106,7 +107,7 @@ static void make_default_for_program( GtkWidget *widget, GdkEvent *event, XRRScr
 
     chooseprogramwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
-    gtk_window_set_transient_for (GTK_WINDOW(chooseprogramwin), GTK_WINDOW(mainwin));
+    gtk_window_set_transient_for (GTK_WINDOW(chooseprogramwin), GTK_WINDOW(confirmwin));
     gtk_window_set_position(GTK_WINDOW (chooseprogramwin), GTK_WIN_POS_CENTER_ON_PARENT);
 
     //Make window transparent
@@ -135,6 +136,8 @@ static void make_default_for_program( GtkWidget *widget, GdkEvent *event, XRRScr
     {
         gm_show_error_dialog("No programs found.\nPlease check configuration file.", NULL, NULL);
     }
+
+		return FALSE;
 }
 
 /**
@@ -148,7 +151,6 @@ static void changeresolution(GtkWidget *widget, GdkEvent *event, XRRScreenSize *
     GtkWidget *button;
     GtkWidget *vbox;
     GtkWidget *label;
-    GtkWidget *confirmwin;
     gchar* markup;
     static XRRScreenSize oldsize;
     int nr;
@@ -175,18 +177,17 @@ static void changeresolution(GtkWidget *widget, GdkEvent *event, XRRScreenSize *
     vbox = gtk_vbox_new(TRUE, 10);
 
     button = gm_create_label_button("Set resolution as default for program", make_default_for_program, size);
-		g_signal_connect (G_OBJECT (button), "pressed", G_CALLBACK(gm_destroy_widget), confirmwin);
     gtk_container_add(GTK_CONTAINER(vbox), button);
 
     button = gm_create_label_button("Keep resolution", gm_destroy_widget, confirmwin);
     gtk_container_add(GTK_CONTAINER(vbox), button);
 
     button = gm_create_label_button("Change back to previous resolution", revert_to_old_res, &oldsize);
-    g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (gm_destroy_widget), confirmwin);
+		g_signal_connect (G_OBJECT (button), "key_release_event", G_CALLBACK (gm_destroy_widget), confirmwin);	
+		g_signal_connect (G_OBJECT (button), "button_release_event", G_CALLBACK (gm_destroy_widget), confirmwin);	
     gtk_container_add(GTK_CONTAINER(vbox), button);
 
     gtk_container_add(GTK_CONTAINER(confirmwin), vbox);
-    gtk_widget_grab_focus(button);
 
     gtk_widget_show_all(confirmwin);
 

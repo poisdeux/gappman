@@ -32,6 +32,7 @@ static void destroy_widget( GtkWidget *widget, gpointer data )
 
 void gm_destroy_widget(GtkWidget* dummy, GdkEvent *event, GtkWidget* widget)
 {
+		g_debug("gm_destroy_widget called");
     //Only start program  if spacebar or mousebutton is pressed
     if ( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
     {
@@ -461,7 +462,7 @@ static gboolean highlight_button ( GtkWidget *widget, GdkEvent *event, menu_elem
 {
     gtk_button_set_relief(GTK_BUTTON(widget), GTK_RELIEF_NORMAL);
     gtk_widget_grab_focus(widget);
-    return TRUE;
+    return FALSE;
 }
 
 /**
@@ -474,7 +475,7 @@ static gboolean dehighlight_button ( GtkWidget *widget, GdkEvent *event, menu_el
 {
 
     gtk_button_set_relief(GTK_BUTTON(widget), GTK_RELIEF_NONE);
-    return TRUE;
+    return FALSE;
 }
 
 /**
