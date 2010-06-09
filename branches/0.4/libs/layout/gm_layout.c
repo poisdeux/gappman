@@ -32,7 +32,6 @@ static void destroy_widget( GtkWidget *widget, gpointer data )
 
 void gm_destroy_widget(GtkWidget* dummy, GdkEvent *event, GtkWidget* widget)
 {
-		g_debug("gm_destroy_widget called");
     //Only start program  if spacebar or mousebutton is pressed
     if ( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
     {

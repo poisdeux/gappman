@@ -5,39 +5,47 @@ style "main-window-style"
   # set the background to black
   bg[NORMAL] = "#000000"
   bg_pixmap[NORMAL] = ""
-  fg[NORMAL] = "#A0A0A0"
-  fg[PRELIGHT] = "#B0B0B0"
-	fg[SELECTED] = "#404040"
-	fg[INSENSITIVE] = "#202020"
 }
 
 style "applet-style"
 {
-	bg[NORMAL] = "#404040"
-  bg_pixmap[NORMAL] = ""
-  fg[NORMAL] = "#A0A0A0"
-  fg[PRELIGHT] = "#B0B0B0"
-	fg[SELECTED] = "#404040"
+	fg[NORMAL] = "#A0A0A0"
+  fg[PRELIGHT] = "#FFFFFF"
+	fg[SELECTED] = "#202020"
+	fg[ACTIVE] = "#404040"
 	fg[INSENSITIVE] = "#202020"
+  bg[NORMAL] = "#303030"
+  bg[PRELIGHT] = "#AAAAAA"
+	bg[SELECTED] = "#404040"
+	bg[ACTIVE] = "#505050"
+	bg[INSENSITIVE] = "#101010"
 }
 
 style "text-style"
 {
 	fg[NORMAL] = "#A0A0A0"
+  fg[PRELIGHT] = "#FFFFFF"
+	fg[SELECTED] = "#202020"
+	fg[ACTIVE] = "#404040"
 	fg[INSENSITIVE] = "#202020"
+  bg[NORMAL] = "#202020"
+  bg[PRELIGHT] = "#AAAAAA"
+	bg[SELECTED] = "#101010"
+	bg[ACTIVE] = "#303030"
+	bg[INSENSITIVE] = "#101010"
 }
 
 style "button-style"
 {
-  fg[NORMAL] = "#404040"
+  fg[NORMAL] = "#505050"
   fg[PRELIGHT] = "#FFFFFF"
-	fg[SELECTED] = "#303030"
-	fg[ACTIVE] = "#AAAAAA"
+	fg[SELECTED] = "#404040"
+	fg[ACTIVE] = "#505050"
 	fg[INSENSITIVE] = "#202020"
   bg[NORMAL] = "#202020"
-  bg[PRELIGHT] = "#202020"
-	bg[SELECTED] = "#202020"
-	bg[ACTIVE] = "#808080"
+  bg[PRELIGHT] = "#303030"
+	bg[SELECTED] = "#303030"
+	bg[ACTIVE] = "#404040"
 	bg[INSENSITIVE] = "#101010"
 	GtkButton::relief = GTK_RELIEF_NONE
 }
