@@ -61,9 +61,8 @@ static gint exec_program(nm_elements* elt)
             _exit(0);
         }
 
-        while ( status == -1 )
+        while ( waitpid(childpid, &status, WNOHANG ) == 0 )
         {
-            waitpid(childpid, &status, WNOHANG);
             sleep(1);
         }
     }
@@ -71,7 +70,7 @@ static gint exec_program(nm_elements* elt)
     {
         g_warning("Could not open %s\n", elt->exec);
     }
-    return status;
+    return WEXITSTATUS(status);
 }
 
 static int check_status()
