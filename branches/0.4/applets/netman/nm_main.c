@@ -24,7 +24,6 @@ static int current_status = -2;
 static const char* conffile = "/etc/gappman/netman.xml";
 static GtkImage *image_success = NULL;
 static GtkImage *image_fail = NULL;
-static GtkImage *button_image = NULL;
 static char **args;
 
 static gint exec_program(nm_elements* elt)
@@ -96,11 +95,13 @@ static void show_status(int status)
 {
     if ( status == 0 )
     {
-				gtk_button_set_image(main_button, GTK_WIDGET(image_success));
+	gtk_container_remove(GTK_CONTAINER(main_button), GTK_WIDGET(image_fail));
+    	gtk_container_add(GTK_CONTAINER(main_button), GTK_WIDGET(image_success));
     }
     else
     {
-				gtk_button_set_image(main_button, GTK_WIDGET(image_fail));
+	gtk_container_remove(GTK_CONTAINER(main_button), GTK_WIDGET(image_success));
+    	gtk_container_add(GTK_CONTAINER(main_button), GTK_WIDGET(image_fail));
     }
 }
 
@@ -217,16 +218,12 @@ G_MODULE_EXPORT int gm_module_init()
                       NULL);
 
     image_success = gm_load_image((char*) stati->name, (char*) stati->logosuccess, nm_get_cache_location(), "netman-success", main_button_width, main_button_height);
+    gtk_widget_show(GTK_WIDGET(image_success));
     image_fail = gm_load_image((char*) stati->name, (char*) stati->logofail, nm_get_cache_location(), "netman-fail", main_button_width, main_button_height);
+    gtk_widget_show(GTK_WIDGET(image_fail));
 
-	//reference the images to prevent removal when switching images
-	//using gtk_button_set_image()
-	g_object_ref(image_fail);
-	g_object_ref(image_success);
-
-    button_image = GTK_IMAGE(gtk_image_new());
     //We start off in fail mode
-    gtk_button_set_image(main_button, GTK_WIDGET(image_fail));
+    gtk_container_add(GTK_CONTAINER(main_button), GTK_WIDGET(image_fail));
     gtk_widget_show(GTK_WIDGET(main_button));
 
     return GM_SUCCES;
