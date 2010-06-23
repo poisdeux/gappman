@@ -219,8 +219,11 @@ G_MODULE_EXPORT int gm_module_init()
 
     image_success = gm_load_image((char*) stati->name, (char*) stati->logosuccess, nm_get_cache_location(), "netman-success", main_button_width, main_button_height);
     gtk_widget_show(GTK_WIDGET(image_success));
+		g_object_ref(image_success);
+
     image_fail = gm_load_image((char*) stati->name, (char*) stati->logofail, nm_get_cache_location(), "netman-fail", main_button_width, main_button_height);
     gtk_widget_show(GTK_WIDGET(image_fail));
+		g_object_ref(image_fail);
 
     //We start off in fail mode
     gtk_container_add(GTK_CONTAINER(main_button), GTK_WIDGET(image_fail));
