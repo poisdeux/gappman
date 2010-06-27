@@ -100,12 +100,12 @@ static void check_status()
 
     stati = nm_get_stati();
 
-	g_debug("Checking status");
     while (stati != NULL)
     {
+		g_debug("Checking status: %s", stati->name);
 		prev_status = stati->status;
         stati->status = exec_program(stati);
-		if(stati->status != prev_status)
+		if((stati->status != prev_status) || (stati->status != stati->success))
 		{
 			switch_status(stati);
 		}
@@ -228,11 +228,11 @@ G_MODULE_EXPORT int gm_module_init()
 	while (stati != NULL)
 	{
 		g_debug("Initializing %s", stati->name);
-    	stati->image_success = gm_load_image("gm_netman", (char*) stati->logosuccess, nm_get_cache_location(), (char*) stati->name, main_button_width, main_button_height);
+    	stati->image_success = gm_load_image("gm_netman_success", (char*) stati->logosuccess, nm_get_cache_location(), (char*) stati->name, main_button_width, main_button_height);
     	gtk_widget_show(GTK_WIDGET(stati->image_success));
 		g_object_ref(stati->image_success);
 
-    	stati->image_fail = gm_load_image("gm_netman", (char*) stati->logofail, nm_get_cache_location(), (char*) stati->name, main_button_width, main_button_height);
+    	stati->image_fail = gm_load_image("gm_netman_fail", (char*) stati->logofail, nm_get_cache_location(), (char*) stati->name, main_button_width, main_button_height);
     	gtk_widget_show(GTK_WIDGET(stati->image_fail));
 		g_object_ref(stati->image_fail);
 		
