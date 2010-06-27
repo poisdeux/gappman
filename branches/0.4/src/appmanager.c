@@ -24,6 +24,7 @@
 #include "listener.h"
 #include <gm_parseconf.h>
 #include <gm_layout.h>
+#include <gm_generic.h>
 #include "appmanager.h"
 #include <pthread.h>
 
@@ -304,6 +305,27 @@ static void destroy( GtkWidget *widget,
 }
 
 /**
+*	\brief stops the elements in the panel
+* \param *panel pointer to the menu_elements structures holding the panel elementts
+*/
+static void stop_panel (menu_elements *panel)
+{
+    while (panel != NULL )
+    {
+		g_debug("Stopping panel element");
+        if (panel->gm_module_stop != NULL)
+        {
+            if (!panel->gm_module_stop() != GM_SUCCES)
+            {
+                g_error("Failed to stop thread");
+            }
+        }
+        panel = panel->next;
+    }
+}
+
+
+/**
 *	\brief starts the elements in the panel
 * \param *panel pointer to the menu_elements structures holding the panel elementts
 */
@@ -311,7 +333,7 @@ static void start_panel (menu_elements *panel)
 {
     while (panel != NULL )
     {
-        if (panel->gm_module_start != NULL)
+        if (panel->gm_module_start != GM_SUCCES)
         {
             if (!g_thread_create((GThreadFunc) panel->gm_module_start, NULL, FALSE, NULL))
             {
@@ -529,13 +551,13 @@ int main (int argc, char **argv)
 
     gappman_start_listener(mainwin);
 
+	stop_panel( panel );
     gdk_threads_enter();
     gtk_main ();
     gdk_threads_leave();
 
 
     gappman_close_listener(NULL);
-
     g_message("Closing up. Goodbye\n");
     gm_free_menu_elements( programs );
     gm_free_menu_elements( actions );

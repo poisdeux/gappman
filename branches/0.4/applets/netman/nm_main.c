@@ -105,6 +105,8 @@ static void check_status()
 		g_debug("Checking status: %s", stati->name);
 		prev_status = stati->status;
         stati->status = exec_program(stati);
+		//Switch only if status is fail or different from previous status
+		//i.e. from fail to success.
 		if((stati->status != prev_status) || (stati->status != stati->success))
 		{
 			switch_status(stati);
@@ -265,7 +267,7 @@ G_MODULE_EXPORT GThreadFunc gm_module_start()
 G_MODULE_EXPORT int gm_module_stop()
 {
     nm_elements* stati;
-
+	g_debug("Stopping module");
     stati = nm_get_stati();
 	KEEP_RUNNING = 0;	
 
