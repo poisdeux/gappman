@@ -312,10 +312,9 @@ static void stop_panel (menu_elements *panel)
 {
     while (panel != NULL )
     {
-		g_debug("Stopping panel element");
         if (panel->gm_module_stop != NULL)
         {
-            if (!panel->gm_module_stop() != GM_SUCCES)
+            if (panel->gm_module_stop() != GM_SUCCES)
             {
                 g_error("Failed to stop thread");
             }
@@ -551,18 +550,19 @@ int main (int argc, char **argv)
 
     gappman_start_listener(mainwin);
 
-	stop_panel( panel );
     gdk_threads_enter();
     gtk_main ();
     gdk_threads_leave();
 
 
+    g_message("Closing up.");
+	stop_panel( panel );
     gappman_close_listener(NULL);
-    g_message("Closing up. Goodbye\n");
     gm_free_menu_elements( programs );
     gm_free_menu_elements( actions );
     gm_free_menu_elements( panel );
-
+	
+    g_message("Goodbye.");
     return 0;
 }
 

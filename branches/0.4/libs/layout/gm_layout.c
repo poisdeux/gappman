@@ -589,6 +589,13 @@ static GtkWidget* createpanelelement( menu_elements *elt, int width, int height)
                       elt->module, g_module_error());
 						return NULL;
         }
+	
+		if (!g_module_symbol (module, "gm_module_stop", (gpointer *) &(elt->gm_module_stop)))
+        {
+            g_warning("Could not get function gm_module_stop from %s\n%s",
+                      elt->module, g_module_error());
+						return NULL;
+        }
 
         if (!g_module_symbol (module, "gm_module_init", (gpointer *) &(elt->gm_module_init)))
         {

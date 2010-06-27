@@ -76,18 +76,15 @@ static gint exec_program(nm_elements* elt)
 static void switch_status(nm_elements* stati)
 {
 	GtkWidget* current_image;
-	g_debug("Switching status");
 	current_image = gtk_bin_get_child(GTK_BIN(main_button));
 	gtk_container_remove(GTK_CONTAINER(main_button), current_image);
 
     if (stati->status != stati->success)
     {
-		g_debug("Status fail");
     	gtk_container_add(GTK_CONTAINER(main_button), GTK_WIDGET(stati->image_fail));
     }
 	else
 	{
-		g_debug("Status success");
     	gtk_container_add(GTK_CONTAINER(main_button), GTK_WIDGET(stati->image_success));
 	}
 }
@@ -102,7 +99,6 @@ static void check_status()
 
     while (stati != NULL)
     {
-		g_debug("Checking status: %s", stati->name);
 		prev_status = stati->status;
         stati->status = exec_program(stati);
 		//Switch only if status is fail or different from previous status
@@ -229,7 +225,6 @@ G_MODULE_EXPORT int gm_module_init()
                       NULL);
 	while (stati != NULL)
 	{
-		g_debug("Initializing %s", stati->name);
     	stati->image_success = gm_load_image("gm_netman_success", (char*) stati->logosuccess, nm_get_cache_location(), (char*) stati->name, main_button_width, main_button_height);
     	gtk_widget_show(GTK_WIDGET(stati->image_success));
 		g_object_ref(stati->image_success);
@@ -240,7 +235,6 @@ G_MODULE_EXPORT int gm_module_init()
 		
 		stati = stati->next;
 	}
-	g_debug("Starting in fail mode");
     stati = nm_get_stati();
     //We start off in fail mode
     gtk_container_add(GTK_CONTAINER(main_button), GTK_WIDGET(stati->image_fail));
@@ -267,7 +261,6 @@ G_MODULE_EXPORT GThreadFunc gm_module_start()
 G_MODULE_EXPORT int gm_module_stop()
 {
     nm_elements* stati;
-	g_debug("Stopping module");
     stati = nm_get_stati();
 	KEEP_RUNNING = 0;	
 
