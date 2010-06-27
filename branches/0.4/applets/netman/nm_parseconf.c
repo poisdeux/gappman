@@ -31,6 +31,8 @@ struct nm_element* create_nm_element(nm_elements* prev)
     elt->status = 1; //default fail
     elt->pid = -1;
     elt->numArguments = 0;
+	elt->image_success = NULL;
+	elt->image_fail = NULL;
     if (prev == NULL)
     {
         elt->amount_of_elements = (int*) malloc (sizeof(int));

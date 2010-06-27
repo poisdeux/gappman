@@ -24,13 +24,14 @@ static int current_status = -2;
 static const char* conffile = "/etc/gappman/netman.xml";
 static GtkImage *image_success = NULL;
 static GtkImage *image_fail = NULL;
-static char **args;
+static int KEEP_RUNNING = 0;
 
 static gint exec_program(nm_elements* elt)
 {
     int status = -1;
     int ret;
     int i;
+	char **args;
     __pid_t childpid;
     FILE *fp;
 
@@ -72,36 +73,44 @@ static gint exec_program(nm_elements* elt)
     return WEXITSTATUS(status);
 }
 
-static int check_status()
+static void switch_status(nm_elements* stati)
 {
-    int status_fail = 0;
+	GtkWidget* current_image;
+	g_debug("Switching status");
+	current_image = gtk_bin_get_child(GTK_BIN(main_button));
+	gtk_container_remove(GTK_CONTAINER(main_button), current_image);
+
+    if (stati->status != stati->success)
+    {
+		g_debug("Status fail");
+    	gtk_container_add(GTK_CONTAINER(main_button), GTK_WIDGET(stati->image_fail));
+    }
+	else
+	{
+		g_debug("Status success");
+    	gtk_container_add(GTK_CONTAINER(main_button), GTK_WIDGET(stati->image_success));
+	}
+}
+
+
+static void check_status()
+{
+    int prev_status = 0;
     nm_elements* stati;
 
     stati = nm_get_stati();
 
+	g_debug("Checking status");
     while (stati != NULL)
     {
+		prev_status = stati->status;
         stati->status = exec_program(stati);
-        if (stati->status != stati->success)
-        {
-            status_fail = 1;
-        }
+		if(stati->status != prev_status)
+		{
+			switch_status(stati);
+		}
+       	sleep(2); 
         stati = stati->next;
-    }
-    return status_fail;
-}
-
-static void show_status(int status)
-{
-    if ( status == 0 )
-    {
-	gtk_container_remove(GTK_CONTAINER(main_button), GTK_WIDGET(image_fail));
-    	gtk_container_add(GTK_CONTAINER(main_button), GTK_WIDGET(image_success));
-    }
-    else
-    {
-	gtk_container_remove(GTK_CONTAINER(main_button), GTK_WIDGET(image_success));
-    	gtk_container_add(GTK_CONTAINER(main_button), GTK_WIDGET(image_fail));
     }
 }
 
@@ -216,17 +225,23 @@ G_MODULE_EXPORT int gm_module_init()
                       "clicked",
                       G_CALLBACK (show_menu),
                       NULL);
+	while (stati != NULL)
+	{
+		g_debug("Initializing %s", stati->name);
+    	stati->image_success = gm_load_image("gm_netman", (char*) stati->logosuccess, nm_get_cache_location(), (char*) stati->name, main_button_width, main_button_height);
+    	gtk_widget_show(GTK_WIDGET(stati->image_success));
+		g_object_ref(stati->image_success);
 
-    image_success = gm_load_image((char*) stati->name, (char*) stati->logosuccess, nm_get_cache_location(), "netman-success", main_button_width, main_button_height);
-    gtk_widget_show(GTK_WIDGET(image_success));
-		g_object_ref(image_success);
-
-    image_fail = gm_load_image((char*) stati->name, (char*) stati->logofail, nm_get_cache_location(), "netman-fail", main_button_width, main_button_height);
-    gtk_widget_show(GTK_WIDGET(image_fail));
-		g_object_ref(image_fail);
-
+    	stati->image_fail = gm_load_image("gm_netman", (char*) stati->logofail, nm_get_cache_location(), (char*) stati->name, main_button_width, main_button_height);
+    	gtk_widget_show(GTK_WIDGET(stati->image_fail));
+		g_object_ref(stati->image_fail);
+		
+		stati = stati->next;
+	}
+	g_debug("Starting in fail mode");
+    stati = nm_get_stati();
     //We start off in fail mode
-    gtk_container_add(GTK_CONTAINER(main_button), GTK_WIDGET(image_fail));
+    gtk_container_add(GTK_CONTAINER(main_button), GTK_WIDGET(stati->image_fail));
     gtk_widget_show(GTK_WIDGET(main_button));
 
     return GM_SUCCES;
@@ -239,26 +254,28 @@ G_MODULE_EXPORT void gm_module_set_conffile(const char* filename)
 
 G_MODULE_EXPORT GThreadFunc gm_module_start()
 {
-    int status = -1;
-    int prev_status = -1;
-    while (1)
+	KEEP_RUNNING = 1;
+    while (KEEP_RUNNING)
     {
-        status = check_status();
-        if ( status != prev_status )
-        {
-            show_status(status);
-            prev_status = status;
-        }
+        check_status();
         sleep(10);
     }
 }
 
 G_MODULE_EXPORT int gm_module_stop()
 {
-    free(args);
-	g_object_unref(image_success);
-	g_object_unref(image_fail);
+    nm_elements* stati;
 
+    stati = nm_get_stati();
+	KEEP_RUNNING = 0;	
+
+	while(stati != NULL)
+	{
+		g_object_unref(stati->image_success);
+		g_object_unref(stati->image_fail);
+		stati = stati->next;
+	}
+	nm_free_elements(stati);
     return GM_SUCCES;
 }
 
