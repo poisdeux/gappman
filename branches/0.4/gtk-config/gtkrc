@@ -13,12 +13,10 @@ style "applet-style"
   fg[PRELIGHT] = "#FFFFFF"
 	fg[SELECTED] = "#202020"
 	fg[ACTIVE] = "#404040"
-	fg[INSENSITIVE] = "#202020"
   bg[NORMAL] = "#303030"
   bg[PRELIGHT] = "#AAAAAA"
 	bg[SELECTED] = "#404040"
 	bg[ACTIVE] = "#505050"
-	bg[INSENSITIVE] = "#101010"
 }
 
 style "text-style"
@@ -41,12 +39,10 @@ style "button-style"
   fg[PRELIGHT] = "#FFFFFF"
 	fg[SELECTED] = "#404040"
 	fg[ACTIVE] = "#505050"
-	fg[INSENSITIVE] = "#202020"
-  bg[NORMAL] = "#202020"
+  bg[NORMAL] = "#404040"
   bg[PRELIGHT] = "#303030"
 	bg[SELECTED] = "#303030"
 	bg[ACTIVE] = "#404040"
-	bg[INSENSITIVE] = "#101010"
 	GtkButton::relief = GTK_RELIEF_NONE
 }
 
