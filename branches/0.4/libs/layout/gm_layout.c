@@ -293,7 +293,7 @@ static GdkPixbuf* scale_image(GtkWidget *image, int max_width, int max_height)
     return gdk_pixbuf_scale_simple(pixbuf, width, height, GDK_INTERP_BILINEAR);
 }
 
-GtkImage* gm_load_image(char* elt_name, char* elt_logo, char* cacheloc, char* programname, int max_width, int max_height)
+GtkWidget* gm_load_image(char* elt_name, char* elt_logo, char* cacheloc, char* programname, int max_width, int max_height)
 {
     GtkWidget *image = NULL;
     GdkPixbuf *pixbuf;
@@ -345,7 +345,7 @@ GtkImage* gm_load_image(char* elt_name, char* elt_logo, char* cacheloc, char* pr
         image = gtk_image_new_from_file ((char*) elt_logo);
         gtk_image_set_from_pixbuf(GTK_IMAGE(image), scale_image(image, max_width, max_height));
     }
-    return GTK_IMAGE(image);
+    return image;
 }
 
 /**

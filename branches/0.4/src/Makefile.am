@@ -11,4 +11,5 @@ gappman_CPPFLAGS += -I$(top_builddir)/libs/layout
 gappman_CPPFLAGS += -I$(top_builddir)/libs/generic
 gappman_LDADD = $(top_builddir)/libs/parseconf/libgm_parseconf.la
 gappman_LDADD += $(top_builddir)/libs/layout/libgm_layout.la
+gappman_LDADD += @GTHREAD_OBJS@
 gappmandir = $(top_builddir)/src

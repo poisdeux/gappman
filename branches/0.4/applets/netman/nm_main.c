@@ -20,10 +20,7 @@
 static GtkButton *main_button = NULL;
 static int main_button_width = 50;
 static int main_button_height = 50;
-static int current_status = -2;
 static const char* conffile = "/etc/gappman/netman.xml";
-static GtkImage *image_success = NULL;
-static GtkImage *image_fail = NULL;
 static int KEEP_RUNNING = 0;
 
 static gint exec_program(nm_elements* elt)
@@ -77,15 +74,29 @@ static void switch_status(nm_elements* stati)
 {
 	GtkWidget* current_image;
 	current_image = gtk_bin_get_child(GTK_BIN(main_button));
-	gtk_container_remove(GTK_CONTAINER(main_button), current_image);
 
+	gtk_container_remove(GTK_CONTAINER(main_button), current_image);
+			g_print("New image realized: %d, mapped: %d, visible: %d\n",
+            GTK_WIDGET_REALIZED(current_image),
+            GTK_WIDGET_MAPPED(current_image),
+            GTK_WIDGET_VISIBLE(current_image));
+
+	g_print("Setting new image from %s", stati->name);
     if (stati->status != stati->success)
     {
     	gtk_container_add(GTK_CONTAINER(main_button), GTK_WIDGET(stati->image_fail));
+			g_print("New image realized: %d, mapped: %d, visible: %d\n",
+            GTK_WIDGET_REALIZED(stati->image_fail),
+            GTK_WIDGET_MAPPED(stati->image_fail),
+            GTK_WIDGET_VISIBLE(stati->image_fail));
     }
 	else
 	{
     	gtk_container_add(GTK_CONTAINER(main_button), GTK_WIDGET(stati->image_success));
+			g_print("New image realized: %d, mapped: %d, visible: %d\n",
+            GTK_WIDGET_REALIZED(stati->image_success),
+            GTK_WIDGET_MAPPED(stati->image_success),
+            GTK_WIDGET_VISIBLE(stati->image_success));
 	}
 }
 
@@ -225,11 +236,11 @@ G_MODULE_EXPORT int gm_module_init()
                       NULL);
 	while (stati != NULL)
 	{
-    	stati->image_success = gm_load_image("gm_netman_success", (char*) stati->logosuccess, nm_get_cache_location(), (char*) stati->name, main_button_width, main_button_height);
+    	stati->image_success = GTK_IMAGE(gm_load_image("gm_netman_success", (char*) stati->logosuccess, nm_get_cache_location(), (char*) stati->name, main_button_width, main_button_height));
     	gtk_widget_show(GTK_WIDGET(stati->image_success));
 		g_object_ref(stati->image_success);
 
-    	stati->image_fail = gm_load_image("gm_netman_fail", (char*) stati->logofail, nm_get_cache_location(), (char*) stati->name, main_button_width, main_button_height);
+    	stati->image_fail = GTK_IMAGE(gm_load_image("gm_netman_fail", (char*) stati->logofail, nm_get_cache_location(), (char*) stati->name, main_button_width, main_button_height));
     	gtk_widget_show(GTK_WIDGET(stati->image_fail));
 		g_object_ref(stati->image_fail);
 		

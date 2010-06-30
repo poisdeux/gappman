@@ -31,8 +31,8 @@ struct nm_element
     int status; //!< should hold the last exit value of the executable
     int success; //!< should hold the exit value of the executable (*exec) that represents the success state
     struct nm_element *next; //!< pointer to the next nm_element structure
-	GtkImage *image_success;
-	GtkImage *image_fail;
+	  GtkImage *image_success;
+	  GtkImage *image_fail;
 };
 
 /**
