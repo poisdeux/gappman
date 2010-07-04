@@ -26,7 +26,6 @@
 #include <gm_layout.h>
 #include <gm_generic.h>
 #include "appmanager.h"
-#include <pthread.h>
 
 struct appwidgetinfo* global_appw;
 menu_elements *programs;

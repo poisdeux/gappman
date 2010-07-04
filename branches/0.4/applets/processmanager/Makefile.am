@@ -11,4 +11,6 @@ gmprocessmanager_CPPFLAGS += -I$(top_builddir)/libs/generic
 gmprocessmanager_LDADD = $(top_builddir)/libs/parseconf/libgm_parseconf.la
 gmprocessmanager_LDADD += $(top_builddir)/libs/layout/libgm_layout.la
 gmprocessmanager_LDADD += $(top_builddir)/libs/connect/libgm_connect.la
+gmprocessmanager_LDADD += @GTK_OBJS@
+gmprocessmanager_LDADD += @LIBXML_OBJS@
 

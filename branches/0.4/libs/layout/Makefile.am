@@ -8,4 +8,6 @@ libgm_layout_la_CPPFLAGS += @LIBXML_INCLUDES@
 libgm_layout_la_CPPFLAGS += -I$(top_builddir)/libs/parseconf
 libgm_layout_la_CPPFLAGS += -I$(top_builddir)/libs/generic
 libgm_layout_la_LIBADD = $(top_builddir)/libs/parseconf/libgm_parseconf.la
+libgm_layout_la_LIBADD += @GTK_OBJS@
+libgm_layout_la_LIBADD += @LIBXML_OBJS@
 
