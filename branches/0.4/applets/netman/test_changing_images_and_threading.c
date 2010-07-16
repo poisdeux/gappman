@@ -4,7 +4,7 @@
 #include <sys/wait.h>
 #include <stdlib.h>
 
-// gcc main.c -o main `pkg-config --libs --cflags gtk+-2.0 gthread-2.0`
+// gcc test_changing_images_and_threading.c -o test `pkg-config --libs --cflags gtk+-2.0 gthread-2.0`
 
 static GtkWidget* button;
 
@@ -90,7 +90,7 @@ int main(int argc, char **argv)
 	list_of_images = image_elt;
 
 	image_elt = create_image_struct(list_of_images);
-	image_elt->image = gtk_image_new_from_file("/usr/share/pixmaps/apple-green.png");
+	image_elt->image = gtk_image_new_from_file("/usr/share/pixmaps/apple-red.png");
 	gtk_widget_show(image_elt->image);
 	g_object_ref(image_elt->image);
 
@@ -104,11 +104,11 @@ int main(int argc, char **argv)
 	gtk_widget_show(mainwin);
 
 	if (!g_thread_create((GThreadFunc) start_thread, NULL, FALSE, NULL))
-    {
-    	g_error("Failed to create thread");
-    }
+  {
+  	g_error("Failed to create thread");
+  }
 
 	gdk_threads_enter();
-    gtk_main ();
-    gdk_threads_leave();
+  gtk_main ();
+  gdk_threads_leave();
 }
