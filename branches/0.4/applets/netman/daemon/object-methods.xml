@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<node name="/gappman/netman/">
+  <interface name="gappman.netman">
+    <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="my_object"/>
+    <method name="RunCommand">
+      <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="gm_nm_run_command"/>
+      <arg type="s" name="command" direction="in" />
+      <arg type="as" name="args" direction="in" />
+      <arg type="i" name="status" direction="out" />
+    </method>
+	  <method name="GetStatus">
+      <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="gm_nm_get_status"/>
+      <arg type="s" name="progname" direction="in" />
+      <arg type="i" name="status" direction="out" />
+    </method>
+		<signal name="StateChanged">
+      <arg name="state" type="u"/>
+    </signal>
+  </interface>
+</node>
+
