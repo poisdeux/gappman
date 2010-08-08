@@ -81,7 +81,7 @@ static void switch_status(nm_elements* stati)
             GTK_WIDGET_MAPPED(current_image),
             GTK_WIDGET_VISIBLE(current_image));
 
-	g_print("Setting new image from %s", stati->name);
+	g_print("Setting new image from %s\n", stati->name);
     if (stati->status != stati->success)
     {
     	gtk_container_add(GTK_CONTAINER(main_button), GTK_WIDGET(stati->image_fail));
@@ -110,16 +110,17 @@ static void check_status()
 
     while (stati != NULL)
     {
-		prev_status = stati->status;
-        stati->status = exec_program(stati);
-		//Switch only if status is fail or different from previous status
-		//i.e. from fail to success.
-		if((stati->status != prev_status) || (stati->status != stati->success))
-		{
-			switch_status(stati);
-		}
-       	sleep(2); 
-        stati = stati->next;
+			prev_status = stati->status;
+    	stati->status = exec_program(stati);
+			//Switch only if status is fail or different from previous status
+			//i.e. from fail to success.
+			g_debug("TEST:%s stati->status=%d   prev_status=%d", stati->name, stati->status, prev_status);
+			if((stati->status != prev_status) || (stati->status != stati->success))
+			{
+				switch_status(stati);
+			}
+      sleep(2); 
+      stati = stati->next;
     }
 }
 
