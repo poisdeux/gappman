@@ -82,6 +82,8 @@ applets/shutdown/Makefile
 applets/processmanager/Makefile
 applets/changeresolution/Makefile
 applets/netman/Makefile
+applets/netman/applet/Makefile
+applets/netman/daemon/Makefile
 ])
 
 AC_OUTPUT
