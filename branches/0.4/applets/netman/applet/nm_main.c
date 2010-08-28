@@ -22,6 +22,8 @@ static int main_button_width = 50;
 static int main_button_height = 50;
 static const char* conffile = "/etc/gappman/netman.xml";
 static int KEEP_RUNNING = 0;
+static int count = 0;
+static GMutex *gm_module_start_mutex = NULL;
 
 static gint exec_program(nm_elements* elt)
 {
@@ -57,11 +59,7 @@ static gint exec_program(nm_elements* elt)
             execvp((char *) elt->exec, args);
             _exit(0);
         }
-
-        while ( waitpid(childpid, &status, WNOHANG ) == 0 )
-        {
-            sleep(1);
-        }
+        wait(&status);
     }
     else
     {
@@ -73,30 +71,14 @@ static gint exec_program(nm_elements* elt)
 static void switch_status(nm_elements* stati)
 {
 	GtkWidget* current_image;
-	current_image = gtk_bin_get_child(GTK_BIN(main_button));
-
-	gtk_container_remove(GTK_CONTAINER(main_button), current_image);
-			g_print("New image realized: %d, mapped: %d, visible: %d\n",
-            GTK_WIDGET_REALIZED(current_image),
-            GTK_WIDGET_MAPPED(current_image),
-            GTK_WIDGET_VISIBLE(current_image));
-
-	g_print("Setting new image from %s\n", stati->name);
+	
     if (stati->status != stati->success)
     {
-    	gtk_container_add(GTK_CONTAINER(main_button), GTK_WIDGET(stati->image_fail));
-			g_print("New image realized: %d, mapped: %d, visible: %d\n",
-            GTK_WIDGET_REALIZED(stati->image_fail),
-            GTK_WIDGET_MAPPED(stati->image_fail),
-            GTK_WIDGET_VISIBLE(stati->image_fail));
+		gtk_button_set_image(main_button, GTK_WIDGET(stati->image_fail));
     }
 	else
 	{
-    	gtk_container_add(GTK_CONTAINER(main_button), GTK_WIDGET(stati->image_success));
-			g_print("New image realized: %d, mapped: %d, visible: %d\n",
-            GTK_WIDGET_REALIZED(stati->image_success),
-            GTK_WIDGET_MAPPED(stati->image_success),
-            GTK_WIDGET_VISIBLE(stati->image_success));
+		gtk_button_set_image(main_button, GTK_WIDGET(stati->image_success));
 	}
 }
 
@@ -223,6 +205,9 @@ static void show_menu()
 G_MODULE_EXPORT int gm_module_init()
 {
     nm_elements* stati;
+	
+	g_assert(gm_module_start_mutex == NULL);
+	gm_module_start_mutex = g_mutex_new();
 
     if(nm_load_conf(conffile) != 0)
 			return GM_COULD_NOT_LOAD_FILE;
@@ -262,12 +247,30 @@ G_MODULE_EXPORT void gm_module_set_conffile(const char* filename)
 
 G_MODULE_EXPORT GThreadFunc gm_module_start()
 {
+	nm_elements *stati;
+
+	g_mutex_lock(gm_module_start_mutex);
 	KEEP_RUNNING = 1;
     while (KEEP_RUNNING)
     {
-        check_status();
-        sleep(10);
+		stati = nm_get_stati();
+		while(stati != NULL)
+		{
+        	check_status();
+			if (stati->status == stati->success)
+			{
+				stati->status = 10;
+			}
+			else
+			{
+				stati->status = stati->success;
+			}
+			switch_status(stati);
+        	//sleep(1);
+			stati = stati->next;
+		}
     }
+	g_mutex_unlock(gm_module_start_mutex);
 }
 
 G_MODULE_EXPORT int gm_module_stop()

@@ -360,7 +360,7 @@ static GtkWidget* image_label_box_hor (menu_elements *elt, int max_width, int ma
 {
     GtkWidget *box;
     GtkWidget *label;
-    GtkImage *image;
+    GtkWidget *image;
 
     /* Create box for image and label */
     box = gtk_hbox_new (FALSE, 0);
@@ -393,7 +393,7 @@ static GtkWidget* image_label_box_vert (menu_elements *elt, int max_width, int m
 {
     GtkWidget *box;
     GtkWidget *label;
-    GtkImage *image;
+    GtkWidget *image;
     gchar *markup;
 
     /* Create box for image and label */
