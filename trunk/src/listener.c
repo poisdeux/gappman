@@ -31,6 +31,7 @@
 
 static GIOChannel* gio;
 static const gchar* confpath = "";
+static const gchar* rcpath = "";
 
 static int parsemessage(gchar *msg)
 {
@@ -125,7 +126,6 @@ static void handle_update_resolution(gchar *msg)
     }
     width = atoi(contentssplit[3]);
     height = atoi(contentssplit[4]);
-
     update_resolution(name, width, height);
 
     g_strfreev(contentssplit);
@@ -140,14 +140,15 @@ static gboolean handleconnection( GIOChannel* gio , GIOCondition cond, gpointer 
     GIOStatus status = G_IO_STATUS_NORMAL;
     int newsock;
     struct sockaddr_in cli_addr;
-    int clilen;
+    int cli_len;
     GIOChannel* new_gio = NULL;
     int msg_id;
 
-    newsock = accept((int) data, (struct sockaddr *) &cli_addr, &clilen);
+    cli_len = sizeof(cli_addr);
+    newsock = accept((int) data, (struct sockaddr *) &cli_addr, &cli_len);
     if (newsock < 0)
     {
-        g_debug("Error on accept.\n");
+        perror("Error accepting message:");
         // we return TRUE to keep watch active.
         return TRUE;
     }
@@ -205,12 +206,12 @@ gboolean gappman_start_listener (GtkWidget* win)
     int sourceid;
     struct hostent *host;
     struct addrinfo hints;
-    struct addrinfo *result, *rp;
+    struct addrinfo *result = NULL;
+    struct addrinfo *rp = NULL;
     struct sockaddr_in addr;
     const gchar *server = "localhost";
     const gchar *port = "2103";
-    gboolean listener_started = TRUE;
-
+    gboolean listener_started = FALSE;
 
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_family = AF_INET;
@@ -224,7 +225,6 @@ gboolean gappman_start_listener (GtkWidget* win)
     s = getaddrinfo(NULL, "2103", &hints, &result);
     if (s != 0) {
         g_warning("getaddrinfo: %s\n", gai_strerror(s));
-        listener_started = FALSE;
     }
     else
     {
@@ -242,14 +242,13 @@ gboolean gappman_start_listener (GtkWidget* win)
             }
             close(sock);
         }
-        if (rp == NULL) /* No address succeeded */
-        {
-            listener_started = FALSE;
-        }
-        else
+        if ( rp != NULL) /* An address succeeded */
         {
             // Listen for TCP connections
-            listen(sock, 5);
+            if( listen(sock, 5) >= 0 )
+	    {
+		listener_started = TRUE;
+	    }
         }
         freeaddrinfo(result);           /* No longer needed */
 
@@ -305,4 +304,9 @@ gboolean gappman_close_listener (GIOChannel* close_gio)
 void gappman_set_confpath(const gchar *path)
 {
 	confpath = path;
+}
+
+void gappman_set_rcpath(const gchar *path)
+{
+	rcpath = path;
 }

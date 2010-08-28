@@ -15,6 +15,21 @@
 #include <gm_parseconf.h>
 
 /**
+* \brief destroys widget only if mousebutton or spacebar is pressed
+* \param dummy widget that emitted event
+* \param event event signal that triggered the function
+* \param widget widget that should be destroyed
+*/
+void gm_destroy_widget(GtkWidget* dummy, GdkEvent *event, GtkWidget* widget);
+
+/**
+* \brief quits program only if mousebutton or spacebar is pressed
+* \param dummy widget that emitted event
+* \param event event signal that triggered the function
+*/
+void gm_quit_program(GtkWidget* dummy, GdkEvent *event);
+
+/**
 * \brief function to calculate the absolute width based upon the total available width
 * \param total_length Total available width for the box element
 * \param *box_length Pointer to a struct length holding the length value and type of the box
@@ -83,20 +98,17 @@ GtkWidget *gm_create_label_button(gchar* buttontext, void *callbackfunc, void *d
 /**
 * \brief Create a single button possibly with a label
 * \param *elt pointer to menu_element struct that contains the logo image filename.
-* \param fontsize size of font used to set the label
 * \param max_width button width
 * \param max_height button height
 * \param *processevent callback function that will be called when button is pressed
 */
-GtkWidget* gm_create_button ( menu_elements *elt, int fontsize, int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, menu_elements*) );
+GtkWidget* gm_create_button ( menu_elements *elt, int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, menu_elements*) );
 
 /**
 * \brief Create a single empty button
-* \param max_width button width
-* \param max_height button height
 * \param *processevent callback function that will be called when button is pressed
 */
-GtkWidget* gm_create_empty_button ( int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, void*), void *data);
+GtkWidget* gm_create_empty_button ( void* callbackfunc, void *data);
 
 /**
 * \brief Create the button layout using the available screen height and width

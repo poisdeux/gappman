@@ -15,6 +15,7 @@
 #include <math.h>
 #include <string.h>
 #include <gm_layout.h>
+#include <gm_generic.h>
 #include <gm_parseconf.h>
 
 static int fontsize = 10*1024; //< the default generic fontsize for all elements. This usually gets updated by menu building functions below.
@@ -27,6 +28,24 @@ static int 	confirmation_answer = 0;
 static void destroy_widget( GtkWidget *widget, gpointer data )
 {
     gtk_widget_destroy(widget);
+}
+
+void gm_destroy_widget(GtkWidget* dummy, GdkEvent *event, GtkWidget* widget)
+{
+    //Only start program  if spacebar or mousebutton is pressed
+    if ( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
+    {
+      gtk_widget_destroy(widget);
+    }
+}
+
+void gm_quit_program(GtkWidget* dummy, GdkEvent *event)
+{
+    //Only start program  if spacebar or mousebutton is pressed
+    if ( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
+    {
+      gtk_main_quit();
+    }
 }
 
 int gm_show_confirmation_dialog(const gchar* message, const gchar* msg_button1, void* callback1, void* data1, const gchar* msg_button2, void* callback2, void* data2, GtkWidget *mainwin)
@@ -179,7 +198,6 @@ void gm_show_error_dialog(const gchar* message, GtkWidget *mainwin, void *callba
     gtk_widget_show(label);
     if (callback != NULL)
     {
-				g_debug("Adding callback");
         g_signal_connect_swapped (G_OBJECT (button), "clicked",
                                  G_CALLBACK (callback),
                                   mainwin);
@@ -224,14 +242,10 @@ GtkWidget *gm_create_label_button(gchar* buttontext, void *callbackfunc, void *d
     markup = g_markup_printf_escaped ("<span size=\"%d\">%s</span>", fontsize, buttontext);
     gtk_label_set_markup (GTK_LABEL (label), markup);
     g_free (markup);
-    button = gtk_button_new();
+    button = gm_create_empty_button(callbackfunc, data);
     gtk_container_add(GTK_CONTAINER(button), label);
     gtk_widget_show(label);
 
-    if ( callbackfunc != NULL)
-    {
-        g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (callbackfunc), data);
-    }
     return button;
 }
 
@@ -281,7 +295,7 @@ static GdkPixbuf* scale_image(GtkWidget *image, int max_width, int max_height)
 
 GtkWidget* gm_load_image(char* elt_name, char* elt_logo, char* cacheloc, char* programname, int max_width, int max_height)
 {
-    GtkWidget *image;
+    GtkWidget *image = NULL;
     GdkPixbuf *pixbuf;
     char* cachedfile;
     size_t stringlength;
@@ -354,8 +368,8 @@ static GtkWidget* image_label_box_hor (menu_elements *elt, int max_width, int ma
 
     /* Now on to the image stuff */
     image = gm_load_image((char*) elt->name, (char*) elt->logo, gm_get_cache_location(), gm_get_programname(), max_width, max_height);
-    gtk_box_pack_start (GTK_BOX (box), image, FALSE, FALSE, 3);
-    gtk_widget_show (image);
+    gtk_box_pack_start (GTK_BOX (box), GTK_WIDGET(image), FALSE, FALSE, 3);
+    gtk_widget_show (GTK_WIDGET(image));
 
     if (elt->printlabel != 0)
     {
@@ -388,8 +402,8 @@ static GtkWidget* image_label_box_vert (menu_elements *elt, int max_width, int m
 
     /* Now on to the image stuff */
     image = gm_load_image((char*) elt->name, (char*) elt->logo, gm_get_cache_location(), gm_get_programname(), max_width, max_height);
-    gtk_box_pack_start (GTK_BOX (box), image, FALSE, FALSE, 3);
-    gtk_widget_show (image);
+    gtk_box_pack_start (GTK_BOX (box), GTK_WIDGET(image), FALSE, FALSE, 3);
+    gtk_widget_show (GTK_WIDGET(image));
 
     if ((elt->printlabel != 0) && (elt->name != NULL))
     {
@@ -447,7 +461,7 @@ static gboolean highlight_button ( GtkWidget *widget, GdkEvent *event, menu_elem
 {
     gtk_button_set_relief(GTK_BUTTON(widget), GTK_RELIEF_NORMAL);
     gtk_widget_grab_focus(widget);
-    return TRUE;
+    return FALSE;
 }
 
 /**
@@ -460,7 +474,7 @@ static gboolean dehighlight_button ( GtkWidget *widget, GdkEvent *event, menu_el
 {
 
     gtk_button_set_relief(GTK_BUTTON(widget), GTK_RELIEF_NONE);
-    return TRUE;
+    return FALSE;
 }
 
 /**
@@ -491,21 +505,23 @@ static int calculateAmountOfElementsPerColumn(int box_width, int box_height, int
 * \param max_height button height
 * \param *processevent callback function which must be called when button is pressed.
 */
-GtkWidget* gm_create_empty_button ( int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, void* ), void *data)
+GtkWidget* gm_create_empty_button ( void* callbackfunc, void *data)
 {
     GtkWidget *button, *imagelabelbox;
     GdkPixbuf *pixbuf;
     int width, height;
-    double ratio;
 
     button = gtk_button_new ();
-    //gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
+    gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
 
     gtk_button_set_focus_on_click(GTK_BUTTON(button), TRUE);
 
-    // Signals to start the program
-    g_signal_connect (G_OBJECT (button), "button_release_event", G_CALLBACK (processevent), data);
-    g_signal_connect (G_OBJECT (button), "key_release_event", G_CALLBACK (processevent), data);
+    if ( callbackfunc != NULL)
+    {
+    	// Signals to start the program
+    	g_signal_connect (G_OBJECT (button), "button_release_event", G_CALLBACK (callbackfunc), data);
+    	g_signal_connect (G_OBJECT (button), "key_release_event", G_CALLBACK (callbackfunc), data);
+    }
 
     // Signals to highlight the button
     g_signal_connect (G_OBJECT (button), "focus_in_event", G_CALLBACK (highlight_button), NULL);
@@ -524,42 +540,20 @@ GtkWidget* gm_create_empty_button ( int max_width, int max_height, gboolean (*pr
 * \param *elt pointer to menu_element struct that contains the logo image filename.
 * \param max_width button width
 */
-GtkWidget* gm_create_button ( menu_elements *elt, int fontsize, int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, menu_elements*) )
+GtkWidget* gm_create_button ( menu_elements *elt, int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, menu_elements*) )
 {
     GtkWidget *button, *imagelabelbox;
     GdkPixbuf *pixbuf;
     int width, height;
     double ratio;
 
+    button = gm_create_empty_button(processevent, elt);
+
     if ( elt->logo != NULL )
     {
         imagelabelbox = image_label_box_vert(elt, max_width, max_height);
-    }
-
-    button = gtk_button_new ();
-    //gtk_container_add(GTK_CONTAINER(button), imagelabelbox);
-    gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
-
-    if ( elt->logo != NULL )
-    {
         gtk_button_set_image(GTK_BUTTON(button), imagelabelbox);
     }
-
-    gtk_button_set_focus_on_click(GTK_BUTTON(button), TRUE);
-
-    // Signals to start the program
-    // process_startprogram_event must be replaced with argument passed to this function?!?
-    g_signal_connect (G_OBJECT (button), "button_release_event", G_CALLBACK (processevent), elt);
-    g_signal_connect (G_OBJECT (button), "key_release_event", G_CALLBACK (processevent), elt);
-
-    // Signals to highlight the button
-    g_signal_connect (G_OBJECT (button), "focus_in_event", G_CALLBACK (highlight_button), NULL);
-    g_signal_connect (G_OBJECT (button), "focus_out_event", G_CALLBACK (dehighlight_button), NULL);
-    g_signal_connect (G_OBJECT (button), "enter_notify_event", G_CALLBACK (highlight_button), NULL);
-    g_signal_connect (G_OBJECT (button), "leave_notify_event", G_CALLBACK (dehighlight_button), NULL);
-
-    // Signals to create button press effect when clicked
-    g_signal_connect (G_OBJECT (button), "button_press_event", G_CALLBACK (press_button), elt);
 
     return button;
 }
@@ -585,6 +579,7 @@ static GtkWidget* createpanelelement( menu_elements *elt, int width, int height)
     if (!module)
     {
         g_warning("Could not load module %s\n%s", elt->module, g_module_error());
+				return NULL;
     }
     else
     {
@@ -592,17 +587,27 @@ static GtkWidget* createpanelelement( menu_elements *elt, int width, int height)
         {
             g_warning("Could not get function gm_module_start from %s\n%s",
                       elt->module, g_module_error());
+						return NULL;
+        }
+	
+		if (!g_module_symbol (module, "gm_module_stop", (gpointer *) &(elt->gm_module_stop)))
+        {
+            g_warning("Could not get function gm_module_stop from %s\n%s",
+                      elt->module, g_module_error());
+						return NULL;
         }
 
         if (!g_module_symbol (module, "gm_module_init", (gpointer *) &(elt->gm_module_init)))
         {
             g_warning("Could not get function gm_module_init from %s\n%s",
                       elt->module, g_module_error());
+						return NULL;
         }
         if (!g_module_symbol (module, "gm_module_get_widget", (gpointer *) &(elt->gm_module_get_widget)))
         {
             g_warning("Could not get function gm_module_get_widget from %s\n%s",
                       elt->module, g_module_error());
+						return NULL;
         }
         if (elt->module_conffile != NULL)
         {
@@ -626,12 +631,14 @@ static GtkWidget* createpanelelement( menu_elements *elt, int width, int height)
             elt->gm_module_set_icon_size(width, height);
         }
 
-        elt->gm_module_init();
-
-        return elt->gm_module_get_widget();
+        if( elt->gm_module_init() != GM_SUCCES )
+				{
+					g_warning("Failed to initialize module %s", elt->module);
+					return NULL;
+				}
     }
 
-    return NULL;
+    return elt->gm_module_get_widget();
 }
 
 GtkWidget* gm_create_buttonbox( menu_elements *elts, gboolean(processevent)(GtkWidget*, GdkEvent*, menu_elements*))
@@ -672,7 +679,7 @@ GtkWidget* gm_create_buttonbox( menu_elements *elts, gboolean(processevent)(GtkW
         }
 
         next = cur->next;
-        button = gm_create_button(cur, fontsize, button_width, box_height, processevent);
+        button = gm_create_button(cur, button_width, box_height, processevent);
         gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 1);
         gtk_widget_show (button);
         cur = next;
@@ -687,6 +694,7 @@ GtkWidget* gm_create_panel( menu_elements *elts)
     GtkWidget* button, *hbox, *vbox;
     int elts_per_row, count, button_width;
     int box_width, box_height;
+		menu_elements *prev_elt;
 
     box_width = gm_calculate_box_length(screen_width, elts->menu_width);
     box_height = gm_calculate_box_length(screen_height, elts->menu_height);
@@ -702,6 +710,7 @@ GtkWidget* gm_create_panel( menu_elements *elts)
     button_width = box_width/elts_per_row;
 
     count = 0;
+		prev_elt = NULL;
     while (elts != NULL)
     {
         if ( (count % elts_per_row) == 0 )
@@ -716,12 +725,34 @@ GtkWidget* gm_create_panel( menu_elements *elts)
         {
             gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 1);
             gtk_widget_show (button);
-        }
-        elts = elts->next;
-        count++;
-    }
-
-    return vbox;
+        		prev_elt = elts;
+        		elts = elts->next;
+        		count++;
+				}
+				else
+				{
+					//remove element from list
+					if (prev_elt != NULL)
+					{
+						prev_elt->next = elts->next;
+						elts->next = NULL;
+						gm_free_menu_elements(elts);
+						elts = prev_elt->next;
+					}
+					else
+					{
+						prev_elt = elts->next;
+						elts->next = NULL;
+						gm_free_menu_elements(elts);
+						elts = prev_elt;
+					}
+				}
+		} 
+		
+		if (count == 0)
+			return NULL;
+		else
+    	return vbox;
 }
 
 

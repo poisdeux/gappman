@@ -1,5 +1,3 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
-SUBDIRS = applet daemon
+include_HEADERS = gm_generic.h
 
-dist-hook:
-	find -name "*~" -exec rm {} \;

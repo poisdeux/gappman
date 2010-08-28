@@ -24,8 +24,8 @@
 #include "listener.h"
 #include <gm_parseconf.h>
 #include <gm_layout.h>
+#include <gm_generic.h>
 #include "appmanager.h"
-#include <pthread.h>
 
 struct appwidgetinfo* global_appw;
 menu_elements *programs;
@@ -304,6 +304,26 @@ static void destroy( GtkWidget *widget,
 }
 
 /**
+*	\brief stops the elements in the panel
+* \param *panel pointer to the menu_elements structures holding the panel elementts
+*/
+static void stop_panel (menu_elements *panel)
+{
+    while (panel != NULL )
+    {
+        if (panel->gm_module_stop != NULL)
+        {
+            if (panel->gm_module_stop() != GM_SUCCES)
+            {
+                g_error("Failed to stop thread");
+            }
+        }
+        panel = panel->next;
+    }
+}
+
+
+/**
 *	\brief starts the elements in the panel
 * \param *panel pointer to the menu_elements structures holding the panel elementts
 */
@@ -311,7 +331,7 @@ static void start_panel (menu_elements *panel)
 {
     while (panel != NULL )
     {
-        if (panel->gm_module_start != NULL)
+        if (panel->gm_module_start != GM_SUCCES)
         {
             if (!g_thread_create((GThreadFunc) panel->gm_module_start, NULL, FALSE, NULL))
             {
@@ -328,12 +348,12 @@ static void align_buttonbox (GtkWidget *hbox_top, GtkWidget *hbox_middle, GtkWid
     int box_width;
     int box_height;
 
-    box_width = gm_calculate_box_length(screen_width, elts->menu_width);
-    box_height = gm_calculate_box_length(screen_height, elts->menu_height);
+    box_width = gm_calculate_box_length(window_width, elts->menu_width);
+    box_height = gm_calculate_box_length(window_height, elts->menu_height);
     //vertical alignment is calculated by dividing elts->vert_alignment by 2
     //this results in hbox_top having 0.0, hbox_middle 0,5, and hbox_bottom 1.0
     //to have the widgets aligned respectively to the top, center, or bottom
-    hor_align = gtk_alignment_new( *elts->hor_alignment, (float) *elts->vert_alignment/2, (float) box_width/screen_width, (float) box_height/screen_height);
+    hor_align = gtk_alignment_new( *elts->hor_alignment, (float) *elts->vert_alignment/2, (float) box_width/window_width, (float) box_height/window_height);
     gtk_container_add (GTK_CONTAINER (hor_align), buttonbox);
     gtk_widget_show(hor_align);
 
@@ -427,6 +447,7 @@ int main (int argc, char **argv)
         }
     }
 
+
 	//set confpath so other programs can retrieve
 	//the configuration file gappman used
 	gappman_set_confpath(conffile);
@@ -444,9 +465,17 @@ int main (int argc, char **argv)
     screen_width =  gdk_screen_get_width (screen);
     screen_height = gdk_screen_get_height (screen);
 
+		if (window_width == -1)
+			window_width = screen_width;
+		if (window_height == -1)
+			window_height = screen_height;
+
+
     gm_set_window_geometry(window_width, window_height);
 
     mainwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+
+		gtk_widget_set_name(mainwin, "gm_mainwindow");
 
     //Keep the main window below all other windows
     if (KEEP_BELOW)
@@ -495,9 +524,16 @@ int main (int argc, char **argv)
     if ( panel != NULL )
     {
         buttonbox = gm_create_panel( panel );
-        align_buttonbox(hbox_top, hbox_middle, hbox_bottom, buttonbox, panel);
-        gtk_widget_show (buttonbox);
-        start_panel( panel );
+        if( buttonbox != NULL )
+				{
+					align_buttonbox(hbox_top, hbox_middle, hbox_bottom, buttonbox, panel);
+        	gtk_widget_show (buttonbox);
+        	start_panel( panel );
+				}
+				else
+				{
+					panel = NULL;
+				}
     }
     gtk_container_add (GTK_CONTAINER (vbox), hbox_top);
     gtk_container_add (GTK_CONTAINER (vbox), hbox_middle);
@@ -518,13 +554,14 @@ int main (int argc, char **argv)
     gdk_threads_leave();
 
 
+    g_message("Closing up.");
+	stop_panel( panel );
     gappman_close_listener(NULL);
-
-    g_message("Closing up. Goodbye\n");
     gm_free_menu_elements( programs );
     gm_free_menu_elements( actions );
     gm_free_menu_elements( panel );
-
+	
+    g_message("Goodbye.");
     return 0;
 }
 

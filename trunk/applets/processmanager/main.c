@@ -110,10 +110,13 @@ static int get_status(int PID)
     return ret_status;
 }
 
-static int kill_program( GtkWidget *widget, menu_elements *elt )
+static int kill_program( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
 {
     int status;
     int count = 0;
+
+    if ( ((GdkEventKey*)event)->keyval != 32 && ((GdkEventButton*)event)->button != 1)
+			return FALSE;
 
     status = get_status(elt->pid);
     switch (status)
@@ -149,7 +152,7 @@ static int kill_program( GtkWidget *widget, menu_elements *elt )
         {
             //Process changed status.
             //Let's try again
-            kill_program(widget, elt);
+            kill_program(widget, event, elt);
         }
     }
 
@@ -157,7 +160,7 @@ static int kill_program( GtkWidget *widget, menu_elements *elt )
     //program from main window
     gtk_widget_set_sensitive(elt->widget, FALSE);
 
-    destroy_widget(widget, killdialogwin);
+    //destroy_widget(widget, killdialogwin);
 
     return TRUE;
 }
@@ -189,14 +192,13 @@ static void showprocessdialog( menu_elements *elt )
     markup = g_markup_printf_escaped ("<span size=\"%d\">%s</span>", fontsize, g_strdup_printf("Stop %s", elt->name));
     gtk_label_set_markup (GTK_LABEL (label), markup);
     g_free (markup);
-    button = gtk_button_new();
+    button = gm_create_empty_button(kill_program, elt);
     gtk_container_add(GTK_CONTAINER(button), label);
     gtk_widget_show(label);
-    g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (kill_program), elt);
     gtk_container_add(GTK_CONTAINER(buttonbox), button);
     gtk_widget_show(button);
 
-    button = gm_create_label_button("Cancel", destroy_widget, killdialogwin);
+    button = gm_create_label_button("Cancel", gm_destroy_widget, killdialogwin);
     gtk_widget_show(label);
     gtk_container_add(GTK_CONTAINER(buttonbox), button);
     gtk_widget_show(button);
@@ -237,7 +239,7 @@ static GtkWidget* createrow(menu_elements *elt, int width, int height)
 
     hbox = gtk_hbox_new (FALSE, 10);
 
-    elt->widget = gm_create_button(elt, fontsize, width, height, process_startprogram_event);
+    elt->widget = gm_create_button(elt, width, height, process_startprogram_event);
 
     statuslabel = gtk_label_new("");
     status = get_status(elt->pid);
@@ -490,7 +492,7 @@ int main (int argc, char **argv)
           {
               hbox = gtk_hbox_new (FALSE, 10);
               // cancel button
-              button = gm_create_label_button("Cancel", gtk_main_quit, NULL);
+              button = gm_create_label_button("Cancel", gm_quit_program, NULL);
               gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
               gtk_widget_show(button);
 

@@ -1,13 +1,16 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
-bin_PROGRAMS = processmanager
-processmanager_SOURCES = main.c connect.c
-processmanager_CPPFLAGS = @GTK_INCLUDES@
-processmanager_CPPFLAGS += @LIBXML_INCLUDES@
-processmanager_CPPFLAGS += -I$(top_builddir)/libs/parseconf
-processmanager_CPPFLAGS += -I$(top_builddir)/libs/layout
-processmanager_CPPFLAGS += -I$(top_builddir)/libs/connect
-processmanager_CPPFLAGS += -I$(top_builddir)/libs/generic
-processmanager_LDADD = $(top_builddir)/libs/parseconf/libgm_parseconf.la
-processmanager_LDADD += $(top_builddir)/libs/layout/libgm_layout.la
-processmanager_LDADD += $(top_builddir)/libs/connect/libgm_connect.la
+noinst_HEADERS = connect.h
+bin_PROGRAMS = gmprocessmanager
+gmprocessmanager_SOURCES = main.c connect.c
+gmprocessmanager_CPPFLAGS = @GTK_INCLUDES@
+gmprocessmanager_CPPFLAGS += @LIBXML_INCLUDES@
+gmprocessmanager_CPPFLAGS += -I$(top_builddir)/libs/parseconf
+gmprocessmanager_CPPFLAGS += -I$(top_builddir)/libs/layout
+gmprocessmanager_CPPFLAGS += -I$(top_builddir)/libs/connect
+gmprocessmanager_CPPFLAGS += -I$(top_builddir)/libs/generic
+gmprocessmanager_LDADD = $(top_builddir)/libs/parseconf/libgm_parseconf.la
+gmprocessmanager_LDADD += $(top_builddir)/libs/layout/libgm_layout.la
+gmprocessmanager_LDADD += $(top_builddir)/libs/connect/libgm_connect.la
+gmprocessmanager_LDADD += @GTK_OBJS@
+gmprocessmanager_LDADD += @LIBXML_OBJS@
 
