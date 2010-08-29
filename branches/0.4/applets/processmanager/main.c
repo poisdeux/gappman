@@ -30,7 +30,7 @@ static int WINDOWED = 0;
 static GtkWidget *mainwin;
 static GtkWidget *killdialogwin;
 static char* color[4] = {"green", "orange", "red", "yellow"};
-static char* statusarray[5] =  {"running", "sleeping", "stopped", "waiting", "zombie"};
+static char* statusarray[6] =  {"running", "sleeping", "stopped", "waiting", "zombie", "paging"};
 static int fontsize;
 
 static void usage()
@@ -65,7 +65,7 @@ static int get_status(int PID)
     g_sprintf(proc_string, "/proc/%d/stat", PID);
     if ( ! g_file_get_contents(proc_string, &contents, &length, &gerror))
     {
-        g_warning("gappman (get_started_apps): %s\n", gerror->message );
+		//Proces is gone. Woohoo!
         ret_status = -2;
     }
     else
@@ -77,32 +77,32 @@ static int get_status(int PID)
         //RUNNING
         if ( g_strcmp0("R", status) == 0 )
         {
-            ret_status = -2;
-        }
-        //ZOMBIE
-        else if ( g_strcmp0("Z", status) == 0 )
-        {
-            ret_status = 4;
+            ret_status = 0;
         }
         //SLEEPING
         else if ( g_strcmp0("S", status) == 0 )
         {
             ret_status = 1;
         }
-        //WAITING UNINTERRUPTIBLE DISK SLEEP
-        else if ( g_strcmp0("D", status) == 0 )
-        {
-            ret_status = 3;
-        }
         //TRACED OR STOPPED
         else if ( g_strcmp0("T", status) == 0 )
         {
             ret_status = 2;
         }
+        //WAITING UNINTERRUPTIBLE DISK SLEEP
+        else if ( g_strcmp0("D", status) == 0 )
+        {
+            ret_status = 3;
+        }
+        //ZOMBIE
+        else if ( g_strcmp0("Z", status) == 0 )
+        {
+            ret_status = 4;
+        }
         //PAGING
         else if ( g_strcmp0("W", status) == 0 )
         {
-            ret_status = 3;
+            ret_status = 5;
         }
         g_free(contents);
         g_strfreev(contentssplit);
@@ -121,17 +121,23 @@ static int kill_program( GtkWidget *widget, GdkEvent *event, menu_elements *elt 
     status = get_status(elt->pid);
     switch (status)
     {
-    case 0|1:
+    case 0:
         kill(elt->pid, 15);
         break;;
-    case 2|3:
+    case 1:
+        kill(elt->pid, 15);
+        break;;
+    case 2:
+        kill(elt->pid, 9);
+        break;;
+    case 3:
         kill(elt->pid, 9);
         break;;
     case 4:
+		//What to do with zombies? Kill parent?
         g_debug("Oh my god! It's a zombie. Who's your daddy!?\n");
         return FALSE;;
     case -2:
-        g_warning("Oops, could not find proces %d\n", elt->pid);
         return TRUE;;
     case -1:
         g_warning("Huh? What should I do with status %d for proces %d\n", status, elt->pid);
@@ -154,13 +160,19 @@ static int kill_program( GtkWidget *widget, GdkEvent *event, menu_elements *elt 
             //Let's try again
             kill_program(widget, event, elt);
         }
+		else
+		{
+			//make button active again so user may try again	
+    		gtk_widget_set_sensitive(widget, TRUE);
+		}
     }
-
-    //If kill was succesful we should remove
-    //program from main window
-    gtk_widget_set_sensitive(elt->widget, FALSE);
-
-    //destroy_widget(widget, killdialogwin);
+	else
+	{
+    	//If kill was succesful we should remove
+    	//program from main window
+    	gtk_widget_set_sensitive(elt->widget, FALSE);
+		gtk_widget_destroy(g_object_get_data((GObject*) widget, "window"));
+	}
 
     return TRUE;
 }
@@ -197,7 +209,9 @@ static void showprocessdialog( menu_elements *elt )
     gtk_widget_show(label);
     gtk_container_add(GTK_CONTAINER(buttonbox), button);
     gtk_widget_show(button);
-
+	//Needed so we can destroy the dialog when kill was succesful
+	g_object_set_data((GObject*) button, "window", killdialogwin);
+	
     button = gm_create_label_button("Cancel", gm_destroy_widget, killdialogwin);
     gtk_widget_show(label);
     gtk_container_add(GTK_CONTAINER(buttonbox), button);

@@ -10,13 +10,14 @@ started and therefore not available from the configuration file.
 Processmanager should show the Programname, Logo, and State in a
 table format:
 
-+------+-------------+-------+
-| Logo | Programname | State |
-+------+-------------+-------+
-| .... |     ....    |  ...  |
-+------+-------------+-------+
-| .... |     ....    |  ...  |
-+------+--------+----+-------+
++-------------+-------+
+| Logo        | State |
+| Programname |       |
++-------------+-------+
+| ....        |  ...  |
++-------------+-------+
+| ....        |  ...  |
++-------------+-------+
 | CANCEL |
 +--------+
 
@@ -41,8 +42,9 @@ of the program.
 * Zombie: Restart parent process
 
 Zombie processes are a bit harder to kill. The parent should be restarted
-or killed. This would be gappman and it should be able to handle the HUP
-signal. Zombie processes would indicate a bug in gappman as these are not
+or killed. This would be gappman and therefore gappman should be able to 
+handle the HUP signal. 
+Note that zombie processes would indicate a bug in gappman as these are not
 supposed to happen.
 
 
@@ -53,21 +55,15 @@ The processmanager will query the gappman daemon about which processes
 were started and what their status is. For this the following protocol
 will be used.
 
-<processmanager>getprocesses</processmanger>
+::listprocesses::
 
 will return a list of processes with their status as follows:
 
-<gappman>
-	<proces>
-		<name>NAME</name>
-		<pid>PID</pid>
-		<status>STATUS</pid>
-	</proces>
-</gappman>
+::name::pid::[name::pid::]...
 
 
-appwidgetinfo linked list
-=========================
+Removing an appwidgetinfo linked list
+=====================================
 
 We use a prev and next pointer to easily remove elements from the
 linked list.

@@ -58,9 +58,13 @@ static void destroy( GtkWidget *widget,
 }
 
 
-static gboolean revert_to_old_res(GtkWidget *widget, XRRScreenSize* size)
+static gboolean revert_to_old_res(GtkWidget *widget, GdkEvent *event, XRRScreenSize* size)
 {
-    gm_changeresolution(size->width, size->height);
+    //Check if spacebar or mousebutton is pressed
+    if ( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
+    {
+    	gm_changeresolution(size->width, size->height);
+	}
     return FALSE;
 }
 
@@ -179,10 +183,7 @@ static void changeresolution(GtkWidget *widget, GdkEvent *event, XRRScreenSize *
     button = gm_create_label_button("Set resolution as default for program", make_default_for_program, size);
     gtk_container_add(GTK_CONTAINER(vbox), button);
 
-    button = gm_create_label_button("Keep resolution", gm_destroy_widget, confirmwin);
-    gtk_container_add(GTK_CONTAINER(vbox), button);
-
-    button = gm_create_label_button("Change back to previous resolution", revert_to_old_res, &oldsize);
+    button = gm_create_label_button("Cancel", revert_to_old_res, &oldsize);
 		g_signal_connect (G_OBJECT (button), "key_release_event", G_CALLBACK (gm_destroy_widget), confirmwin);	
 		g_signal_connect (G_OBJECT (button), "button_release_event", G_CALLBACK (gm_destroy_widget), confirmwin);	
     gtk_container_add(GTK_CONTAINER(vbox), button);
