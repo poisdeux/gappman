@@ -1,17 +1,33 @@
 #summary Network restart and status applet
 
+NetMan is not available in gappman's official releases.
+It is only available in the trunk. NetMan currently has a
+major design flaw and needs to be redesigned.
+
 = Introduction =
 
 NetMan provides simple network status and restart functionality.
 
 Using multiple checks it will provide status information about the network.
 Besides checking the status it can restart the network configuration.
+
+It consists of an applet which must be loaded by gappman. The applet
+provides a user-interface to the user showing status
+information through the button image. It can also be used to analyze network
+problems and restart a network interface.
+Besides an applet NetMan uses a daemon to perform the actual network analysis. 
+The applet and the daemon communicate using the D-Bus. 
+Besides support for the NetMan daemon the NetMan applet will also include
+support for the much used NetworkManager.
  
 = Screenshot =
 
 Not yet available
 
 = Configuration =
+
+This is the current configuration setup. This will change in the future
+as NetMan is redesigned.
 
 {{{
 <netman>
