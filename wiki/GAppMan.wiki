@@ -13,7 +13,7 @@ about the UI layout and started applications.
 
 = Screenshot =
 
-<a href="http://www.flickr.com/photos/sfeerbeheer/4296852049/" title="gappman-screenshot1 by poisdeux, on Flickr"><img src="http://farm5.static.flickr.com/4025/4296852049_be3849aed7_o.png" width="320" height="200" alt="gappman-screenshot1" /></a>
+<a href="http://www.flickr.com/photos/53529347@N05/4948902556/" title="gappman-main by pietsiroop, on Flickr"><img src="http://farm5.static.flickr.com/4119/4948902556_aae3517a50.jpg" width="500" height="293" alt="gappman-main" /></a>
 
 = Configuration =
 
