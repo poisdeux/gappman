@@ -264,12 +264,12 @@ static void usage()
 {
     printf("usage: appmanager [--keep-below] [--width <WIDTHINPIXELS>] [--height <HEIGHTINPIXELS>] [--conffile <FILENAME>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
     printf("");
-    printf("--keep-below:\t\tKeeps the window at the bottom of the window manager's stack\n");
-    printf("--width <WIDTHINPIXELS>:\t\twidth of the main window (default: screen width)\n");
-    printf("--height <HEIGHTINPIXELS:\t\theight of the main window (default: screen height)\n");
-    printf("--conffile <FILENAME>:\t\t configuration file specifying the program and actions (default: ./conf.xml)\n");
-    printf("--gtkrc <GTKRCFILENAME>:\t\t gtk configuration file which can be used for themeing\n");
-    printf("--windowed:\t\t creates a border around the window\n");
+    printf("--keep-below:\t\t\tKeeps the window at the bottom of the window manager's stack\n");
+    printf("--width <WIDTHINPIXELS>:\twidth of the main window (default: screen width)\n");
+    printf("--height <HEIGHTINPIXELS:\theight of the main window (default: screen height)\n");
+    printf("--conffile <FILENAME>:\t\tconfiguration file specifying the program and actions (default: ./conf.xml)\n");
+    printf("--gtkrc <GTKRCFILENAME>:\tgtk configuration file which can be used for themeing\n");
+    printf("--windowed:\t\t\truns gappman in a window\n");
 }
 
 /**

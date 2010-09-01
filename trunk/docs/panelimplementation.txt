@@ -15,13 +15,13 @@ gm_module_set_icon_size()
 gm_module_get_widget()
 
 
-Configuration should be done in the main gappman config file using the panel sub-element:
+Adding an applet should be done in the main gappman config file using the panel sub-element:
 
   <panel width=100% height=20%>
-    <widget>
+    <applet>
       <name>Network manager</name>
       <module>./widgets/netman/gm_netman.so</module>
-    <widget>
+    <applet>
   </panel>
 
 

@@ -91,7 +91,8 @@ static int get_nearest_size(XRRScreenConfiguration *sc, int *size, int width, in
         {
             *size = i;
             break;
-        } else if ( abs((sizes[i].width + sizes[i].height) - (width + height)) < min_size_dist )
+        } 
+		else if ( abs((sizes[i].width + sizes[i].height) - (width + height)) < min_size_dist )
         {
             min_size_dist = abs((sizes[i].width + sizes[i].height) - (width + height));
             *size = i;
