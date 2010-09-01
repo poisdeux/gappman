@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT([gappman], [0.4a], [m.brekhof@gmail.com])
+AC_INIT([gappman], [0.4], [m.brekhof@gmail.com])
 
 AC_SUBST(GTK_INCLUDES)
 AC_SUBST(GTK_OBJS)
