@@ -8,7 +8,7 @@ The ChangeResolution applet allows you to change the screen resolution using the
 
 = Screenshot =
 
-<a href="http://www.flickr.com/photos/sfeerbeheer/4296834891/" title="changeresolution-screenshot1 by poisdeux, on Flickr"><img src="http://farm5.static.flickr.com/4065/4296834891_273d04a708_o.png" width="81" height="321" alt="changeresolution-screenshot1" /></a>
+<a href="http://www.flickr.com/photos/53529347@N05/4948902602/" title="changeresolution-main by pietsiroop, on Flickr"><img src="http://farm5.static.flickr.com/4142/4948902602_0b42b8508e.jpg" width="194" height="286" alt="changeresolution-main" /></a>
 
 = TODO =
 
