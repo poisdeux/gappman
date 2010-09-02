@@ -509,14 +509,14 @@ int main (int argc, char **argv)
 
     if ( actions != NULL )
     {
-        buttonbox = gm_create_buttonbox( actions, &process_startprogram_event );
+        buttonbox = gm_create_buttonbox( actions, &process_startprogram_event, TRUE);
         align_buttonbox(hbox_top, hbox_middle, hbox_bottom, buttonbox, actions);
         gtk_widget_show (buttonbox);
     }
 
     if ( programs != NULL )
     {
-        buttonbox = gm_create_buttonbox( programs, &process_startprogram_event );
+        buttonbox = gm_create_buttonbox( programs, &process_startprogram_event, TRUE);
         align_buttonbox(hbox_top, hbox_middle, hbox_bottom, buttonbox, programs);
         gtk_widget_show (buttonbox);
     }

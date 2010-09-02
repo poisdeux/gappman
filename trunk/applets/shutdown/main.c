@@ -200,12 +200,20 @@ int main (int argc, char **argv)
     }
     vbox = gtk_vbox_new (FALSE, 10);
 
-    //We do not get the fontsize from gappman but let the buttonbox
-    //determine the right fontsize
     if ( actions != NULL )
     {
-        align = gm_create_buttonbox( actions, &process_startprogram_event );
-        gtk_container_add (GTK_CONTAINER (vbox), align);
+		//get generic fontsize from gappman
+    	if (gm_get_fontsize_from_gappman(2103, "localhost", &fontsize) == GM_SUCCES)
+    	{
+        	gm_set_fontsize(fontsize);
+        	align = gm_create_buttonbox( actions, &process_startprogram_event, FALSE );
+    	}
+		else
+		{
+			//Recalculate fontsize
+        	align = gm_create_buttonbox( actions, &process_startprogram_event, TRUE );
+        }
+		gtk_container_add (GTK_CONTAINER (vbox), align);
         gtk_widget_show (align);
     }
 
@@ -227,7 +235,6 @@ int main (int argc, char **argv)
 
     gtk_widget_show (mainwin);
 
-    //gtk_window_set_focus(GTK_WINDOW (mainwin), button);
     gtk_main ();
 
     gm_free_menu_elements( actions );

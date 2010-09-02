@@ -641,7 +641,7 @@ static GtkWidget* createpanelelement( menu_elements *elt, int width, int height)
     return elt->gm_module_get_widget();
 }
 
-GtkWidget* gm_create_buttonbox( menu_elements *elts, gboolean(processevent)(GtkWidget*, GdkEvent*, menu_elements*))
+GtkWidget* gm_create_buttonbox( menu_elements *elts, gboolean(processevent)(GtkWidget*, GdkEvent*, menu_elements*), gboolean calc_fontsize)
 {
     menu_elements *next, *cur;
     GtkWidget* button, *hbox, *vbox;
@@ -660,11 +660,12 @@ GtkWidget* gm_create_buttonbox( menu_elements *elts, gboolean(processevent)(GtkW
     }
 
     button_width = box_width/elts_per_row;
-    //The size metric is 1024th of a point.
-    //Fontsize calculations conflicts when applets want to use this function.
-    //For instance the shutdown applet. Need to detach font calculation
-    //from this function or make sure it is only called once.
-    fontsize = (1024*button_width*2)/MAXCHARSINLABEL;
+
+	if ( calc_fontsize )
+	{
+    	//The size metric is 1024th of a point.
+    	fontsize = (1024*button_width*2)/MAXCHARSINLABEL;
+	}
 
     cur=elts;
     count = 0;
