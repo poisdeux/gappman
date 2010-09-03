@@ -8,7 +8,9 @@
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
+#include <stdlib.h>
 #include <glib.h>
+#include <dbus/dbus-glib.h>
 
 int
 main (int argc, char **argv)
@@ -31,6 +33,7 @@ main (int argc, char **argv)
       g_error_free (error);
       exit (1);
     }
+
 
   /* Create a proxy object for the "bus driver" (name "org.freedesktop.DBus") */
   

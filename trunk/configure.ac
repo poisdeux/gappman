@@ -9,6 +9,8 @@ AC_SUBST(GTHREAD_INCLUDES)
 AC_SUBST(GTHREAD_OBJS)
 AC_SUBST(LIBXML_INCLUDES)
 AC_SUBST(LIBXML_OBJS)
+AC_SUBST(DBUS_INCLUDES)
+AC_SUBST(DBUS_OBJS)
 AC_SUBST(XRANDR_INCLUDES)
 AC_SUBST(XRANDR_OBJS)
 
@@ -33,6 +35,13 @@ if test "$HAVE_PKG_CONFIG" = "no" ; then
   AC_MSG_ERROR(== Could not find required program pkg-config.)
 fi
 
+
+AC_SEARCH_LIBS(dbus_g_bus_get, dbus-glib-1, [
+DBUS_INCLUDES=`pkg-config --cflags dbus-glib-1`
+DBUS_OBJS=`pkg-config --libs dbus-glib-1`
+], [
+echo "Error: dbus-glib-1 not found!"; exit 1
+], [])
 
 AC_SEARCH_LIBS(xmlTextReaderRead, xml2, [
 LIBXML_INCLUDES=`pkg-config --cflags libxml-2.0`
@@ -81,6 +90,9 @@ applets/Makefile
 applets/shutdown/Makefile
 applets/processmanager/Makefile
 applets/changeresolution/Makefile
+applets/netman/Makefile
+applets/netman/applet/Makefile
+applets/netman/daemon/Makefile
 ])
 
 AC_OUTPUT
