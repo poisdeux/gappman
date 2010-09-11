@@ -12,6 +12,16 @@
 #include <glib.h>
 #include <dbus/dbus-glib.h>
 
+
+static int gm_nm_run_command(gchar* command, gchar** args, int status);
+
+#include "gm_netmand_glue.h"
+
+static void restart_network(gchar *interface)
+{
+	g_debug("restart_network: %s", interface);
+}
+
 int
 main (int argc, char **argv)
 {
@@ -20,7 +30,8 @@ main (int argc, char **argv)
   DBusGProxy *proxy;
   char **name_list;
   char **name_list_ptr;
-  
+  int result;
+ 
   g_type_init ();
 
   error = NULL;
@@ -36,11 +47,37 @@ main (int argc, char **argv)
 
 
   /* Create a proxy object for the "bus driver" (name "org.freedesktop.DBus") */
-  
+ 
   proxy = dbus_g_proxy_new_for_name (connection,
                                      DBUS_SERVICE_DBUS,
                                      DBUS_PATH_DBUS,
                                      DBUS_INTERFACE_DBUS);
+
+	
+	if (!dbus_g_proxy_call (proxy, "RequestName", &error,
+                            G_TYPE_STRING, "gappman.netman",
+                            G_TYPE_UINT, DBUS_NAME_FLAG_DO_NOT_QUEUE,
+                            G_TYPE_INVALID,
+                            G_TYPE_UINT, &result,
+                            G_TYPE_INVALID)) 
+	{
+		g_warning("Could not acquire gappman.netman");
+	}
+
+    if (result != DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER) 
+	{
+    	if (result == DBUS_REQUEST_NAME_REPLY_EXISTS)
+        {
+	    	g_warning("An instance of gm_netmand is already running.");
+        }
+		else 
+		{
+            g_warning("Could not acquire the gappman.netman service.");
+        }
+    }
+
+	dbus_g_proxy_add_signal(proxy, "gappman.netman.RestartNetwork", G_TYPE_STRING);
+	dbus_g_proxy_connect_signal(proxy, "gappman.netman.RestartNetwork", G_CALLBACK(restart_network), "test", NULL);
 
   /* Call ListNames method, wait for reply */
   error = NULL;

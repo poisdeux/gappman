@@ -93,6 +93,7 @@ applets/changeresolution/Makefile
 applets/netman/Makefile
 applets/netman/applet/Makefile
 applets/netman/daemon/Makefile
+applets/netman/daemon/introspection/Makefile
 ])
 
 AC_OUTPUT
