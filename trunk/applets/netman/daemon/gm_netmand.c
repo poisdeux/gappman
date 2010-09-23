@@ -9,104 +9,76 @@
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
 #include <stdlib.h>
-#include <glib.h>
 #include <dbus/dbus-glib.h>
+#include "gm_netmand.h"
 
+/* will create gm_netmand_get_type and set gm_netmand_parent_class */
+G_DEFINE_TYPE (GmNetmand, gm_netmand, G_TYPE_OBJECT);
 
-static int gm_nm_run_command(gchar* command, gchar** args, int status);
-
-#include "gm_netmand_glue.h"
+static int gm_netmand_run_command(gchar* command, gchar** args)
+{
+	g_debug("gm_netmand_run_command called");
+	return 0;
+}
 
 static void restart_network(gchar *interface)
 {
 	g_debug("restart_network: %s", interface);
 }
 
+
+static void gm_netmand_class_init (GmNetmandClass *klass)
+{
+}
+
+static void gm_netmand_init (GmNetmand *self)
+{
+}
+
 int
 main (int argc, char **argv)
 {
-  DBusGConnection *connection;
-  GError *error;
-  DBusGProxy *proxy;
-  char **name_list;
-  char **name_list_ptr;
-  int result;
- 
+  DBusGConnection *bus;
+  DBusGProxy *bus_proxy;
+  GError *error = NULL;
+  GmNetmand *obj;
+  GMainLoop *mainloop;
+  guint request_name_result;
+
   g_type_init ();
 
-  error = NULL;
-  connection = dbus_g_bus_get (DBUS_BUS_SESSION,
-                               &error);
-  if (connection == NULL)
-    {
-      g_printerr ("Failed to open connection to bus: %s\n",
-                  error->message);
-      g_error_free (error);
-      exit (1);
-    }
+  //Install introspection information so we can invoke the methods by name
+  dbus_g_object_type_install_info (GM_TYPE_NETMAND, &dbus_glib_gm_netmand_object_info);
+
+  mainloop = g_main_loop_new (NULL, FALSE);
+
+  bus = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
+  if (!bus)
+    g_error("Couldn't connect to session bus: %s", error->message);
+
+  bus_proxy = dbus_g_proxy_new_for_name (bus, "org.freedesktop.DBus",
+           "/org/freedesktop/DBus",
+           "org.freedesktop.DBus");
 
 
-  /* Create a proxy object for the "bus driver" (name "org.freedesktop.DBus") */
- 
-  proxy = dbus_g_proxy_new_for_name (connection,
-                                     DBUS_SERVICE_DBUS,
-                                     DBUS_PATH_DBUS,
-                                     DBUS_INTERFACE_DBUS);
-
-	
-	if (!dbus_g_proxy_call (proxy, "RequestName", &error,
-                            G_TYPE_STRING, "gappman.netman",
-                            G_TYPE_UINT, DBUS_NAME_FLAG_DO_NOT_QUEUE,
-                            G_TYPE_INVALID,
-                            G_TYPE_UINT, &result,
-                            G_TYPE_INVALID)) 
+  if (!dbus_g_proxy_call (bus_proxy, "RequestName", &error,
+        G_TYPE_STRING, "gappman.netman",
+        G_TYPE_UINT, DBUS_NAME_FLAG_DO_NOT_QUEUE,
+        G_TYPE_INVALID,
+        G_TYPE_UINT, &request_name_result,
+        G_TYPE_INVALID))
 	{
-		g_warning("Could not acquire gappman.netman");
+    g_warning("Failed to acquire gappman.netman: %s", error->message);
 	}
 
-    if (result != DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER) 
-	{
-    	if (result == DBUS_REQUEST_NAME_REPLY_EXISTS)
-        {
-	    	g_warning("An instance of gm_netmand is already running.");
-        }
-		else 
-		{
-            g_warning("Could not acquire the gappman.netman service.");
-        }
-    }
+  obj = g_object_new (GM_TYPE_NETMAND, NULL);
 
-	dbus_g_proxy_add_signal(proxy, "gappman.netman.RestartNetwork", G_TYPE_STRING);
-	dbus_g_proxy_connect_signal(proxy, "gappman.netman.RestartNetwork", G_CALLBACK(restart_network), "test", NULL);
+  dbus_g_connection_register_g_object (bus, "/GmNetmand", G_OBJECT (obj));
 
-  /* Call ListNames method, wait for reply */
-  error = NULL;
-  if (!dbus_g_proxy_call (proxy, "ListNames", &error, G_TYPE_INVALID,
-                          G_TYPE_STRV, &name_list, G_TYPE_INVALID))
-    {
-      /* Just do demonstrate remote exceptions versus regular GError */
-      if (error->domain == DBUS_GERROR && error->code == DBUS_GERROR_REMOTE_EXCEPTION)
-        g_printerr ("Caught remote method exception %s: %s",
-	            dbus_g_error_get_name (error),
-	            error->message);
-      else
-        g_printerr ("Error: %s\n", error->message);
-      g_error_free (error);
-      exit (1);
-    }
+  g_message("gm_netmand running\n");
 
-  /* Print the results */
- 
-  g_print ("Names on the message bus:\n");
-  
-  for (name_list_ptr = name_list; *name_list_ptr; name_list_ptr++)
-    {
-      g_print ("  %s\n", *name_list_ptr);
-    }
-  g_strfreev (name_list);
+  g_main_loop_run (mainloop);
 
-  g_object_unref (proxy);
-
-  return 0;
+  exit (0);
 }
 

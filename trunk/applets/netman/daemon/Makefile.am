@@ -1,7 +1,7 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
 SUBDIRS = introspection
 
-noinst_HEADERS = 
+noinst_HEADERS = gm_netmand.h
 bin_PROGRAMS = gm_netmand
 gm_netmand_SOURCES = gm_netmand.c 
 gm_netmand_CPPFLAGS = @GTK_INCLUDES@
