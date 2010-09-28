@@ -20,8 +20,6 @@
 int gm_getpossibleresolutions (XRRScreenSize **sizes, int *nsize)
 {
     GdkDisplay *gdk_dpy;
-    int major;
-    int minor;
     XRRScreenConfiguration *sc;
 
     gdk_dpy = gdk_display_get_default ();
@@ -115,8 +113,6 @@ int gm_changeresolution (int width, int height)
     SizeID	current_size;
     int size = -1;
     int ret_status;
-    int major;
-    int minor;
     short rate = -1;
     GdkDisplay *gdk_dpy;
 

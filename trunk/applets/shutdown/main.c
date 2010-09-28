@@ -20,13 +20,14 @@
 #include <gm_parseconf.h>
 #include <gm_layout.h>
 #include <gm_generic.h>
+#include <gm_connect.h>
 
 static int WINDOWED = 0;
 
 static void usage()
 {
     printf("usage: shutdown [--help] [--width <WIDTHINPIXELS>] [--height <HEIGHTINPIXELS>] [--conffile <FILENAME>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
-    printf("");
+    printf("\n");
     printf("--help:\t\tshows this help text\n");
     printf("--width <WIDTHINPIXELS>:\t\twidth of the main window (default: screen width / 9)\n");
     printf("--height <HEIGHTINPIXELS:\t\theight of the main window (default: screen height / 9)\n");
@@ -40,9 +41,6 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
 {
     char **args;
     int i;
-    int status;
-    int ret;
-    struct appwidgetinfo* appw;
     __pid_t childpid;
     FILE *fp;
 
@@ -85,6 +83,7 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
     }
 
     free(args);
+		return TRUE;
 }
 
 
@@ -94,7 +93,7 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
 * \param *event the GdkEvent that occured. Space key and left mousebutton are valid actions.
 * \param *elt menu_element structure containing the filename and arguments of the program that should be started
 */
-static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
+static void process_startprogram_event ( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
 {
 
 
@@ -104,7 +103,6 @@ static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event,
         startprogram( widget, elt );
     }
 
-    return FALSE;
 }
 
 /**
@@ -132,7 +130,6 @@ int main (int argc, char **argv)
     GtkWidget *mainwin;
     menu_elements *actions;
     const char* conffile = "/etc/gappman/shutdown.xml";
-    const char* rcfile = "";
     int c;
     int fontsize;
 

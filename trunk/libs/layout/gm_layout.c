@@ -21,7 +21,6 @@
 static int fontsize = 10*1024; //< the default generic fontsize for all elements. This usually gets updated by menu building functions below.
 static int	screen_width = 800;
 static int	screen_height = 600;
-static int 	confirmation_answer = 0;
 
 #define MAXCHARSINLABEL 15;
 
@@ -48,9 +47,8 @@ void gm_quit_program(GtkWidget* dummy, GdkEvent *event)
     }
 }
 
-int gm_show_confirmation_dialog(const gchar* message, const gchar* msg_button1, void* callback1, void* data1, const gchar* msg_button2, void* callback2, void* data2, GtkWidget *mainwin)
+void gm_show_confirmation_dialog(const gchar* message, const gchar* msg_button1, void* callback1, void* data1, const gchar* msg_button2, void* callback2, void* data2, GtkWidget *mainwin)
 {
-    GtkWidget *dialog;
     GtkWidget *window;
     GtkWidget *vbox;
     GtkWidget *hbox;
@@ -59,10 +57,6 @@ int gm_show_confirmation_dialog(const gchar* message, const gchar* msg_button1, 
     gchar *markup;
     GdkPixbuf *pixbuf;
     GtkWidget *stock_image;
-    GtkStyle *style;
-    GtkIconSet *iconset;
-    int button1_pressed = 0;
-    int button2_pressed = 1;
 
     g_warning("%s", message);
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -145,7 +139,6 @@ int gm_show_confirmation_dialog(const gchar* message, const gchar* msg_button1, 
 
 void gm_show_error_dialog(const gchar* message, GtkWidget *mainwin, void *callback)
 {
-    GtkWidget *dialog;
     GtkWidget *window;
     GtkWidget *vbox;
     GtkWidget *hbox;
@@ -154,8 +147,6 @@ void gm_show_error_dialog(const gchar* message, GtkWidget *mainwin, void *callba
     gchar *markup;
     GdkPixbuf *pixbuf;
     GtkWidget *stock_image;
-    GtkStyle *style;
-    GtkIconSet *iconset;
 
     g_warning("%s", message);
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -250,17 +241,6 @@ GtkWidget *gm_create_label_button(gchar* buttontext, void *callbackfunc, void *d
 }
 
 /**
-* \brief callback function to quit the program
-* \param *widget pointer to widget to destroy
-* \param data mandatory argument for callback function, may be NULL.
-*/
-static void layout_destroy( GtkWidget *widget,
-                            gpointer   data )
-{
-    gtk_main_quit ();
-}
-
-/**
 * \brief scales an image to max_width unless that will make the button-heifght larger than max_height.
 * \param image a pointer to a GtkWidget that holds the image
 * \param max_width maximum allowed width of the button
@@ -293,7 +273,7 @@ static GdkPixbuf* scale_image(GtkWidget *image, int max_width, int max_height)
     return gdk_pixbuf_scale_simple(pixbuf, width, height, GDK_INTERP_BILINEAR);
 }
 
-GtkWidget* gm_load_image(char* elt_name, char* elt_logo, char* cacheloc, char* programname, int max_width, int max_height)
+GtkWidget* gm_load_image(const char* elt_name, const char* elt_logo, const char* cacheloc, const char* programname, int max_width, int max_height)
 {
     GtkWidget *image = NULL;
     GdkPixbuf *pixbuf;
@@ -374,7 +354,7 @@ static GtkWidget* image_label_box_hor (menu_elements *elt, int max_width, int ma
     if (elt->printlabel != 0)
     {
         /* Create a label for the button */
-        label = gtk_label_new (elt->name);
+        label = gtk_label_new ((const gchar*) elt->name);
         gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 3);
         gtk_widget_show (label);
     }
@@ -507,9 +487,7 @@ static int calculateAmountOfElementsPerColumn(int box_width, int box_height, int
 */
 GtkWidget* gm_create_empty_button ( void* callbackfunc, void *data)
 {
-    GtkWidget *button, *imagelabelbox;
-    GdkPixbuf *pixbuf;
-    int width, height;
+    GtkWidget *button;
 
     button = gtk_button_new ();
     gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
@@ -540,12 +518,9 @@ GtkWidget* gm_create_empty_button ( void* callbackfunc, void *data)
 * \param *elt pointer to menu_element struct that contains the logo image filename.
 * \param max_width button width
 */
-GtkWidget* gm_create_button ( menu_elements *elt, int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, menu_elements*) )
+GtkWidget* gm_create_button ( menu_elements *elt, int max_width, int max_height, void (*processevent)(GtkWidget*, GdkEvent*, menu_elements*) )
 {
     GtkWidget *button, *imagelabelbox;
-    GdkPixbuf *pixbuf;
-    int width, height;
-    double ratio;
 
     button = gm_create_empty_button(processevent, elt);
 
@@ -567,14 +542,13 @@ GtkWidget* gm_create_button ( menu_elements *elt, int max_width, int max_height,
 static GtkWidget* createpanelelement( menu_elements *elt, int width, int height)
 {
     GModule *module;
-    GtkWidget *widget;
 
     if ( ! g_module_supported() )
     {
         return NULL;
     }
 
-    module = g_module_open(elt->module, G_MODULE_BIND_LAZY);
+    module = g_module_open((const gchar*) elt->module, G_MODULE_BIND_LAZY);
 
     if (!module)
     {
@@ -618,7 +592,7 @@ static GtkWidget* createpanelelement( menu_elements *elt, int width, int height)
             }
             else
             {
-                elt->gm_module_set_conffile(elt->module_conffile);
+                elt->gm_module_set_conffile((const gchar*) elt->module_conffile);
             }
         }
         if (!g_module_symbol (module, "gm_module_set_icon_size", (gpointer *) &(elt->gm_module_set_icon_size)))
@@ -641,7 +615,7 @@ static GtkWidget* createpanelelement( menu_elements *elt, int width, int height)
     return elt->gm_module_get_widget();
 }
 
-GtkWidget* gm_create_buttonbox( menu_elements *elts, gboolean(processevent)(GtkWidget*, GdkEvent*, menu_elements*), gboolean calc_fontsize)
+GtkWidget* gm_create_buttonbox( menu_elements *elts, void (*processevent)(GtkWidget*, GdkEvent*, menu_elements*), gboolean calc_fontsize)
 {
     menu_elements *next, *cur;
     GtkWidget* button, *hbox, *vbox;

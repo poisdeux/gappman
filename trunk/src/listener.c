@@ -35,10 +35,8 @@ static const gchar* rcpath = "";
 
 static int parsemessage(gchar *msg)
 {
-    static int state = 0;
     int msg_id;
     gchar** contentssplit = NULL;
-    int i = 0;
     contentssplit = g_strsplit(msg, "::", 0);
 
     if (g_strcmp0(contentssplit[1], "listprocesses") == 0)
@@ -81,7 +79,7 @@ static void sendprocesslist(GIOChannel* gio)
     appw_list = get_started_apps();
     while (appw_list != NULL)
     {
-        if (strlen(appw_list->menu_elt->name) < 256)
+        if (strlen((const char*) appw_list->menu_elt->name) < 256)
         {
             g_sprintf(msg, "::name::%s", appw_list->menu_elt->name);
         }
@@ -135,12 +133,11 @@ static gboolean handleconnection( GIOChannel* gio , GIOCondition cond, gpointer 
 {
     gsize len;
     gchar *msg;
-    int bytes_read;
     GError *gerror = NULL;
     GIOStatus status = G_IO_STATUS_NORMAL;
     int newsock;
     struct sockaddr_in cli_addr;
-    int cli_len;
+    socklen_t cli_len;
     GIOChannel* new_gio = NULL;
     int msg_id;
 
@@ -203,12 +200,9 @@ gboolean gappman_start_listener (GtkWidget* win)
 {
     int sock;
     int s;
-    int sourceid;
-    struct hostent *host;
     struct addrinfo hints;
     struct addrinfo *result = NULL;
     struct addrinfo *rp = NULL;
-    struct sockaddr_in addr;
     const gchar *server = "localhost";
     const gchar *port = "2103";
     gboolean listener_started = FALSE;

@@ -110,8 +110,8 @@ int gm_get_confpath_from_gappman(int portno, const char* hostname, gchar** path)
     gsize len;
     int socket;
     gchar *msg;
-    int status, n, sourceid;
-    int bytes_written;
+    int status;
+    gsize bytes_written;
     GIOChannel* gio = NULL;
     GError *gerror = NULL;
 
@@ -158,8 +158,8 @@ int gm_get_fontsize_from_gappman(int portno, const char* hostname, int *fontsize
     gsize len;
     int socket;
     gchar *msg;
-    int status, n, sourceid;
-    int bytes_written;
+    int status;
+    gsize bytes_written;
     GIOChannel* gio = NULL;
     GError *gerror = NULL;
 
@@ -204,8 +204,8 @@ int gm_send_and_receive_message(int portno, const char* hostname, gchar *msg, vo
 {
     gsize len;
     int socket;
-    int status, n, sourceid;
-    int bytes_written;
+    int status;
+    gsize bytes_written;
     GIOChannel* gio = NULL;
     GError *gerror = NULL;
 	gchar* recv_msg;

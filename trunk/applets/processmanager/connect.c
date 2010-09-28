@@ -83,8 +83,8 @@ int getStartedProcsFromGappman(int portno, const char* hostname, struct procesli
 {
     gsize len;
     gchar *msg;
-    int status, sockfd, n, sourceid;
-    int bytes_written;
+    int status, sockfd;
+    gsize bytes_written;
     GIOChannel* gio = NULL;
     GError *gerror = NULL;
 

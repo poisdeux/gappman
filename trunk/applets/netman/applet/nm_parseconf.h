@@ -57,7 +57,7 @@ void nm_free_elements( nm_elements *elt );
 * \brief Get the path of the cache location on disk
 * \return string
 */
-char* nm_get_cache_location();
+const char* nm_get_cache_location();
 
 /**
 * \brief returns the nm_elements structure that contains the stati

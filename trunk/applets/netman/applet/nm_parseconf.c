@@ -14,7 +14,7 @@
 
 static nm_elements* stati;
 static nm_elements* actions;
-static char *cache_location;
+static const char *cache_location;
 
 struct nm_element* create_nm_element(nm_elements* prev)
 {
@@ -58,7 +58,7 @@ static void add_argument(nm_elements *elt, char *argument)
     elt->args[elt->numArguments - 1] = (char *) argument;
 }
 
-char* nm_get_cache_location()
+const char* nm_get_cache_location()
 {
     return cache_location;
 }
@@ -108,7 +108,7 @@ process_nm_element(xmlTextReaderPtr reader, nm_elements *elt, const char* elemen
             }
             else if ( strcmp((char *) name, "success") == 0 )
             {
-                elt->success = atoi(value);
+                elt->success = atoi((const char*) value);
             }
         }
 
@@ -132,7 +132,6 @@ void nm_free_elements( nm_elements *elt )
 {
     nm_elements *next;
     int i;
-    char** orient;
 
     if (elt != NULL)
     {
@@ -197,7 +196,7 @@ void static process_nm_elements(const char* element_name, const char* group_elem
             process_nm_element(reader, *elts, element_name);
         }
         //check if we found the closing tag
-        if ( strcmp(name, group_element_name) == 0 && xmlTextReaderNodeType(reader) == 15 )
+        if ( strcmp((const char*) name, group_element_name) == 0 && xmlTextReaderNodeType(reader) == 15 )
         {
             ret = 0;
         }
@@ -231,10 +230,10 @@ int nm_load_conf(const char *filename) {
                 process_nm_elements("action", "actions", reader, &actions);
             }
 
-            if ( strcmp((char *) name, "cachelocation") == 0 && xmlTextReaderNodeType(reader) == 1)
+            if ( strcmp((const char *) name, "cachelocation") == 0 && xmlTextReaderNodeType(reader) == 1)
             {
                 ret = xmlTextReaderRead(reader);
-                cache_location = xmlTextReaderValue(reader);
+                cache_location = (const char*) xmlTextReaderValue(reader);
             }
             else
             {

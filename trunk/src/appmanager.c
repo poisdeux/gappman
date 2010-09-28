@@ -74,8 +74,6 @@ struct appwidgetinfo* get_started_apps()
 */
 static gint check_app_status(struct appwidgetinfo* local_appw)
 {
-    int status;
-    FILE *fp;
     struct appwidgetinfo* tmp;
     struct menu_element* elt;
 
@@ -184,8 +182,6 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
 {
     char **args;
     int i;
-    int status;
-    int ret;
     __pid_t childpid;
     FILE *fp;
 
@@ -248,7 +244,7 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
 * \param *event the GdkEvent that occured. Space key and left mousebutton are valid actions.
 * \param *elt menu_element structure containing the filename and arguments of the program that should be started
 */
-static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
+static void process_startprogram_event ( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
 {
 
     //Only start program  if spacebar or mousebutton is pressed
@@ -256,14 +252,12 @@ static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event,
     {
         startprogram( widget, elt );
     }
-
-    return FALSE;
 }
 
 static void usage()
 {
     printf("usage: appmanager [--keep-below] [--width <WIDTHINPIXELS>] [--height <HEIGHTINPIXELS>] [--conffile <FILENAME>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
-    printf("");
+    printf("\n");
     printf("--keep-below:\t\t\tKeeps the window at the bottom of the window manager's stack\n");
     printf("--width <WIDTHINPIXELS>:\twidth of the main window (default: screen width)\n");
     printf("--height <HEIGHTINPIXELS:\theight of the main window (default: screen height)\n");
@@ -278,7 +272,7 @@ static void usage()
 */
 static void autostartprograms( menu_elements *elts )
 {
-    menu_elements *next, *cur;
+    menu_elements *cur;
 
     cur = elts;
 
@@ -377,23 +371,16 @@ static void align_buttonbox (GtkWidget *hbox_top, GtkWidget *hbox_middle, GtkWid
 int main (int argc, char **argv)
 {
     GdkScreen *screen;
-    GdkWindow * rootwin;
-    GdkPixbuf *pixbuf_bg;
-    GtkWidget *window_bg;
-    GtkWidget *picture_bg;
     GtkWidget *mainwin;
     GtkWidget *buttonbox;
     GtkWidget *hbox_top;
     GtkWidget *hbox_middle;
     GtkWidget *hbox_bottom;
     GtkWidget *vbox;
-    GtkStyle  *style;
     menu_elements *actions;
     menu_elements *panel;
     const char* conffile = "./conf.xml";
-    const char* bgimage = NULL;
     int c;
-    GIOChannel* gio;
 
     //Needs to be called before any another glib function
     if (!g_thread_supported ())

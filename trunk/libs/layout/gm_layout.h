@@ -48,7 +48,7 @@ int gm_calculate_box_length(int total_length, struct length *box_length);
 * \param max_height maximum height image may have
 * \return GtkWidget pointer to image
 */
-GtkWidget* gm_load_image(char* elt_name, char* elt_logo, char* cacheloc, char* programname, int max_width, int max_height);
+GtkWidget* gm_load_image(const char* elt_name, const char* elt_logo, const char* cacheloc, const char* programname, int max_width, int max_height);
 
 /**
 * \brief shows a question dialog with regards to gappman fontsize.
@@ -57,7 +57,7 @@ GtkWidget* gm_load_image(char* elt_name, char* elt_logo, char* cacheloc, char* p
 * \param msg_button2 pointer to char that will hold the message for the second button.
 * \param mainwin pointer to main window GtkWidget
 */
-int gm_show_confirmation_dialog(const gchar* message, const gchar* msg_button1, void* callback1, void* data1, const gchar* msg_button2, void* callback2, void* data2, GtkWidget *mainwin);
+void gm_show_confirmation_dialog(const gchar* message, const gchar* msg_button1, void* callback1, void* data1, const gchar* msg_button2, void* callback2, void* data2, GtkWidget *mainwin);
 
 /**
 * \brief shows an error dialog with regards to gappman fontsize.
@@ -102,7 +102,7 @@ GtkWidget *gm_create_label_button(gchar* buttontext, void *callbackfunc, void *d
 * \param max_height button height
 * \param *processevent callback function that will be called when button is pressed
 */
-GtkWidget* gm_create_button ( menu_elements *elt, int max_width, int max_height, gboolean (*processevent)(GtkWidget*, GdkEvent*, menu_elements*) );
+GtkWidget* gm_create_button ( menu_elements *elt, int max_width, int max_height, void (*processevent)(GtkWidget*, GdkEvent*, menu_elements*) );
 
 /**
 * \brief Create a single empty button
@@ -116,7 +116,7 @@ GtkWidget* gm_create_empty_button ( void* callbackfunc, void *data);
 * \param *processevent function pointer to function which should be used as callback when a button is pressed.
 * \param calc_fontsize boolean if true will recalculate fontsize, if false it will take the current fontsize.
 */
-GtkWidget* gm_create_buttonbox( menu_elements *elts, gboolean(*processevent)(GtkWidget*, GdkEvent*, menu_elements*), gboolean calc_fontsize);
+GtkWidget* gm_create_buttonbox( menu_elements *elts, void (*processevent)(GtkWidget*, GdkEvent*, menu_elements*), gboolean calc_fontsize);
 
 /**
 * \brief Creates the panel layout using the available screen height and width

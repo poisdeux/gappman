@@ -36,7 +36,7 @@ static int dialog_height;
 static void usage()
 {
     printf("usage: changeresolution [--help] [--screenwidth <WIDTHINPIXELS>] [--screenheight <HEIGHTINPIXELS>] [--gmconffile <FILENAME>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
-    printf("");
+    printf("\n");
     printf("--help:\t\tshows this help text\n");
     printf("--screenwidth <WIDTHINPIXELS>:\t\twidth of the main (gappman) window (default: screen width / 3)\n");
     printf("--screenheight <HEIGHTINPIXELS:\t\theight of the main (gappman) window (default: screen height / 3)\n");
@@ -58,14 +58,13 @@ static void destroy( GtkWidget *widget,
 }
 
 
-static gboolean revert_to_old_res(GtkWidget *widget, GdkEvent *event, XRRScreenSize* size)
+static void revert_to_old_res(GtkWidget *widget, GdkEvent *event, XRRScreenSize* size)
 {
     //Check if spacebar or mousebutton is pressed
     if ( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
     {
     	gm_changeresolution(size->width, size->height);
 	}
-    return FALSE;
 }
 
 /**
@@ -74,7 +73,7 @@ static gboolean revert_to_old_res(GtkWidget *widget, GdkEvent *event, XRRScreenS
 * \param *event event that triggered the widget
 * \param *elt menu_element pointer to the program for which the resolution must be updated
 */
-static gboolean set_default_res_for_program( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
+static void set_default_res_for_program( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
 {
     XRRScreenSize current_size;
     gchar *msg;
@@ -87,7 +86,6 @@ static gboolean set_default_res_for_program( GtkWidget *widget, GdkEvent *event,
         {
             gm_show_error_dialog("Could not connect to gappman.", NULL, NULL);
         }
-        return TRUE;
     }
 }
 
@@ -97,7 +95,7 @@ static gboolean set_default_res_for_program( GtkWidget *widget, GdkEvent *event,
 * \param *event event that triggered the widget
 * \param *size pointer to a XRRScreenSize struct that holds the new resolution
 */
-static gboolean make_default_for_program( GtkWidget *widget, GdkEvent *event, XRRScreenSize *size )
+static void make_default_for_program( GtkWidget *widget, GdkEvent *event, XRRScreenSize *size )
 {
     GtkWidget *button;
     GtkWidget *chooseprogramwin;
@@ -107,7 +105,7 @@ static gboolean make_default_for_program( GtkWidget *widget, GdkEvent *event, XR
 
 		// only show menu if spacebar or mousebutton were pressed
     if ( ((GdkEventKey*)event)->keyval != 32 && ((GdkEventButton*)event)->button != 1)
-			return;
+			return ;
 
     chooseprogramwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
@@ -141,7 +139,6 @@ static gboolean make_default_for_program( GtkWidget *widget, GdkEvent *event, XR
         gm_show_error_dialog("No programs found.\nPlease check configuration file.", NULL, NULL);
     }
 
-		return FALSE;
 }
 
 /**
@@ -154,10 +151,7 @@ static void changeresolution(GtkWidget *widget, GdkEvent *event, XRRScreenSize *
 {
     GtkWidget *button;
     GtkWidget *vbox;
-    GtkWidget *label;
-    gchar* markup;
     static XRRScreenSize oldsize;
-    int nr;
 
 		// only show menu if spacebar or mousebutton were pressed
     if ( ((GdkEventKey*)event)->keyval != 32 && ((GdkEventButton*)event)->button != 1)
@@ -201,8 +195,6 @@ static GtkWidget* createrow(XRRScreenSize* size, int width, int height)
 {
     GtkWidget *button, *hbox, *label;
     gchar *markup;
-    GtkWidget *alignment;
-    int status;
 
     hbox = gtk_hbox_new (FALSE, 10);
 
@@ -229,12 +221,9 @@ static GtkWidget* createrow(XRRScreenSize* size, int width, int height)
 int main (int argc, char **argv)
 {
     GdkScreen *screen;
-    GdkWindow *rootwin;
     GtkWidget *button;
-    GtkWidget *labelimagebox;
     GtkWidget *vbox;
     GtkWidget *hbox;
-    GtkWidget *align;
     GtkWidget *separator;
 
     int row_height;

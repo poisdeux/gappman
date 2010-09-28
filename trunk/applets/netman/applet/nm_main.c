@@ -28,7 +28,6 @@ static GMutex *gm_module_start_mutex = NULL;
 static gint exec_program(nm_elements* elt)
 {
     int status = -1;
-    int ret;
     int i;
 	char **args;
     __pid_t childpid;
@@ -70,7 +69,6 @@ static gint exec_program(nm_elements* elt)
 
 static void switch_status(nm_elements* stati)
 {
-	GtkWidget* current_image;
 	
     if (stati->status != stati->success)
     {
@@ -222,11 +220,11 @@ G_MODULE_EXPORT int gm_module_init()
                       NULL);
 	while (stati != NULL)
 	{
-    	stati->image_success = GTK_IMAGE(gm_load_image("gm_netman_success", (char*) stati->logosuccess, nm_get_cache_location(), (char*) stati->name, main_button_width, main_button_height));
+    	stati->image_success = GTK_IMAGE(gm_load_image("gm_netman_success", (char*) stati->logosuccess, (char*) nm_get_cache_location(), (char*) stati->name, main_button_width, main_button_height));
     	gtk_widget_show(GTK_WIDGET(stati->image_success));
 		g_object_ref(stati->image_success);
 
-    	stati->image_fail = GTK_IMAGE(gm_load_image("gm_netman_fail", (char*) stati->logofail, nm_get_cache_location(), (char*) stati->name, main_button_width, main_button_height));
+    	stati->image_fail = GTK_IMAGE(gm_load_image("gm_netman_fail", (const char*) stati->logofail, nm_get_cache_location(), (char*) stati->name, main_button_width, main_button_height));
     	gtk_widget_show(GTK_WIDGET(stati->image_fail));
 		g_object_ref(stati->image_fail);
 		
@@ -245,7 +243,7 @@ G_MODULE_EXPORT void gm_module_set_conffile(const char* filename)
     conffile = filename;
 }
 
-G_MODULE_EXPORT GThreadFunc gm_module_start()
+G_MODULE_EXPORT void gm_module_start()
 {
 	nm_elements *stati;
 

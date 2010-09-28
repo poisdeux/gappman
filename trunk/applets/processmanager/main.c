@@ -36,7 +36,7 @@ static int fontsize;
 static void usage()
 {
     printf("usage: processmanager [--help] [--width <WIDTHINPIXELS>] [--height <HEIGHTINPIXELS>] [--conffile <FILENAME>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
-    printf("");
+    printf("\n");
     printf("--help:\t\tshows this help text\n");
     printf("--width <WIDTHINPIXELS>:\t\twidth of the main window (default: screen width / 9)\n");
     printf("--height <HEIGHTINPIXELS:\t\theight of the main window (default: screen height / 9)\n");
@@ -44,11 +44,6 @@ static void usage()
     printf("--gtkrc <GTKRCFILENAME>:\t\t gtk configuration file which can be used for themeing\n");
     printf("--windowed:\t\t creates a border around the window\n");
 
-}
-
-static void destroy_widget( GtkWidget *widget, gpointer data )
-{
-    gtk_widget_destroy(GTK_WIDGET(data));
 }
 
 
@@ -229,7 +224,7 @@ static void showprocessdialog( menu_elements *elt )
 * \param *event the GdkEvent that occured. Space key and left mousebutton are valid actions.
 * \param *elt menu_element structure containing the filename and arguments of the program that should be started
 */
-static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
+static void process_startprogram_event ( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
 {
 
     //Only start program  if spacebar or mousebutton is pressed
@@ -239,14 +234,12 @@ static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event,
         showprocessdialog( elt );
         gtk_widget_set_sensitive(GTK_WIDGET(widget), TRUE);
     }
-
-    return TRUE;
 }
 
 
 static GtkWidget* createrow(menu_elements *elt, int width, int height)
 {
-    GtkWidget *hbox, *imagebox, *statuslabel;
+    GtkWidget *hbox, *statuslabel;
     gchar *markup;
     GtkWidget *alignment;
     int status;
@@ -292,14 +285,10 @@ static void destroy( GtkWidget *widget,
 int main (int argc, char **argv)
 {
     GdkScreen *screen;
-    GdkWindow *rootwin;
     GtkWidget *button;
-    GtkWidget *labelimagebox;
     GtkWidget *vbox;
     GtkWidget *hbox;
-    GtkWidget *align;
     GtkWidget *separator;
-    GtkWidget *table;
     menu_elements *program_elts = NULL;
     menu_elements *action_elts = NULL;
     const char* conffile = "/etc/gappman/processmanager.xml";
@@ -313,7 +302,6 @@ int main (int argc, char **argv)
     int status;
     int c;
     int mypid;
-    time_t timestruct;
     struct proceslist* started_procs = NULL;
     struct proceslist* started_procs_tmp = NULL;
 
@@ -452,7 +440,7 @@ int main (int argc, char **argv)
               started_procs_tmp	 = started_procs;
               while ( started_procs_tmp != NULL)
               {
-                  if (( g_strcmp0(program_elts->name, started_procs_tmp->name) == 0 ) && ( started_procs_tmp->pid != mypid ))
+                  if (( g_strcmp0((const gchar*) program_elts->name, started_procs_tmp->name) == 0 ) && ( started_procs_tmp->pid != mypid ))
                   {
                       no_progsacts_found = 0;
                       program_elts->pid	 = started_procs_tmp->pid;
@@ -479,7 +467,7 @@ int main (int argc, char **argv)
               started_procs_tmp = started_procs;
               while ( started_procs_tmp != NULL)
               {
-                  if (( g_strcmp0(action_elts->name, started_procs_tmp->name) == 0 ) && ( started_procs_tmp->pid != mypid))
+                  if (( g_strcmp0((const gchar*) action_elts->name, (const gchar*) started_procs_tmp->name) == 0 ) && ( started_procs_tmp->pid != mypid))
                   {
                       no_progsacts_found = 0;
                       action_elts->pid = started_procs_tmp->pid;

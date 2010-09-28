@@ -38,8 +38,8 @@ static void printElements(xmlTextReaderPtr reader)
 
     if (xmlTextReaderHasAttributes(reader))
     {
-        printf("width: %s, ", xmlTextReaderGetAttribute (reader, "width"));
-        printf("height: %s, ", xmlTextReaderGetAttribute (reader, "height"));
+        printf("width: %s, ", xmlTextReaderGetAttribute (reader, (const xmlChar*) "width"));
+        printf("height: %s, ", xmlTextReaderGetAttribute (reader, (const xmlChar*) "height"));
     }
 }
 
@@ -72,8 +72,8 @@ static void parseLength(xmlChar * length, struct length *str_length)
 {
     if ( length != NULL )
     {
-        str_length->value = atoi (strndup(length, strspn( length,  "0123456789")));
-        if ( strstr( length,  "%") != NULL )
+        str_length->value = atoi (strndup((const char*) length, strspn( (const char*) length,  "0123456789")));
+        if ( strstr( (const char*) length,  "%") != NULL )
         {
             str_length->type = PERCENTAGE;
         }
@@ -136,7 +136,7 @@ processMenuElement(xmlTextReaderPtr reader, menu_elements *elt, const char* elem
             }
             else if ( strcmp((char *) name, "printlabel") == 0 )
             {
-                elt->printlabel = atoi(value);
+                elt->printlabel = atoi((const char*) value);
             }
             else if ( strcmp((char *) name, "exec") == 0 )
             {
@@ -152,11 +152,11 @@ processMenuElement(xmlTextReaderPtr reader, menu_elements *elt, const char* elem
             }
             else if ( strcmp((char *) name, "autostart") == 0 )
             {
-                elt->autostart = atoi(value);
+                elt->autostart = atoi((const char*) value);
             }
             else if ( strcmp((char *) name, "resolution") == 0 )
             {
-                if (sscanf (value, "%dx%d", &elt->app_width, &elt->app_height) != 2)
+                if (sscanf ((const char*) value, "%dx%d", &elt->app_width, &elt->app_height) != 2)
                 {
                     fprintf(stderr, "Error: could not parse resolution value: %s", value);
                 }
@@ -286,11 +286,7 @@ static void gm_parse_alignment(char* align, float *hor_align, int *vert_align)
 void static processMenuElements(const char* element_name, const char* group_element_name, xmlTextReaderPtr reader, menu_elements **elts)
 {
     int ret = 1;
-    int i;
     xmlChar *name;
-    char* result;
-    int width;
-    int height;
     int *number_elts;
     float *hor_align;
     int *vert_align;
@@ -341,9 +337,9 @@ void static processMenuElements(const char* element_name, const char* group_elem
         {
             if (xmlTextReaderHasAttributes(reader))
             {
-                parseLength(xmlTextReaderGetAttribute (reader, "width"), menu_width);
-                parseLength(xmlTextReaderGetAttribute (reader, "height"), menu_height);
-                gm_parse_alignment(xmlTextReaderGetAttribute (reader, "align"), hor_align, vert_align);
+                parseLength(xmlTextReaderGetAttribute (reader, (const xmlChar*) "width"), menu_width);
+                parseLength(xmlTextReaderGetAttribute (reader, (const xmlChar*) "height"), menu_height);
+                gm_parse_alignment((char*) xmlTextReaderGetAttribute (reader, (const xmlChar*) "align"), hor_align, vert_align);
             }
             //this should end parsing this group of elements
             ret = 0;
@@ -370,7 +366,7 @@ int gm_load_conf(const char *filename) {
         ret = xmlTextReaderRead(reader);
 
         // first attribute must be the name of the program
-        program_name = xmlTextReaderName(reader);
+        program_name = (char*) xmlTextReaderName(reader);
 
         while (ret == 1)
         {
@@ -390,7 +386,7 @@ int gm_load_conf(const char *filename) {
             if ( strcmp((char *) name, "cachelocation") == 0 && xmlTextReaderNodeType(reader) == 1)
             {
                 ret = xmlTextReaderRead(reader);
-                cache_location = xmlTextReaderValue(reader);
+                cache_location = (char*) xmlTextReaderValue(reader);
             }
             else
             {
@@ -424,10 +420,11 @@ menu_elements* gm_search_elt_by_name(gchar* name, menu_elements* programs)
 {
     while ( programs != NULL )
     {
-        if ( g_strcmp0(name, programs->name) == 0 )
+        if ( g_strcmp0(name, (const char*) programs->name) == 0 )
         {
             return programs;
         }
         programs = programs->next;
     }
+		return NULL;
 }
