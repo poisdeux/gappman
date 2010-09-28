@@ -2,7 +2,6 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
 AC_INIT([gappman], [0.4a], [m.brekhof@gmail.com])
-
 AC_SUBST(GTK_INCLUDES)
 AC_SUBST(GTK_OBJS)
 AC_SUBST(GTHREAD_INCLUDES)
@@ -14,7 +13,9 @@ AC_SUBST(DBUS_OBJS)
 AC_SUBST(XRANDR_INCLUDES)
 AC_SUBST(XRANDR_OBJS)
 
+AC_CONFIG_MACRO_DIR([m4])
 AC_USE_SYSTEM_EXTENSIONS
+AC_PROG_LIBTOOL
 AC_CHECK_FUNCS([localtime_r pow sqrt])
 AC_C_CONST
 AC_FUNC_MALLOC
