@@ -112,12 +112,13 @@ char* gm_get_programname()
 * \param *elt menu_element structure that will contain the program configuration values
 */
 static void
-processMenuElement(xmlTextReaderPtr reader, menu_elements *elt, const char* element_name ) {
-    xmlChar *name, *value;
+processMenuElement(xmlTextReaderPtr reader, menu_elements *elt, const char* element_name ) 
+{
+    xmlChar *name = NULL;
+	xmlChar *value = NULL;
     int ret = 1;
 
-    if (name == NULL)
-        name = BAD_CAST "--";
+   	name = BAD_CAST "--";
 
     while ( ret == 1 )
     {
@@ -180,7 +181,9 @@ processMenuElement(xmlTextReaderPtr reader, menu_elements *elt, const char* elem
         {
             ret = xmlTextReaderRead(reader);
         }
-    }
+
+
+	}
 }
 
 
@@ -283,7 +286,7 @@ static void gm_parse_alignment(char* align, float *hor_align, int *vert_align)
 * \param **elts pointer to the linked list of menu element structures.
 * \return nothing. Use the **elts call by reference to retrieve the menu elements.
 */
-void static processMenuElements(const char* element_name, const char* group_element_name, xmlTextReaderPtr reader, menu_elements **elts)
+static void processMenuElements(const char* element_name, const char* group_element_name, xmlTextReaderPtr reader, menu_elements **elts)
 {
     int ret = 1;
     xmlChar *name;

@@ -63,7 +63,10 @@ static void revert_to_old_res(GtkWidget *widget, GdkEvent *event, XRRScreenSize*
     //Check if spacebar or mousebutton is pressed
     if ( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
     {
-    	gm_changeresolution(size->width, size->height);
+    	if ( gm_changeresolution(size->width, size->height) == GM_SIZE_NOT_AVAILABLE )
+		{
+			gm_show_error_dialog("Could not change resolution", mainwin, NULL);	
+		}
 	}
 }
 
@@ -93,9 +96,8 @@ static void set_default_res_for_program( GtkWidget *widget, GdkEvent *event, men
 * \brief creates a popup dialog window that allows the user to set the new resolution as default for a program
 * \param *widget that called this function (usually through a callback construction)
 * \param *event event that triggered the widget
-* \param *size pointer to a XRRScreenSize struct that holds the new resolution
 */
-static void make_default_for_program( GtkWidget *widget, GdkEvent *event, XRRScreenSize *size )
+static void make_default_for_program( GtkWidget *widget, GdkEvent *event)
 {
     GtkWidget *button;
     GtkWidget *chooseprogramwin;
@@ -174,7 +176,7 @@ static void changeresolution(GtkWidget *widget, GdkEvent *event, XRRScreenSize *
 
     vbox = gtk_vbox_new(TRUE, 10);
 
-    button = gm_create_label_button("Set resolution as default for program", make_default_for_program, size);
+    button = gm_create_label_button("Set resolution as default for program", make_default_for_program, NULL);
     gtk_container_add(GTK_CONTAINER(vbox), button);
 
     button = gm_create_label_button("Cancel", revert_to_old_res, &oldsize);
@@ -191,7 +193,7 @@ static void changeresolution(GtkWidget *widget, GdkEvent *event, XRRScreenSize *
     //g_timeout_add_seconds (10, )
 }
 
-static GtkWidget* createrow(XRRScreenSize* size, int width, int height)
+static GtkWidget* createrow(XRRScreenSize* size, int width)
 {
     GtkWidget *button, *hbox, *label;
     gchar *markup;
@@ -226,7 +228,6 @@ int main (int argc, char **argv)
     GtkWidget *hbox;
     GtkWidget *separator;
 
-    int row_height;
     int c;
     int nsize;
     int ret_value;
@@ -329,7 +330,7 @@ int main (int argc, char **argv)
 
         for (i = 0; i < nsize; i++)
         {
-            hbox = createrow(&sizes[i], dialog_width, row_height);
+            hbox = createrow(&sizes[i], dialog_width);
             gtk_container_add(GTK_CONTAINER(vbox), hbox);
             gtk_widget_show (hbox);
             separator = gtk_hseparator_new();

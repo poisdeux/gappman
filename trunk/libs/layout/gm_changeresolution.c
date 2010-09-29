@@ -128,7 +128,6 @@ int gm_changeresolution (int width, int height)
     ret_status = get_nearest_size(sc, &size, width, height);
     if ( ret_status != GM_SUCCES)
     {
-        g_warning("%d: Could not find a size and rate for new resolution %dx%d", ret_status, width, height);
         return ret_status;
     }
 
