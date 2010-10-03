@@ -10,6 +10,7 @@
  */
 
 #include "gm_parseconf.h"
+#include <gm_generic.h>
 #include <string.h>
 
 static int numberElts;
@@ -415,7 +416,7 @@ int gm_load_conf(const char *filename) {
     * Cleanup function for the XML library.
     */
     xmlCleanupParser();
-    return 0;
+    return GM_SUCCES;
 }
 
 

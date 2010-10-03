@@ -4,5 +4,6 @@ libgm_parseconf_la_SOURCES = gm_parseconf.c gm_parseconf.h
 include_HEADERS = gm_parseconf.h
 libgm_parseconf_la_CPPFLAGS = @LIBXML_INCLUDES@
 libgm_parseconf_la_CPPFLAGS += @GTK_INCLUDES@
+libgm_parseconf_la_CPPFLAGS += -I$(top_builddir)/libs/generic
 libgm_parseconf_la_LIBADD = @LIBXML_OBJS@
 libgm_parseconf_la_LIBADD += @GTK_OBJS@

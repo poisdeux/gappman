@@ -63,27 +63,28 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
         //Disable button
         gtk_widget_set_sensitive(GTK_WIDGET(widget), FALSE);
 
-        fclose(fp);
+        (void) fclose(fp);
 
         childpid = fork();
         if ( childpid == 0 )
         {
-            execvp((char *) elt->exec, args);
+            (void) execvp((char *) elt->exec, args);
             _exit(0);
         }
         else if (  childpid < 0 )
         {
-            printf("Failed to fork!\n");
+            g_warning("Failed to fork!\n");
             return FALSE;
         }
     }
     else
     {
-        printf("File: %s not found!\n", (char *) elt->exec);
+        g_warning("File: %s not found!\n", (char *) elt->exec);
+		return FALSE;
     }
 
     free(args);
-		return TRUE;
+	return TRUE;
 }
 
 
@@ -100,7 +101,7 @@ static void process_startprogram_event ( GtkWidget *widget, GdkEvent *event, men
     //Only start program  if spacebar or mousebutton is pressed
     if ( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
     {
-        startprogram( widget, elt );
+        (void) startprogram( widget, elt );
     }
 
 }
@@ -135,7 +136,7 @@ int main (int argc, char **argv)
 
     gtk_init (&argc, &argv);
 
-    while (1) {
+    while (TRUE) {
         int option_index = 0;
         static struct option long_options[] = {
             {"conffile", 1, 0, 'c'},
@@ -183,16 +184,16 @@ int main (int argc, char **argv)
     //gtk_window_set_opacity (GTK_WINDOW (mainwin), 0.8);
 
     //Remove border
-    if ( !WINDOWED )
+    if ( WINDOWED == 0 )
     {
         gtk_window_set_decorated (GTK_WINDOW (mainwin), FALSE);
     }
     else
     {
         gtk_window_set_decorated (GTK_WINDOW (mainwin), TRUE);
-        g_signal_connect (G_OBJECT (mainwin), "delete_event",
+        (void) g_signal_connect (G_OBJECT (mainwin), "delete_event",
                           G_CALLBACK (destroy), NULL);
-        g_signal_connect (G_OBJECT (mainwin), "destroy",
+        (void) g_signal_connect (G_OBJECT (mainwin), "destroy",
                           G_CALLBACK (destroy), NULL);
     }
     vbox = gtk_vbox_new (FALSE, 10);
@@ -217,7 +218,7 @@ int main (int argc, char **argv)
     hbox = gtk_hbox_new (FALSE, 10);
 
     // cancel button
-    button = gm_create_label_button("Cancel", gm_quit_program, NULL);
+    button = gm_create_label_button("Cancel", (void*) gm_quit_program, NULL);
     gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
     gtk_widget_show(button);
 

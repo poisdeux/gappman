@@ -139,6 +139,8 @@ int gm_get_confpath_from_gappman(int portno, const char* hostname, gchar** path)
 		parse_confpath_message(path, msg);
     }
 
+    g_free(msg);
+
     g_io_channel_unref(gio);
     status = g_io_channel_shutdown( gio, TRUE, &gerror );
     if ( status == G_IO_STATUS_ERROR )
