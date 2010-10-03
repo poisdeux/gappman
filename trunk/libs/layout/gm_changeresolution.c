@@ -31,6 +31,8 @@ int gm_getpossibleresolutions (XRRScreenSize **sizes, int *nsize)
 
     *sizes = XRRConfigSizes(sc, nsize);
 
+		XRRFreeScreenConfigInfo(sc);
+
     return GM_SUCCES;
 }
 
@@ -73,16 +75,15 @@ static int get_nearest_rate(XRRScreenConfiguration *sc, int size, short *rate)
 static int get_nearest_size(XRRScreenConfiguration *sc, int *size, int width, int height)
 {
     int nsize;
-    int min_size_dist;
+    int min_size_dist, size_dist;
     int i;
     XRRScreenSize *sizes;
 
     sizes = XRRConfigSizes(sc, &nsize);
-    // Search wanted resolution in available resolutions
-    // Take resolution that best matches wanted resolution
-    // Higher resolutions should prevail over lower resolutions
-    // so we take < instead of <=.
-    min_size_dist = width + height;
+
+		//Initialize min_size_dist to the first available resolution from XRANDR
+    min_size_dist = abs((sizes[0].width + sizes[0].height) - (width + height));
+
     for (i = 0; i < nsize; i++)
     {
         if ( sizes[i].width == width && sizes[i].height == height )
@@ -90,15 +91,22 @@ static int get_nearest_size(XRRScreenConfiguration *sc, int *size, int width, in
             *size = i;
             break;
         } 
-		else if ( abs((sizes[i].width + sizes[i].height) - (width + height)) < min_size_dist )
-        {
-            min_size_dist = abs((sizes[i].width + sizes[i].height) - (width + height));
+				else 
+				{
+					size_dist = abs((sizes[i].width + sizes[i].height) - (width + height));
+
+    			// Higher resolutions should prevail over lower resolutions.
+    			// So if two consecutive sizes result in equal distances with 
+					// the requested resolution we take the first size.
+					if ( size_dist < min_size_dist )
+					{
+            min_size_dist = size_dist;
             *size = i;
+					}
         }
     }
     if (*size >= nsize) {
-        g_warning(
-            "Size %dx%d not found in available modes not changing resolution\n", width, height);
+        g_warning("Size %dx%d not found in available modes not changing resolution\n", width, height);
         return GM_SIZE_NOT_AVAILABLE;
     }
 
@@ -139,14 +147,14 @@ int gm_changeresolution (int width, int height)
     {
         //Grab X server while we mess with it.
         gdk_x11_display_grab ( gdk_dpy );
-
         XRRSelectInput ( GDK_DISPLAY_XDISPLAY(gdk_dpy), GDK_ROOT_WINDOW(), RRScreenChangeNotifyMask);
         XRRSetScreenConfigAndRate ( GDK_DISPLAY_XDISPLAY(gdk_dpy), sc, GDK_ROOT_WINDOW(), size, current_rotation, rate, CurrentTime);
-        XRRFreeScreenConfigInfo(sc);
 
         //Release X server
         gdk_x11_display_ungrab ( gdk_dpy );
     }
+
+    XRRFreeScreenConfigInfo(sc);
 
     return GM_SUCCES;
 }
@@ -172,5 +180,8 @@ int gm_get_current_size(XRRScreenSize* size)
     size_id = XRRConfigCurrentConfiguration (sc, &current_rotation);
 
     *size = sizes[size_id];
+
+		XRRFreeScreenConfigInfo(sc);
+
     return GM_SUCCES;
 }

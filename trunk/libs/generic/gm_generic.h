@@ -14,23 +14,17 @@
 #define __GAPPMAN_GENERIC_H__
 
 /**
-* Enumeration for error types.
-* Currently supported types are:
-* SUCCES: no error
-* NO_RANDR_EXTENSION: X server has no support for the RANDR extension
-* NO_SCREEN_CONFIGURATION: could not get a screen configuration for the current display. This means that the xrandr extension is not available for the current screen.
-* SIZE_NOT_AVAILABLE: provided width x height is not available
-* RATE_NOT_AVAILABLE: could not determine a proper rate for the new screen size
+* \enum gm_return_values
+* Enumeration for generic return values as used by the gappman lib
 */
-#define GM_SUCCES 0
-#define GM_NO_RANDR_EXTENSION 1
-#define GM_NO_SCREEN_CONFIGURATION 2
-#define GM_SIZE_NOT_AVAILABLE 3
-#define GM_RATE_NOT_AVAILABLE 4
-#define GM_COULD_NOT_RESOLVE_HOSTNAME 5
-#define GM_COULD_NOT_CONNECT 6
-#define GM_COULD_NOT_SEND_MESSAGE 7
-#define GM_COULD_NOT_DISCONNECT 8
-#define GM_COULD_NOT_LOAD_FILE 9
+#define GM_SUCCES 0	///< no errors detected
+#define GM_NO_RANDR_EXTENSION 1 ///< Xorg has no support for the XRANDR extension. This is fatal for gm_changeresolution
+#define GM_NO_SCREEN_CONFIGURATION  ///< No screen configuration could be retrieved. This is fatal for gm_changeresolution
+#define GM_SIZE_NOT_AVAILABLE 3 ///< No screen sizes found that match a requested resolution. This should never happen and is only possible if wrong values are passed. 
+#define GM_COULD_NOT_RESOLVE_HOSTNAME 4 
+#define GM_COULD_NOT_CONNECT 5
+#define GM_COULD_NOT_SEND_MESSAGE 6
+#define GM_COULD_NOT_DISCONNECT 7
+#define GM_COULD_NOT_LOAD_FILE 8
 
 #endif

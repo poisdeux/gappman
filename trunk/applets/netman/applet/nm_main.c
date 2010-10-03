@@ -22,7 +22,6 @@ static int main_button_width = 50;
 static int main_button_height = 50;
 static const char* conffile = "/etc/gappman/netman.xml";
 static int KEEP_RUNNING = 0;
-static int count = 0;
 static GMutex *gm_module_start_mutex = NULL;
 
 static gint exec_program(nm_elements* elt)
