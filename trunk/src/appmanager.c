@@ -37,12 +37,6 @@ static int screen_height=-1;
 static int window_width=-1;
 static int window_height=-1;
 
-struct appm_alignment
-{
-    float x;
-    float y;
-};
-
 void update_resolution(gchar* programname, int width, int height)
 {
     menu_elements* elt = NULL;

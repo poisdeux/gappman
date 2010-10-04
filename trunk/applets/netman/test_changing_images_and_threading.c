@@ -8,9 +8,12 @@
 
 static GtkWidget* button;
 
+/** \struct images
+* \brief list of images.
+*/ 
 struct images {
-	GtkWidget* image;
-	struct images *next;
+	GtkWidget* image; ///< an image
+	struct images *next; ///<  pointer to next images struct
 };
 
 struct images *list_of_images;

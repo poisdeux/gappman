@@ -26,7 +26,7 @@ int gm_changeresolution (int width, int height);
 /**
 * \brief Queries using Xrandr the possible screen resolutions
 * \param **sizes pointer to a list of XRRScreenSizes
-* \param *int pointer to integer that will hold the amount of available sizes
+* \param *size pointer to integer that will hold the amount of available sizes
 * \return int Error type, see enum error_types
 */
 int gm_getpossibleresolutions (XRRScreenSize **sizes, int *size);

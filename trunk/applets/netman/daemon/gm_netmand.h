@@ -20,21 +20,34 @@ static int gm_netmand_run_command(gchar* command, gchar** args);
 typedef struct _GmNetmand        GmNetmand;
 typedef struct _GmNetmandClass   GmNetmandClass;
 
+/**
+* \struct _GmNetmand
+* GObjectClass struct holding any instances of the gm_netmand object.
+*/
 struct _GmNetmand
 {
-  GObject parent_instance;
+  GObject parent_instance; ///< identify this struct as the parent object
 
   /* instance members */
 };
 
+/**
+* \struct _GmNetmandClass
+* GObjectClass struct holding a reference to the parent class
+* and any class members (vars and methods) 
+*/
 struct _GmNetmandClass
 {
-  GObjectClass parent_class;
+  GObjectClass parent_class; ///< identify this struct as the parent class
 
   /* class members */
 };
 
-/* used by GM_TYPE_NETMAND */
+/**
+* \brief used by GM_TYPE_NETMAND which should always return the GType
+* of the object type.
+* \return GType of object GM_NETMAND
+*/ 
 GType gm_netmand_get_type ();
 
 #endif /* __GM_NETMAND_H__ */
