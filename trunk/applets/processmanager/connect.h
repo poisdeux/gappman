@@ -16,9 +16,9 @@
 * \brief struct to hold the process ID and program name retrieved from Gappman
 */
 struct proceslist {
-    int pid;
-    gchar* name;
-    struct proceslist* prev;
+    int pid;	///< process ID of proces started by gappman
+    gchar* name; ///< programname as known by gappman
+    struct proceslist* prev; ///< pointer to next proces in proceslist
 };
 
 /**
