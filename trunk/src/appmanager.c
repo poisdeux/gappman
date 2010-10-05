@@ -1,6 +1,6 @@
-/***
+/**
  * \file appmanager.c
- *
+ * \brief The main application manager better known as gappman
  *
  *
  * GPL v2

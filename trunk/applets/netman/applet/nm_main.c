@@ -1,6 +1,6 @@
-/***
+/**
  * \file nm_main.c
- *
+ * \brief applet showing network status and allows users to analyse and restart the network.
  *
  *
  * GPL v2
@@ -21,7 +21,7 @@ static GtkButton *main_button = NULL;
 static int main_button_width = 50;
 static int main_button_height = 50;
 static const char* conffile = "/etc/gappman/netman.xml";
-static int KEEP_RUNNING = 0;
+static boolean KEEP_RUNNING = FALSE;
 static GMutex *gm_module_start_mutex = NULL;
 
 static gint exec_program(nm_elements* elt)
@@ -199,6 +199,12 @@ static void show_menu()
     gtk_widget_show(menuwin);
 }
 
+/**
+* \brief Initializes the module. Loads the configuration and starts the applet in failed mode.
+* \return int 
+*  - GM_SUCCES if initialization was succesful. 
+*  - GM_COULD_NOT_LOAD_FILE if the configuration file could not be loaded.
+*/
 G_MODULE_EXPORT int gm_module_init()
 {
     nm_elements* stati;
@@ -237,17 +243,27 @@ G_MODULE_EXPORT int gm_module_init()
     return GM_SUCCES;
 }
 
+/**
+* \brief Supposed to be used by gappman to make the module aware of its configuration file
+* Not really used so will be deprecated pretty soon.
+*/
 G_MODULE_EXPORT void gm_module_set_conffile(const char* filename)
 {
     conffile = filename;
 }
 
+/**
+* \brief Starts the applet checking network status
+* Uses global KEEP_RUNNING to determine if it should keep
+* checking the network status. If KEEP_RUNNING becomes FALSE
+* it will stop.
+*/
 G_MODULE_EXPORT void gm_module_start()
 {
 	nm_elements *stati;
 
 	g_mutex_lock(gm_module_start_mutex);
-	KEEP_RUNNING = 1;
+	KEEP_RUNNING = TRUE;
     while (KEEP_RUNNING)
     {
 		stati = nm_get_stati();
@@ -270,11 +286,16 @@ G_MODULE_EXPORT void gm_module_start()
 	g_mutex_unlock(gm_module_start_mutex);
 }
 
+/**
+* \brief Stops the applet
+* Sets KEEP_RUNNING to FALSE and frees the stati 
+* list of status structs.
+*/
 G_MODULE_EXPORT int gm_module_stop()
 {
     nm_elements* stati;
     stati = nm_get_stati();
-	KEEP_RUNNING = 0;	
+	  KEEP_RUNNING = FALSE;	
 
 	while(stati != NULL)
 	{
@@ -286,12 +307,21 @@ G_MODULE_EXPORT int gm_module_stop()
     return GM_SUCCES;
 }
 
+/**
+* \brief Sets the icon size as determined by gappman
+* \param width width of the icon
+* \param height height of the icon
+*/
 G_MODULE_EXPORT void gm_module_set_icon_size(int width, int height)
 {
     main_button_width = width;
     main_button_height = height;
 }
 
+/**
+* \brief returns the button that gappman should add to the applet-bar
+* \return GtkWidget
+*/
 G_MODULE_EXPORT GtkWidget *gm_module_get_widget()
 {
     return GTK_WIDGET(main_button);

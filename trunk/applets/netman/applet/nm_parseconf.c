@@ -1,4 +1,4 @@
-/***
+/**
  * \file nm_parseconf.c
  *
  *

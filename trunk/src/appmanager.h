@@ -1,7 +1,9 @@
 /***
  * \file appmanager.h
- *
- *
+ * \brief The main application manager better known as gappman
+ * Note that these exported functions should not be used. All
+ * generic code that should be used by other components like
+ * applets should be included in one of the libs.
  *
  * GPL v2
  *

@@ -1,4 +1,4 @@
-/***
+/**
  * \file gm_netmand.c
  *
  *
