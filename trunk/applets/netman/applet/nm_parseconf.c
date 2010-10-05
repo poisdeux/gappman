@@ -16,6 +16,12 @@ static nm_elements* stati;
 static nm_elements* actions;
 static const char *cache_location;
 
+/**
+* \brief creates a new nm_element and initializes it.
+* \param prev pointer to the previous nm_element if it exist otherwise it should be NULL.
+* \return pointer to the new nm_element 
+*/
+
 struct nm_element* create_nm_element(nm_elements* prev)
 {
     struct nm_element *elt;
