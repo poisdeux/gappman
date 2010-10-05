@@ -5,15 +5,13 @@
  *
  * GPL v2
  *
- * Authors:
- *   Martijn Brekhof <m.brekhof@gmail.com>
+ * \author Martijn Brekhof <m.brekhof@gmail.com>
  */
 #include <stdlib.h>
 #include <dbus/dbus-glib.h>
 #include "gm_netmand.h"
 
-/* will create gm_netmand_get_type and set gm_netmand_parent_class */
-G_DEFINE_TYPE (GmNetmand, gm_netmand, G_TYPE_OBJECT);
+G_DEFINE_TYPE (GmNetmand, gm_netmand, G_TYPE_OBJECT); ///< will create gm_netmand_get_type and set gm_netmand_parent_class
 
 static int gm_netmand_run_command(gchar* command, gchar** args)
 {
@@ -35,8 +33,10 @@ static void gm_netmand_init (GmNetmand *self)
 {
 }
 
-int
-main (int argc, char **argv)
+/**
+* \brief starts the mainloop and starts a D-Bus session
+*/
+void main ()
 {
   DBusGConnection *bus;
   DBusGProxy *bus_proxy;

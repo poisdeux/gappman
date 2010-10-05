@@ -21,15 +21,15 @@ static int gm_netmand_run_command(gchar* command, gchar** args);
 /*
  * Type macros.
  */
-#define GM_TYPE_NETMAND                  (gm_netmand_get_type ())
-#define GM_NETMAND(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), GM_TYPE_NETMAND, GmNetmand))
-#define GM_IS_NETMAND(obj)               (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GM_TYPE_NETMAND))
-#define GM_NETMAND_CLASS(klass)          (G_TYPE_CHECK_CLASS_CAST ((klass), GM_TYPE_NETMAND, GmNetmandClass))
-#define GM_IS_NETMAND_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), GM_TYPE_NETMAND))
-#define GM_NETMAND_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), GM_TYPE_NETMAND, GmNetmandClass))
+#define GM_TYPE_NETMAND                  (gm_netmand_get_type ()) ///< always returns the gm_netmand object type
+#define GM_NETMAND(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), GM_TYPE_NETMAND, GmNetmand)) ///< Used to cast an object to type gm_netmand
+#define GM_IS_NETMAND(obj)               (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GM_TYPE_NETMAND)) ///< Checks whether obj is of type gm_netmand
+#define GM_NETMAND_CLASS(klass)          (G_TYPE_CHECK_CLASS_CAST ((klass), GM_TYPE_NETMAND, GmNetmandClass)) ///< Used to cast klass to class gm_netmand
+#define GM_IS_NETMAND_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), GM_TYPE_NETMAND)) ///< Checks whether klass is of class gm_netmand
+#define GM_NETMAND_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), GM_TYPE_NETMAND, GmNetmandClass)) ///< Returns the gm_netmand class of obj
 
-typedef struct _GmNetmand        GmNetmand;
-typedef struct _GmNetmandClass   GmNetmandClass;
+typedef struct _GmNetmand        GmNetmand; ///< Typedef to make switching to different struct easier
+typedef struct _GmNetmandClass   GmNetmandClass; ///< Typedef to make switching to different struct easier
 
 /**
 * \struct _GmNetmand
