@@ -1,4 +1,4 @@
-/***
+/**
  * \file appmanager.h
  * \brief The main application manager better known as gappman
  * Note that these exported functions should not be used. All

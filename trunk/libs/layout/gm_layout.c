@@ -1,6 +1,6 @@
 /**
  * \file gm_layout.c
- *
+ * \brief Main layout functions to create the user interface
  *
  *
  * GPL v2

@@ -1,3 +1,14 @@
+/**
+ * \file gm_netmand.h
+ * Daemon that checks network status on behalf of the gm_netman applet 
+ * Used D-Bus for communication with the applet
+ *
+ * GPL v2
+ *
+ * Authors:
+ *   Martijn Brekhof <m.brekhof@gmail.com>
+ */
+
 #ifndef __GM_NETMAND_H__
 #define __GM_NETMAND_H__
 #include <glib.h>
