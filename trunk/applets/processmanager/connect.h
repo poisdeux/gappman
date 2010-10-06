@@ -24,8 +24,8 @@ struct proceslist {
 /**
 * \brief Connects to gappman and requests the proceslist
 * \param portno portnumber gappman listens to
-* \param server servername of host that runs gappman
-* \param starteprocs adres of the pointer to a proceslist structure (call by reference)
+* \param hostname servername of host that runs gappman
+* \param startedprocs adres of the pointer to a proceslist structure (call by reference)
 * \return integer value
 *			0: OK
 *			1: Could not resolve hostname
