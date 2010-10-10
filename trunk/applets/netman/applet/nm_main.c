@@ -15,55 +15,39 @@
 #include <sys/wait.h>
 #include <gm_layout.h>
 #include <gm_generic.h>
+#include <dbus/dbus-glib.h>
 #include "nm_parseconf.h"
 
 static GtkButton *main_button = NULL;
 static int main_button_width = 50;
 static int main_button_height = 50;
 static const char* conffile = "/etc/gappman/netman.xml";
-static boolean KEEP_RUNNING = FALSE;
-static GMutex *gm_module_start_mutex = NULL;
+static gboolean KEEP_RUNNING = FALSE;
 
-static gint exec_program(nm_elements* elt)
+static void connect_to_dbus(void)
 {
-    int status = -1;
-    int i;
-	char **args;
-    __pid_t childpid;
-    FILE *fp;
+  DBusGConnection *bus;
+  DBusGProxy *remote_object;
+  GError *error = NULL;
+  gint status;
 
+  g_type_init ();
 
-    fp = fopen((char *) elt->exec,"r");
-    if ( fp )
-    {
-        fclose(fp);
+  bus = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
+  if (!bus)
+    g_error ("Couldn't connect to session bus: %s\n", error->message);
 
-        childpid = fork();
-        if ( childpid == 0 )
-        {
-            /**
-            Create argument list. First element should be the filename
-            of the executable and last element needs to be NULL.
-            see man exec for more details
-            */
-            args = (char **) malloc((elt->numArguments + 2)* sizeof(char *));
-            args[0] = (char *) elt->exec;
-            for (i = 0; i < elt->numArguments; i++ )
-            {
-                args[i+1] = elt->args[i];
-            }
-            args[i+1] = NULL;
+  remote_object = dbus_g_proxy_new_for_name (bus,
+                         "gappman.NetmanService",
+                         "/GmNetmand",
+                         "gappman.NetmanInterface");
+  
+  //if (!dbus_g_proxy_call (remote_object, "RunCommand", &error,
+  //            G_TYPE_STRING, "Hello", G_TYPE_STRV, "arg1", G_TYPE_INVALID,
+  //            G_TYPE_INT, &status, G_TYPE_INVALID))
+  //  g_error ("Failed to complete RunCommand");
 
-            execvp((char *) elt->exec, args);
-            _exit(0);
-        }
-        wait(&status);
-    }
-    else
-    {
-        g_warning("Could not open %s\n", elt->exec);
-    }
-    return WEXITSTATUS(status);
+  g_object_unref (G_OBJECT (remote_object));
 }
 
 static void switch_status(nm_elements* stati)
@@ -90,7 +74,7 @@ static void check_status()
     while (stati != NULL)
     {
 			prev_status = stati->status;
-    	stati->status = exec_program(stati);
+    		//stati->status = run_program(stati);
 			//Switch only if status is fail or different from previous status
 			//i.e. from fail to success.
 			g_debug("TEST:%s stati->status=%d   prev_status=%d", stati->name, stati->status, prev_status);
@@ -105,11 +89,11 @@ static void check_status()
 
 static void start_action(GtkWidget* widget, GdkEvent *event, nm_elements* action)
 {
-		//Only start program  if spacebar or mousebutton is pressed
+	//Only start program  if spacebar or mousebutton is pressed
     if ( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
     {
-	    exec_program(action);
-		}
+	    //exec_program(action);
+	}
 }
 
 static void destroy_widget(GtkWidget* dummy, GdkEvent *event, GtkWidget* widget)
@@ -209,8 +193,6 @@ G_MODULE_EXPORT int gm_module_init()
 {
     nm_elements* stati;
 	
-	g_assert(gm_module_start_mutex == NULL);
-	gm_module_start_mutex = g_mutex_new();
 
     if(nm_load_conf(conffile) != 0)
 			return GM_COULD_NOT_LOAD_FILE;
@@ -240,6 +222,8 @@ G_MODULE_EXPORT int gm_module_init()
     gtk_container_add(GTK_CONTAINER(main_button), GTK_WIDGET(stati->image_fail));
     gtk_widget_show(GTK_WIDGET(main_button));
 
+	connect_to_dbus();
+	
     return GM_SUCCES;
 }
 
@@ -262,7 +246,6 @@ G_MODULE_EXPORT void gm_module_start()
 {
 	nm_elements *stati;
 
-	g_mutex_lock(gm_module_start_mutex);
 	KEEP_RUNNING = TRUE;
     while (KEEP_RUNNING)
     {
@@ -283,7 +266,6 @@ G_MODULE_EXPORT void gm_module_start()
 			stati = stati->next;
 		}
     }
-	g_mutex_unlock(gm_module_start_mutex);
 }
 
 /**

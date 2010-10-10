@@ -79,11 +79,12 @@ process_nm_element(xmlTextReaderPtr reader, nm_elements *elt, const char* elemen
     xmlChar *name, *value;
     int ret = 1;
 
-    if (name == NULL)
-        name = BAD_CAST "--";
+    name = NULL;
 
     while ( ret == 1 )
     {
+    	if (name == NULL)
+        	name = BAD_CAST "--";
 
         if ( xmlTextReaderNodeType(reader) == 1 )
         {
@@ -182,7 +183,7 @@ nm_elements* nm_get_actions()
 * \param **elts pointer to the linked list of menu element structures.
 * \return nothing. Use the **elts call by reference to retrieve the menu elements.
 */
-void static process_nm_elements(const char* element_name, const char* group_element_name, xmlTextReaderPtr reader, nm_elements **elts)
+static void process_nm_elements(const char* element_name, const char* group_element_name, xmlTextReaderPtr reader, nm_elements **elts)
 {
     int ret = 1;
     xmlChar *name;
