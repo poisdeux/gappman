@@ -54,7 +54,11 @@ GtkWidget* gm_load_image(const char* elt_name, const char* elt_logo, const char*
 * \brief shows a question dialog with regards to gappman fontsize.
 * \param message pointer to char that will hold the general question
 * \param msg_button1 pointer to char that will hold the message for the first button.
+* \param callback1 callback function that should be called when the first button is pressed. Use NULL to disable using a callbackfunction for the first button
 * \param msg_button2 pointer to char that will hold the message for the second button.
+* \param data1 void pointer pointing to any data that should be passed as an argument when calling the callbackfunction callback1
+* \param callback2 callback function that should be called when the second button is pressed. Use NULL to disable using a callbackfunction for the second button
+* \param data2 void pointer pointing to any data that should be passed as an argument when calling the callbackfunction callback2
 * \param mainwin pointer to main window GtkWidget
 */
 void gm_show_confirmation_dialog(const gchar* message, const gchar* msg_button1, void* callback1, void* data1, const gchar* msg_button2, void* callback2, void* data2, GtkWidget *mainwin);
@@ -97,30 +101,34 @@ GtkWidget *gm_create_label_button(gchar* buttontext, void *callbackfunc, void *d
 
 /**
 * \brief Create a single button possibly with a label
-* \param *elt pointer to menu_element struct that contains the logo image filename.
+* \param elt pointer to menu_element struct that contains the logo image filename.
 * \param max_width button width
 * \param max_height button height
-* \param *processevent callback function that will be called when button is pressed
+* \param processevent callback function that will be called when button is pressed
+* \return GtkWidget pointer to the new button
 */
 GtkWidget* gm_create_button ( menu_elements *elt, int max_width, int max_height, void (*processevent)(GtkWidget*, GdkEvent*, menu_elements*) );
 
 /**
 * \brief Create a single empty button
-* \param *processevent callback function that will be called when button is pressed
+* \param callbackfunc callback function that will be called when button is pressed
+* \param data data to be parsed as argument when calling callbackfunc
+* \return GtkWidget pointer to the new button
 */
 GtkWidget* gm_create_empty_button ( void* callbackfunc, void *data);
 
 /**
 * \brief Create the button layout using the available screen height and width
-* \param *elts pointer to first menu_elements structure
-* \param *processevent function pointer to function which should be used as callback when a button is pressed.
+* \param elts pointer to first menu_elements structure
+* \param processevent function pointer to function which should be used as callback when a button is pressed.
 * \param calc_fontsize boolean if true will recalculate fontsize, if false it will take the current fontsize.
+* \return GtkWidget pointer to a vbox
 */
 GtkWidget* gm_create_buttonbox( menu_elements *elts, void (*processevent)(GtkWidget*, GdkEvent*, menu_elements*), gboolean calc_fontsize);
 
 /**
 * \brief Creates the panel layout using the available screen height and width
-* \param *elts pointer to first menu_elements structure
+* \param elts pointer to first menu_elements structure
 * \return GtkWidget pointer to container holding the panel
 */
 GtkWidget* gm_create_panel( menu_elements *elts);

@@ -44,7 +44,10 @@ static void printElements(xmlTextReaderPtr reader)
     }
 }
 
-struct menu_element* createMenuElement()
+/**
+* \brief creates and initializes a new menu_element struct
+*/
+static struct menu_element* createMenuElement()
 {
     struct menu_element *elt;
     elt = (menu_elements *) malloc(sizeof(menu_elements));

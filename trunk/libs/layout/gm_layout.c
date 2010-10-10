@@ -18,11 +18,11 @@
 #include <gm_generic.h>
 #include <gm_parseconf.h>
 
-static int fontsize = 10*1024; //< the default generic fontsize for all elements. This usually gets updated by menu building functions below.
+static int fontsize = 10*1024; ///< the default generic fontsize for all elements. This usually gets updated by menu building functions below.
 static int	screen_width = 800;
 static int	screen_height = 600;
 
-#define MAXCHARSINLABEL 15;
+#define MAXCHARSINLABEL 15; ///< amount of characters we take as a maximum to determine the fontsize.
 
 static void destroy_widget( GtkWidget *widget, gpointer data )
 {
@@ -479,12 +479,6 @@ static int calculateAmountOfElementsPerColumn(int box_width, int box_height, int
     }
 }
 
-/**
-* \brief Create a single button
-* \param max_width button width
-* \param max_height button height
-* \param *processevent callback function which must be called when button is pressed.
-*/
 GtkWidget* gm_create_empty_button ( void* callbackfunc, void *data)
 {
     GtkWidget *button;
@@ -513,11 +507,6 @@ GtkWidget* gm_create_empty_button ( void* callbackfunc, void *data)
     return button;
 }
 
-/**
-* \brief Create a single button
-* \param *elt pointer to menu_element struct that contains the logo image filename.
-* \param max_width button width
-*/
 GtkWidget* gm_create_button ( menu_elements *elt, int max_width, int max_height, void (*processevent)(GtkWidget*, GdkEvent*, menu_elements*) )
 {
     GtkWidget *button, *imagelabelbox;

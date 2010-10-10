@@ -1,5 +1,5 @@
 /**
- * \file main.c
+ * \file applets/processmanager/main.c
  *
  *
  *

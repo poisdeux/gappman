@@ -1,13 +1,16 @@
-/***
+/**
  * \file gm_connect.h
- *
+ * \brief generic functions to retrieve or sent information from or to gappman
  *
  *
  * GPL v2
  *
- * Authors:
+ * \author
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
+
+#ifndef __GAPPMAN_CONNECT_H__
+#define __GAPPMAN_CONNECT_H__
 
 /**
 * \brief Connects to gappman and requests the fontsize
@@ -46,3 +49,5 @@ int gm_connect_to_gappman(int portno, const char* hostname, int *sockfd);
 * \return integer value as defined in libs/generic/gm_generic.h
 */
 int gm_send_and_receive_message(int portno, const char* hostname, gchar *msg, void (*callbackfunc)(gchar*));
+
+#endif

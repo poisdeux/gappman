@@ -38,7 +38,7 @@ int getStartedProcsFromGappman(int portno, const char* hostname, struct procesli
 /**
 * \brief Connects to gappman and requests the fontsize
 * \param portno portnumber gappman listens to
-* \param server servername of host that runs gappman
+* \param hostname host that runs gappman
 * \param fontsize adres of the pointer to an integer value (call by reference)
 * \return integer value
 *			0: OK

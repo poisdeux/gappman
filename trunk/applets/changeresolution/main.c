@@ -1,5 +1,5 @@
 /**
- * \file main.c
+ * \file applets/changeresolution/main.c
  *
  *
  *

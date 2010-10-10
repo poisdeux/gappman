@@ -24,10 +24,10 @@
 #include "appmanager.h"
 #include "listener.h"
 
-#define SEND_PROCESS_LIST 1
-#define SEND_FONTSIZE 2
-#define UPDATE_RES 3
-#define SEND_CONFPATH 4
+#define SEND_PROCESS_LIST 1 ///< message id used to specify we received a request to sent the current list of programs started by gappman
+#define SEND_FONTSIZE 2 ///< message id used to specify we received a request to sent the current default fontsize used by gappman
+#define UPDATE_RES 3 ///< message id used to specify we received an resolution update request
+#define SEND_CONFPATH 4 ///< message id used to specify we received a request to sent the configuration path gappman uses
 
 static GIOChannel* gio;
 static const gchar* confpath = "";
@@ -298,9 +298,4 @@ gboolean gappman_close_listener (GIOChannel* close_gio)
 void gappman_set_confpath(const gchar *path)
 {
 	confpath = path;
-}
-
-void gappman_set_rcpath(const gchar *path)
-{
-	rcpath = path;
 }

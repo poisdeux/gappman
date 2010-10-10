@@ -23,9 +23,7 @@
 #include <gm_generic.h>
 #include "gm_connect.h"
 
-gchar *confpath = NULL;
- 
-void parse_confpath_message(gchar **path, gchar *msg)
+static void parse_confpath_message(gchar **path, gchar *msg)
 {
     gchar** contentssplit = NULL;
     int i = 0;

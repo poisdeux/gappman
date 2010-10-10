@@ -27,8 +27,8 @@
 #include <gm_generic.h>
 #include "appmanager.h"
 
-struct appwidgetinfo* global_appw;
-menu_elements *programs;
+struct appwidgetinfo* started_apps; ///< holds the currently started apps
+menu_elements *programs; ///< list of all programs gappman manages. Currently only programs need to be global as only programs have meta-info that can be updated. E.g. resolution updates for a specific program. 
 
 static int KEEP_BELOW=0;
 static int WINDOWED=0;
@@ -58,7 +58,7 @@ void update_resolution(gchar* programname, int width, int height)
 
 struct appwidgetinfo* get_started_apps()
 {
-    return global_appw;
+    return started_apps;
 }
 
 /**
@@ -88,7 +88,7 @@ static gint check_app_status(struct appwidgetinfo* local_appw)
         {
             //local_appw only element in the list,
             //so we reset the list.
-            global_appw = NULL;
+            started_apps = NULL;
             //change resolution back to gappman menu resolution
             gm_changeresolution(screen_width, screen_height);
         }
@@ -116,8 +116,8 @@ static gint check_app_status(struct appwidgetinfo* local_appw)
             {
                 //local_appw is last element
                 //we therefore need to relocate
-                //the global_appw pointer
-                global_appw = local_appw->prev;
+                //the started_apps pointer
+                started_apps = local_appw->prev;
             }
 
             if ( elt != NULL )
@@ -154,15 +154,15 @@ static void create_new_appwidgetinfo(int PID, GtkWidget *widget, struct menu_ele
         local_appw->PID = PID;
         local_appw->menu_elt = elt;
         local_appw->widget = widget;
-        local_appw->prev = global_appw;
+        local_appw->prev = started_apps;
         local_appw->next = NULL;
-        if ( global_appw != NULL )
+        if ( started_apps != NULL )
         {
-            global_appw->next = local_appw;
+            started_apps->next = local_appw;
         }
-        //shift global global_appw pointer so it always points to
+        //shift global started_apps pointer so it always points to
         //last started process
-        global_appw = local_appw;
+        started_apps = local_appw;
     }
 }
 
@@ -219,7 +219,7 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
         else
         {
             create_new_appwidgetinfo(childpid, widget, elt);
-            g_timeout_add(1000, (GSourceFunc) check_app_status, (gpointer) global_appw);
+            g_timeout_add(1000, (GSourceFunc) check_app_status, (gpointer) started_apps);
         }
     }
     else
@@ -434,7 +434,7 @@ int main (int argc, char **argv)
 	gappman_set_confpath(conffile);
 
     /** INIT */
-    global_appw = NULL;
+    started_apps = NULL;
 
     /** Load configuration elements */
     gm_load_conf(conffile);
