@@ -18,6 +18,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <getopt.h>
+#include <errno.h>
 #include <sys/socket.h>
 #include <string.h>
 #include <gm_changeresolution.h>
@@ -208,7 +209,11 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
         childpid = fork();
         if ( childpid == 0 )
         {
-            execvp((char *) elt->exec, args);
+            if ( execvp((char *) elt->exec, args) == -1 )
+			{
+				g_warning("Could not execute %s: errno: %d\n", elt->exec, errno);
+				_exit(1);
+			}	
             _exit(0);
         }
         else if (  childpid < 0 )

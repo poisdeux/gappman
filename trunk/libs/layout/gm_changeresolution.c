@@ -31,8 +31,6 @@ int gm_getpossibleresolutions (XRRScreenSize **sizes, int *nsize)
 
     *sizes = XRRConfigSizes(sc, nsize);
 
-		XRRFreeScreenConfigInfo(sc);
-
     return GM_SUCCES;
 }
 

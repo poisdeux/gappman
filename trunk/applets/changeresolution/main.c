@@ -43,16 +43,18 @@ static void usage()
     printf("--gtkrc <GTKRCFILENAME>:\t\t gtk configuration file which can be used for themeing\n");
     printf("--windowed:\t\t creates a border around the window\n");
 
+	exit(1);
 }
 
 /**
-* \brief callback function to quit the program
+* \brief callback function to quit the program and free the XRRFreeScreenConfigInfo structure
 * \param *widget pointer to widget to destroy
 * \param data mandatory argument for callback function, may be NULL.
 */
 static void destroy( GtkWidget *widget,
                      gpointer   data )
 {
+	XRRFreeScreenConfigInfo(sc);
     gtk_main_quit ();
 }
 
@@ -304,9 +306,9 @@ int main (int argc, char **argv)
     {
         gtk_window_set_decorated (GTK_WINDOW (mainwin), TRUE);
         (void) g_signal_connect (G_OBJECT (mainwin), "delete_event",
-                          G_CALLBACK (destroy), NULL);
+                          G_CALLBACK (destroy), sizes);
         (void) g_signal_connect (G_OBJECT (mainwin), "destroy",
-                          G_CALLBACK (destroy), NULL);
+                          G_CALLBACK (destroy), sizes);
     }
 
     //get generic fontsize from gappman
@@ -352,7 +354,7 @@ int main (int argc, char **argv)
         }
         hbox = gtk_hbox_new (FALSE, 10);
         // cancel button
-        button = gm_create_label_button("Done", (void *) gm_quit_program, NULL);
+        button = gm_create_label_button("Done", destroy, NULL);
         gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
         gtk_widget_show(button);
 
