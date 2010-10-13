@@ -61,8 +61,17 @@ void gm_show_confirmation_dialog(const gchar* message, const gchar* msg_button1,
     g_warning("%s", message);
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
-    gtk_window_set_transient_for (GTK_WINDOW(window), GTK_WINDOW(mainwin));
-    gtk_window_set_position(GTK_WINDOW (window), GTK_WIN_POS_CENTER_ON_PARENT);
+    if ( mainwin != NULL )
+    {
+      gtk_window_set_transient_for (GTK_WINDOW(window), GTK_WINDOW(mainwin));
+      gtk_window_set_position(GTK_WINDOW (window), GTK_WIN_POS_CENTER_ON_PARENT);
+    }
+    else
+    {
+      gtk_window_set_position(GTK_WINDOW (window), GTK_WIN_POS_CENTER);
+    }
+
+		gtk_widget_grab_focus(window);
 
     //Make window transparent
     //gtk_window_set_opacity (GTK_WINDOW (window), 0.8);
@@ -151,8 +160,15 @@ void gm_show_error_dialog(const gchar* message, GtkWidget *mainwin, void *callba
     g_warning("%s", message);
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
-    gtk_window_set_transient_for (GTK_WINDOW(window), GTK_WINDOW(mainwin));
-    gtk_window_set_position(GTK_WINDOW (window), GTK_WIN_POS_CENTER_ON_PARENT);
+		if ( mainwin != NULL )
+    {
+			gtk_window_set_transient_for (GTK_WINDOW(window), GTK_WINDOW(mainwin));
+    	gtk_window_set_position(GTK_WINDOW (window), GTK_WIN_POS_CENTER_ON_PARENT);
+		}
+		else
+		{
+			gtk_window_set_position(GTK_WINDOW (window), GTK_WIN_POS_CENTER);
+		}
 
     //Make window transparent
     //gtk_window_set_opacity (GTK_WINDOW (window), 0.8);

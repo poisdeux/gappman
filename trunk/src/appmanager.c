@@ -91,7 +91,7 @@ static gint check_app_status(struct appwidgetinfo* local_appw)
             //so we reset the list.
             started_apps = NULL;
             //change resolution back to gappman menu resolution
-            gm_changeresolution(screen_width, screen_height);
+            gm_res_changeresolution(screen_width, screen_height);
         }
         else
         {
@@ -125,7 +125,7 @@ static gint check_app_status(struct appwidgetinfo* local_appw)
             {
                 if ( elt->app_width > 0 && elt->app_height > 0 )
                 {
-                    gm_changeresolution(elt->app_width, elt->app_height);
+                    gm_res_changeresolution(elt->app_width, elt->app_height);
                 }
             }
         }
@@ -203,7 +203,7 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
 
         if ( elt->app_width > 0 && elt->app_height > 0 )
         {
-            gm_changeresolution(elt->app_width, elt->app_height);
+            gm_res_changeresolution(elt->app_width, elt->app_height);
         }
 
         childpid = fork();
@@ -433,6 +433,8 @@ int main (int argc, char **argv)
         }
     }
 
+
+	gm_res_init();
 
 	//set confpath so other programs can retrieve
 	//the configuration file gappman used

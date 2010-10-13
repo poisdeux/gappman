@@ -59,14 +59,14 @@ GtkWidget* gm_load_image(const char* elt_name, const char* elt_logo, const char*
 * \param data1 void pointer pointing to any data that should be passed as an argument when calling the callbackfunction callback1
 * \param callback2 callback function that should be called when the second button is pressed. Use NULL to disable using a callbackfunction for the second button
 * \param data2 void pointer pointing to any data that should be passed as an argument when calling the callbackfunction callback2
-* \param mainwin pointer to main window GtkWidget
+* \param mainwin pointer to parent window GtkWidget that called gm_show_confirmation_dialog. If NULL dialog is positioned in the center.
 */
 void gm_show_confirmation_dialog(const gchar* message, const gchar* msg_button1, void* callback1, void* data1, const gchar* msg_button2, void* callback2, void* data2, GtkWidget *mainwin);
 
 /**
 * \brief shows an error dialog with regards to gappman fontsize.
 * \param message pointer to char that will hold the message
-* \param mainwin pointer to main window GtkWidget
+* \param mainwin pointer to parent window GtkWidget that called gm_show_error_dialog. If NULL dialog is positioned in the center.
 * \param callback pointer to callback function that should be called when Close button is pressed. If NULL the default action will be taken which simply destroys this error dialog.
 */
 void gm_show_error_dialog(const gchar* message, GtkWidget *mainwin, void* callback);

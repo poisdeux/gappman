@@ -47,14 +47,14 @@ static void usage()
 }
 
 /**
-* \brief callback function to quit the program and free the XRRFreeScreenConfigInfo structure
+* \brief callback function to quit the program 
 * \param *widget pointer to widget to destroy
 * \param data mandatory argument for callback function, may be NULL.
 */
 static void destroy( GtkWidget *widget,
                      gpointer   data )
 {
-	XRRFreeScreenConfigInfo(sc);
+		gm_res_free();
     gtk_main_quit ();
 }
 
@@ -64,7 +64,7 @@ static void revert_to_old_res(GtkWidget *widget, GdkEvent *event, XRRScreenSize*
     //Check if spacebar or mousebutton is pressed
     if ( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
     {
-    	if ( gm_changeresolution(size->width, size->height) == GM_SIZE_NOT_AVAILABLE )
+    	if ( gm_res_changeresolution(size->width, size->height) == GM_SIZE_NOT_AVAILABLE )
 		{
 			gm_show_error_dialog("Could not change resolution", mainwin, NULL);	
 		}
@@ -84,7 +84,7 @@ static void set_default_res_for_program( GtkWidget *widget, GdkEvent *event, men
     //Check if spacebar or mousebutton is pressed
     if ( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
     {
-        if( gm_get_current_size(&current_size) == GM_SUCCES )
+        if( gm_res_get_current_size(&current_size) == GM_SUCCES )
 		{
         	msg = g_strdup_printf("::updateres::%s::%d::%d::", elt->name, current_size.width, current_size.height);
         	if ( gm_send_and_receive_message(2103, "localhost", msg, NULL) != GM_SUCCES )
@@ -167,12 +167,12 @@ static void changeresolution(GtkWidget *widget, GdkEvent *event, XRRScreenSize *
     if ( ((GdkEventKey*)event)->keyval != 32 && ((GdkEventButton*)event)->button != 1)
 			return;
 
-    if ( gm_get_current_size(&oldsize) != GM_SUCCES )
+    if ( gm_res_get_current_size(&oldsize) != GM_SUCCES )
 	{
 		g_warning("Could not get current screen resolution");
 	}
 
-    if ( gm_changeresolution(size[0].width, size[0].height) != GM_SUCCES )
+    if ( gm_res_changeresolution(size[0].width, size[0].height) != GM_SUCCES )
 	{
 		gm_show_error_dialog("Could not change screen resolution", NULL, NULL);
 		return;
@@ -330,11 +330,13 @@ int main (int argc, char **argv)
 		}
     }
 
-    ret_value = gm_getpossibleresolutions(&sizes, &nsize);
+		gm_res_init();
+			
+    ret_value = gm_res_getpossibleresolutions(&sizes, &nsize);
     if (ret_value != GM_SUCCES)
     {
         g_warning("Error could not get possible resolutions (error_type: %d)\n", ret_value);
-        gm_show_error_dialog("Changing screen resolution is not supported.", mainwin, (void *) destroy);
+        gm_show_error_dialog("Changing screen resolution is not supported.", NULL, (void *) destroy);
     }
     else
     {

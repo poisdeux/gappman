@@ -1,5 +1,5 @@
 /**
- * \file gm_changeresolution.c
+ * \file gm_res_changeresolution.c
  *
  *
  *
@@ -16,19 +16,37 @@
 #include <gm_changeresolution.h>
 #include <gm_generic.h>
 
+static XRRScreenConfiguration *sc = NULL;
 
-int gm_getpossibleresolutions (XRRScreenSize **sizes, int *nsize)
+void gm_res_free()
 {
-    GdkDisplay *gdk_dpy;
-    XRRScreenConfiguration *sc;
+	XRRFreeScreenConfigInfo(sc);
+}
 
-    gdk_dpy = gdk_display_get_default ();
+int gm_res_init()
+{
+  GdkDisplay *gdk_dpy;
 
-    sc = XRRGetScreenInfo ( GDK_DISPLAY_XDISPLAY(gdk_dpy), GDK_ROOT_WINDOW() );
+  gdk_dpy = gdk_display_get_default ();
 
+	if (sc == NULL)
+	{	
+		sc = XRRGetScreenInfo ( GDK_DISPLAY_XDISPLAY(gdk_dpy), GDK_ROOT_WINDOW() );
+		return GM_SUCCES;
+	}
+	else
+	{
+		g_warning("gm_res already initialized");
+		return GM_FAIL;
+	}
+}
+
+int gm_res_getpossibleresolutions (XRRScreenSize **sizes, int *nsize)
+{
     if (sc == NULL)
-        return GM_NO_SCREEN_CONFIGURATION;
-
+    {
+	    return GM_NO_SCREEN_CONFIGURATION;
+		}
     *sizes = XRRConfigSizes(sc, nsize);
 
     return GM_SUCCES;
@@ -112,7 +130,7 @@ static int get_nearest_size(XRRScreenConfiguration *sc, int *size, int width, in
     return GM_SUCCES;
 }
 
-int gm_changeresolution (int width, int height)
+int gm_res_changeresolution (int width, int height)
 {
     XRRScreenConfiguration *sc;
     Rotation current_rotation;
@@ -123,8 +141,6 @@ int gm_changeresolution (int width, int height)
     GdkDisplay *gdk_dpy;
 
     gdk_dpy = gdk_display_get_default ();
-
-    sc = XRRGetScreenInfo ( GDK_DISPLAY_XDISPLAY(gdk_dpy), GDK_ROOT_WINDOW() );
 
     if (sc == NULL)
         return GM_NO_SCREEN_CONFIGURATION;
@@ -157,7 +173,7 @@ int gm_changeresolution (int width, int height)
     return GM_SUCCES;
 }
 
-int gm_get_current_size(XRRScreenSize* size)
+int gm_res_get_current_size(XRRScreenSize* size)
 {
     int nsize;
     SizeID size_id;
@@ -167,8 +183,6 @@ int gm_get_current_size(XRRScreenSize* size)
     XRRScreenSize *sizes;
 
     gdk_dpy = gdk_display_get_default ();
-
-    sc = XRRGetScreenInfo ( GDK_DISPLAY_XDISPLAY(gdk_dpy), GDK_ROOT_WINDOW() );
 
     if (sc == NULL)
         return GM_NO_SCREEN_CONFIGURATION;
