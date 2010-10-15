@@ -229,7 +229,7 @@ int main (int argc, char **argv)
     gtk_widget_show (vbox);
 
     //make sure the widget grabs keyboard and mouse focus
-    gtk_grab_add(mainwin);
+    gtk_widget_grab_focus(mainwin);
 
     gtk_widget_show (mainwin);
 

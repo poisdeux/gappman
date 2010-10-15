@@ -51,13 +51,14 @@ static void usage()
 * \param *widget pointer to widget to destroy
 * \param data mandatory argument for callback function, may be NULL.
 */
-static void destroy( GtkWidget *widget,
-                     gpointer   data )
+static void destroy( GtkWidget *widget, GdkEvent *event )
 {
+	if ( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
+    {
 		gm_res_free();
-    gtk_main_quit ();
+    	gtk_main_quit ();
+	}
 }
-
 
 static void revert_to_old_res(GtkWidget *widget, GdkEvent *event, XRRScreenSize* size)
 {
@@ -72,7 +73,7 @@ static void revert_to_old_res(GtkWidget *widget, GdkEvent *event, XRRScreenSize*
 }
 
 /**
-* \brief Sends the new resolution as default for a program to gappman
+* \brief Sends the new resolution to be used as default for a program to gappman
 * \param *widget that called this function (usually through a callback construction)
 * \param *event event that triggered the widget
 * \param *elt menu_element pointer to the program for which the resolution must be updated
@@ -121,9 +122,8 @@ static void make_default_for_program( GtkWidget *widget, GdkEvent *event)
 
     gtk_window_set_transient_for (GTK_WINDOW(chooseprogramwin), GTK_WINDOW(mainwin));
     gtk_window_set_position(GTK_WINDOW (chooseprogramwin), GTK_WIN_POS_CENTER_ON_PARENT);
-
-    //Make window transparent
-    //gtk_window_set_opacity (GTK_WINDOW (chooseprogramwin), 0.8);
+	
+	gtk_widget_grab_focus(chooseprogramwin);
 
     //Remove border
     gtk_window_set_decorated (GTK_WINDOW (chooseprogramwin), FALSE);
@@ -330,7 +330,7 @@ int main (int argc, char **argv)
 		}
     }
 
-		gm_res_init();
+	gm_res_init();
 			
     ret_value = gm_res_getpossibleresolutions(&sizes, &nsize);
     if (ret_value != GM_SUCCES)

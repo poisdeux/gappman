@@ -71,7 +71,7 @@ void gm_show_confirmation_dialog(const gchar* message, const gchar* msg_button1,
       gtk_window_set_position(GTK_WINDOW (window), GTK_WIN_POS_CENTER);
     }
 
-		gtk_widget_grab_focus(window);
+	gtk_widget_grab_focus(window);
 
     //Make window transparent
     //gtk_window_set_opacity (GTK_WINDOW (window), 0.8);

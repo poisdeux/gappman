@@ -132,7 +132,6 @@ static int get_nearest_size(XRRScreenConfiguration *sc, int *size, int width, in
 
 int gm_res_changeresolution (int width, int height)
 {
-    XRRScreenConfiguration *sc;
     Rotation current_rotation;
     SizeID	current_size;
     int size = -1;
@@ -168,7 +167,6 @@ int gm_res_changeresolution (int width, int height)
         gdk_x11_display_ungrab ( gdk_dpy );
     }
 
-    XRRFreeScreenConfigInfo(sc);
 
     return GM_SUCCES;
 }
@@ -177,7 +175,6 @@ int gm_res_get_current_size(XRRScreenSize* size)
 {
     int nsize;
     SizeID size_id;
-    XRRScreenConfiguration *sc;
     Rotation current_rotation;
     GdkDisplay *gdk_dpy;
     XRRScreenSize *sizes;
@@ -185,15 +182,15 @@ int gm_res_get_current_size(XRRScreenSize* size)
     gdk_dpy = gdk_display_get_default ();
 
     if (sc == NULL)
-        return GM_NO_SCREEN_CONFIGURATION;
-
+    {
+		g_warning("sc is NULL");
+	    return GM_NO_SCREEN_CONFIGURATION;
+	}
     sizes = XRRConfigSizes(sc, &nsize);
 
     size_id = XRRConfigCurrentConfiguration (sc, &current_rotation);
 
     *size = sizes[size_id];
-
-		XRRFreeScreenConfigInfo(sc);
 
     return GM_SUCCES;
 }
