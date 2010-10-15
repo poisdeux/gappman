@@ -34,6 +34,7 @@ main (int argc, char **argv)
   DBusGProxy *remote_object;
   GError *error = NULL;
   guint i;
+	gchar *args[] = { "arg1", "arg2", NULL };
   gint status;
 
   g_type_init ();
@@ -43,12 +44,12 @@ main (int argc, char **argv)
     lose_gerror ("Couldn't connect to session bus", error);
   
   remote_object = dbus_g_proxy_new_for_name (bus,
-					     "gappman.NetmanService",
+					     "gappman.netman",
 					     "/GmNetmand",
-					     "gappman.NetmanInterface");
+					     "gappman.netman.NetmanInterface");
 
   if (!dbus_g_proxy_call (remote_object, "RunCommand", &error,
-			  G_TYPE_STRING, "echo", G_TYPE_STRING, "arg1", G_TYPE_INVALID,
+			  G_TYPE_STRING, "echo", G_TYPE_STRV, args, G_TYPE_INVALID,
 			  G_TYPE_INT, &status, G_TYPE_INVALID))
     lose_gerror ("Failed to complete RunCommand", error);
 

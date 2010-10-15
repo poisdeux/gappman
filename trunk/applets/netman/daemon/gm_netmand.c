@@ -13,10 +13,14 @@
 
 G_DEFINE_TYPE (GmNetmand, gm_netmand, G_TYPE_OBJECT); ///< will create gm_netmand_get_type and set gm_netmand_parent_class
 
-static int gm_netmand_run_command(gchar* command, gchar** args)
+static gboolean gm_netmand_run_command(GmNetmand *obj, gchar* command, gchar** args, GError **error)
 {
 	g_debug("gm_netmand_run_command called");
-	return 0;
+	g_debug("command: %s", command);
+	for (; *args != NULL; args++)
+		g_debug("arg: %s", *args);
+
+	return TRUE;
 }
 
 static void restart_network(gchar *interface)
@@ -36,7 +40,7 @@ static void gm_netmand_init (GmNetmand *self)
 /**
 * \brief starts the mainloop and starts a D-Bus session
 */
-void main ()
+int main ()
 {
   DBusGConnection *bus;
   DBusGProxy *bus_proxy;

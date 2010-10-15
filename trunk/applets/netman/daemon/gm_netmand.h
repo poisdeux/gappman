@@ -13,10 +13,7 @@
 #define __GM_NETMAND_H__
 #include <glib.h>
 
-//Functions supporting the introspection objects
-static int gm_netmand_run_command(gchar* command, gchar** args);
 
-#include <gm_netmand_glue.h>
 
 /*
  * Type macros.
@@ -60,5 +57,11 @@ struct _GmNetmandClass
 * \return GType of object GM_NETMAND
 */ 
 GType gm_netmand_get_type ();
+
+//Functions supporting the introspection objects
+static gboolean gm_netmand_run_command(GmNetmand *obj, gchar* command, gchar** args, GError **error);
+
+//This needs to be included after above function prototype
+#include <gm_netmand_glue.h>
 
 #endif /* __GM_NETMAND_H__ */

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<node name="/gappman/netman/">
-  <interface name="gappman.NetmanInterface">
+<node name="/">
+  <interface name="gappman.netman.NetmanInterface">
     <method name="RunCommand">
       <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="gm_netmand_run_command"/>
       <arg type="s" name="command" direction="in" />
