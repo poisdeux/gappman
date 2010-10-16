@@ -209,7 +209,7 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
         childpid = fork();
         if ( childpid == 0 )
         {
-            if ( execvp((char *) elt->exec, args) == -1 )
+            if ( execv((char *) elt->exec, args) == -1 )
 			{
 				g_warning("Could not execute %s: errno: %d\n", elt->exec, errno);
 				_exit(1);
