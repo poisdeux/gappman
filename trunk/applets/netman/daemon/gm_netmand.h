@@ -59,7 +59,7 @@ struct _GmNetmandClass
 GType gm_netmand_get_type ();
 
 //Functions supporting the introspection objects
-static gboolean gm_netmand_run_command(GmNetmand *obj, gchar* command, gchar** args, GError **error);
+static gboolean gm_netmand_run_command(GmNetmand *obj, gchar* command, gchar** args, int *exitcode, GError **error);
 
 //This needs to be included after above function prototype
 #include <gm_netmand_glue.h>

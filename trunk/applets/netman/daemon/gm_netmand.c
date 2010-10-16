@@ -7,19 +7,79 @@
  *
  * \author Martijn Brekhof <m.brekhof@gmail.com>
  */
+#include <unistd.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <dbus/dbus-glib.h>
 #include "gm_netmand.h"
 
 G_DEFINE_TYPE (GmNetmand, gm_netmand, G_TYPE_OBJECT); ///< will create gm_netmand_get_type and set gm_netmand_parent_class
 
-static gboolean gm_netmand_run_command(GmNetmand *obj, gchar* command, gchar** args, GError **error)
+static gboolean gm_netmand_run_command(GmNetmand *obj, gchar* command, gchar** args, gint *exitcode, GError **error)
 {
-	g_debug("gm_netmand_run_command called");
-	g_debug("command: %s", command);
-	for (; *args != NULL; args++)
-		g_debug("arg: %s", *args);
+	int childpid;
+	int index = 0;
+	int timeout = 0;
+  gchar **tmp;
 
+	g_debug("gm_netmand_run_command called");
+
+	//create a new array that is 1 element bigger than args
+	tmp = (gchar**) malloc ((sizeof(args) + 1 )*sizeof(gchar*));
+
+	//first elt in the arg-list should be the command (needed by execvp)
+	tmp[index++] = command;
+
+	//fill rest of the tmp array with the elements from args
+	for (; *args != NULL; args++)
+	{	
+		tmp[index++] = *args;
+	}
+	//Array must be NULL-terminated
+	tmp[index] = NULL;
+		
+	childpid = fork();
+  if ( childpid == 0 )
+  {
+  	if ( execvp((char *) command, tmp) == -1 )
+  	{
+  		g_warning("Could not execute %s: errno: %d\n", command, errno);
+  		_exit(1);
+  	}
+  	_exit(0);
+  }
+  else if ( childpid < 0 )
+  {
+  	g_warning("Failed to fork!\n");
+		free(tmp);
+  	return FALSE;
+  }
+
+	free(tmp);
+
+	timeout=10;
+	*exitcode=-1;
+	do
+	{
+		if( waitpid(childpid, exitcode, WNOHANG) == -1 )
+		{
+			g_warning("Waitpid failed: %s", errno);
+			return FALSE;
+		}
+		g_debug("waiting on child %d: exitcode %d", childpid, *exitcode);
+		sleep(1);
+		timeout--;
+	} while ((! WIFEXITED(*exitcode)) && (timeout != 0));
+
+	if(timeout == 0)
+	{
+		// should be replaced by a generic gm kill function (see src/appmanager.c for implementation)
+		// to prevent a stall when child refuses to die
+		g_debug("Killing kid %d", childpid);
+		kill(childpid, 15);
+		waitpid(childpid, exitcode, 0);
+	}
+	g_debug("Child %d returned: exitcode %d", childpid, *exitcode);
 	return TRUE;
 }
 

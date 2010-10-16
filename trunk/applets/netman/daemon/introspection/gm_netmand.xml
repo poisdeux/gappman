@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<node name="/">
+<node name="/GmNetmand">
   <interface name="gappman.netman.NetmanInterface">
     <method name="RunCommand">
       <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="gm_netmand_run_command"/>
       <arg type="s" name="command" direction="in" />
       <arg type="as" name="args" direction="in" />
-      <arg type="i" name="status" direction="out" />
+      <arg type="i" name="exitcode" direction="out" />
     </method>
 		<signal name="StateChanged">
       <arg name="state" type="u"/>
