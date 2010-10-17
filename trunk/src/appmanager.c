@@ -306,10 +306,7 @@ static void stop_panel (menu_elements *panel)
     {
         if (panel->gm_module_stop != NULL)
         {
-            if (panel->gm_module_stop() != GM_SUCCES)
-            {
-                g_error("Failed to stop thread");
-            }
+            panel->gm_module_stop();
         }
         panel = panel->next;
     }
@@ -324,11 +321,11 @@ static void start_panel (menu_elements *panel)
 {
     while (panel != NULL )
     {
-        if (panel->gm_module_start != GM_SUCCES)
+        if (panel->gm_module_start != NULL)
         {
             if (!g_thread_create((GThreadFunc) panel->gm_module_start, NULL, FALSE, NULL))
             {
-                g_error("Failed to create thread");
+                g_warning("Failed to create thread");
             }
         }
         panel = panel->next;
@@ -543,12 +540,12 @@ int main (int argc, char **argv)
 
 
     g_message("Closing up.");
-	stop_panel( panel );
+		stop_panel( panel );
     gappman_close_listener(NULL);
     gm_free_menu_elements( programs );
     gm_free_menu_elements( actions );
     gm_free_menu_elements( panel );
-	
+ 	
     g_message("Goodbye.");
     return 0;
 }

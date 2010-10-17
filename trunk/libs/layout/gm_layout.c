@@ -564,6 +564,7 @@ static GtkWidget* createpanelelement( menu_elements *elt, int width, int height)
     {
         if (!g_module_symbol (module, "gm_module_start", (gpointer *) &(elt->gm_module_start)))
         {
+						elt->gm_module_start = NULL;
             g_warning("Could not get function gm_module_start from %s\n%s",
                       elt->module, g_module_error());
 						return NULL;
@@ -571,6 +572,7 @@ static GtkWidget* createpanelelement( menu_elements *elt, int width, int height)
 	
 		if (!g_module_symbol (module, "gm_module_stop", (gpointer *) &(elt->gm_module_stop)))
         {
+						elt->gm_module_stop = NULL;
             g_warning("Could not get function gm_module_stop from %s\n%s",
                       elt->module, g_module_error());
 						return NULL;
@@ -578,12 +580,14 @@ static GtkWidget* createpanelelement( menu_elements *elt, int width, int height)
 
         if (!g_module_symbol (module, "gm_module_init", (gpointer *) &(elt->gm_module_init)))
         {
+						elt->gm_module_init = NULL;
             g_warning("Could not get function gm_module_init from %s\n%s",
                       elt->module, g_module_error());
 						return NULL;
         }
         if (!g_module_symbol (module, "gm_module_get_widget", (gpointer *) &(elt->gm_module_get_widget)))
         {
+						elt->gm_module_get_widget = NULL;
             g_warning("Could not get function gm_module_get_widget from %s\n%s",
                       elt->module, g_module_error());
 						return NULL;
@@ -592,6 +596,7 @@ static GtkWidget* createpanelelement( menu_elements *elt, int width, int height)
         {
             if (!g_module_symbol (module, "gm_module_set_conffile", (gpointer *) &(elt->gm_module_set_conffile)))
             {
+								elt->gm_module_set_conffile = NULL;
                 g_warning("Could not get function gm_module_set_conffile from %s\n%s",
                           elt->module, g_module_error());
             }
@@ -602,6 +607,7 @@ static GtkWidget* createpanelelement( menu_elements *elt, int width, int height)
         }
         if (!g_module_symbol (module, "gm_module_set_icon_size", (gpointer *) &(elt->gm_module_set_icon_size)))
         {
+						elt->gm_module_set_icon_size = NULL;
             g_warning("Could not get function gm_module_set_icon_size from %s\n%s",
                       elt->module, g_module_error());
         }
