@@ -24,7 +24,7 @@ static int main_button_height = 50;
 static const char* conffile = "/etc/gappman/netman.xml";
 static gboolean KEEP_RUNNING = FALSE;
 
-static void connect_to_dbus(void)
+static void check_status(nm_elements *check)
 {
   DBusGConnection *bus;
   DBusGProxy *remote_object;
@@ -37,63 +37,19 @@ static void connect_to_dbus(void)
   if (!bus)
     g_error ("Couldn't connect to session bus: %s\n", error->message);
 
+	check->prev_status = check->status;
+
   remote_object = dbus_g_proxy_new_for_name (bus,
-                         "gappman.NetmanService",
-                         "/GmNetmand",
-                         "gappman.NetmanInterface");
-  
-  //if (!dbus_g_proxy_call (remote_object, "RunCommand", &error,
-  //            G_TYPE_STRING, "Hello", G_TYPE_STRV, "arg1", G_TYPE_INVALID,
-  //            G_TYPE_INT, &status, G_TYPE_INVALID))
-  //  g_error ("Failed to complete RunCommand");
+               "gappman.netman",
+               "/GmNetmand",
+               "gappman.netman.NetmanInterface");
+
+  if (!dbus_g_proxy_call (remote_object, "RunCommand", &error,
+        G_TYPE_STRING, check->exec, G_TYPE_STRV, check->args, G_TYPE_INVALID,
+        G_TYPE_INT, &status, G_TYPE_INVALID))
+    g_error ("Failed to complete RunCommand: %s", error->message);
 
   g_object_unref (G_OBJECT (remote_object));
-}
-
-static void switch_status(nm_elements* stati)
-{
-	
-    if (stati->status != stati->success)
-    {
-		gtk_button_set_image(main_button, GTK_WIDGET(stati->image_fail));
-    }
-	else
-	{
-		gtk_button_set_image(main_button, GTK_WIDGET(stati->image_success));
-	}
-}
-
-
-static void check_status()
-{
-    int prev_status = 0;
-    nm_elements* stati;
-
-    stati = nm_get_stati();
-
-    while (stati != NULL)
-    {
-			prev_status = stati->status;
-    		//stati->status = run_program(stati);
-			//Switch only if status is fail or different from previous status
-			//i.e. from fail to success.
-			g_debug("TEST:%s stati->status=%d   prev_status=%d", stati->name, stati->status, prev_status);
-			if((stati->status != prev_status) || (stati->status != stati->success))
-			{
-				switch_status(stati);
-			}
-      sleep(2); 
-      stati = stati->next;
-    }
-}
-
-static void start_action(GtkWidget* widget, GdkEvent *event, nm_elements* action)
-{
-	//Only start program  if spacebar or mousebutton is pressed
-    if ( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
-    {
-	    //exec_program(action);
-	}
 }
 
 static void destroy_widget(GtkWidget* dummy, GdkEvent *event, GtkWidget* widget)
@@ -103,6 +59,41 @@ static void destroy_widget(GtkWidget* dummy, GdkEvent *event, GtkWidget* widget)
     {
     	gtk_widget_destroy(widget);
 		}
+}
+
+static void update_button()
+{
+	nm_elements* checks;
+	int status_changed_to_succes = 0;
+
+	checks = nm_get_stati();
+	
+	while(checks != NULL)
+	{
+		//we only need to do something if the status changed
+		if(checks->prev_status != checks->status)
+		{
+			if(checks->status != checks->success)
+			{
+				gtk_button_set_image(main_button, GTK_WIDGET(checks->image_fail));
+
+				// Network will only succeed if all checks succeed. So we can stop
+				// if one of the checks fails
+				return;
+			}
+			else
+			{
+				status_changed_to_succes = 1;
+			}
+		}
+		checks = checks->next;
+	}	
+	//we'll only get this far if none of the checks failed or did not change
+	//since the previous check.
+	if( status_changed_to_succes )
+	{
+		gtk_button_set_image(main_button, GTK_WIDGET(checks->image_success));
+	}
 }
 
 static void show_menu()
@@ -166,7 +157,7 @@ static void show_menu()
         markup = g_markup_printf_escaped ("<span size=\"%d\">%s</span>", gm_get_fontsize(), actions->name);
         gtk_label_set_markup (GTK_LABEL (label), markup);
         g_free (markup);
-        button = gm_create_empty_button(start_action, actions);
+        button = gm_create_empty_button(check_status, actions);
 				gtk_container_add(GTK_CONTAINER(button), label);
         gtk_widget_show(label);
         gtk_container_add(GTK_CONTAINER(vbox), button);
@@ -222,8 +213,6 @@ G_MODULE_EXPORT int gm_module_init()
     gtk_container_add(GTK_CONTAINER(main_button), GTK_WIDGET(stati->image_fail));
     gtk_widget_show(GTK_WIDGET(main_button));
 
-	connect_to_dbus();
-	
     return GM_SUCCES;
 }
 
@@ -244,28 +233,19 @@ G_MODULE_EXPORT void gm_module_set_conffile(const char* filename)
 */
 G_MODULE_EXPORT void gm_module_start()
 {
-	nm_elements *stati;
+	nm_elements *checks;
 
 	KEEP_RUNNING = TRUE;
-    while (KEEP_RUNNING)
-    {
-		stati = nm_get_stati();
-		while(stati != NULL)
+	while (KEEP_RUNNING)
+	{
+		checks = nm_get_stati();
+		while(checks != NULL)
 		{
-        	check_status();
-			if (stati->status == stati->success)
-			{
-				stati->status = 10;
-			}
-			else
-			{
-				stati->status = stati->success;
-			}
-			switch_status(stati);
-        	//sleep(1);
-			stati = stati->next;
+			check_status(checks);
+			checks = checks->next;
 		}
-    }
+//		update_button();
+	}
 }
 
 /**

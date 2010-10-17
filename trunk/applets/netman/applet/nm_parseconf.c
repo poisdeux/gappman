@@ -35,6 +35,7 @@ struct nm_element* create_nm_element(nm_elements* prev)
     elt->next = prev;
     elt->args = NULL;
     elt->status = 1; //default fail
+		elt->prev_status = 1; //default fail
     elt->pid = -1;
     elt->numArguments = 0;
 	elt->image_success = NULL;
@@ -60,8 +61,9 @@ struct nm_element* create_nm_element(nm_elements* prev)
 static void add_argument(nm_elements *elt, char *argument)
 {
     elt->numArguments++;
-    elt->args = (char **) realloc(elt->args, ((elt->numArguments) * sizeof(char *)));
+    elt->args = (char **) realloc(elt->args, ((elt->numArguments + 1) * sizeof(char *)));
     elt->args[elt->numArguments - 1] = (char *) argument;
+		elt->args[elt->numArguments] = NULL;
 }
 
 const char* nm_get_cache_location()
@@ -155,6 +157,7 @@ void nm_free_elements( nm_elements *elt )
             {
                 free(elt->args[i]);
             }
+            free(elt->args[i]);
             free(elt->args);
 
             next = elt->next;
