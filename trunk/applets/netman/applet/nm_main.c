@@ -30,6 +30,8 @@ static void check_status(nm_elements *check)
   DBusGProxy *remote_object;
   GError *error = NULL;
   gint status;
+	gchar *args[] = { "-c", "1", "google.com", NULL };
+	gchar **tmp;
 
   g_type_init ();
 
@@ -255,18 +257,19 @@ G_MODULE_EXPORT void gm_module_start()
 */
 G_MODULE_EXPORT int gm_module_stop()
 {
-    nm_elements* stati;
-    stati = nm_get_stati();
-	  KEEP_RUNNING = FALSE;	
+  nm_elements *checks, *tmp;
+  checks = nm_get_stati();
+	KEEP_RUNNING = FALSE;	
 
-	while(stati != NULL)
+	tmp = checks;
+	while(tmp != NULL)
 	{
-		g_object_unref(stati->image_success);
-		g_object_unref(stati->image_fail);
-		stati = stati->next;
+		g_object_unref(tmp->image_success);
+		g_object_unref(tmp->image_fail);
+		tmp = tmp->next;
 	}
-	nm_free_elements(stati);
-    return GM_SUCCES;
+	nm_free_elements(checks);
+  return GM_SUCCES;
 }
 
 /**
