@@ -23,35 +23,43 @@ static int main_button_width = 50;
 static int main_button_height = 50;
 static const char* conffile = "/etc/gappman/netman.xml";
 static gboolean KEEP_RUNNING = FALSE;
+static DBusGProxy *remote_object;
+static DBusGConnection *bus;
 
-static void check_status(nm_elements *check)
+static gboolean dbus_connect()
 {
-  DBusGConnection *bus;
-  DBusGProxy *remote_object;
-  GError *error = NULL;
-  gint status;
-	gchar *args[] = { "-c", "1", "google.com", NULL };
-	gchar **tmp;
-
-  g_type_init ();
+	GError *error = NULL;
 
   bus = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
   if (!bus)
-    g_error ("Couldn't connect to session bus: %s\n", error->message);
-
-	check->prev_status = check->status;
+  {
+    g_warning ("Couldn't connect to session bus: %s\n", error->message);
+		return FALSE;
+  }
 
   remote_object = dbus_g_proxy_new_for_name (bus,
                "gappman.netman",
                "/GmNetmand",
                "gappman.netman.NetmanInterface");
 
-  if (!dbus_g_proxy_call (remote_object, "RunCommand", &error,
-        G_TYPE_STRING, check->exec, G_TYPE_STRV, check->args, G_TYPE_INVALID,
-        G_TYPE_INT, &status, G_TYPE_INVALID))
-    g_error ("Failed to complete RunCommand: %s", error->message);
+	return TRUE;
+}
 
-  g_object_unref (G_OBJECT (remote_object));
+static gboolean check_status(nm_elements *check)
+{
+  GError *error = NULL;
+	gchar* args[] = { "-c", "1", "google.com", NULL }; 
+	gint status;
+
+  if (!dbus_g_proxy_call (remote_object, "RunCommand", &error,
+        G_TYPE_STRING, "ping", G_TYPE_STRV, args, G_TYPE_INVALID,
+        G_TYPE_INT, &status, G_TYPE_INVALID))
+	{
+		g_warning ("Failed to complete RunCommand: %p %s", remote_object, error->message);
+		return FALSE;
+	}
+
+	return TRUE;
 }
 
 static void destroy_widget(GtkWidget* dummy, GdkEvent *event, GtkWidget* widget)
@@ -186,6 +194,7 @@ G_MODULE_EXPORT int gm_module_init()
 {
     nm_elements* stati;
 	
+  	g_type_init ();
 
     if(nm_load_conf(conffile) != 0)
 			return GM_COULD_NOT_LOAD_FILE;
@@ -215,6 +224,9 @@ G_MODULE_EXPORT int gm_module_init()
     gtk_container_add(GTK_CONTAINER(main_button), GTK_WIDGET(stati->image_fail));
     gtk_widget_show(GTK_WIDGET(main_button));
 
+		if ( dbus_connect() == FALSE )
+			return GM_FAIL;
+
     return GM_SUCCES;
 }
 
@@ -236,17 +248,39 @@ G_MODULE_EXPORT void gm_module_set_conffile(const char* filename)
 G_MODULE_EXPORT void gm_module_start()
 {
 	nm_elements *checks;
+	int failed_checks = 0;
 
 	KEEP_RUNNING = TRUE;
 	while (KEEP_RUNNING)
 	{
 		checks = nm_get_stati();
+
+		if( *checks->amount_of_elements * 10 < failed_checks )
+		{
+			g_warning("Exiting. gm_netmand is not running.");
+			// NOTE: possible race condition when both gm_module_start 
+			// and appmanager stop the module.
+			// add new function gm_module_running() to let appmanager check
+			// periodically if the module is still active.
+			//gm_module_stop();
+			return;
+		}
+
 		while(checks != NULL)
 		{
-			check_status(checks);
+			if ( check_status(checks) == FALSE )
+			{
+				failed_checks++;
+				sleep(1);
+			}
+			else
+			{
+				failed_checks = 0;
+			}
 			checks = checks->next;
 		}
 //		update_button();
+		sleep(2);
 	}
 }
 
@@ -260,6 +294,8 @@ G_MODULE_EXPORT int gm_module_stop()
   nm_elements *checks, *tmp;
   checks = nm_get_stati();
 	KEEP_RUNNING = FALSE;	
+
+  g_object_unref (G_OBJECT (remote_object));
 
 	tmp = checks;
 	while(tmp != NULL)

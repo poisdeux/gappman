@@ -22,30 +22,24 @@ static gboolean gm_netmand_run_command(GmNetmand *obj, gchar* command, gchar** a
 	int timeout = 0;
   gchar **tmp;
 
-	g_debug("gm_netmand_run_command called 1");
 
 	//create a new array that is 1 element bigger than args
 	tmp = (gchar**) malloc ((sizeof(args) + 1 )*sizeof(gchar*));
 
-	g_debug("gm_netmand_run_command called 2");
 	if (tmp == NULL)
 		return FALSE;
 
-	g_debug("gm_netmand_run_command called 3");
 	//first elt in the arg-list should be the command (needed by execvp)
 	tmp[index++] = command;
 
-	g_debug("gm_netmand_run_command called 4");
 	//fill rest of the tmp array with the elements from args
 	for (; *args != NULL; args++)
 	{	
 		tmp[index++] = *args;
 	}
-	g_debug("gm_netmand_run_command called 5");
 	//Array must be NULL-terminated
 	tmp[index] = NULL;
 		
-	g_debug("gm_netmand_run_command called 6");
 	childpid = fork();
   if ( childpid == 0 )
   {
@@ -59,21 +53,17 @@ static gboolean gm_netmand_run_command(GmNetmand *obj, gchar* command, gchar** a
   else if ( childpid < 0 )
   {
   	g_warning("Failed to fork!\n");
-		free(tmp);
   	return FALSE;
   }
 
-	g_debug("gm_netmand_run_command called 7");
 
-	g_debug("gm_netmand_run_command called 8");
 	timeout=10;
 	*exitcode=-1;
 	do
 	{
 		if( waitpid(childpid, exitcode, WNOHANG) == -1 )
 		{
-			g_warning("Waitpid failed: %s", errno);
-			free(tmp);
+			g_warning("Waitpid failed: %d", errno);
 			return FALSE;
 		}
 		g_debug("waiting on child %d: exitcode %d", childpid, *exitcode);
@@ -81,7 +71,6 @@ static gboolean gm_netmand_run_command(GmNetmand *obj, gchar* command, gchar** a
 		timeout--;
 	} while ((! WIFEXITED(*exitcode)) && (timeout != 0));
 
-	g_debug("gm_netmand_run_command called 9");
 	if(timeout == 0)
 	{
 		// should be replaced by a generic gm kill function (see src/appmanager.c for implementation)
@@ -91,7 +80,6 @@ static gboolean gm_netmand_run_command(GmNetmand *obj, gchar* command, gchar** a
 		waitpid(childpid, exitcode, 0);
 	}
 	g_debug("Child %d returned: exitcode %d", childpid, *exitcode);
-	free(tmp);
 	return TRUE;
 }
 
