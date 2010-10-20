@@ -16,6 +16,7 @@
 #include <gm_layout.h>
 #include <gm_generic.h>
 #include <dbus/dbus-glib.h>
+#include <string.h>
 #include "nm_parseconf.h"
 
 static GtkButton *main_button = NULL;
@@ -31,9 +32,10 @@ static gboolean dbus_connect()
 	GError *error = NULL;
 
   bus = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
-  if (!bus)
+  if (bus == NULL)
   {
     g_warning ("Couldn't connect to session bus: %s\n", error->message);
+		g_error_free(error);
 		return FALSE;
   }
 
@@ -42,6 +44,13 @@ static gboolean dbus_connect()
                "/GmNetmand",
                "gappman.netman.NetmanInterface");
 
+	if(remote_object == NULL)
+	{
+		g_warning("Could not get dbus object for gappman.netman.NetmanInterface");
+		dbus_g_connection_unref(bus);
+		bus = NULL;
+		return FALSE;
+	}
 	return TRUE;
 }
 
@@ -50,15 +59,31 @@ static gboolean check_status(nm_elements *check)
   GError *error = NULL;
 	gchar* args[] = { "-c", "1", "google.com", NULL }; 
 	gint status;
+	gchar* name;
 
+  fprintf(stderr, "1\n");
+	fflush(stderr);
   if (!dbus_g_proxy_call (remote_object, "RunCommand", &error,
         G_TYPE_STRING, "ping", G_TYPE_STRV, args, G_TYPE_INVALID,
         G_TYPE_INT, &status, G_TYPE_INVALID))
 	{
-		g_warning ("Failed to complete RunCommand: %p %s", remote_object, error->message);
+  	fprintf(stderr, "2\n");
+		fflush(stderr);
+    /* dbus-glib GError messages _always_ have two NULLs, the D-Bus error
+     * name comes after the first NULL.  Find it.
+     */
+    name = error->message + strlen (error->message) + 1;
+  	fprintf(stderr, "3\n");
+		fflush(stderr);
+		g_warning ("Failed to complete RunCommand: %p: %s: %s", remote_object, error->message, name);
+		g_error_free(error);
+  	fprintf(stderr, "4\n");
+		fflush(stderr);
 		return FALSE;
 	}
 
+  fprintf(stderr, "4\n");
+	fflush(stderr);
 	return TRUE;
 }
 
