@@ -24,34 +24,46 @@ static int main_button_width = 50;
 static int main_button_height = 50;
 static const char* conffile = "/etc/gappman/netman.xml";
 static gboolean KEEP_RUNNING = FALSE;
-static DBusGProxy *remote_object;
-static DBusGConnection *bus;
 
-static gboolean dbus_connect()
+static DBusGConnection* dbus_connect(DBusGProxy **proxy)
 {
 	GError *error = NULL;
+	DBusGConnection *bus;
 
   bus = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
   if (bus == NULL)
   {
     g_warning ("Couldn't connect to session bus: %s\n", error->message);
 		g_error_free(error);
-		return FALSE;
+		return bus;
   }
 
-  remote_object = dbus_g_proxy_new_for_name (bus,
+  *proxy = dbus_g_proxy_new_for_name (bus,
                "gappman.netman",
                "/GmNetmand",
                "gappman.netman.NetmanInterface");
 
-	if(remote_object == NULL)
+	if(*proxy == NULL)
 	{
 		g_warning("Could not get dbus object for gappman.netman.NetmanInterface");
 		dbus_g_connection_unref(bus);
 		bus = NULL;
-		return FALSE;
 	}
-	return TRUE;
+	return bus;
+}
+
+static void dbus_disconnect(DBusGConnection *bus, DBusGProxy *proxy)
+{
+	  if (bus) {
+    dbus_g_connection_unref (bus);
+    bus = NULL;
+  }
+
+  if (proxy) {
+    g_object_unref (proxy);
+    proxy = NULL;
+  }
+
 }
 
 static gboolean check_status(nm_elements *check)
@@ -60,30 +72,30 @@ static gboolean check_status(nm_elements *check)
 	gchar* args[] = { "-c", "1", "google.com", NULL }; 
 	gint status;
 	gchar* name;
+	DBusGConnection *bus;
+	DBusGProxy *remote_object;
 
-  fprintf(stderr, "1\n");
-	fflush(stderr);
+	bus = dbus_connect(&remote_object);
+
+	if( ! bus )
+	{
+		return FALSE;		
+	}
+
   if (!dbus_g_proxy_call (remote_object, "RunCommand", &error,
         G_TYPE_STRING, "ping", G_TYPE_STRV, args, G_TYPE_INVALID,
         G_TYPE_INT, &status, G_TYPE_INVALID))
 	{
-  	fprintf(stderr, "2\n");
-		fflush(stderr);
     /* dbus-glib GError messages _always_ have two NULLs, the D-Bus error
      * name comes after the first NULL.  Find it.
      */
     name = error->message + strlen (error->message) + 1;
-  	fprintf(stderr, "3\n");
-		fflush(stderr);
 		g_warning ("Failed to complete RunCommand: %p: %s: %s", remote_object, error->message, name);
 		g_error_free(error);
-  	fprintf(stderr, "4\n");
-		fflush(stderr);
+		dbus_disconnect(bus, remote_object);
 		return FALSE;
 	}
 
-  fprintf(stderr, "4\n");
-	fflush(stderr);
 	return TRUE;
 }
 
@@ -249,9 +261,6 @@ G_MODULE_EXPORT int gm_module_init()
     gtk_container_add(GTK_CONTAINER(main_button), GTK_WIDGET(stati->image_fail));
     gtk_widget_show(GTK_WIDGET(main_button));
 
-		if ( dbus_connect() == FALSE )
-			return GM_FAIL;
-
     return GM_SUCCES;
 }
 
@@ -319,8 +328,6 @@ G_MODULE_EXPORT int gm_module_stop()
   nm_elements *checks, *tmp;
   checks = nm_get_stati();
 	KEEP_RUNNING = FALSE;	
-
-  g_object_unref (G_OBJECT (remote_object));
 
 	tmp = checks;
 	while(tmp != NULL)
