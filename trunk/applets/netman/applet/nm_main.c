@@ -27,8 +27,10 @@ static gboolean KEEP_RUNNING = FALSE;
 
 static DBusGConnection* dbus_connect(DBusGProxy **proxy)
 {
-	GError *error = NULL;
+	GError *error;
 	DBusGConnection *bus;
+
+	error = NULL;
 
   bus = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
   if (bus == NULL)
@@ -56,25 +58,23 @@ static void dbus_disconnect(DBusGConnection *bus, DBusGProxy *proxy)
 {
 	  if (bus) {
     dbus_g_connection_unref (bus);
-    bus = NULL;
   }
 
   if (proxy) {
     g_object_unref (proxy);
-    proxy = NULL;
   }
 
 }
 
 static gboolean check_status(nm_elements *check)
 {
-  GError *error = NULL;
+  GError *error;
 	gchar* args[] = { "-c", "1", "google.com", NULL }; 
 	gint status;
-	gchar* name;
 	DBusGConnection *bus;
 	DBusGProxy *remote_object;
 
+	error = NULL;
 	bus = dbus_connect(&remote_object);
 
 	if( ! bus )
@@ -82,19 +82,32 @@ static gboolean check_status(nm_elements *check)
 		return FALSE;		
 	}
 
+	fprintf(stderr, "1\n");
+	fflush(stderr);
   if (!dbus_g_proxy_call (remote_object, "RunCommand", &error,
         G_TYPE_STRING, "ping", G_TYPE_STRV, args, G_TYPE_INVALID,
         G_TYPE_INT, &status, G_TYPE_INVALID))
 	{
+	fprintf(stderr, "2\n");
+	fflush(stderr);
     /* dbus-glib GError messages _always_ have two NULLs, the D-Bus error
      * name comes after the first NULL.  Find it.
      */
-    name = error->message + strlen (error->message) + 1;
-		g_warning ("Failed to complete RunCommand: %p: %s: %s", remote_object, error->message, name);
+		g_warning ("Failed to complete RunCommand: %p: %s", remote_object, error->message);
 		g_error_free(error);
 		dbus_disconnect(bus, remote_object);
+	fprintf(stderr, "3\n");
+	fflush(stderr);
 		return FALSE;
 	}
+
+	fprintf(stderr, "4\n");
+	fflush(stderr);
+	g_debug("status: %d", status);
+
+	dbus_disconnect(bus, remote_object);
+	fprintf(stderr, "5\n");
+  fflush(stderr);
 
 	return TRUE;
 }
@@ -230,8 +243,9 @@ static void show_menu()
 G_MODULE_EXPORT int gm_module_init()
 {
     nm_elements* stati;
-	
+
   	g_type_init ();
+		dbus_g_thread_init();
 
     if(nm_load_conf(conffile) != 0)
 			return GM_COULD_NOT_LOAD_FILE;
@@ -313,7 +327,7 @@ G_MODULE_EXPORT void gm_module_start()
 			}
 			checks = checks->next;
 		}
-//		update_button();
+		//update_button();
 		sleep(2);
 	}
 }
