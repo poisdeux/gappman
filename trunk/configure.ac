@@ -62,12 +62,12 @@ AC_SEARCH_LIBS([g_thread_init], [gthread-2.0], [
 GTHREAD_INCLUDES=`pkg-config --cflags gthread-2.0`
 GTHREAD_OBJS=`pkg-config --libs gthread-2.0`
 ], [
-echo "Error: gtk+-2.0 not found!"; exit 1
+echo "Error: gtkthread-2.0 not found!"; exit 1
 ], [])
 
 AC_SEARCH_LIBS([XRRSetScreenConfigAndRate], [Xrandr], [
-XRANDR_INCLUDES=`pkg-config --cflags --libs libxml-2.0`
-XRANDR_OBJS=`pkg-config --libs --libs libxml-2.0`
+XRANDR_INCLUDES=`pkg-config --cflags xrandr`
+XRANDR_OBJS=`pkg-config --libs xrandr`
 ], [
 echo "Error: libXrandr not found!"; exit 1
 ], [])

@@ -2,116 +2,55 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static void lose (const char *fmt, ...) G_GNUC_NORETURN G_GNUC_PRINTF (1, 2);
-static void lose_gerror (const char *prefix, GError *error) G_GNUC_NORETURN;
-
-
-static void
-lose (const char *str, ...)
-{
-  va_list args;
-
-  va_start (args, str);
-
-  vfprintf (stderr, str, args);
-  fputc ('\n', stderr);
-
-  va_end (args);
-
-  exit (1);
-}
-
-static void
-lose_gerror (const char *prefix, GError *error) 
-{
-  lose ("%s: %s", prefix, error->message);
-}
-
-static DBusGConnection* dbus_connect(DBusGProxy **proxy)
+static void do_thread()
 {
   GError *error = NULL;
   DBusGConnection *bus;
+  gchar* args[] = { "-c", "1", "google.com", NULL };
+  gint status, i;
+  DBusGProxy *proxy;
 
   bus = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
   if (bus == NULL)
   {
     g_warning ("Couldn't connect to session bus: %s\n", error->message);
     g_error_free(error);
-    return bus;
+    return;
   }
 
-  *proxy = dbus_g_proxy_new_for_name (bus,
+  proxy = dbus_g_proxy_new_for_name (bus,
                "gappman.netman",
                "/GmNetmand",
                "gappman.netman.NetmanInterface");
 
-  if(*proxy == NULL)
+  if(proxy == NULL)
   {
     g_warning("Could not get dbus object for gappman.netman.NetmanInterface");
     dbus_g_connection_unref(bus);
     bus = NULL;
   }
-  return bus;
-}
 
-static void dbus_disconnect(DBusGConnection *bus, DBusGProxy *proxy)
-{
-    if (bus) {
-    dbus_g_connection_unref (bus);
-  }
-
-  if (proxy) {
-    g_object_unref (proxy);
-  }
-
-}
-
-static gboolean check_status()
-{
-  GError *error = NULL;
-  gchar* args[] = { "-c", "1", "google.com", NULL };
-  gint status;
-  DBusGConnection *bus;
-  DBusGProxy *remote_object;
-
-  bus = dbus_connect(&remote_object);
-
-  if( ! bus )
-  {
-    return FALSE;
-  }
-
-  if (!dbus_g_proxy_call (remote_object, "RunCommand", &error,
-        G_TYPE_STRING, "ping", G_TYPE_STRV, args, G_TYPE_INVALID,
-        G_TYPE_INT, &status, G_TYPE_INVALID))
-  {
-    g_warning ("Failed to complete RunCommand: %p: %s", remote_object, error->message);
-    g_error_free(error);
-    dbus_disconnect(bus, remote_object);
-    return FALSE;
-  }
-
-  g_debug("status: %d", status);
-
-  dbus_disconnect(bus, remote_object);
-
-  return TRUE;
-}
-
-static void do_thread()
-{
-	while(TRUE)
-	{
-		check_status();
-		sleep(1);
+	for( i = 0; i < 20; i++)
+	{	
+  	if (!dbus_g_proxy_call (proxy, "RunCommand", &error,
+   	     G_TYPE_STRING, "ping", G_TYPE_STRV, args, G_TYPE_INVALID,
+   	     G_TYPE_INT, &status, G_TYPE_INVALID))
+  	{
+   	 g_warning ("Failed to complete RunCommand: %s", error->message);
+   	 g_error_free(error);
+   	 return;
+  	}
+		else
+		{
+			g_message("%d, received %d", i, status);
+		}
 	}
+	return;	
 }
 
 int
 main (int argc, char **argv)
 {
-  DBusGConnection *bus;
-  DBusGProxy *remote_object;
   GError *error = NULL;
   guint i;
   gint status;
@@ -134,6 +73,7 @@ main (int argc, char **argv)
     {
         g_thread_init (NULL);
         gdk_threads_init();
+				dbus_g_thread_init();
     }
 
 
@@ -147,15 +87,18 @@ main (int argc, char **argv)
     exit (1);
   }
 
+	g_debug("non threaded");
+	do_thread();
 
+	g_debug("threaded");
 	if (!g_thread_create((GThreadFunc) do_thread, NULL, FALSE, NULL))
-            {
-                g_warning("Failed to create thread");
-            }
+  {
+  	g_warning("Failed to create thread");
+  }
 
-    gdk_threads_enter();
-    gtk_main ();
-    gdk_threads_leave();
+  gdk_threads_enter();
+  gtk_main ();
+  gdk_threads_leave();
 
   exit(0);
 }
