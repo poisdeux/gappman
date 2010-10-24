@@ -10,11 +10,14 @@ static void do_thread()
   gint status, i;
   DBusGProxy *proxy;
 
+  g_type_init ();
+
   bus = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
   if (bus == NULL)
   {
     g_warning ("Couldn't connect to session bus: %s\n", error->message);
     g_error_free(error);
+		error = NULL;
     return;
   }
 
@@ -30,15 +33,16 @@ static void do_thread()
     bus = NULL;
   }
 
-	for( i = 0; i < 20; i++)
+	for( i = 0; i < 80; i++)
 	{	
   	if (!dbus_g_proxy_call (proxy, "RunCommand", &error,
    	     G_TYPE_STRING, "ping", G_TYPE_STRV, args, G_TYPE_INVALID,
    	     G_TYPE_INT, &status, G_TYPE_INVALID))
   	{
-   	 g_warning ("Failed to complete RunCommand: %s", error->message);
+   	 g_warning ("Failed to complete RunCommand: %d, %s", i, error->message);
    	 g_error_free(error);
-   	 return;
+			error = NULL;
+		 sleep(1);
   	}
 		else
 		{
@@ -54,6 +58,7 @@ main (int argc, char **argv)
   GError *error = NULL;
   guint i;
   gint status;
+	GThread *thread;
   GOptionContext *context;
 	gchar* command;
 	gchar **args;
@@ -66,14 +71,12 @@ main (int argc, char **argv)
 
   gtk_init (&argc, &argv);
 
-  g_type_init ();
 
     //Needs to be called before any another glib function
     if (!g_thread_supported ())
     {
         g_thread_init (NULL);
         gdk_threads_init();
-				dbus_g_thread_init();
     }
 
 
@@ -84,21 +87,19 @@ main (int argc, char **argv)
   if (!g_option_context_parse (context, &argc, &argv, &error))
   {
     g_print ("option parsing failed: %s\n", error->message);
-    exit (1);
+		g_error_free(error);
+		error = NULL;
+    return 1;
   }
 
-	g_debug("non threaded");
-	do_thread();
-
-	g_debug("threaded");
-	if (!g_thread_create((GThreadFunc) do_thread, NULL, FALSE, NULL))
+	thread = g_thread_create((GThreadFunc) do_thread, NULL, TRUE, NULL);
+	if ( thread == NULL )
   {
   	g_warning("Failed to create thread");
+		return 1;
   }
 
-  gdk_threads_enter();
-  gtk_main ();
-  gdk_threads_leave();
+	g_thread_join(thread);
 
-  exit(0);
+	return 0;
 }

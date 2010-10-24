@@ -66,48 +66,22 @@ static void dbus_disconnect(DBusGConnection *bus, DBusGProxy *proxy)
 
 }
 
-static gboolean check_status(nm_elements *check)
+static gboolean check_status(DBusGProxy *proxy, nm_elements *check)
 {
-  GError *error;
+  GError *error = NULL;
 	gchar* args[] = { "-c", "1", "google.com", NULL }; 
 	gint status;
-	DBusGConnection *bus;
-	DBusGProxy *remote_object;
 
-	error = NULL;
-	bus = dbus_connect(&remote_object);
-
-	if( ! bus )
-	{
-		return FALSE;		
-	}
-
-	fprintf(stderr, "1\n");
-	fflush(stderr);
-  if (!dbus_g_proxy_call (remote_object, "RunCommand", &error,
+  if (!dbus_g_proxy_call (proxy, "RunCommand", &error,
         G_TYPE_STRING, "ping", G_TYPE_STRV, args, G_TYPE_INVALID,
         G_TYPE_INT, &status, G_TYPE_INVALID))
 	{
-	fprintf(stderr, "2\n");
-	fflush(stderr);
-    /* dbus-glib GError messages _always_ have two NULLs, the D-Bus error
-     * name comes after the first NULL.  Find it.
-     */
-		g_warning ("Failed to complete RunCommand: %p: %s", remote_object, error->message);
+		g_warning ("Failed to complete RunCommand: %p: %s", proxy, error->message);
 		g_error_free(error);
-		dbus_disconnect(bus, remote_object);
-	fprintf(stderr, "3\n");
-	fflush(stderr);
 		return FALSE;
 	}
 
-	fprintf(stderr, "4\n");
-	fflush(stderr);
 	g_debug("status: %d", status);
-
-	dbus_disconnect(bus, remote_object);
-	fprintf(stderr, "5\n");
-  fflush(stderr);
 
 	return TRUE;
 }
@@ -244,8 +218,6 @@ G_MODULE_EXPORT int gm_module_init()
 {
     nm_elements* stati;
 
-  	g_type_init ();
-		dbus_g_thread_init();
 
     if(nm_load_conf(conffile) != 0)
 			return GM_COULD_NOT_LOAD_FILE;
@@ -297,6 +269,16 @@ G_MODULE_EXPORT void gm_module_start()
 {
 	nm_elements *checks;
 	int failed_checks = 0;
+	DBusGConnection *bus = NULL;
+	DBusGProxy *proxy;
+
+ 	g_type_init ();
+
+	while( bus == NULL )
+	{
+		bus = dbus_connect(&proxy);
+		sleep(1);
+	}
 
 	KEEP_RUNNING = TRUE;
 	while (KEEP_RUNNING)
@@ -316,7 +298,7 @@ G_MODULE_EXPORT void gm_module_start()
 
 		while(checks != NULL)
 		{
-			if ( check_status(checks) == FALSE )
+			if ( check_status(proxy, checks) == FALSE )
 			{
 				failed_checks++;
 				sleep(1);
