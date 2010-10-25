@@ -24,14 +24,38 @@ static int main_button_width = 50;
 static int main_button_height = 50;
 static const char* conffile = "/etc/gappman/netman.xml";
 static gboolean KEEP_RUNNING = FALSE;
+static DBusGProxyCall* proxy_call;
+static DBusGConnection *bus;
+static DBusGProxy *proxy;
+
+static void collect_status()
+{
+	GError *error = NULL;
+  gchar* args[] = { "-c", "1", "google.com", NULL };
+	gint status;
+
+	if( ! dbus_g_proxy_end_call(proxy, proxy_call, &error,
+				G_TYPE_STRING, "ping", G_TYPE_STRV, args, G_TYPE_INVALID,
+      	G_TYPE_INT, &status, G_TYPE_INVALID) )
+	{
+		g_warning("Error retrieving ping status: %s", error->message);
+		g_error_free(error);
+	}
+	else
+	{
+		g_message("Got status: %d", status);
+	}
+
+	proxy_call = NULL;
+
+}
 
 static gboolean check_status()
 {
   GError *error = NULL;
   DBusGConnection *bus;
   gchar* args[] = { "-c", "1", "google.com", NULL };
-  gint status, i;
-  DBusGProxy *proxy;
+	gint status;
 
   bus = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
   if (bus == NULL)
@@ -54,21 +78,22 @@ static gboolean check_status()
 		return FALSE;
   }
 
-  if (!dbus_g_proxy_call (proxy, "RunCommand", &error,
+	proxy_call = dbus_g_proxy_begin_call(proxy, "RunCommand", collect_status, NULL,
+			 NULL, G_TYPE_STRING, "ping", G_TYPE_STRV, args, G_TYPE_INVALID,
+       G_TYPE_INT, &status, G_TYPE_INVALID);
+
+  /*if (!dbus_g_proxy_call (proxy, "RunCommand", &error,
        G_TYPE_STRING, "ping", G_TYPE_STRV, args, G_TYPE_INVALID,
-       G_TYPE_INT, &status, G_TYPE_INVALID))
+       G_TYPE_INT, &status, G_TYPE_INVALID))*/
+
+	if (!proxy_call)
   {
-  	g_warning ("Failed to complete RunCommand: %d, %s", i, error->message);
+  	g_warning ("Failed to call RunCommand: %s", error->message);
    	g_error_free(error);
     error = NULL;
 		return FALSE;
   }
-  else
-  {
-      g_message("%d, received %d", i, status);
-  }
 
-  dbus_g_connection_unref(bus);
   return TRUE;
 }
 
@@ -254,12 +279,23 @@ G_MODULE_EXPORT void gm_module_set_conffile(const char* filename)
 G_MODULE_EXPORT void gm_module_start()
 {
 	KEEP_RUNNING = TRUE;
+
+	// Initialize to NULL to start the
+	// loop.
+	proxy_call = NULL;
+
 	while(KEEP_RUNNING)
 	{
-		gdk_threads_enter();
-		check_status();
-		gdk_threads_leave();
-		sleep(1);
+		if( proxy_call == NULL )
+		{
+			gdk_threads_enter();
+			check_status();
+			gdk_threads_leave();
+		}
+		else
+		{
+			sleep(1);
+		}
 	}
 }
 
