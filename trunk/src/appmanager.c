@@ -319,14 +319,21 @@ static void stop_panel (menu_elements *panel)
 */
 static void start_panel (menu_elements *panel)
 {
+		GThread *thread;
+
     while (panel != NULL )
     {
         if (panel->gm_module_start != NULL)
         {
-            if (!g_thread_create((GThreadFunc) panel->gm_module_start, NULL, FALSE, NULL))
+            thread = g_thread_create((GThreadFunc) panel->gm_module_start, NULL, TRUE, NULL);
+						if( !thread )
             {
                 g_warning("Failed to create thread");
             }
+						else
+						{
+							//g_thread_join(thread);
+						}
         }
         panel = panel->next;
     }

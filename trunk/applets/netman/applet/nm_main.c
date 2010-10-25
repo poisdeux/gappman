@@ -25,65 +25,51 @@ static int main_button_height = 50;
 static const char* conffile = "/etc/gappman/netman.xml";
 static gboolean KEEP_RUNNING = FALSE;
 
-static DBusGConnection* dbus_connect(DBusGProxy **proxy)
+static gboolean check_status()
 {
-	GError *error;
-	DBusGConnection *bus;
-
-	error = NULL;
+  GError *error = NULL;
+  DBusGConnection *bus;
+  gchar* args[] = { "-c", "1", "google.com", NULL };
+  gint status, i;
+  DBusGProxy *proxy;
 
   bus = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
   if (bus == NULL)
   {
     g_warning ("Couldn't connect to session bus: %s\n", error->message);
-		g_error_free(error);
-		return bus;
+    g_error_free(error);
+    error = NULL;
+    return FALSE;
   }
 
-  *proxy = dbus_g_proxy_new_for_name (bus,
+  proxy = dbus_g_proxy_new_for_name (bus,
                "gappman.netman",
                "/GmNetmand",
                "gappman.netman.NetmanInterface");
 
-	if(*proxy == NULL)
-	{
-		g_warning("Could not get dbus object for gappman.netman.NetmanInterface");
-		dbus_g_connection_unref(bus);
-		bus = NULL;
-	}
-	return bus;
-}
-
-static void dbus_disconnect(DBusGConnection *bus, DBusGProxy *proxy)
-{
-	  if (bus) {
-    dbus_g_connection_unref (bus);
+  if(proxy == NULL)
+  {
+    g_warning("Could not get dbus object for gappman.netman.NetmanInterface");
+    dbus_g_connection_unref(bus);
+		return FALSE;
   }
-
-  if (proxy) {
-    g_object_unref (proxy);
-  }
-
-}
-
-static gboolean check_status(DBusGProxy *proxy, nm_elements *check)
-{
-  GError *error = NULL;
-	gchar* args[] = { "-c", "1", "google.com", NULL }; 
-	gint status;
 
   if (!dbus_g_proxy_call (proxy, "RunCommand", &error,
-        G_TYPE_STRING, "ping", G_TYPE_STRV, args, G_TYPE_INVALID,
-        G_TYPE_INT, &status, G_TYPE_INVALID))
-	{
-		g_warning ("Failed to complete RunCommand: %p: %s", proxy, error->message);
-		g_error_free(error);
+       G_TYPE_STRING, "ping", G_TYPE_STRV, args, G_TYPE_INVALID,
+       G_TYPE_INT, &status, G_TYPE_INVALID))
+  {
+  	g_warning ("Failed to complete RunCommand: %d, %s", i, error->message);
+   	g_error_free(error);
+    error = NULL;
 		return FALSE;
-	}
+  }
+  else
+  {
+      g_message("%d, received %d", i, status);
+  }
 
-	g_debug("status: %d", status);
-
-	return TRUE;
+  dbus_g_connection_unref(bus);
+  return TRUE;
 }
 
 static void destroy_widget(GtkWidget* dummy, GdkEvent *event, GtkWidget* widget)
@@ -191,7 +177,7 @@ static void show_menu()
         markup = g_markup_printf_escaped ("<span size=\"%d\">%s</span>", gm_get_fontsize(), actions->name);
         gtk_label_set_markup (GTK_LABEL (label), markup);
         g_free (markup);
-        button = gm_create_empty_button(check_status, actions);
+        button = gm_create_empty_button(NULL, NULL);
 				gtk_container_add(GTK_CONTAINER(button), label);
         gtk_widget_show(label);
         gtk_container_add(GTK_CONTAINER(vbox), button);
@@ -267,50 +253,13 @@ G_MODULE_EXPORT void gm_module_set_conffile(const char* filename)
 */
 G_MODULE_EXPORT void gm_module_start()
 {
-	nm_elements *checks;
-	int failed_checks = 0;
-	DBusGConnection *bus = NULL;
-	DBusGProxy *proxy;
-
- 	g_type_init ();
-
-	while( bus == NULL )
-	{
-		bus = dbus_connect(&proxy);
-		sleep(1);
-	}
-
 	KEEP_RUNNING = TRUE;
-	while (KEEP_RUNNING)
+	while(KEEP_RUNNING)
 	{
-		checks = nm_get_stati();
-
-		if( *checks->amount_of_elements * 10 < failed_checks )
-		{
-			g_warning("Exiting. gm_netmand is not running.");
-			// NOTE: possible race condition when both gm_module_start 
-			// and appmanager stop the module.
-			// add new function gm_module_running() to let appmanager check
-			// periodically if the module is still active.
-			//gm_module_stop();
-			return;
-		}
-
-		while(checks != NULL)
-		{
-			if ( check_status(proxy, checks) == FALSE )
-			{
-				failed_checks++;
-				sleep(1);
-			}
-			else
-			{
-				failed_checks = 0;
-			}
-			checks = checks->next;
-		}
-		//update_button();
-		sleep(2);
+		gdk_threads_enter();
+		check_status();
+		gdk_threads_leave();
+		sleep(1);
 	}
 }
 

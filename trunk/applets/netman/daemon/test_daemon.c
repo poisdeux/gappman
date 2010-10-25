@@ -2,15 +2,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static void do_thread()
+static void do_nothing_glibbish()
+{
+	int i;
+
+	for ( i = 0; i < 80; i++)
+	{
+		printf("Look ma, no glib! %d\n", i);
+	}
+}
+
+static void check_status()
 {
   GError *error = NULL;
   DBusGConnection *bus;
+	gint status;
   gchar* args[] = { "-c", "1", "google.com", NULL };
-  gint status, i;
   DBusGProxy *proxy;
 
-  g_type_init ();
 
   bus = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
   if (bus == NULL)
@@ -30,26 +39,37 @@ static void do_thread()
   {
     g_warning("Could not get dbus object for gappman.netman.NetmanInterface");
     dbus_g_connection_unref(bus);
-    bus = NULL;
+		return;
   }
 
-	for( i = 0; i < 80; i++)
-	{	
   	if (!dbus_g_proxy_call (proxy, "RunCommand", &error,
    	     G_TYPE_STRING, "ping", G_TYPE_STRV, args, G_TYPE_INVALID,
    	     G_TYPE_INT, &status, G_TYPE_INVALID))
   	{
-   	 g_warning ("Failed to complete RunCommand: %d, %s", i, error->message);
-   	 g_error_free(error);
+   	 	g_warning ("Failed to complete RunCommand: %s", error->message);
+   	 	g_error_free(error);
 			error = NULL;
-		 sleep(1);
   	}
 		else
 		{
-			g_message("%d, received %d", i, status);
+			g_message("received %d", status);
 		}
-	}
+
+  dbus_g_connection_unref(bus);
 	return;	
+}
+
+static int do_thread()
+{
+	gint i;
+
+	for(i = 0; i < 80; i++ )
+	{
+		gdk_threads_enter();
+		check_status();
+		gdk_threads_leave();
+		sleep(1);
+	}
 }
 
 int
@@ -69,16 +89,16 @@ main (int argc, char **argv)
   	{ NULL }
 	};
 
+  //Needs to be called before any another glib function
+  if (!g_thread_supported ())
+  {
+    g_thread_init (NULL);
+    gdk_threads_init();
+  }
+
+	g_type_init();
+
   gtk_init (&argc, &argv);
-
-
-    //Needs to be called before any another glib function
-    if (!g_thread_supported ())
-    {
-        g_thread_init (NULL);
-        gdk_threads_init();
-    }
-
 
   context = g_option_context_new ("- test gm_netmand daemon");
   g_option_context_add_main_entries (context, entries, NULL);
@@ -93,13 +113,16 @@ main (int argc, char **argv)
   }
 
 	thread = g_thread_create((GThreadFunc) do_thread, NULL, TRUE, NULL);
+	//thread = g_thread_create((GThreadFunc) do_nothing_glibbish, NULL, TRUE, NULL);
 	if ( thread == NULL )
   {
   	g_warning("Failed to create thread");
 		return 1;
   }
-
-	g_thread_join(thread);
-
+	
+	gdk_threads_enter();
+  gtk_main();
+  gdk_threads_leave();
+	
 	return 0;
 }
