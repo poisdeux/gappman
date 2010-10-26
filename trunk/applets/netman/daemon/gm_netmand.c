@@ -18,6 +18,7 @@ G_DEFINE_TYPE (GmNetmand, gm_netmand, G_TYPE_OBJECT); ///< will create gm_netman
 static gboolean gm_netmand_run_command(GmNetmand *obj, gchar* command, gchar** args, gint *exitcode, GError **error)
 {
 	int childpid;
+	int tmp_exitcode;
 	int index = 0;
 	int timeout = 0;
   gchar **tmp;
@@ -58,18 +59,20 @@ static gboolean gm_netmand_run_command(GmNetmand *obj, gchar* command, gchar** a
 
 
 	timeout=10;
-	*exitcode=-1;
+	tmp_exitcode=-1;
 	do
 	{
-		if( waitpid(childpid, exitcode, WNOHANG) == -1 )
+		if( waitpid(childpid, tmp_exitcode, WNOHANG) == -1 )
 		{
 			g_warning("Waitpid failed: %d", errno);
+			g_set_error(GM_NETMAND_ERROR, GMError, 
+				"command execution failed while waiting for child: %d", childpid);  
 			return FALSE;
 		}
-		g_debug("waiting on child %d: exitcode %d", childpid, *exitcode);
+		g_debug("waiting on child %d: exitcode %d", childpid, tmp_exitcode);
 		sleep(1);
 		timeout--;
-	} while ((! WIFEXITED(*exitcode)) && (timeout != 0));
+	} while ((! WIFEXITED(tmp_exitcode)) && (timeout != 0));
 
 	if(timeout == 0)
 	{
@@ -77,9 +80,11 @@ static gboolean gm_netmand_run_command(GmNetmand *obj, gchar* command, gchar** a
 		// to prevent a stall when child refuses to die
 		g_debug("Killing kid %d", childpid);
 		kill(childpid, 15);
-		waitpid(childpid, exitcode, 0);
+		waitpid(childpid, &tmp_exitcode, 0);
 	}
-	g_debug("Child %d returned: exitcode %d", childpid, *exitcode);
+	g_debug("Child %d returned: exitcode %d", childpid, tmp_exitcode);
+
+	*exitcode = WEXITSTATUS(tmp_exitcode);
 	return TRUE;
 }
 

@@ -23,10 +23,14 @@ static GtkButton *main_button = NULL;
 static int main_button_width = 50;
 static int main_button_height = 50;
 static const char* conffile = "/etc/gappman/netman.xml";
-static gboolean KEEP_RUNNING = FALSE;
-static DBusGProxyCall* proxy_call;
-static DBusGConnection *bus;
-static DBusGProxy *proxy;
+static gboolean KEEP_RUNNING;
+static GMutex *check_status_mutex;
+
+static struct dbus_struct {
+	DBusGProxyCall* proxy_call;
+	DBusGConnection *bus;
+	DBusGProxy *proxy;
+} *dbus_conn;
 
 static void collect_status()
 {
@@ -34,8 +38,7 @@ static void collect_status()
   gchar* args[] = { "-c", "1", "google.com", NULL };
 	gint status;
 
-	if( ! dbus_g_proxy_end_call(proxy, proxy_call, &error,
-				G_TYPE_STRING, "ping", G_TYPE_STRV, args, G_TYPE_INVALID,
+	if( ! dbus_g_proxy_end_call(dbus_conn->proxy, dbus_conn->proxy_call, &error,
       	G_TYPE_INT, &status, G_TYPE_INVALID) )
 	{
 		g_warning("Error retrieving ping status: %s", error->message);
@@ -46,19 +49,18 @@ static void collect_status()
 		g_message("Got status: %d", status);
 	}
 
-	proxy_call = NULL;
+	dbus_conn->proxy_call = NULL;
 
 }
 
 static gboolean check_status()
 {
   GError *error = NULL;
-  DBusGConnection *bus;
   gchar* args[] = { "-c", "1", "google.com", NULL };
 	gint status;
 
-  bus = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
-  if (bus == NULL)
+  dbus_conn->bus = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
+  if (dbus_conn->bus == NULL)
   {
     g_warning ("Couldn't connect to session bus: %s\n", error->message);
     g_error_free(error);
@@ -66,27 +68,27 @@ static gboolean check_status()
     return FALSE;
   }
 
-  proxy = dbus_g_proxy_new_for_name (bus,
+  dbus_conn->proxy = dbus_g_proxy_new_for_name (dbus_conn->bus,
                "gappman.netman",
                "/GmNetmand",
                "gappman.netman.NetmanInterface");
 
-  if(proxy == NULL)
+  if(dbus_conn->proxy == NULL)
   {
     g_warning("Could not get dbus object for gappman.netman.NetmanInterface");
-    dbus_g_connection_unref(bus);
+    dbus_g_connection_unref(dbus_conn->bus);
 		return FALSE;
   }
 
-	proxy_call = dbus_g_proxy_begin_call(proxy, "RunCommand", collect_status, NULL,
-			 NULL, G_TYPE_STRING, "ping", G_TYPE_STRV, args, G_TYPE_INVALID,
-       G_TYPE_INT, &status, G_TYPE_INVALID);
+	dbus_conn->proxy_call = dbus_g_proxy_begin_call(dbus_conn->proxy, 
+			"RunCommand", collect_status, NULL,	NULL, 
+			G_TYPE_STRING, "ping", G_TYPE_STRV, args, G_TYPE_INVALID);
 
-  /*if (!dbus_g_proxy_call (proxy, "RunCommand", &error,
+  /*if (!dbus_g_proxy_call (dbus_conn->proxy, "RunCommand", &error,
        G_TYPE_STRING, "ping", G_TYPE_STRV, args, G_TYPE_INVALID,
        G_TYPE_INT, &status, G_TYPE_INVALID))*/
 
-	if (!proxy_call)
+	if (!dbus_conn->proxy_call)
   {
   	g_warning ("Failed to call RunCommand: %s", error->message);
    	g_error_free(error);
@@ -229,7 +231,6 @@ G_MODULE_EXPORT int gm_module_init()
 {
     nm_elements* stati;
 
-
     if(nm_load_conf(conffile) != 0)
 			return GM_COULD_NOT_LOAD_FILE;
 
@@ -258,6 +259,8 @@ G_MODULE_EXPORT int gm_module_init()
     gtk_container_add(GTK_CONTAINER(main_button), GTK_WIDGET(stati->image_fail));
     gtk_widget_show(GTK_WIDGET(main_button));
 
+	check_status_mutex = g_mutex_new();
+
     return GM_SUCCES;
 }
 
@@ -280,20 +283,27 @@ G_MODULE_EXPORT void gm_module_start()
 {
 	KEEP_RUNNING = TRUE;
 
+	dbus_conn = (struct dbus_struct *) malloc(sizeof(struct dbus_struct)); 
 	// Initialize to NULL to start the
 	// loop.
-	proxy_call = NULL;
+	dbus_conn->proxy_call = NULL;
 
 	while(KEEP_RUNNING)
 	{
-		if( proxy_call == NULL )
+		if( dbus_conn->proxy_call == NULL )
 		{
+			while(! g_mutex_trylock(check_status_mutex))
+			{
+				sleep(1);
+			}
 			gdk_threads_enter();
 			check_status();
 			gdk_threads_leave();
+			g_mutex_unlock(check_status_mutex);
 		}
 		else
 		{
+			//we wait for calls to return
 			sleep(1);
 		}
 	}
@@ -307,8 +317,17 @@ G_MODULE_EXPORT void gm_module_start()
 G_MODULE_EXPORT int gm_module_stop()
 {
   nm_elements *checks, *tmp;
+	KEEP_RUNNING = FALSE;
+
+	//prevents freeing elements while
+	//we are still in a run checking
+  //some status
+	while(! g_mutex_trylock(check_status_mutex))
+	{
+		sleep(1);
+	}
+
   checks = nm_get_stati();
-	KEEP_RUNNING = FALSE;	
 
 	tmp = checks;
 	while(tmp != NULL)
@@ -318,6 +337,9 @@ G_MODULE_EXPORT int gm_module_stop()
 		tmp = tmp->next;
 	}
 	nm_free_elements(checks);
+	
+	free(dbus_conn);
+
   return GM_SUCCES;
 }
 
