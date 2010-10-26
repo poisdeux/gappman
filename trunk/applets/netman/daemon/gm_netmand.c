@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <dbus/dbus-glib.h>
 #include "gm_netmand.h"
+#include <../generic/gm_netman_generic.h>
 
 G_DEFINE_TYPE (GmNetmand, gm_netmand, G_TYPE_OBJECT); ///< will create gm_netmand_get_type and set gm_netmand_parent_class
 
@@ -47,6 +48,8 @@ static gboolean gm_netmand_run_command(GmNetmand *obj, gchar* command, gchar** a
   	if ( execvp((char *) command, tmp) == -1 )
   	{
   		g_warning("Could not execute %s: errno: %d\n", command, errno);
+			g_set_error(error, GM_NETMAND_ERROR, GM_NETMAND_FAILED_EXEC, 
+				"Failed to execute %s", command); 
   		_exit(1);
   	}
   	_exit(0);
@@ -54,6 +57,8 @@ static gboolean gm_netmand_run_command(GmNetmand *obj, gchar* command, gchar** a
   else if ( childpid < 0 )
   {
   	g_warning("Failed to fork!\n");
+		g_set_error(error, GM_NETMAND_ERROR, GM_NETMAND_FAILED_EXEC, 
+				"Failed to execute %s", command); 
   	return FALSE;
   }
 
@@ -62,23 +67,22 @@ static gboolean gm_netmand_run_command(GmNetmand *obj, gchar* command, gchar** a
 	tmp_exitcode=-1;
 	do
 	{
-		if( waitpid(childpid, tmp_exitcode, WNOHANG) == -1 )
+		if( waitpid(childpid, &tmp_exitcode, WNOHANG) == -1 )
 		{
 			g_warning("Waitpid failed: %d", errno);
-			g_set_error(GM_NETMAND_ERROR, GMError, 
-				"command execution failed while waiting for child: %d", childpid);  
+			g_set_error(error, GM_NETMAND_ERROR, GM_NETMAND_FAILED_WAIT, 
+				"Failed while waiting for child: %d", childpid);  
 			return FALSE;
 		}
-		g_debug("waiting on child %d: exitcode %d", childpid, tmp_exitcode);
 		sleep(1);
 		timeout--;
+	//Continue loop untill either child exited or child timed out.
 	} while ((! WIFEXITED(tmp_exitcode)) && (timeout != 0));
 
 	if(timeout == 0)
 	{
 		// should be replaced by a generic gm kill function (see src/appmanager.c for implementation)
 		// to prevent a stall when child refuses to die
-		g_debug("Killing kid %d", childpid);
 		kill(childpid, 15);
 		waitpid(childpid, &tmp_exitcode, 0);
 	}

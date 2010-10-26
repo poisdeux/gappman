@@ -1,5 +1,5 @@
 /**
- * \file gm_netmand.c
+ * \file gm_netman_generic.h
  *
  *
  *
@@ -12,5 +12,6 @@
 
 typedef enum
 {
-	GM_NETMAND_EXEC_FAILED	 //< failed to execute command
+	GM_NETMAND_FAILED_EXEC,	 //< failed to fork or execute command
+	GM_NETMAND_FAILED_WAIT	 //< failed while waiting for exitcode of child
 } GMError;

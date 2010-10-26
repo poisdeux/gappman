@@ -84,10 +84,6 @@ static gboolean check_status()
 			"RunCommand", collect_status, NULL,	NULL, 
 			G_TYPE_STRING, "ping", G_TYPE_STRV, args, G_TYPE_INVALID);
 
-  /*if (!dbus_g_proxy_call (dbus_conn->proxy, "RunCommand", &error,
-       G_TYPE_STRING, "ping", G_TYPE_STRV, args, G_TYPE_INVALID,
-       G_TYPE_INT, &status, G_TYPE_INVALID))*/
-
 	if (!dbus_conn->proxy_call)
   {
   	g_warning ("Failed to call RunCommand: %s", error->message);
@@ -281,11 +277,17 @@ G_MODULE_EXPORT void gm_module_set_conffile(const char* filename)
 */
 G_MODULE_EXPORT void gm_module_start()
 {
+	if ( KEEP_RUNNING == TRUE )
+	{
+		g_warning("gm_netman applet already started");
+		return;
+	}
+
 	KEEP_RUNNING = TRUE;
 
 	dbus_conn = (struct dbus_struct *) malloc(sizeof(struct dbus_struct)); 
-	// Initialize to NULL to start the
-	// loop.
+
+	// Initialize to NULL to start the loop
 	dbus_conn->proxy_call = NULL;
 
 	while(KEEP_RUNNING)
@@ -317,6 +319,13 @@ G_MODULE_EXPORT void gm_module_start()
 G_MODULE_EXPORT int gm_module_stop()
 {
   nm_elements *checks, *tmp;
+	
+	if ( KEEP_RUNNING == FALSE )
+	{
+		g_warning("gm_netman applet not running");
+		return;
+	}
+
 	KEEP_RUNNING = FALSE;
 
 	//prevents freeing elements while
