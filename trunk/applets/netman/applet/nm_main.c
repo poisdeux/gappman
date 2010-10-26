@@ -32,10 +32,19 @@ static struct dbus_struct {
 	DBusGProxy *proxy;
 } *dbus_conn;
 
-static void collect_status()
+static void test_print_args(nm_elements *check)
+{
+	int i;
+	
+	for ( i = 0; check->args[i] != NULL; i++ )
+	{
+		g_debug("arg: %s", check->args[i]);
+	}
+}
+
+static void collect_status(nm_elements *check)
 {
 	GError *error = NULL;
-  gchar* args[] = { "-c", "1", "google.com", NULL };
 	gint status;
 
 	if( ! dbus_g_proxy_end_call(dbus_conn->proxy, dbus_conn->proxy_call, &error,
@@ -46,14 +55,15 @@ static void collect_status()
 	}
 	else
 	{
+		check->prev_status = check->status;
+		check->status = status;
 		g_message("Got status: %d", status);
 	}
 
 	dbus_conn->proxy_call = NULL;
-
 }
 
-static gboolean check_status()
+static gboolean check_status(nm_elements *check)
 {
   GError *error = NULL;
   gchar* args[] = { "-c", "1", "google.com", NULL };
@@ -80,9 +90,11 @@ static gboolean check_status()
 		return FALSE;
   }
 
+	test_print_args(check);
+
 	dbus_conn->proxy_call = dbus_g_proxy_begin_call(dbus_conn->proxy, 
-			"RunCommand", collect_status, NULL,	NULL, 
-			G_TYPE_STRING, "ping", G_TYPE_STRV, args, G_TYPE_INVALID);
+			"RunCommand", collect_status, check,	NULL, 
+			G_TYPE_STRING, check->exec, G_TYPE_STRV, check->args, G_TYPE_INVALID);
 
 	if (!dbus_conn->proxy_call)
   {
@@ -277,6 +289,9 @@ G_MODULE_EXPORT void gm_module_set_conffile(const char* filename)
 */
 G_MODULE_EXPORT void gm_module_start()
 {
+	nm_elements *checks;
+
+
 	if ( KEEP_RUNNING == TRUE )
 	{
 		g_warning("gm_netman applet already started");
@@ -292,21 +307,36 @@ G_MODULE_EXPORT void gm_module_start()
 
 	while(KEEP_RUNNING)
 	{
-		if( dbus_conn->proxy_call == NULL )
+		checks = nm_get_stati();
+		while((checks != NULL) && KEEP_RUNNING)
 		{
-			while(! g_mutex_trylock(check_status_mutex))
+			//do not start a new call if previous 
+			//call has not finished 
+			if( dbus_conn->proxy_call == NULL )
 			{
+				//lock required to prevent gm_module_stop
+				//from kicking in when we are just about
+				//to perform a check
+				if( g_mutex_trylock(check_status_mutex) )
+				{
+					gdk_threads_enter();
+					check_status(checks);
+					gdk_threads_leave();
+
+					checks = checks->next;
+
+					g_mutex_unlock(check_status_mutex);
+				}
+				else
+				{
+					sleep(1);
+				}
+			}
+			else
+			{
+				//we wait for a previous proxy call to return
 				sleep(1);
 			}
-			gdk_threads_enter();
-			check_status();
-			gdk_threads_leave();
-			g_mutex_unlock(check_status_mutex);
-		}
-		else
-		{
-			//we wait for calls to return
-			sleep(1);
 		}
 	}
 }
