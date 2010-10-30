@@ -26,11 +26,13 @@ static const char* conffile = "/etc/gappman/netman.xml";
 static gboolean KEEP_RUNNING;
 static GMutex *check_status_mutex;
 
+/*
 static struct dbus_struct {
 	DBusGProxyCall* proxy_call;
 	DBusGConnection *bus;
 	DBusGProxy *proxy;
 } *dbus_conn;
+*/
 
 static void test_print_args(nm_elements *check)
 {
@@ -42,12 +44,12 @@ static void test_print_args(nm_elements *check)
 	}
 }
 
-static void collect_status(nm_elements *check)
+static DBusGProxyCallNotify collect_status(DBusGProxy *proxy, DBusGProxyCall* proxy_call, nm_elements *check)
 {
 	GError *error = NULL;
 	gint status;
 
-	if( ! dbus_g_proxy_end_call(dbus_conn->proxy, dbus_conn->proxy_call, &error,
+	if( ! dbus_g_proxy_end_call(proxy, proxy_call, &error,
       	G_TYPE_INT, &status, G_TYPE_INVALID) )
 	{
 		g_warning("Error retrieving ping status: %s", error->message);
@@ -59,8 +61,6 @@ static void collect_status(nm_elements *check)
 		check->status = status;
 		g_message("Got status: %d", status);
 	}
-
-	dbus_conn->proxy_call = NULL;
 }
 
 static gboolean check_status(nm_elements *check)
@@ -68,9 +68,12 @@ static gboolean check_status(nm_elements *check)
   GError *error = NULL;
   gchar* args[] = { "-c", "1", "google.com", NULL };
 	gint status;
+	DBusGProxyCall* proxy_call;
+  DBusGConnection *bus;
+  DBusGProxy *proxy;
 
-  dbus_conn->bus = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
-  if (dbus_conn->bus == NULL)
+	bus = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
+  if (bus == NULL)
   {
     g_warning ("Couldn't connect to session bus: %s\n", error->message);
     g_error_free(error);
@@ -78,25 +81,25 @@ static gboolean check_status(nm_elements *check)
     return FALSE;
   }
 
-  dbus_conn->proxy = dbus_g_proxy_new_for_name (dbus_conn->bus,
+  proxy = dbus_g_proxy_new_for_name (bus,
                "gappman.netman",
                "/GmNetmand",
                "gappman.netman.NetmanInterface");
 
-  if(dbus_conn->proxy == NULL)
+  if(proxy == NULL)
   {
     g_warning("Could not get dbus object for gappman.netman.NetmanInterface");
-    dbus_g_connection_unref(dbus_conn->bus);
+    dbus_g_connection_unref(bus);
 		return FALSE;
   }
 
 	test_print_args(check);
 
-	dbus_conn->proxy_call = dbus_g_proxy_begin_call(dbus_conn->proxy, 
-			"RunCommand", collect_status, check,	NULL, 
+	proxy_call = dbus_g_proxy_begin_call(proxy, 
+			"RunCommand", (DBusGProxyCallNotify) collect_status, check,	NULL, 
 			G_TYPE_STRING, check->exec, G_TYPE_STRV, check->args, G_TYPE_INVALID);
 
-	if (!dbus_conn->proxy_call)
+	if (proxy_call == NULL)
   {
   	g_warning ("Failed to call RunCommand: %s", error->message);
    	g_error_free(error);
@@ -300,23 +303,15 @@ G_MODULE_EXPORT void gm_module_start()
 
 	KEEP_RUNNING = TRUE;
 
-	dbus_conn = (struct dbus_struct *) malloc(sizeof(struct dbus_struct)); 
-
-	// Initialize to NULL to start the loop
-	dbus_conn->proxy_call = NULL;
 
 	while(KEEP_RUNNING)
 	{
 		checks = nm_get_stati();
 		while((checks != NULL) && KEEP_RUNNING)
 		{
-			//do not start a new call if previous 
-			//call has not finished 
-			if( dbus_conn->proxy_call == NULL )
-			{
-				//lock required to prevent gm_module_stop
-				//from kicking in when we are just about
-				//to perform a check
+			//lock required to prevent gm_module_stop
+			//from kicking in when we are just about
+			//to perform a check
 				if( g_mutex_trylock(check_status_mutex) )
 				{
 					gdk_threads_enter();
@@ -324,19 +319,9 @@ G_MODULE_EXPORT void gm_module_start()
 					gdk_threads_leave();
 
 					checks = checks->next;
-
 					g_mutex_unlock(check_status_mutex);
 				}
-				else
-				{
-					sleep(1);
-				}
-			}
-			else
-			{
-				//we wait for a previous proxy call to return
 				sleep(1);
-			}
 		}
 	}
 }
@@ -377,7 +362,6 @@ G_MODULE_EXPORT int gm_module_stop()
 	}
 	nm_free_elements(checks);
 	
-	free(dbus_conn);
 
   return GM_SUCCES;
 }

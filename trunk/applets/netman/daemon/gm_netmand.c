@@ -88,6 +88,7 @@ static gboolean gm_netmand_run_command(GmNetmand *obj, gchar* command, gchar** a
 	}
 	g_debug("Child %d returned: exitcode %d", childpid, tmp_exitcode);
 
+	free(tmp);
 	*exitcode = WEXITSTATUS(tmp_exitcode);
 	return TRUE;
 }
