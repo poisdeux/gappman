@@ -2,32 +2,47 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static void do_nothing_glibbish()
-{
-	int i;
-
-	for ( i = 0; i < 80; i++)
-	{
-		printf("Look ma, no glib! %d\n", i);
-	}
-}
-
-static void check_status()
+static DBusGProxyCallNotify collect_status(DBusGProxy *proxy, DBusGProxyCall* proxy_call, void *data)
 {
   GError *error = NULL;
-  DBusGConnection *bus;
-	gint status;
+  gint status;
+
+  if( ! dbus_g_proxy_end_call(proxy, proxy_call, &error,
+        G_TYPE_INT, &status, G_TYPE_INVALID) )
+  {
+    g_warning("Error retrieving ping status: %s", error->message);
+    g_error_free(error);
+  }
+  else
+  {
+    g_message("Got status: %d", status);
+  }
+}
+
+static gboolean check_status()
+{
+  GError *error = NULL;
   gchar* args[] = { "-c", "1", "google.com", NULL };
+	gchar** re_args = NULL;
+  gint status;
+  DBusGProxyCall* proxy_call;
+  DBusGConnection *bus;
   DBusGProxy *proxy;
 
+	re_args = (char **) realloc(re_args, (11 * sizeof(char *)));
+
+	re_args[0] = args[0];
+	re_args[1] = args[1];
+	re_args[2] = args[2];
+	re_args[3] = NULL;
 
   bus = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
   if (bus == NULL)
   {
     g_warning ("Couldn't connect to session bus: %s\n", error->message);
     g_error_free(error);
-		error = NULL;
-    return;
+    error = NULL;
+    return FALSE;
   }
 
   proxy = dbus_g_proxy_new_for_name (bus,
@@ -39,25 +54,24 @@ static void check_status()
   {
     g_warning("Could not get dbus object for gappman.netman.NetmanInterface");
     dbus_g_connection_unref(bus);
-		return;
+    return FALSE;
   }
 
-  	if (!dbus_g_proxy_call (proxy, "RunCommand", &error,
-   	     G_TYPE_STRING, "ping", G_TYPE_STRV, args, G_TYPE_INVALID,
-   	     G_TYPE_INT, &status, G_TYPE_INVALID))
-  	{
-   	 	g_warning ("Failed to complete RunCommand: %s", error->message);
-   	 	g_error_free(error);
-			error = NULL;
-  	}
-		else
-		{
-			g_message("received %d", status);
-		}
+  proxy_call = dbus_g_proxy_begin_call(proxy,
+      "RunCommand", (DBusGProxyCallNotify) collect_status, NULL, NULL,
+      G_TYPE_STRING, "ping", G_TYPE_STRV, re_args, G_TYPE_INVALID);
 
-  dbus_g_connection_unref(bus);
-	return;	
+  if (proxy_call == NULL)
+  {
+    g_warning ("Failed to call RunCommand: %s", error->message);
+    g_error_free(error);
+    error = NULL;
+    return FALSE;
+  }
+
+  return TRUE;
 }
+
 
 static int do_thread()
 {
@@ -113,7 +127,6 @@ main (int argc, char **argv)
   }
 
 	thread = g_thread_create((GThreadFunc) do_thread, NULL, TRUE, NULL);
-	//thread = g_thread_create((GThreadFunc) do_nothing_glibbish, NULL, TRUE, NULL);
 	if ( thread == NULL )
   {
   	g_warning("Failed to create thread");

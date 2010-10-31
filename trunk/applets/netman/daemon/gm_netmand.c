@@ -16,6 +16,16 @@
 
 G_DEFINE_TYPE (GmNetmand, gm_netmand, G_TYPE_OBJECT); ///< will create gm_netmand_get_type and set gm_netmand_parent_class
 
+static void test_print_args(gchar **args)
+{
+  int i;
+
+  for ( i = 0; args[i] != NULL; i++ )
+  {
+    g_debug("arg: %s", args[i]);
+  }
+}
+
 static gboolean gm_netmand_run_command(GmNetmand *obj, gchar* command, gchar** args, gint *exitcode, GError **error)
 {
 	int childpid;
@@ -24,9 +34,9 @@ static gboolean gm_netmand_run_command(GmNetmand *obj, gchar* command, gchar** a
 	int timeout = 0;
   gchar **tmp;
 
-
-	//create a new array that is 1 element bigger than args
-	tmp = (gchar**) malloc ((sizeof(args) + 1 )*sizeof(gchar*));
+  //note: we make the tmp array 2 bigger than sizeof(args) as we need to make 
+  //the array null-terminated
+	tmp = (gchar**) malloc ((sizeof(args) + 2 )*sizeof(gchar*));
 
 	if (tmp == NULL)
 		return FALSE;
@@ -40,7 +50,7 @@ static gboolean gm_netmand_run_command(GmNetmand *obj, gchar* command, gchar** a
 		tmp[index++] = *args;
 	}
 	//Array must be NULL-terminated
-	tmp[index] = NULL;
+	tmp[index] = (char *) NULL;
 		
 	childpid = fork();
   if ( childpid == 0 )
@@ -51,7 +61,7 @@ static gboolean gm_netmand_run_command(GmNetmand *obj, gchar* command, gchar** a
 			g_set_error(error, GM_NETMAND_ERROR, GM_NETMAND_FAILED_EXEC, 
 				"Failed to execute %s", command); 
   		_exit(1);
-  	}
+  	}	
   	_exit(0);
   }
   else if ( childpid < 0 )
@@ -61,7 +71,6 @@ static gboolean gm_netmand_run_command(GmNetmand *obj, gchar* command, gchar** a
 				"Failed to execute %s", command); 
   	return FALSE;
   }
-
 
 	timeout=10;
 	tmp_exitcode=-1;
@@ -86,7 +95,6 @@ static gboolean gm_netmand_run_command(GmNetmand *obj, gchar* command, gchar** a
 		kill(childpid, 15);
 		waitpid(childpid, &tmp_exitcode, 0);
 	}
-	g_debug("Child %d returned: exitcode %d", childpid, tmp_exitcode);
 
 	free(tmp);
 	*exitcode = WEXITSTATUS(tmp_exitcode);
