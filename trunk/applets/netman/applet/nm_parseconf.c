@@ -26,7 +26,9 @@ struct nm_element* create_nm_element(nm_elements* prev)
 {
     struct nm_element *elt;
     elt = (nm_elements *) malloc(sizeof(nm_elements));
+		elt->checking = FALSE;
     elt->numArguments = 0;
+    elt->logounavail = NULL;
     elt->logosuccess = NULL;
     elt->logofail = NULL;
     elt->success = 0;
@@ -62,7 +64,7 @@ static void add_argument(nm_elements *elt, char *argument)
 {
     elt->numArguments++;
     elt->args = (char **) realloc(elt->args, ((elt->numArguments + 1) * sizeof(char *)));
-    elt->args[elt->numArguments - 1] = (char *) argument;
+    elt->args[elt->numArguments - 1] = argument;
 		elt->args[elt->numArguments] = NULL;
 }
 
@@ -102,6 +104,10 @@ process_nm_element(xmlTextReaderPtr reader, nm_elements *elt, const char* elemen
             else if ( strcmp((char *) name, "exec") == 0 )
             {
                 elt->exec = value;
+            }
+            else if ( strcmp((char *) name, "logounavail") == 0 )
+            {
+                elt->logounavail = value;
             }
             else if ( strcmp((char *) name, "logosuccess") == 0 )
             {
@@ -150,6 +156,7 @@ void nm_free_elements( nm_elements *elt )
         {
             free((xmlChar *) elt->name);
             free((xmlChar *) elt->exec);
+            free((xmlChar *) elt->logounavail);
             free((xmlChar *) elt->logosuccess);
             free((xmlChar *) elt->logofail);
 

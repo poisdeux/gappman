@@ -20,9 +20,11 @@
 */
 struct nm_element
 {
+		gboolean checking;
     int *amount_of_elements; //!< total number of elements
     const xmlChar *name; //!< holds the name of the program
     const xmlChar *exec; //!< absolute path to executable
+    const xmlChar *logounavail; //!< absolute path to image file
     const xmlChar *logosuccess; //!< absolute path to image file
     const xmlChar *logofail; //!< absolute path to image file
     char **args; //!< array of strings containing arguments that need to be passed to the executable
@@ -32,6 +34,7 @@ struct nm_element
     int prev_status; //!< should hold the last exit value of the executable of the previous test
     int success; //!< should hold the exit value of the executable (*exec) that represents the success state
     struct nm_element *next; //!< pointer to the next nm_element structure
+	  GtkImage *image_unavail; ///< image that should be displayed when connection/call to dbus failed
 	  GtkImage *image_success; ///< image that should be displayed when check succeeds 
 	  GtkImage *image_fail; ///< image that should be displayed when check fails
 };

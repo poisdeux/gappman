@@ -10,6 +10,7 @@
       <arg>1</arg>
       <arg>google.com</arg>
       <success>0</success>
+      <logounavail>./applets/netman/logos/gnome-netstatus-error.png</logounavail>
       <logosuccess>./applets/netman/logos/network-up.png</logosuccess>
       <logofail>./applets/netman/logos/network-down.png</logofail>
     </status>

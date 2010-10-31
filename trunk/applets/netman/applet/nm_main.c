@@ -26,24 +26,6 @@ static const char* conffile = "/etc/gappman/netman.xml";
 static gboolean KEEP_RUNNING;
 static GMutex *check_status_mutex;
 
-/*
-static struct dbus_struct {
-	DBusGProxyCall* proxy_call;
-	DBusGConnection *bus;
-	DBusGProxy *proxy;
-} *dbus_conn;
-*/
-
-static void test_print_args(nm_elements *check)
-{
-	int i;
-	
-	for ( i = 0; check->args[i] != NULL; i++ )
-	{
-		g_debug("arg: %s", check->args[i]);
-	}
-}
-
 static DBusGProxyCallNotify collect_status(DBusGProxy *proxy, DBusGProxyCall* proxy_call, nm_elements *check)
 {
 	GError *error = NULL;
@@ -52,15 +34,19 @@ static DBusGProxyCallNotify collect_status(DBusGProxy *proxy, DBusGProxyCall* pr
 	if( ! dbus_g_proxy_end_call(proxy, proxy_call, &error,
       	G_TYPE_INT, &status, G_TYPE_INVALID) )
 	{
-		g_warning("Error retrieving ping status: %s", error->message);
+		g_warning("Error retrieving status for command %s: %s", check->exec, error->message);
 		g_error_free(error);
+
+		check->prev_status = check->status;
+		check->status = -1;
 	}
 	else
 	{
 		check->prev_status = check->status;
 		check->status = status;
-		g_message("Got status: %d", status);
 	}
+	g_message("Got status: %d", check->status);
+	check->checking = FALSE;
 }
 
 static gboolean check_status(nm_elements *check)
@@ -93,7 +79,6 @@ static gboolean check_status(nm_elements *check)
 		return FALSE;
   }
 
-	test_print_args(check);
 
 	proxy_call = dbus_g_proxy_begin_call(proxy, 
 			"RunCommand", (DBusGProxyCallNotify) collect_status, check,	NULL, 
@@ -106,6 +91,8 @@ static gboolean check_status(nm_elements *check)
     error = NULL;
 		return FALSE;
   }
+
+	check->checking = TRUE;
 
   return TRUE;
 }
@@ -131,7 +118,11 @@ static void update_button()
 		//we only need to do something if the status changed
 		if(checks->prev_status != checks->status)
 		{
-			if(checks->status != checks->success)
+			if( checks->status == -1 )
+			{
+				gtk_button_set_image(main_button, GTK_WIDGET(checks->image_unavail));
+			}
+			else if(checks->status != checks->success)
 			{
 				gtk_button_set_image(main_button, GTK_WIDGET(checks->image_fail));
 
@@ -150,6 +141,7 @@ static void update_button()
 	//since the previous check.
 	if( status_changed_to_succes )
 	{
+		checks = nm_get_stati();
 		gtk_button_set_image(main_button, GTK_WIDGET(checks->image_success));
 	}
 }
@@ -255,24 +247,28 @@ G_MODULE_EXPORT int gm_module_init()
                       NULL);
 	while (stati != NULL)
 	{
-    	stati->image_success = GTK_IMAGE(gm_load_image("gm_netman_success", (char*) stati->logosuccess, (char*) nm_get_cache_location(), (char*) stati->name, main_button_width, main_button_height));
-    	gtk_widget_show(GTK_WIDGET(stati->image_success));
+    stati->image_unavail = GTK_IMAGE(gm_load_image("gm_netman_unavail", (char*) stati->logounavail, (char*) nm_get_cache_location(), (char*) stati->name, main_button_width, main_button_height));
+    gtk_widget_show(GTK_WIDGET(stati->image_unavail));
+		g_object_ref(stati->image_unavail);
+
+    stati->image_success = GTK_IMAGE(gm_load_image("gm_netman_success", (char*) stati->logosuccess, (char*) nm_get_cache_location(), (char*) stati->name, main_button_width, main_button_height));
+    gtk_widget_show(GTK_WIDGET(stati->image_success));
 		g_object_ref(stati->image_success);
 
-    	stati->image_fail = GTK_IMAGE(gm_load_image("gm_netman_fail", (const char*) stati->logofail, nm_get_cache_location(), (char*) stati->name, main_button_width, main_button_height));
-    	gtk_widget_show(GTK_WIDGET(stati->image_fail));
+    stati->image_fail = GTK_IMAGE(gm_load_image("gm_netman_fail", (const char*) stati->logofail, nm_get_cache_location(), (char*) stati->name, main_button_width, main_button_height));
+    gtk_widget_show(GTK_WIDGET(stati->image_fail));
 		g_object_ref(stati->image_fail);
 		
 		stati = stati->next;
 	}
-    stati = nm_get_stati();
-    //We start off in fail mode
-    gtk_container_add(GTK_CONTAINER(main_button), GTK_WIDGET(stati->image_fail));
-    gtk_widget_show(GTK_WIDGET(main_button));
+  stati = nm_get_stati();
+  //We start off in fail mode
+  gtk_container_add(GTK_CONTAINER(main_button), GTK_WIDGET(stati->image_fail));
+  gtk_widget_show(GTK_WIDGET(main_button));
 
 	check_status_mutex = g_mutex_new();
 
-    return GM_SUCCES;
+  return GM_SUCCES;
 }
 
 /**
@@ -303,7 +299,6 @@ G_MODULE_EXPORT void gm_module_start()
 
 	KEEP_RUNNING = TRUE;
 
-
 	while(KEEP_RUNNING)
 	{
 		checks = nm_get_stati();
@@ -312,17 +307,28 @@ G_MODULE_EXPORT void gm_module_start()
 			//lock required to prevent gm_module_stop
 			//from kicking in when we are just about
 			//to perform a check
-				if( g_mutex_trylock(check_status_mutex) )
+			if( g_mutex_trylock(check_status_mutex) )
+			{
+				if(!checks->checking)
 				{
 					gdk_threads_enter();
 					check_status(checks);
 					gdk_threads_leave();
-
-					checks = checks->next;
-					g_mutex_unlock(check_status_mutex);
 				}
-				sleep(1);
+				checks = checks->next;
+				g_mutex_unlock(check_status_mutex);
+			}
 		}
+
+    if( g_mutex_trylock(check_status_mutex) )
+    {
+			gdk_threads_enter();
+			update_button();
+			gdk_threads_leave();
+			g_mutex_unlock(check_status_mutex);
+		}
+
+		sleep(1);
 	}
 }
 
@@ -356,6 +362,7 @@ G_MODULE_EXPORT int gm_module_stop()
 	tmp = checks;
 	while(tmp != NULL)
 	{
+		g_object_unref(tmp->image_unavail);
 		g_object_unref(tmp->image_success);
 		g_object_unref(tmp->image_fail);
 		tmp = tmp->next;
