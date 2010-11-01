@@ -66,7 +66,7 @@ static void writemsg(GIOChannel* gio, gchar* msg)
     gerror = g_io_channel_write(gio, msg, strlen(msg), &bytes_written);
     if ( gerror != G_IO_ERROR_NONE )
     {
-        g_warning("Error sending message: %s : bytes written %d\n", msg, bytes_written);
+        g_warning("Error sending message: %s : bytes written %d\n", msg, (int) bytes_written);
     }
 }
 
@@ -142,7 +142,7 @@ static gboolean handleconnection( GIOChannel* gio , GIOCondition cond, gpointer 
     int msg_id;
 
     cli_len = sizeof(cli_addr);
-    newsock = accept((int) data, (struct sockaddr *) &cli_addr, &cli_len);
+    newsock = accept(*(int*) data, (struct sockaddr *) &cli_addr, &cli_len);
     if (newsock < 0)
     {
         perror("Error accepting message:");
@@ -198,7 +198,7 @@ static gboolean handleconnection( GIOChannel* gio , GIOCondition cond, gpointer 
 
 gboolean gappman_start_listener (GtkWidget* win)
 {
-    int sock;
+    static int sock;
     int s;
     struct addrinfo hints;
     struct addrinfo *result = NULL;
@@ -250,7 +250,7 @@ gboolean gappman_start_listener (GtkWidget* win)
         {
             gio = g_io_channel_unix_new (sock);
 
-            if (! g_io_add_watch( gio, G_IO_IN, handleconnection, (gpointer) sock ))
+            if (! g_io_add_watch( gio, G_IO_IN, handleconnection, (gpointer) &sock ))
             {
                 g_warning("Cannot add watch on GIOChannel!\n");
                 listener_started = FALSE;
