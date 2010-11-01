@@ -13,8 +13,8 @@
 #include <config.h>
 #endif
 
-#if defined(HAVE_NETDB_H) && defined(HAVE_NETINET_IN_H) 
-#include <glib.h>
+#if defined (HAVE_NETDB_H) && defined (HAVE_NETINET_IN_H) 
+#include <gtk/gtk.h>
 
 /**
 * \brief Starts the gappman listener. Should be started only once.
