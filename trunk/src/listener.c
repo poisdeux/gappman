@@ -9,6 +9,9 @@
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
 
+#include "listener.h"
+
+#if defined(HAVE_NETDB_H) && defined(HAVE_NETINET_IN_H) 
 
 #include <stdio.h>
 #include <glib.h>
@@ -16,13 +19,12 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <string.h>
-#include <netinet/in.h>
 #include <stdlib.h>
+#include <netinet/in.h>
 #include <netdb.h>
 #include <unistd.h>
 #include <gm_layout.h>
 #include "appmanager.h"
-#include "listener.h"
 
 #define SEND_PROCESS_LIST 1 ///< message id used to specify we received a request to sent the current list of programs started by gappman
 #define SEND_FONTSIZE 2 ///< message id used to specify we received a request to sent the current default fontsize used by gappman
@@ -299,3 +301,4 @@ void gappman_set_confpath(const gchar *path)
 {
 	confpath = path;
 }
+#endif

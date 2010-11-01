@@ -389,9 +389,10 @@ int main (int argc, char **argv)
 	{
 	    switch (status)
    	 	{
-	    	case GM_SUCCES:
+	    	case GM_NET_COMM_NOT_SUPPORTED:
+     			gm_show_error_dialog("Gappman compiled without network support", (void*) mainwin, (void*) destroy);
   	      		break;;
-			case GM_COULD_NOT_RESOLVE_HOSTNAME:
+		case GM_COULD_NOT_RESOLVE_HOSTNAME:
      			gm_show_error_dialog("Could not resolve hostname: localhost", (void*) mainwin, (void*) destroy);
       			break;;
 	    	case GM_COULD_NOT_CONNECT:
@@ -406,7 +407,7 @@ int main (int argc, char **argv)
 	    default:
 				gm_show_error_dialog("An undefined error occured when contacting gappman.", (void *) mainwin, (void*) destroy);
 	        	break;;
-    	}
+    	   }
 	}
 	else
 	{

@@ -21,5 +21,6 @@
 #define GM_COULD_NOT_SEND_MESSAGE 6 ///< Returned by gm_connect lib when sending message failed
 #define GM_COULD_NOT_DISCONNECT 7 ///< Returned by gm_connect lib could not disconnect connection with gappman
 #define GM_COULD_NOT_LOAD_FILE 8 ///< Could not open or read a file
+#define GM_NET_COMM_NOT_SUPPORTED 9 ///< No support for network-communications
 
 #endif

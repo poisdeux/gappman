@@ -9,10 +9,15 @@
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#ifdef HAVE_NETDB_H
 #include <netdb.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -57,6 +62,9 @@ static void parse_fontsize_message(int *fontsize, gchar *msg)
 
 int gm_connect_to_gappman(int portno, const char* hostname, int *sockfd)
 {
+#ifndef HAVE_NETDB_H
+    return GM_NET_COMM_NOT_SUPPORTED;
+#else
     struct sockaddr_in serv_addr;
     struct hostent *server;
 
@@ -84,6 +92,7 @@ int gm_connect_to_gappman(int portno, const char* hostname, int *sockfd)
         return GM_COULD_NOT_CONNECT;
     }
     return GM_SUCCES;
+#endif
 }
 
 static int create_gio_channel(int portno, const char* hostname, GIOChannel** gio, int *sockfd)
@@ -105,6 +114,9 @@ static int create_gio_channel(int portno, const char* hostname, GIOChannel** gio
 
 int gm_get_confpath_from_gappman(int portno, const char* hostname, gchar** path)
 {
+#ifndef HAVE_NETDB_H
+    return GM_NET_COMM_NOT_SUPPORTED;
+#else
     gsize len;
     int socket;
     gchar *msg;
@@ -152,11 +164,15 @@ int gm_get_confpath_from_gappman(int portno, const char* hostname, gchar** path)
     close(socket);
 
     return GM_SUCCES;
+#endif
 }
 
 
 int gm_get_fontsize_from_gappman(int portno, const char* hostname, int *fontsize)
 {
+#ifndef HAVE_NETDB_H
+    return GM_NET_COMM_NOT_SUPPORTED;
+#else
     gsize len;
     int socket;
     gchar *msg;
@@ -201,10 +217,14 @@ int gm_get_fontsize_from_gappman(int portno, const char* hostname, int *fontsize
     close(socket);
 
     return GM_SUCCES;
+#endif
 }
 
 int gm_send_and_receive_message(int portno, const char* hostname, gchar *msg, void (*callbackfunc)(gchar*))
 {
+#ifndef HAVE_NETDB_H
+    return GM_NET_COMM_NOT_SUPPORTED;
+#else
     gsize len;
     int socket;
     int status;
@@ -248,4 +268,5 @@ int gm_send_and_receive_message(int portno, const char* hostname, gchar *msg, vo
     close(socket);
 
     return GM_SUCCES;
+#endif
 }

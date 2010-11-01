@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.67])
-AC_INIT([gappman], [0.4a], [m.brekhof@gmail.com])
+AC_INIT([gappman], [0.4a], [m.brekhof@gmail.com], [http://code.google.com/p/gappman/])
 AC_CONFIG_SRCDIR([libs/layout/gm_layout.c])
 AC_CONFIG_HEADERS([config.h])
 
@@ -69,8 +69,7 @@ echo "Error: libXrandr not found!"; exit 1
 
 # Checks for header files.
 AC_PATH_X
-AC_CHECK_HEADERS([netdb.h netinet/in.h stdlib.h string.h sys/socket.h unistd.h])
-AC_HEADER_STDC
+AC_CHECK_HEADERS([netdb.h netinet/in.h sys/socket.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T

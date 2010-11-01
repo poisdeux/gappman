@@ -9,7 +9,11 @@
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
+#if defined(HAVE_NETDB_H) && defined(HAVE_NETINET_IN_H) 
 #include <glib.h>
 
 /**
@@ -30,3 +34,4 @@ gboolean gappman_close_listener (GIOChannel* gio);
 * \param *path string containing the absolute path to the configuration file for gappman.
 */
 void gappman_set_confpath(const gchar *path);
+#endif

@@ -9,6 +9,8 @@
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
 
+#include "listener.h"
+#include "appmanager.h"
 #include <glib.h>
 #include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
@@ -22,11 +24,9 @@
 #include <sys/socket.h>
 #include <string.h>
 #include <gm_changeresolution.h>
-#include "listener.h"
 #include <gm_parseconf.h>
 #include <gm_layout.h>
 #include <gm_generic.h>
-#include "appmanager.h"
 
 struct appwidgetinfo* started_apps; ///< holds the currently started apps
 menu_elements *programs; ///< list of all programs gappman manages. Currently only programs need to be global as only programs have meta-info that can be updated. E.g. resolution updates for a specific program. 
@@ -442,7 +442,9 @@ int main (int argc, char **argv)
 
 	//set confpath so other programs can retrieve
 	//the configuration file gappman used
+#if defined(HAVE_NETDB_H) && defined(HAVE_NETINET_IN_H)
 	gappman_set_confpath(conffile);
+#endif
 
     /** INIT */
     started_apps = NULL;
@@ -539,7 +541,11 @@ int main (int argc, char **argv)
 
     autostartprograms( programs );
 
+#if defined(HAVE_NETDB_H) && defined(HAVE_NETINET_IN_H) 
     gappman_start_listener(mainwin);
+#else
+    g_warning("Gappman compiled without network support");
+#endif
 
     gdk_threads_enter();
     gtk_main ();
@@ -547,8 +553,10 @@ int main (int argc, char **argv)
 
 
     g_message("Closing up.");
-		stop_panel( panel );
+    stop_panel( panel );
+#if defined(HAVE_NETDB_H) && defined(HAVE_NETINET_IN_H) 
     gappman_close_listener(NULL);
+#endif
     gm_free_menu_elements( programs );
     gm_free_menu_elements( actions );
     gm_free_menu_elements( panel );
