@@ -11,6 +11,8 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <dbus/dbus-glib.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include "gm_netmand.h"
 #include <../generic/gm_netman_generic.h>
 

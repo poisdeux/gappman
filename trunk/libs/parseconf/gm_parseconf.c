@@ -9,9 +9,9 @@
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
 
+#include <string.h>
 #include "gm_parseconf.h"
 #include <gm_generic.h>
-#include <string.h>
 
 static int numberElts;
 static menu_elements* programs = NULL;
