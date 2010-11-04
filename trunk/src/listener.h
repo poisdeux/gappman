@@ -13,7 +13,7 @@
 #include <config.h>
 #endif
 
-#if defined (HAVE_NETDB_H) && defined (HAVE_NETINET_IN_H) 
+#if !defined (NO_LISTENER)
 #include <gtk/gtk.h>
 
 /**

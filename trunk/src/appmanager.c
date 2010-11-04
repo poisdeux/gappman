@@ -440,9 +440,9 @@ int main (int argc, char **argv)
 
 	gm_res_init();
 
+#if !defined(NO_LISTENER)
 	//set confpath so other programs can retrieve
 	//the configuration file gappman used
-#if defined(HAVE_NETDB_H) && defined(HAVE_NETINET_IN_H)
 	gappman_set_confpath(conffile);
 #endif
 
@@ -541,7 +541,7 @@ int main (int argc, char **argv)
 
     autostartprograms( programs );
 
-#if defined(HAVE_NETDB_H) && defined(HAVE_NETINET_IN_H) 
+#if !defined(NO_LISTENER)
     gappman_start_listener(mainwin);
 #else
     g_warning("Gappman compiled without network support");
@@ -554,7 +554,7 @@ int main (int argc, char **argv)
 
     g_message("Closing up.");
     stop_panel( panel );
-#if defined(HAVE_NETDB_H) && defined(HAVE_NETINET_IN_H) 
+#if !defined(NO_LISTENER)
     gappman_close_listener(NULL);
 #endif
     gm_free_menu_elements( programs );

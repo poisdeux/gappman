@@ -62,7 +62,7 @@ static void parse_fontsize_message(int *fontsize, gchar *msg)
 
 int gm_connect_to_gappman(int portno, const char* hostname, int *sockfd)
 {
-#ifndef HAVE_NETDB_H
+#ifdef NO_LISTENER
     return GM_NET_COMM_NOT_SUPPORTED;
 #else
     struct sockaddr_in serv_addr;
@@ -114,7 +114,7 @@ static int create_gio_channel(int portno, const char* hostname, GIOChannel** gio
 
 int gm_get_confpath_from_gappman(int portno, const char* hostname, gchar** path)
 {
-#ifndef HAVE_NETDB_H
+#ifdef NO_LISTENER
     return GM_NET_COMM_NOT_SUPPORTED;
 #else
     gsize len;
@@ -170,7 +170,7 @@ int gm_get_confpath_from_gappman(int portno, const char* hostname, gchar** path)
 
 int gm_get_fontsize_from_gappman(int portno, const char* hostname, int *fontsize)
 {
-#ifndef HAVE_NETDB_H
+#ifndef NO_LISTENER
     return GM_NET_COMM_NOT_SUPPORTED;
 #else
     gsize len;
@@ -222,7 +222,7 @@ int gm_get_fontsize_from_gappman(int portno, const char* hostname, int *fontsize
 
 int gm_send_and_receive_message(int portno, const char* hostname, gchar *msg, void (*callbackfunc)(gchar*))
 {
-#ifndef HAVE_NETDB_H
+#ifndef NO_LISTENER
     return GM_NET_COMM_NOT_SUPPORTED;
 #else
     gsize len;
