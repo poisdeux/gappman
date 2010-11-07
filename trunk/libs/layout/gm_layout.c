@@ -24,6 +24,17 @@ static int	screen_height = 600;
 
 #define MAXCHARSINLABEL 15; ///< amount of characters we take as a maximum to determine the fontsize.
 
+gboolean check_key(GdkEvent *event)
+{
+  //Only start program  if spacebar or mousebutton is pressed
+  if ( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
+  {
+		return TRUE;
+	}
+		
+	return FALSE;
+}
+
 static void destroy_widget( GtkWidget *widget, gpointer data )
 {
     gtk_widget_destroy(widget);

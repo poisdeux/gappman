@@ -15,6 +15,7 @@
 static nm_elements* stati;
 static nm_elements* actions;
 static const char *cache_location;
+static const char *logounavail;
 
 /**
 * \brief creates a new nm_element and initializes it.
@@ -26,9 +27,8 @@ struct nm_element* create_nm_element(nm_elements* prev)
 {
     struct nm_element *elt;
     elt = (nm_elements *) malloc(sizeof(nm_elements));
-		elt->checking = FALSE;
+		elt->running = FALSE;
     elt->numArguments = 0;
-    elt->logounavail = NULL;
     elt->logosuccess = NULL;
     elt->logofail = NULL;
     elt->success = 0;
@@ -68,6 +68,11 @@ static void add_argument(nm_elements *elt, char *argument)
 		elt->args[elt->numArguments] = NULL;
 }
 
+const char* nm_get_filename_logounavail()
+{
+	return logounavail;
+}
+
 const char* nm_get_cache_location()
 {
     return cache_location;
@@ -104,10 +109,6 @@ process_nm_element(xmlTextReaderPtr reader, nm_elements *elt, const char* elemen
             else if ( strcmp((char *) name, "exec") == 0 )
             {
                 elt->exec = value;
-            }
-            else if ( strcmp((char *) name, "logounavail") == 0 )
-            {
-                elt->logounavail = value;
             }
             else if ( strcmp((char *) name, "logosuccess") == 0 )
             {
@@ -156,7 +157,6 @@ void nm_free_elements( nm_elements *elt )
         {
             free((xmlChar *) elt->name);
             free((xmlChar *) elt->exec);
-            free((xmlChar *) elt->logounavail);
             free((xmlChar *) elt->logosuccess);
             free((xmlChar *) elt->logofail);
 
@@ -200,23 +200,36 @@ static void process_nm_elements(const char* element_name, const char* group_elem
     nm_elements *prev;
     prev = NULL;
 
-
     while (ret)
     {
         ret = xmlTextReaderRead(reader);
-        name = xmlTextReaderName(reader);
-        // Parse new status or action and create a new nm_element for it.
-        if ( strcmp((char *) name, element_name) == 0 && xmlTextReaderNodeType(reader) == 1)
-        {
+				if ( xmlTextReaderNodeType(reader) == 1 )
+				{
+        	name = xmlTextReaderName(reader);
+	
+        	// Parse new status or action and create a new nm_element for it.
+        	if ( strcmp((char *) name, element_name) == 0 )
+        	{
             *elts = create_nm_element(prev);
             prev = *elts;
             process_nm_element(reader, *elts, element_name);
-        }
-        //check if we found the closing tag
-        if ( strcmp((const char*) name, group_element_name) == 0 && xmlTextReaderNodeType(reader) == 15 )
-        {
+        	}
+				}
+				else if ( xmlTextReaderNodeType(reader) == 3 ) 
+				{
+       		if ( strcmp((char *) name, "logounavail") == 0 )
+					{
+						logounavail = (const char*) xmlTextReaderValue(reader);
+					}
+				}
+				else if ( xmlTextReaderNodeType(reader) == 15 )
+				{
+       		name = xmlTextReaderName(reader);
+        	if ( strcmp((const char*) name, group_element_name) == 0 )
+        	{
             ret = 0;
-        }
+        	}
+				}
     }
 }
 
@@ -229,34 +242,35 @@ int nm_load_conf(const char *filename) {
     stati = NULL;
     actions = NULL;
     cache_location = NULL;
+		logounavail = NULL;
 
     reader = xmlReaderForFile(filename, NULL, 0);
     if (reader != NULL)
     {
         ret = xmlTextReaderRead(reader);
-
         while (ret == 1)
         {
-            name = xmlTextReaderName(reader);
-            if ( strcmp((char *) name, "stati") == 0 && xmlTextReaderNodeType(reader) == 1)
-            {
+        		if ( xmlTextReaderNodeType(reader) == 1 )
+						{
+            	name = xmlTextReaderName(reader);
+         	  	if ( strcmp((char *) name, "stati") == 0 )
+            	{
                 process_nm_elements("status", "stati", reader, &stati);
-            }
-            else if ( strcmp((char *) name, "actions") == 0 && xmlTextReaderNodeType(reader) == 1)
-            {
+            	}
+            	else if ( strcmp((char *) name, "actions") == 0 )
+            	{
                 process_nm_elements("action", "actions", reader, &actions);
-            }
-
-            if ( strcmp((const char *) name, "cachelocation") == 0 && xmlTextReaderNodeType(reader) == 1)
-            {
-                ret = xmlTextReaderRead(reader);
-                cache_location = (const char*) xmlTextReaderValue(reader);
-            }
-            else
-            {
-                ret = xmlTextReaderRead(reader);
-            }
-        }
+            	}
+						}
+						else if ( xmlTextReaderNodeType(reader) == 3 )
+						{
+            	if ( strcmp((const char *) name, "cachelocation") == 0 )
+            	{
+             	  cache_location = (const char*) xmlTextReaderValue(reader);
+            	}
+												}
+            ret = xmlTextReaderRead(reader);
+         }
 
         /**
          * Free up the reader

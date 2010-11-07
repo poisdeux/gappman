@@ -20,11 +20,10 @@
 */
 struct nm_element
 {
-		gboolean checking;
+		gboolean running; //!< Should be TRUE if exec has been executed and is still running. FALSE otherwise.
     int *amount_of_elements; //!< total number of elements
     const xmlChar *name; //!< holds the name of the program
     const xmlChar *exec; //!< absolute path to executable
-    const xmlChar *logounavail; //!< absolute path to image file
     const xmlChar *logosuccess; //!< absolute path to image file
     const xmlChar *logofail; //!< absolute path to image file
     char **args; //!< array of strings containing arguments that need to be passed to the executable
@@ -34,7 +33,6 @@ struct nm_element
     int prev_status; //!< should hold the last exit value of the executable of the previous test
     int success; //!< should hold the exit value of the executable (*exec) that represents the success state
     struct nm_element *next; //!< pointer to the next nm_element structure
-	  GtkImage *image_unavail; ///< image that should be displayed when connection/call to dbus failed
 	  GtkImage *image_success; ///< image that should be displayed when check succeeds 
 	  GtkImage *image_fail; ///< image that should be displayed when check fails
 };
@@ -59,6 +57,12 @@ int nm_load_conf(const char *filename);
 * \param *elt first nm_element structure
 */
 void nm_free_elements( nm_elements *elt );
+
+/**
+* \brief Get the filename for the unavail image
+* \return string or NULL if filename was not set
+*/
+const char* nm_get_filename_logounavail();
 
 /**
 * \brief Get the path of the cache location on disk

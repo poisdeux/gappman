@@ -1,13 +1,18 @@
 /**
- * \file gm_layout.h
- *
- *
- *
- * GPL v2
- *
- * Authors:
- *   Martijn Brekhof <m.brekhof@gmail.com>
- */
+* \file gm_layout.h
+*
+*
+* GPL v2
+*
+* Authors:
+*   Martijn Brekhof <m.brekhof@gmail.com>
+*
+* Format of the callback function should be: 
+* functionname( GtkWidget *widget, GdkEvent *event, void *data ).
+* Where *data will be the data you passed on to gm_create_empty_button in *data.
+*
+*/
+
 #ifndef __GAPPMAN_LAYOUT_H__
 #define __GAPPMAN_LAYOUT_H__
 
@@ -21,6 +26,13 @@
 * \param widget widget that should be destroyed
 */
 void gm_destroy_widget(GtkWidget* dummy, GdkEvent *event, GtkWidget* widget);
+
+/**
+* \brief checks if spacebar or mousebutton was pressed to generate the event
+* \param event pointer to the GdkEvent that was generated
+* \return TRUE if spacebar or mousebutton generated the event. FALSE otherwise
+*/
+gboolean check_key(GdkEvent *event);
 
 /**
 * \brief quits program only if mousebutton or spacebar is pressed
@@ -111,7 +123,7 @@ GtkWidget* gm_create_button ( menu_elements *elt, int max_width, int max_height,
 
 /**
 * \brief Create a single empty button
-* \param callbackfunc callback function that will be called when button is pressed
+* \param callbackfunc callback function that will be called when button is pressed. 
 * \param data data to be parsed as argument when calling callbackfunc
 * \return GtkWidget pointer to the new button
 */
