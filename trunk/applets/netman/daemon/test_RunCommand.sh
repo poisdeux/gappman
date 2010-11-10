@@ -1,16 +1,30 @@
 #!/bin/bash
+GMNETMAND="./gm_netmand"
 TEST_FAILED=0
 retval=""
 
 if [ ! -x /usr/bin/dbus-send ]
 then
-	echo "Error: /usr/bin/dbus-send not found. Not performing check for RunCommand"
+	echo "ERROR: /usr/bin/dbus-send not found."
 	exit 1
 fi
 
-echo "Starting gmnetmand"
-./gm_netmand > /dev/null 2>&1 &
+if [ ! -x ${GMNETMAND} ]
+then
+	echo "ERROR: ${GMNETMAND} not found"
+	exit 1
+fi
+
+echo "Starting ${GMNETMAND}"
+${GMNETMAND} > /dev/null 2>&1 &
+retval=$?
 GMNETMAND_PID=$!
+
+if [ ${retval} -ne 0 ]
+then
+	echo "ERROR: ${GMNETMAND} failed"
+	exit 1
+fi
 
 echo "Testing gappman.netman.NetmanInterface.RunCommand"
 
