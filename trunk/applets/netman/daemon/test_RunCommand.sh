@@ -2,6 +2,12 @@
 TEST_FAILED=0
 retval=""
 
+if [ ! -x /usr/bin/dbus-send ]
+then
+	echo "Error: /usr/bin/dbus-send not found. Not performing check for RunCommand"
+	exit 1
+fi
+
 echo "Starting gmnetmand"
 ./gm_netmand > /dev/null 2>&1 &
 GMNETMAND_PID=$!
