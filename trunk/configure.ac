@@ -5,6 +5,7 @@ AC_PREREQ([2.61])
 AC_INIT([gappman], [0.4a], [m.brekhof@gmail.com], [http://code.google.com/p/gappman/])
 AC_CONFIG_SRCDIR([libs/layout/gm_layout.c])
 AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_MACRO_DIR([m4])
 
 # Pass generic make options to all makefiles
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
@@ -114,3 +115,21 @@ AC_CONFIG_FILES([Makefile
                  libs/parseconf/Makefile
                  src/Makefile])
 AC_OUTPUT
+
+echo \
+"
+Configured ${PACKAGE_NAME} ${PACKAGE_VERSION}
+
+prefix: ${prefix}
+compiler: ${CC} ${CFLAGS} ${CPPFLAGS}
+
+Package features:
+  listener disabled: ${disable_listener}
+
+Now type 'make @<:@<target>@:>@'
+  where the optional <target> can be:
+    all         - build all binaries
+    install     - install everything
+
+"
+
