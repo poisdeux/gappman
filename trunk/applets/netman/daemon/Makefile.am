@@ -2,14 +2,7 @@
 SUBDIRS = introspection
 
 noinst_HEADERS = gm_netmand.h
-bin_PROGRAMS = gm_netmand test_daemon
-test_daemon_SOURCES = test_daemon.c
-test_daemon_CPPFLAGS = @GTK_INCLUDES@
-test_daemon_CPPFLAGS += @DBUS_INCLUDES@
-test_daemon_CPPFLAGS += @GTHREAD_INCLUDES@
-test_daemon_LDADD = @GTK_OBJS@ 
-test_daemon_LDADD += @DBUS_OBJS@ 
-test_daemon_LDADD += @GTHREAD_OBJS@ 
+bin_PROGRAMS = gm_netmand 
 gm_netmand_SOURCES = gm_netmand.c 
 gm_netmand_CPPFLAGS = @GTK_INCLUDES@
 gm_netmand_CPPFLAGS += @DBUS_INCLUDES@
@@ -22,3 +15,5 @@ BUILT_SOURCES = gm_netmand_glue.h
 gm_netmand_glue.h: introspection/gm_netmand.xml
 	dbus-binding-tool --prefix=gm_netmand --mode=glib-server --output=$@ $<
 
+check_SCRIPTS = test_RunCommand.sh
+TESTS = $(check_SCRIPTS)
