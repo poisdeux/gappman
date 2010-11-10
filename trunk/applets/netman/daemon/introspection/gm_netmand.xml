@@ -8,9 +8,6 @@
       <arg type="as" name="args" direction="in" />
       <arg type="i" name="exitcode" direction="out" />
     </method>
-		<signal name="StateChanged">
-      <arg name="state" type="u"/>
-    </signal>
   </interface>
 </node>
 
