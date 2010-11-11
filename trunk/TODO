@@ -11,3 +11,7 @@
 * Fix fontsize calculation. This is now performed by gm_create_buttonbox but should be done only once. Preferrably only when the programs-button_box is calculated.
 
 * Redesign netman
+
+* Unit-testing with http://klee.llvm.org/
+
+
