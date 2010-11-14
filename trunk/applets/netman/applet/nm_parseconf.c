@@ -82,6 +82,8 @@ const char* nm_get_cache_location()
 * \brief process an status element from the XML configuration file.
 * \param reader the XMLtext reader pointing to the configuration file.
 * \param *elt nm_element structure that will contain the status configuration values
+* \param element_name name of the XML element we need to parse. Used to determine when
+*        end of the xml block is reached
 */
 static void
 process_nm_element(xmlTextReaderPtr reader, nm_elements *elt, const char* element_name ) {

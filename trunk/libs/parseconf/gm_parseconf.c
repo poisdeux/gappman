@@ -111,9 +111,11 @@ char* gm_get_programname()
 }
 
 /**
-* \brief process an program element from the XML configuration file.
+* \brief process a program element from the XML configuration file.
 * \param reader the XMLtext reader pointing to the configuration file.
 * \param *elt menu_element structure that will contain the program configuration values
+* \param element_name name of the XML-element. Needed to determine when end of XML-block
+*        is reached.
 */
 static void
 processMenuElement(xmlTextReaderPtr reader, menu_elements *elt, const char* element_name ) 

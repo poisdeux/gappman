@@ -13,8 +13,8 @@
 #include <dbus/dbus-glib.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include "gm_netmand.h"
 #include <../generic/gm_netman_generic.h>
+#include "gm_netmand.h"
 
 G_DEFINE_TYPE (GmNetmand, gm_netmand, G_TYPE_OBJECT); ///< will create gm_netmand_get_type and set gm_netmand_parent_class
 

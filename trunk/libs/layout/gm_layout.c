@@ -7,6 +7,10 @@
  *
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
+ *
+ * \todo Fix fontsize calculation. This is now performed by gm_create_buttonbox
+ *       everytime it is called but should be done only once. Preferrably only 
+ *       when the programs-button_box is calculated.
  */
 
 
@@ -357,11 +361,10 @@ GtkWidget* gm_load_image(const char* elt_name, const char* elt_logo, const char*
 
 /**
 * \brief Creates a box with an image and labeltext on the right of it.
-* \param imagefile filename of image on disk
-* \param labeltext string containing label
-* \param max_width maximum allowed width the image may have
-* \param max_height maximum allowed height the image may have
-* \return GtkWidget pointer
+* \param *elt menu_element for which the label must be created
+* \param max_width maximum width for the box
+* \param max_height maximum height for the box
+* \return GtkWidget pointer to the hbox containing the label
 */
 static GtkWidget* image_label_box_hor (menu_elements *elt, int max_width, int max_height)
 {
@@ -391,10 +394,10 @@ static GtkWidget* image_label_box_hor (menu_elements *elt, int max_width, int ma
 
 /**
 * \brief Creates a box with an image and labeltext below it.
-* \param imagefile filename of image on disk
-* \param labeltext string containing label
-* \param max_width maximum allowed width the image may have
-* \param max_height maximum allowed height the image may have
+* \param *elt menu_element for which the label must be created
+* \param max_width maximum width for the box
+* \param max_height maximum height for the box
+* \return GtkWidget pointer to the hbox containing the label
 */
 static GtkWidget* image_label_box_vert (menu_elements *elt, int max_width, int max_height)
 {
@@ -486,6 +489,8 @@ static gboolean dehighlight_button ( GtkWidget *widget, GdkEvent *event, menu_el
 
 /**
 * \brief Calculates the amount of elements per row to evenly spread all elements on a surface of box_height x box_width.
+* \param box_width width in pixels of the box that should contain the elements.
+* \param box_height height in pixels of the box that should contain the elements.
 * \param amount_of_elements number of elements that should be placed in the box_height x box_width area
 */
 static int calculateAmountOfElementsPerColumn(int box_width, int box_height, int amount_of_elements)

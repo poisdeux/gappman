@@ -1,12 +1,17 @@
 /**
  * \file nm_main.c
- * \brief applet showing network status and allows users to analyse and restart the network.
+ * \brief applet showing network status and allows users to analyse and restart
+ *        the network.
  *
  *
  * GPL v2
  *
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
+ *
+ * \todo Redesign applet making it independent from gm_netmand. Applet can call
+ *       the actions itself instead of sending the command to gm_netmand
+ * \todo Implement support for keybindings which should trigger the menu to pop-up.
  */
 #include <gtk/gtk.h>
 #include <gmodule.h>

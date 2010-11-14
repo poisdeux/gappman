@@ -49,7 +49,7 @@ static void usage()
 /**
 * \brief callback function to quit the program 
 * \param *widget pointer to widget to destroy
-* \param data mandatory argument for callback function, may be NULL.
+* \param *event gdkevent that triggered calling this function
 */
 static void destroy( GtkWidget *widget, GdkEvent *event )
 {

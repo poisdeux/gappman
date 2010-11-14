@@ -7,6 +7,12 @@
  *
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
+ *
+ * \todo Be able to popup main menu when other apps have focus.
+ *       This should probably be solved in the window manager used and not 
+ *    	 solved by gappman.
+ * \todo Unit-testing with http://klee.llvm.org/
+ * \todo Implement support for keybindings. For instance to start specific applets.
  */
 
 #include "listener.h"
@@ -64,7 +70,7 @@ struct appwidgetinfo* get_started_apps()
 
 /**
 * \brief Checks if the application is still responding and enables the button when it doesn't respond.
-* \param appw appwidgetinfo structure which holds the application's button widget and the PID of the running application.
+* \param local_appw appwidgetinfo structure which holds the application's button widget and the PID of the running application.
 * \return TRUE if application responds, FALSE if not.
 */
 static gint check_app_status(struct appwidgetinfo* local_appw)
@@ -144,7 +150,7 @@ static gint check_app_status(struct appwidgetinfo* local_appw)
 * \brief Creates an appwidgetinfo structure
 * \param PID the process ID of the application
 * \param widget pointer to the GtkWidget which belongs to the button of the application
-* \param name programname with PID
+* \param *elt menu_element of the application the new appwidgetinfo must be created for 
 */
 static void create_new_appwidgetinfo(int PID, GtkWidget *widget, struct menu_element *elt)
 {
