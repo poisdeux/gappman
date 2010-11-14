@@ -1,5 +1,5 @@
 /**
- * \file gm_res_changeresolution.h
+ * \file gm_changeresolution.h
  * \brief Changes X screen resolution using the Xrandr extension
  *
  *

@@ -170,7 +170,7 @@ int gm_get_confpath_from_gappman(int portno, const char* hostname, gchar** path)
 
 int gm_get_fontsize_from_gappman(int portno, const char* hostname, int *fontsize)
 {
-#ifndef NO_LISTENER
+#ifdef NO_LISTENER
     return GM_NET_COMM_NOT_SUPPORTED;
 #else
     gsize len;
@@ -222,7 +222,7 @@ int gm_get_fontsize_from_gappman(int portno, const char* hostname, int *fontsize
 
 int gm_send_and_receive_message(int portno, const char* hostname, gchar *msg, void (*callbackfunc)(gchar*))
 {
-#ifndef NO_LISTENER
+#ifdef NO_LISTENER
     return GM_NET_COMM_NOT_SUPPORTED;
 #else
     gsize len;

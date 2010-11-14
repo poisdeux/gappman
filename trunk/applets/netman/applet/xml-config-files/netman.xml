@@ -29,11 +29,8 @@
   <actions width="30%" height="10%" align="center">
     <action>
       <name>Restart network</name>
-      <exec>if-restart</exec>
+      <exec>./if-restart</exec>
       <arg>eth0</arg>
-      <logoprogress>./logos/network-restart1.png</logoprogress>
-      <logoprogress>./logos/network-restart2.png</logoprogress>
-      <logoprogress>./logos/network-restart3.png</logoprogress>
     </action>
   </actions>
 </netman>

@@ -1,5 +1,5 @@
 /**
- * \file gm_res_changeresolution.c
+ * \file gm_changeresolution.c
  *
  *
  *
@@ -91,7 +91,8 @@ static int get_nearest_rate(XRRScreenConfiguration *sc, int size, short *rate)
 static int get_nearest_size(XRRScreenConfiguration *sc, int *size, int width, int height)
 {
     int nsize;
-    int min_size_dist, size_dist;
+    int min_size_dist;
+		int size_dist;
     int i;
     XRRScreenSize *sizes;
 
@@ -99,6 +100,7 @@ static int get_nearest_size(XRRScreenConfiguration *sc, int *size, int width, in
 
 		//Initialize min_size_dist to the first available resolution from XRANDR
     min_size_dist = abs((sizes[0].width + sizes[0].height) - (width + height));
+		*size = 0;
 
     for (i = 0; i < nsize; i++)
     {
@@ -151,7 +153,6 @@ int gm_res_changeresolution (int width, int height)
     {
         return ret_status;
     }
-
 
     get_nearest_rate(sc, size, &rate);
 

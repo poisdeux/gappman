@@ -20,10 +20,10 @@
 #include <string.h>
 #include <sys/types.h>
 #include <signal.h>
+#include <gm_generic.h>
 #include <gm_layout.h>
 #include <gm_connect.h>
 #include <gm_changeresolution.h>
-#include <gm_generic.h>
 
 static int WINDOWED = 0;
 static GtkWidget *mainwin;
@@ -330,7 +330,7 @@ int main (int argc, char **argv)
 		}
     }
 
-	gm_res_init();
+		gm_res_init();
 			
     ret_value = gm_res_getpossibleresolutions(&sizes, &nsize);
     if (ret_value != GM_SUCCES)

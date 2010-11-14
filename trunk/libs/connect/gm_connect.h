@@ -7,7 +7,9 @@
  *
  * \author
  *   Martijn Brekhof <m.brekhof@gmail.com>
- */
+ *
+ * \todo Rewrite to support D-Bus
+*/
 
 #ifndef __GAPPMAN_CONNECT_H__
 #define __GAPPMAN_CONNECT_H__

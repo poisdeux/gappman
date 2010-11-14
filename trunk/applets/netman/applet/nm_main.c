@@ -83,7 +83,6 @@ static gboolean run_command(GtkWidget *widget, GdkEvent *event, nm_elements *nm_
   DBusGProxy *proxy;
 
 	get_lock();
-	g_debug("Starting %s", nm_elt->name);
 
 	bus = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
   if (bus == NULL)
@@ -334,6 +333,7 @@ G_MODULE_EXPORT int gm_module_init()
  	if( nm_get_filename_logounavail() != NULL )
 	{
 		image_unavail = GTK_IMAGE(gm_load_image("gm_netman_unavail", (char*) nm_get_filename_logounavail(), (char*) nm_get_cache_location(), "netman", main_button_width, main_button_height));
+    gtk_widget_show(GTK_WIDGET(image_unavail));
 		g_object_ref(image_unavail);
 
  		//We start off in unavail mode
