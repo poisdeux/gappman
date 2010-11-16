@@ -1,5 +1,23 @@
 -----------------------------------------------------------------------------
-1. Release versions
+1. Coding style
+-----------------------------------------------------------------------------
+
+GAppMan is written in the so-called Allman style. Hence, the brace following
+a control statement is put on the next line on the same indentation level as 
+the control statement. Statements inside the braces are indented one level 
+deeper.
+
+To get your code pretty-printed in the Allman style you can use the program
+"indent" as follows:
+
+  indent -bap -bli0 -i4 -l79 -ncs -npcs -npsl -fca -lc79 -fc1 -ts4 \
+    <SOURCECODEFILE>
+
+NOTE: above automatic pretty-printing may cause doxygen comments like ///< 
+to be rewritten as // /< which causes doxygen to fail.
+
+-----------------------------------------------------------------------------
+2. Version number scheme
 -----------------------------------------------------------------------------
 
 The following versioning scheme is used by gappman.
@@ -26,7 +44,7 @@ Where 23 > 13 > 3. Therefore, the above versions are increasing from top to
 bottom.
 
 -----------------------------------------------------------------------------
-2. Creating a new release version from trunk
+3. Creating a new release version from trunk
 -----------------------------------------------------------------------------
 
 1. Make a branch to test and debug the release
@@ -52,7 +70,7 @@ bottom.
   svn commit -m "New release <MAJOR>.<MINOR>"
 
 -----------------------------------------------------------------------------
-3. Creating a maintenance release
+4. Creating a maintenance release
 -----------------------------------------------------------------------------
 
 Maintenance/update releases should be tested on the branch and result in a 
@@ -72,7 +90,7 @@ Maintenance/update releases should be tested on the branch and result in a
   autoreconf -i
   ./configure
   make
-  cd tests && ./rungappman.sh
+  ./rungappman.sh
  
 3. Commit the changes on the branch
 
@@ -84,14 +102,13 @@ Maintenance/update releases should be tested on the branch and result in a
     https://gappman.googlecode.com/svn/tags/release-RELEASEVERSION.x
 
 
-
 -----------------------------------------------------------------------------
 5. Create a downloadable version of the release
 -----------------------------------------------------------------------------
 
 1. Go to the release version
 
-  cd tags/release-RELEASEVERSION.x
+  cd tags/release-RELEASEVERSION
 
 2. Create the makefiles
 
