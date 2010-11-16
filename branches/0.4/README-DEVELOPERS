@@ -90,7 +90,7 @@ Maintenance/update releases should be tested on the branch and result in a
   autoreconf -i
   ./configure
   make
-  cd tests && ./rungappman.sh
+  ./rungappman.sh
  
 3. Commit the changes on the branch
 
@@ -102,14 +102,13 @@ Maintenance/update releases should be tested on the branch and result in a
     https://gappman.googlecode.com/svn/tags/release-RELEASEVERSION.x
 
 
-
 -----------------------------------------------------------------------------
 5. Create a downloadable version of the release
 -----------------------------------------------------------------------------
 
 1. Go to the release version
 
-  cd tags/release-RELEASEVERSION.x
+  cd tags/release-RELEASEVERSION
 
 2. Create the makefiles
 

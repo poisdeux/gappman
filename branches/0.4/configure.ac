@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.61])
-AC_INIT([gappman], [TRUNKMUSTNOTGENERATEPACKAGE], [m.brekhof@gmail.com], [http://code.google.com/p/gappman/])
+AC_INIT([gappman], [0.4.1], [m.brekhof@gmail.com], [http://code.google.com/p/gappman/])
 AC_CONFIG_SRCDIR([libs/layout/gm_layout.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
