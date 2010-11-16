@@ -1,73 +1,114 @@
 -----------------------------------------------------------------------------
-1. Making a new release version from trunk
+1. Release versions
 -----------------------------------------------------------------------------
 
-1. Edit the Changelog and raise the version number in configure.ac
+The following versioning scheme is used by gappman.
 
-2. Commit the changes on the trunk
+<MAJOR>.<MINOR>[.<MAINTENANCE/UPDATE>]
 
-svn commit -m "New release version VERSION"
+MAJOR version releases represent a complete implementation of a set of major
+features. NOTE: the major set for the 1.0 release still has to be 
+determined. 
+MINOR version releases include one or more major features.
+MAINTENANCE/UPDATE releases are optional and include bugfixes, security fixes, 
+new applets.
 
-3. Make a branch to test and debug the release
+Only integers are allowed as versionnumbers.
+For example, the following versions are accepted:
 
-svn copy https://gappman.googlecode.com/svn/trunk/ \
-	https://gappman.googlecode.com/svn/branches/RELEASEVERSION
+0.3
+0.3.1
+1.9.12
+1.13.1
+1.23.17
+
+Where 23 > 13 > 3. Therefore, the above versions are increasing from top to 
+bottom.
+
+-----------------------------------------------------------------------------
+2. Creating a new release version from trunk
+-----------------------------------------------------------------------------
+
+1. Make a branch to test and debug the release
+
+  svn copy https://gappman.googlecode.com/svn/trunk/ \
+    https://gappman.googlecode.com/svn/branches/<MAJOR>.<MINOR>
+
+2. Edit the Changelog and raise the version number in configure.ac
+
+3. Commit the changes on the branch
+
+  svn commit -m "New branch <MAJOR>.<MINOR>"
 
 4. After testing and debugging commit the changes, if any. 
 
-svn commit -m "New release version VERSION"
-
 5. Make a release version
 
-svn copy https://gappman.googlecode.com/svn/branches/RELEASEVERSION \
-  https://gappman.googlecode.com/svn/tags/release-RELEASEVERSION
+  svn copy https://gappman.googlecode.com/svn/branches/<MAJOR>.<MINOR> \
+    https://gappman.googlecode.com/svn/tags/release-<MAJOR>.<MINOR>
 
+6. Commit the new release
+
+  svn commit -m "New release <MAJOR>.<MINOR>"
 
 -----------------------------------------------------------------------------
-2. Making a maintenance release
+3. Creating a maintenance release
 -----------------------------------------------------------------------------
 
-To release a bugfix version after the initial release you can make a maintenance release.
-Maintenance releases should be tested on the branch and result in a RELEASEVERSION.x
-	 where x is a subnumber starting at 1 and increased with every new maintenance release
+Maintenance/update releases should be tested on the branch and result in a 
+<MAJOR>.<MINOR>.<MAINTENANCE/UPDATE> version.
 
-1. Edit the Changelog and raise the version number in configure.ac
+1. Merge wanted/needed changes from trunk to branch.
+	 NOTE: svn has a problem merging repos where dirs or files are moved or 
+         deleted. ALWAYS CHECK!!!
 
-2. Commit the changes on the branch
+	cd gappman/branch/<MAJOR>.<MINOR>
+  svn merge --reintegrate https://gappman.googlecode.com/svn/trunk  
 
-svn commit -m "New maintenance version VERSION"
+2. Edit the Changelog and raise the version number in configure.ac
+
+3. Build and test:
+
+  autoreconf -i
+  ./configure
+  make
+  cd tests && ./rungappman.sh
+ 
+3. Commit the changes on the branch
+
+  svn commit -m "New maintenance version <MAJOR>.<MINOR>.<MAINTENANCE/UPDATE>"
 
 3. Make a maintenance release version
  
-svn copy https://gappman.googlecode.com/svn/branches/RELEASEVERSION \
-  https://gappman.googlecode.com/svn/tags/release-RELEASEVERSION.x
+  svn copy https://gappman.googlecode.com/svn/branches/RELEASEVERSION \
+    https://gappman.googlecode.com/svn/tags/release-RELEASEVERSION.x
 
 
 
 -----------------------------------------------------------------------------
-3. Create a downloadable version of the release
+5. Create a downloadable version of the release
 -----------------------------------------------------------------------------
 
 1. Go to the release version
 
-cd tags/release-RELEASEVERSION.x
+  cd tags/release-RELEASEVERSION.x
 
 2. Create the makefiles
 
-libtoolize --copy
-aclocal
-autoconf
-automake --add-missing
-/configure
+  libtoolize --copy
+  aclocal
+  autoconf
+  automake --add-missing
+  ./configure
 
 1. Create the tarball as follows:
 
-make dist
+  make dist
 
 2. Copy the tarball to the website.
 
 -----------------------------------------------------------------------------
-4. Checking the code
+6. Checking the code
 -----------------------------------------------------------------------------
 
 Splint might be a nice tool to check the code for security vulnerabilities and 
