@@ -92,13 +92,10 @@ Maintenance/update releases should be tested on the branch and result in a
   make
   ./rungappman.sh
  
-3. Commit the changes on the branch
-
-  svn commit -m "New maintenance version <MAJOR>.<MINOR>.<MAINTENANCE/UPDATE>"
-
 3. Make a maintenance release version
  
-  svn copy https://gappman.googlecode.com/svn/branches/RELEASEVERSION \
+  svn copy -m "New maintenance version <MAJOR>.<MINOR>[.<MAINTENANCE/UPDATE>]"\ 
+    https://gappman.googlecode.com/svn/branches/RELEASEVERSION \
     https://gappman.googlecode.com/svn/tags/release-RELEASEVERSION.x
 
 
@@ -115,6 +112,7 @@ Maintenance/update releases should be tested on the branch and result in a
   libtoolize --copy
   aclocal
   autoconf
+  autoheader
   automake --add-missing
   ./configure
 
