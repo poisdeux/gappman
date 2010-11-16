@@ -1,4 +1,4 @@
-/***
+/**
  * \file gm_parseconf.c
  *
  *
@@ -9,8 +9,9 @@
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
 
-#include "gm_parseconf.h"
 #include <string.h>
+#include "gm_parseconf.h"
+#include <gm_generic.h>
 
 static int numberElts;
 static menu_elements* programs = NULL;
@@ -38,12 +39,15 @@ static void printElements(xmlTextReaderPtr reader)
 
     if (xmlTextReaderHasAttributes(reader))
     {
-        printf("width: %s, ", xmlTextReaderGetAttribute (reader, "width"));
-        printf("height: %s, ", xmlTextReaderGetAttribute (reader, "height"));
+        printf("width: %s, ", xmlTextReaderGetAttribute (reader, (const xmlChar*) "width"));
+        printf("height: %s, ", xmlTextReaderGetAttribute (reader, (const xmlChar*) "height"));
     }
 }
 
-struct menu_element* createMenuElement()
+/**
+* \brief creates and initializes a new menu_element struct
+*/
+static struct menu_element* createMenuElement()
 {
     struct menu_element *elt;
     elt = (menu_elements *) malloc(sizeof(menu_elements));
@@ -72,8 +76,8 @@ static void parseLength(xmlChar * length, struct length *str_length)
 {
     if ( length != NULL )
     {
-        str_length->value = atoi (strndup(length, strspn( length,  "0123456789")));
-        if ( strstr( length,  "%") != NULL )
+        str_length->value = atoi (strndup((const char*) length, strspn( (const char*) length,  "0123456789")));
+        if ( strstr( (const char*) length,  "%") != NULL )
         {
             str_length->type = PERCENTAGE;
         }
@@ -107,17 +111,20 @@ char* gm_get_programname()
 }
 
 /**
-* \brief process an program element from the XML configuration file.
+* \brief process a program element from the XML configuration file.
 * \param reader the XMLtext reader pointing to the configuration file.
 * \param *elt menu_element structure that will contain the program configuration values
+* \param element_name name of the XML-element. Needed to determine when end of XML-block
+*        is reached.
 */
 static void
-processMenuElement(xmlTextReaderPtr reader, menu_elements *elt, const char* element_name ) {
-    xmlChar *name, *value;
+processMenuElement(xmlTextReaderPtr reader, menu_elements *elt, const char* element_name ) 
+{
+    xmlChar *name = NULL;
+	xmlChar *value = NULL;
     int ret = 1;
 
-    if (name == NULL)
-        name = BAD_CAST "--";
+   	name = BAD_CAST "--";
 
     while ( ret == 1 )
     {
@@ -136,7 +143,7 @@ processMenuElement(xmlTextReaderPtr reader, menu_elements *elt, const char* elem
             }
             else if ( strcmp((char *) name, "printlabel") == 0 )
             {
-                elt->printlabel = atoi(value);
+                elt->printlabel = atoi((const char*) value);
             }
             else if ( strcmp((char *) name, "exec") == 0 )
             {
@@ -152,11 +159,11 @@ processMenuElement(xmlTextReaderPtr reader, menu_elements *elt, const char* elem
             }
             else if ( strcmp((char *) name, "autostart") == 0 )
             {
-                elt->autostart = atoi(value);
+                elt->autostart = atoi((const char*) value);
             }
             else if ( strcmp((char *) name, "resolution") == 0 )
             {
-                if (sscanf (value, "%dx%d", &elt->app_width, &elt->app_height) != 2)
+                if (sscanf ((const char*) value, "%dx%d", &elt->app_width, &elt->app_height) != 2)
                 {
                     fprintf(stderr, "Error: could not parse resolution value: %s", value);
                 }
@@ -180,7 +187,9 @@ processMenuElement(xmlTextReaderPtr reader, menu_elements *elt, const char* elem
         {
             ret = xmlTextReaderRead(reader);
         }
-    }
+
+
+	}
 }
 
 
@@ -283,14 +292,10 @@ static void gm_parse_alignment(char* align, float *hor_align, int *vert_align)
 * \param **elts pointer to the linked list of menu element structures.
 * \return nothing. Use the **elts call by reference to retrieve the menu elements.
 */
-void static processMenuElements(const char* element_name, const char* group_element_name, xmlTextReaderPtr reader, menu_elements **elts)
+static void processMenuElements(const char* element_name, const char* group_element_name, xmlTextReaderPtr reader, menu_elements **elts)
 {
     int ret = 1;
-    int i;
     xmlChar *name;
-    char* result;
-    int width;
-    int height;
     int *number_elts;
     float *hor_align;
     int *vert_align;
@@ -341,9 +346,9 @@ void static processMenuElements(const char* element_name, const char* group_elem
         {
             if (xmlTextReaderHasAttributes(reader))
             {
-                parseLength(xmlTextReaderGetAttribute (reader, "width"), menu_width);
-                parseLength(xmlTextReaderGetAttribute (reader, "height"), menu_height);
-                gm_parse_alignment(xmlTextReaderGetAttribute (reader, "align"), hor_align, vert_align);
+                parseLength(xmlTextReaderGetAttribute (reader, (const xmlChar*) "width"), menu_width);
+                parseLength(xmlTextReaderGetAttribute (reader, (const xmlChar*) "height"), menu_height);
+                gm_parse_alignment((char*) xmlTextReaderGetAttribute (reader, (const xmlChar*) "align"), hor_align, vert_align);
             }
             //this should end parsing this group of elements
             ret = 0;
@@ -370,7 +375,7 @@ int gm_load_conf(const char *filename) {
         ret = xmlTextReaderRead(reader);
 
         // first attribute must be the name of the program
-        program_name = xmlTextReaderName(reader);
+        program_name = (char*) xmlTextReaderName(reader);
 
         while (ret == 1)
         {
@@ -390,7 +395,7 @@ int gm_load_conf(const char *filename) {
             if ( strcmp((char *) name, "cachelocation") == 0 && xmlTextReaderNodeType(reader) == 1)
             {
                 ret = xmlTextReaderRead(reader);
-                cache_location = xmlTextReaderValue(reader);
+                cache_location = (char*) xmlTextReaderValue(reader);
             }
             else
             {
@@ -416,7 +421,7 @@ int gm_load_conf(const char *filename) {
     * Cleanup function for the XML library.
     */
     xmlCleanupParser();
-    return 0;
+    return GM_SUCCES;
 }
 
 
@@ -424,10 +429,11 @@ menu_elements* gm_search_elt_by_name(gchar* name, menu_elements* programs)
 {
     while ( programs != NULL )
     {
-        if ( g_strcmp0(name, programs->name) == 0 )
+        if ( g_strcmp0(name, (const char*) programs->name) == 0 )
         {
             return programs;
         }
         programs = programs->next;
     }
+		return NULL;
 }

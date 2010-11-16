@@ -1,4 +1,4 @@
-/***
+/**
  * \file gm_connect.c
  *
  *
@@ -9,10 +9,15 @@
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#ifdef HAVE_NETDB_H
 #include <netdb.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -23,9 +28,7 @@
 #include <gm_generic.h>
 #include "gm_connect.h"
 
-gchar *confpath = NULL;
- 
-void parse_confpath_message(gchar **path, gchar *msg)
+static void parse_confpath_message(gchar **path, gchar *msg)
 {
     gchar** contentssplit = NULL;
     int i = 0;
@@ -59,6 +62,9 @@ static void parse_fontsize_message(int *fontsize, gchar *msg)
 
 int gm_connect_to_gappman(int portno, const char* hostname, int *sockfd)
 {
+#ifdef NO_LISTENER
+    return GM_NET_COMM_NOT_SUPPORTED;
+#else
     struct sockaddr_in serv_addr;
     struct hostent *server;
 
@@ -86,6 +92,7 @@ int gm_connect_to_gappman(int portno, const char* hostname, int *sockfd)
         return GM_COULD_NOT_CONNECT;
     }
     return GM_SUCCES;
+#endif
 }
 
 static int create_gio_channel(int portno, const char* hostname, GIOChannel** gio, int *sockfd)
@@ -107,13 +114,17 @@ static int create_gio_channel(int portno, const char* hostname, GIOChannel** gio
 
 int gm_get_confpath_from_gappman(int portno, const char* hostname, gchar** path)
 {
+#ifdef NO_LISTENER
+    return GM_NET_COMM_NOT_SUPPORTED;
+#else
     gsize len;
     int socket;
     gchar *msg;
-    int status, n, sourceid;
-    int bytes_written;
+    int status;
+    gsize bytes_written;
     GIOChannel* gio = NULL;
     GError *gerror = NULL;
+
 
     status = create_gio_channel(portno, hostname, &gio, &socket);
     if ( status != GM_SUCCES )
@@ -126,6 +137,7 @@ int gm_get_confpath_from_gappman(int portno, const char* hostname, gchar** path)
         return GM_COULD_NOT_SEND_MESSAGE;
     }
 
+    msg = g_strdup("::showconfpath::\n");
     status = g_io_channel_flush( gio, &gerror);
     if ( status == G_IO_STATUS_ERROR )
     {
@@ -139,8 +151,10 @@ int gm_get_confpath_from_gappman(int portno, const char* hostname, gchar** path)
 		parse_confpath_message(path, msg);
     }
 
+    g_free(msg);
+
     g_io_channel_unref(gio);
-    status = g_io_channel_shutdown( gio, TRUE, &gerror );
+    //status = g_io_channel_shutdown( gio, TRUE, &gerror );
     if ( status == G_IO_STATUS_ERROR )
     {
         g_warning("gm_get_confpath_from_gappman: %s\n", gerror->message );
@@ -150,16 +164,20 @@ int gm_get_confpath_from_gappman(int portno, const char* hostname, gchar** path)
     close(socket);
 
     return GM_SUCCES;
+#endif
 }
 
 
 int gm_get_fontsize_from_gappman(int portno, const char* hostname, int *fontsize)
 {
+#ifdef NO_LISTENER
+    return GM_NET_COMM_NOT_SUPPORTED;
+#else
     gsize len;
     int socket;
     gchar *msg;
-    int status, n, sourceid;
-    int bytes_written;
+    int status;
+    gsize bytes_written;
     GIOChannel* gio = NULL;
     GError *gerror = NULL;
 
@@ -187,8 +205,9 @@ int gm_get_fontsize_from_gappman(int portno, const char* hostname, int *fontsize
         parse_fontsize_message(fontsize, msg);
     }
 
+
     g_io_channel_unref(gio);
-    status = g_io_channel_shutdown( gio, TRUE, &gerror );
+    //status = g_io_channel_shutdown( gio, TRUE, &gerror );
     if ( status == G_IO_STATUS_ERROR )
     {
         g_warning("gm_get_fontsize_from_gappman: %s\n", gerror->message );
@@ -198,14 +217,18 @@ int gm_get_fontsize_from_gappman(int portno, const char* hostname, int *fontsize
     close(socket);
 
     return GM_SUCCES;
+#endif
 }
 
 int gm_send_and_receive_message(int portno, const char* hostname, gchar *msg, void (*callbackfunc)(gchar*))
 {
+#ifdef NO_LISTENER
+    return GM_NET_COMM_NOT_SUPPORTED;
+#else
     gsize len;
     int socket;
-    int status, n, sourceid;
-    int bytes_written;
+    int status;
+    gsize bytes_written;
     GIOChannel* gio = NULL;
     GError *gerror = NULL;
 	gchar* recv_msg;
@@ -230,7 +253,7 @@ int gm_send_and_receive_message(int portno, const char* hostname, gchar *msg, vo
     {
 		while ( g_io_channel_read_line( gio, &recv_msg, &len, NULL,  &gerror) != G_IO_STATUS_EOF )
     	{
-			g_debug("I should be calling the callback function right now. But my master has not yet implemented this feature!");
+			g_warning("I should be calling the callback function right now. But my master has not yet implemented this feature!");
     	}
 	}
 
@@ -245,4 +268,5 @@ int gm_send_and_receive_message(int portno, const char* hostname, gchar *msg, vo
     close(socket);
 
     return GM_SUCCES;
+#endif
 }

@@ -24,7 +24,7 @@ svn copy https://gappman.googlecode.com/svn/branches/RELEASEVERSION \
 
 
 -----------------------------------------------------------------------------
-4. Making a maintenance release
+2. Making a maintenance release
 -----------------------------------------------------------------------------
 
 To release a bugfix version after the initial release you can make a maintenance release.
@@ -66,7 +66,34 @@ make dist
 
 2. Copy the tarball to the website.
 
+-----------------------------------------------------------------------------
+4. Checking the code
+-----------------------------------------------------------------------------
 
+Splint might be a nice tool to check the code for security vulnerabilities and 
+coding mistakes. It can be executed as follows:
 
+splint +charint -warnposix -paramuse -nullpass \
+	-I `pkg-config gtk+-2.0 --cflags` `pkg-config libxml-2.0 --cflags` \
+	-I./libs/connect/ -I./libs/generic/ -I./libs/layout/ -I./libs/parseconf/ \
+  	<SOURCEFILE>
 
+It currently shows a lot of warnings.
 
+We use the following parameters to reduce the amount of warnings:
+
+  -paramuse			As we use callbacks for GTK there are functions which
+					contain parameters that are not always used in the 
+					function
+  -nullpass			Some of the gm functions use NULL as an indication that
+					the default should be used. Example: gm_show_error_dialog
+					where the callback may be NULL to use the default callback
+					function that destroys the dialog upon pressing the 
+					close-button.
+  -warnposix		the posix libs make splint barf about bugs in the posix libraries.
+					Unless we intend to debug these libs we can ignore the posix warnings.
+  +charint			We use get_opts to parse commandline options. As we use chars in the 
+					switch-statement to select the commandline options, we use chars in the 
+					long_options struct, although the struct requires type int. As long as
+					we use the same chars in the struct as in the switch-statement there is
+					no problem. Hence, we may ignore these warnings.

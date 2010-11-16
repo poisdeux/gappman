@@ -1,5 +1,5 @@
-/***
- * \file main.c
+/**
+ * \file applets/shutdown/main.c
  *
  *
  *
@@ -20,13 +20,14 @@
 #include <gm_parseconf.h>
 #include <gm_layout.h>
 #include <gm_generic.h>
+#include <gm_connect.h>
 
 static int WINDOWED = 0;
 
 static void usage()
 {
     printf("usage: shutdown [--help] [--width <WIDTHINPIXELS>] [--height <HEIGHTINPIXELS>] [--conffile <FILENAME>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
-    printf("");
+    printf("\n");
     printf("--help:\t\tshows this help text\n");
     printf("--width <WIDTHINPIXELS>:\t\twidth of the main window (default: screen width / 9)\n");
     printf("--height <HEIGHTINPIXELS:\t\theight of the main window (default: screen height / 9)\n");
@@ -40,9 +41,6 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
 {
     char **args;
     int i;
-    int status;
-    int ret;
-    struct appwidgetinfo* appw;
     __pid_t childpid;
     FILE *fp;
 
@@ -65,26 +63,28 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
         //Disable button
         gtk_widget_set_sensitive(GTK_WIDGET(widget), FALSE);
 
-        fclose(fp);
+        (void) fclose(fp);
 
         childpid = fork();
         if ( childpid == 0 )
         {
-            execvp((char *) elt->exec, args);
+            (void) execvp((char *) elt->exec, args);
             _exit(0);
         }
         else if (  childpid < 0 )
         {
-            printf("Failed to fork!\n");
+            g_warning("Failed to fork!\n");
             return FALSE;
         }
     }
     else
     {
-        printf("File: %s not found!\n", (char *) elt->exec);
+        g_warning("File: %s not found!\n", (char *) elt->exec);
+		return FALSE;
     }
 
     free(args);
+	return TRUE;
 }
 
 
@@ -94,17 +94,16 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
 * \param *event the GdkEvent that occured. Space key and left mousebutton are valid actions.
 * \param *elt menu_element structure containing the filename and arguments of the program that should be started
 */
-static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
+static void process_startprogram_event ( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
 {
 
 
     //Only start program  if spacebar or mousebutton is pressed
     if ( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
     {
-        startprogram( widget, elt );
+        (void) startprogram( widget, elt );
     }
 
-    return FALSE;
 }
 
 /**
@@ -132,13 +131,12 @@ int main (int argc, char **argv)
     GtkWidget *mainwin;
     menu_elements *actions;
     const char* conffile = "/etc/gappman/shutdown.xml";
-    const char* rcfile = "";
     int c;
     int fontsize;
 
     gtk_init (&argc, &argv);
 
-    while (1) {
+    while (TRUE) {
         int option_index = 0;
         static struct option long_options[] = {
             {"conffile", 1, 0, 'c'},
@@ -186,33 +184,41 @@ int main (int argc, char **argv)
     //gtk_window_set_opacity (GTK_WINDOW (mainwin), 0.8);
 
     //Remove border
-    if ( !WINDOWED )
+    if ( WINDOWED == 0 )
     {
         gtk_window_set_decorated (GTK_WINDOW (mainwin), FALSE);
     }
     else
     {
         gtk_window_set_decorated (GTK_WINDOW (mainwin), TRUE);
-        g_signal_connect (G_OBJECT (mainwin), "delete_event",
+        (void) g_signal_connect (G_OBJECT (mainwin), "delete_event",
                           G_CALLBACK (destroy), NULL);
-        g_signal_connect (G_OBJECT (mainwin), "destroy",
+        (void) g_signal_connect (G_OBJECT (mainwin), "destroy",
                           G_CALLBACK (destroy), NULL);
     }
     vbox = gtk_vbox_new (FALSE, 10);
 
-    //We do not get the fontsize from gappman but let the buttonbox
-    //determine the right fontsize
     if ( actions != NULL )
     {
-        align = gm_create_buttonbox( actions, &process_startprogram_event );
-        gtk_container_add (GTK_CONTAINER (vbox), align);
+		//get generic fontsize from gappman
+    	if (gm_get_fontsize_from_gappman(2103, "localhost", &fontsize) == GM_SUCCES)
+    	{
+        	gm_set_fontsize(fontsize);
+        	align = gm_create_buttonbox( actions, &process_startprogram_event, FALSE );
+    	}
+		else
+		{
+			//Recalculate fontsize
+        	align = gm_create_buttonbox( actions, &process_startprogram_event, TRUE );
+        }
+		gtk_container_add (GTK_CONTAINER (vbox), align);
         gtk_widget_show (align);
     }
 
     hbox = gtk_hbox_new (FALSE, 10);
 
     // cancel button
-    button = gm_create_label_button("Cancel", gm_quit_program, NULL);
+    button = gm_create_label_button("Cancel", (void*) gm_quit_program, NULL);
     gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
     gtk_widget_show(button);
 
@@ -223,11 +229,10 @@ int main (int argc, char **argv)
     gtk_widget_show (vbox);
 
     //make sure the widget grabs keyboard and mouse focus
-    gtk_grab_add(mainwin);
+    gtk_widget_grab_focus(mainwin);
 
     gtk_widget_show (mainwin);
 
-    //gtk_window_set_focus(GTK_WINDOW (mainwin), button);
     gtk_main ();
 
     gm_free_menu_elements( actions );

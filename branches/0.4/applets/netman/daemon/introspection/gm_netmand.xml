@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<node name="/GmNetmand">
+  <interface name="gappman.netman.NetmanInterface">
+    <method name="RunCommand">
+      <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="gm_netmand_run_command"/>
+      <arg type="s" name="command" direction="in" />
+      <arg type="as" name="args" direction="in" />
+      <arg type="i" name="exitcode" direction="out" />
+    </method>
+  </interface>
+</node>
+

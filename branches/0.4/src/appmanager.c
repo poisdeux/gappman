@@ -1,14 +1,22 @@
-/***
+/**
  * \file appmanager.c
- *
+ * \brief The main application manager better known as gappman
  *
  *
  * GPL v2
  *
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
+ *
+ * \todo Be able to popup main menu when other apps have focus.
+ *       This should probably be solved in the window manager used and not 
+ *    	 solved by gappman.
+ * \todo Unit-testing with http://klee.llvm.org/
+ * \todo Implement support for keybindings. For instance to start specific applets.
  */
 
+#include "listener.h"
+#include "appmanager.h"
 #include <glib.h>
 #include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
@@ -18,17 +26,16 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <getopt.h>
+#include <errno.h>
 #include <sys/socket.h>
 #include <string.h>
 #include <gm_changeresolution.h>
-#include "listener.h"
 #include <gm_parseconf.h>
 #include <gm_layout.h>
 #include <gm_generic.h>
-#include "appmanager.h"
 
-struct appwidgetinfo* global_appw;
-menu_elements *programs;
+struct appwidgetinfo* started_apps; ///< holds the currently started apps
+menu_elements *programs; ///< list of all programs gappman manages. Currently only programs need to be global as only programs have meta-info that can be updated. E.g. resolution updates for a specific program. 
 
 static int KEEP_BELOW=0;
 static int WINDOWED=0;
@@ -36,12 +43,6 @@ static int screen_width=-1;
 static int screen_height=-1;
 static int window_width=-1;
 static int window_height=-1;
-
-struct appm_alignment
-{
-    float x;
-    float y;
-};
 
 void update_resolution(gchar* programname, int width, int height)
 {
@@ -64,18 +65,16 @@ void update_resolution(gchar* programname, int width, int height)
 
 struct appwidgetinfo* get_started_apps()
 {
-    return global_appw;
+    return started_apps;
 }
 
 /**
 * \brief Checks if the application is still responding and enables the button when it doesn't respond.
-* \param appw appwidgetinfo structure which holds the application's button widget and the PID of the running application.
+* \param local_appw appwidgetinfo structure which holds the application's button widget and the PID of the running application.
 * \return TRUE if application responds, FALSE if not.
 */
 static gint check_app_status(struct appwidgetinfo* local_appw)
 {
-    int status;
-    FILE *fp;
     struct appwidgetinfo* tmp;
     struct menu_element* elt;
 
@@ -96,9 +95,9 @@ static gint check_app_status(struct appwidgetinfo* local_appw)
         {
             //local_appw only element in the list,
             //so we reset the list.
-            global_appw = NULL;
+            started_apps = NULL;
             //change resolution back to gappman menu resolution
-            gm_changeresolution(screen_width, screen_height);
+            gm_res_changeresolution(screen_width, screen_height);
         }
         else
         {
@@ -124,15 +123,15 @@ static gint check_app_status(struct appwidgetinfo* local_appw)
             {
                 //local_appw is last element
                 //we therefore need to relocate
-                //the global_appw pointer
-                global_appw = local_appw->prev;
+                //the started_apps pointer
+                started_apps = local_appw->prev;
             }
 
             if ( elt != NULL )
             {
                 if ( elt->app_width > 0 && elt->app_height > 0 )
                 {
-                    gm_changeresolution(elt->app_width, elt->app_height);
+                    gm_res_changeresolution(elt->app_width, elt->app_height);
                 }
             }
         }
@@ -151,7 +150,7 @@ static gint check_app_status(struct appwidgetinfo* local_appw)
 * \brief Creates an appwidgetinfo structure
 * \param PID the process ID of the application
 * \param widget pointer to the GtkWidget which belongs to the button of the application
-* \param name programname with PID
+* \param *elt menu_element of the application the new appwidgetinfo must be created for 
 */
 static void create_new_appwidgetinfo(int PID, GtkWidget *widget, struct menu_element *elt)
 {
@@ -162,15 +161,15 @@ static void create_new_appwidgetinfo(int PID, GtkWidget *widget, struct menu_ele
         local_appw->PID = PID;
         local_appw->menu_elt = elt;
         local_appw->widget = widget;
-        local_appw->prev = global_appw;
+        local_appw->prev = started_apps;
         local_appw->next = NULL;
-        if ( global_appw != NULL )
+        if ( started_apps != NULL )
         {
-            global_appw->next = local_appw;
+            started_apps->next = local_appw;
         }
-        //shift global global_appw pointer so it always points to
+        //shift global started_apps pointer so it always points to
         //last started process
-        global_appw = local_appw;
+        started_apps = local_appw;
     }
 }
 
@@ -184,8 +183,6 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
 {
     char **args;
     int i;
-    int status;
-    int ret;
     __pid_t childpid;
     FILE *fp;
 
@@ -212,13 +209,17 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
 
         if ( elt->app_width > 0 && elt->app_height > 0 )
         {
-            gm_changeresolution(elt->app_width, elt->app_height);
+            gm_res_changeresolution(elt->app_width, elt->app_height);
         }
 
         childpid = fork();
         if ( childpid == 0 )
         {
-            execvp((char *) elt->exec, args);
+            if ( execv((char *) elt->exec, args) == -1 )
+			{
+				g_warning("Could not execute %s: errno: %d\n", elt->exec, errno);
+				_exit(1);
+			}	
             _exit(0);
         }
         else if (  childpid < 0 )
@@ -229,7 +230,7 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
         else
         {
             create_new_appwidgetinfo(childpid, widget, elt);
-            g_timeout_add(1000, (GSourceFunc) check_app_status, (gpointer) global_appw);
+            g_timeout_add(1000, (GSourceFunc) check_app_status, (gpointer) started_apps);
         }
     }
     else
@@ -248,7 +249,7 @@ static gboolean startprogram( GtkWidget *widget, menu_elements *elt )
 * \param *event the GdkEvent that occured. Space key and left mousebutton are valid actions.
 * \param *elt menu_element structure containing the filename and arguments of the program that should be started
 */
-static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
+static void process_startprogram_event ( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
 {
 
     //Only start program  if spacebar or mousebutton is pressed
@@ -256,14 +257,12 @@ static gboolean process_startprogram_event ( GtkWidget *widget, GdkEvent *event,
     {
         startprogram( widget, elt );
     }
-
-    return FALSE;
 }
 
 static void usage()
 {
     printf("usage: appmanager [--keep-below] [--width <WIDTHINPIXELS>] [--height <HEIGHTINPIXELS>] [--conffile <FILENAME>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
-    printf("");
+    printf("\n");
     printf("--keep-below:\t\t\tKeeps the window at the bottom of the window manager's stack\n");
     printf("--width <WIDTHINPIXELS>:\twidth of the main window (default: screen width)\n");
     printf("--height <HEIGHTINPIXELS:\theight of the main window (default: screen height)\n");
@@ -278,7 +277,7 @@ static void usage()
 */
 static void autostartprograms( menu_elements *elts )
 {
-    menu_elements *next, *cur;
+    menu_elements *cur;
 
     cur = elts;
 
@@ -313,10 +312,7 @@ static void stop_panel (menu_elements *panel)
     {
         if (panel->gm_module_stop != NULL)
         {
-            if (panel->gm_module_stop() != GM_SUCCES)
-            {
-                g_error("Failed to stop thread");
-            }
+            panel->gm_module_stop();
         }
         panel = panel->next;
     }
@@ -329,14 +325,21 @@ static void stop_panel (menu_elements *panel)
 */
 static void start_panel (menu_elements *panel)
 {
+		GThread *thread;
+
     while (panel != NULL )
     {
-        if (panel->gm_module_start != GM_SUCCES)
+        if (panel->gm_module_start != NULL)
         {
-            if (!g_thread_create((GThreadFunc) panel->gm_module_start, NULL, FALSE, NULL))
+            thread = g_thread_create((GThreadFunc) panel->gm_module_start, NULL, TRUE, NULL);
+						if( !thread )
             {
-                g_error("Failed to create thread");
+                g_warning("Failed to create thread");
             }
+						else
+						{
+							//g_thread_join(thread);
+						}
         }
         panel = panel->next;
     }
@@ -377,23 +380,16 @@ static void align_buttonbox (GtkWidget *hbox_top, GtkWidget *hbox_middle, GtkWid
 int main (int argc, char **argv)
 {
     GdkScreen *screen;
-    GdkWindow * rootwin;
-    GdkPixbuf *pixbuf_bg;
-    GtkWidget *window_bg;
-    GtkWidget *picture_bg;
     GtkWidget *mainwin;
     GtkWidget *buttonbox;
     GtkWidget *hbox_top;
     GtkWidget *hbox_middle;
     GtkWidget *hbox_bottom;
     GtkWidget *vbox;
-    GtkStyle  *style;
     menu_elements *actions;
     menu_elements *panel;
     const char* conffile = "./conf.xml";
-    const char* bgimage = NULL;
     int c;
-    GIOChannel* gio;
 
     //Needs to be called before any another glib function
     if (!g_thread_supported ())
@@ -448,12 +444,16 @@ int main (int argc, char **argv)
     }
 
 
+	gm_res_init();
+
+#if !defined(NO_LISTENER)
 	//set confpath so other programs can retrieve
 	//the configuration file gappman used
 	gappman_set_confpath(conffile);
+#endif
 
     /** INIT */
-    global_appw = NULL;
+    started_apps = NULL;
 
     /** Load configuration elements */
     gm_load_conf(conffile);
@@ -509,14 +509,14 @@ int main (int argc, char **argv)
 
     if ( actions != NULL )
     {
-        buttonbox = gm_create_buttonbox( actions, &process_startprogram_event );
+        buttonbox = gm_create_buttonbox( actions, &process_startprogram_event, TRUE);
         align_buttonbox(hbox_top, hbox_middle, hbox_bottom, buttonbox, actions);
         gtk_widget_show (buttonbox);
     }
 
     if ( programs != NULL )
     {
-        buttonbox = gm_create_buttonbox( programs, &process_startprogram_event );
+        buttonbox = gm_create_buttonbox( programs, &process_startprogram_event, TRUE);
         align_buttonbox(hbox_top, hbox_middle, hbox_bottom, buttonbox, programs);
         gtk_widget_show (buttonbox);
     }
@@ -547,7 +547,11 @@ int main (int argc, char **argv)
 
     autostartprograms( programs );
 
+#if !defined(NO_LISTENER)
     gappman_start_listener(mainwin);
+#else
+    g_warning("Gappman compiled without network support");
+#endif
 
     gdk_threads_enter();
     gtk_main ();
@@ -555,12 +559,14 @@ int main (int argc, char **argv)
 
 
     g_message("Closing up.");
-	stop_panel( panel );
+    stop_panel( panel );
+#if !defined(NO_LISTENER)
     gappman_close_listener(NULL);
+#endif
     gm_free_menu_elements( programs );
     gm_free_menu_elements( actions );
     gm_free_menu_elements( panel );
-	
+ 	
     g_message("Goodbye.");
     return 0;
 }

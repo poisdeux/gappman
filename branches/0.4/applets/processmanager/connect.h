@@ -1,4 +1,4 @@
-/***
+/**
  * \file connect.h
  *
  *
@@ -16,16 +16,16 @@
 * \brief struct to hold the process ID and program name retrieved from Gappman
 */
 struct proceslist {
-    int pid;
-    gchar* name;
-    struct proceslist* prev;
+    int pid;	///< process ID of proces started by gappman
+    gchar* name; ///< programname as known by gappman
+    struct proceslist* prev; ///< pointer to next proces in proceslist
 };
 
 /**
 * \brief Connects to gappman and requests the proceslist
 * \param portno portnumber gappman listens to
-* \param server servername of host that runs gappman
-* \param starteprocs adres of the pointer to a proceslist structure (call by reference)
+* \param hostname servername of host that runs gappman
+* \param startedprocs adres of the pointer to a proceslist structure (call by reference)
 * \return integer value
 *			0: OK
 *			1: Could not resolve hostname
@@ -38,7 +38,7 @@ int getStartedProcsFromGappman(int portno, const char* hostname, struct procesli
 /**
 * \brief Connects to gappman and requests the fontsize
 * \param portno portnumber gappman listens to
-* \param server servername of host that runs gappman
+* \param hostname host that runs gappman
 * \param fontsize adres of the pointer to an integer value (call by reference)
 * \return integer value
 *			0: OK

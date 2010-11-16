@@ -1,5 +1,5 @@
-/***
- * \file main.c
+/**
+ * \file applets/changeresolution/main.c
  *
  *
  *
@@ -20,23 +20,22 @@
 #include <string.h>
 #include <sys/types.h>
 #include <signal.h>
+#include <gm_generic.h>
 #include <gm_layout.h>
 #include <gm_connect.h>
 #include <gm_changeresolution.h>
-#include <gm_generic.h>
 
 static int WINDOWED = 0;
 static GtkWidget *mainwin;
-static GtkWidget *confirmwin;
 static int fontsize;
-static menu_elements *programs;
+static menu_elements *programs = NULL;
 static int dialog_width;
 static int dialog_height;
 
 static void usage()
 {
     printf("usage: changeresolution [--help] [--screenwidth <WIDTHINPIXELS>] [--screenheight <HEIGHTINPIXELS>] [--gmconffile <FILENAME>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
-    printf("");
+    printf("\n");
     printf("--help:\t\tshows this help text\n");
     printf("--screenwidth <WIDTHINPIXELS>:\t\twidth of the main (gappman) window (default: screen width / 3)\n");
     printf("--screenheight <HEIGHTINPIXELS:\t\theight of the main (gappman) window (default: screen height / 3)\n");
@@ -44,50 +43,61 @@ static void usage()
     printf("--gtkrc <GTKRCFILENAME>:\t\t gtk configuration file which can be used for themeing\n");
     printf("--windowed:\t\t creates a border around the window\n");
 
+	exit(1);
 }
 
 /**
-* \brief callback function to quit the program
+* \brief callback function to quit the program 
 * \param *widget pointer to widget to destroy
-* \param data mandatory argument for callback function, may be NULL.
+* \param *event gdkevent that triggered calling this function
 */
-static void destroy( GtkWidget *widget,
-                     gpointer   data )
+static void destroy( GtkWidget *widget, GdkEvent *event )
 {
-    gtk_main_quit ();
+	if ( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
+    {
+		gm_res_free();
+    	gtk_main_quit ();
+	}
 }
 
-
-static gboolean revert_to_old_res(GtkWidget *widget, GdkEvent *event, XRRScreenSize* size)
+static void revert_to_old_res(GtkWidget *widget, GdkEvent *event, XRRScreenSize* size)
 {
     //Check if spacebar or mousebutton is pressed
     if ( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
     {
-    	gm_changeresolution(size->width, size->height);
+    	if ( gm_res_changeresolution(size->width, size->height) == GM_SIZE_NOT_AVAILABLE )
+		{
+			gm_show_error_dialog("Could not change resolution", mainwin, NULL);	
+		}
 	}
-    return FALSE;
 }
 
 /**
-* \brief Sends the new resolution as default for a program to gappman
+* \brief Sends the new resolution to be used as default for a program to gappman
 * \param *widget that called this function (usually through a callback construction)
 * \param *event event that triggered the widget
 * \param *elt menu_element pointer to the program for which the resolution must be updated
 */
-static gboolean set_default_res_for_program( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
+static void set_default_res_for_program( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
 {
     XRRScreenSize current_size;
     gchar *msg;
     //Check if spacebar or mousebutton is pressed
     if ( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
     {
-        gm_get_current_size(&current_size);
-        msg = g_strdup_printf("::updateres::%s::%d::%d::", elt->name, current_size.width, current_size.height);
-        if ( gm_send_and_receive_message(2103, "localhost", msg, NULL) != GM_SUCCES )
-        {
-            gm_show_error_dialog("Could not connect to gappman.", NULL, NULL);
-        }
-        return TRUE;
+        if( gm_res_get_current_size(&current_size) == GM_SUCCES )
+		{
+        	msg = g_strdup_printf("::updateres::%s::%d::%d::", elt->name, current_size.width, current_size.height);
+        	if ( gm_send_and_receive_message(2103, "localhost", msg, NULL) != GM_SUCCES )
+        	{
+           		gm_show_error_dialog("Could not connect to gappman.", NULL, NULL);
+        	}
+			g_free(msg);
+		}
+		else
+		{
+			g_warning("Could not get current screen resolution");
+		}
     }
 }
 
@@ -95,9 +105,8 @@ static gboolean set_default_res_for_program( GtkWidget *widget, GdkEvent *event,
 * \brief creates a popup dialog window that allows the user to set the new resolution as default for a program
 * \param *widget that called this function (usually through a callback construction)
 * \param *event event that triggered the widget
-* \param *size pointer to a XRRScreenSize struct that holds the new resolution
 */
-static gboolean make_default_for_program( GtkWidget *widget, GdkEvent *event, XRRScreenSize *size )
+static void make_default_for_program( GtkWidget *widget, GdkEvent *event)
 {
     GtkWidget *button;
     GtkWidget *chooseprogramwin;
@@ -107,15 +116,14 @@ static gboolean make_default_for_program( GtkWidget *widget, GdkEvent *event, XR
 
 		// only show menu if spacebar or mousebutton were pressed
     if ( ((GdkEventKey*)event)->keyval != 32 && ((GdkEventButton*)event)->button != 1)
-			return;
+			return ;
 
     chooseprogramwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
-    gtk_window_set_transient_for (GTK_WINDOW(chooseprogramwin), GTK_WINDOW(confirmwin));
+    gtk_window_set_transient_for (GTK_WINDOW(chooseprogramwin), GTK_WINDOW(mainwin));
     gtk_window_set_position(GTK_WINDOW (chooseprogramwin), GTK_WIN_POS_CENTER_ON_PARENT);
-
-    //Make window transparent
-    //gtk_window_set_opacity (GTK_WINDOW (chooseprogramwin), 0.8);
+	
+	gtk_widget_grab_focus(chooseprogramwin);
 
     //Remove border
     gtk_window_set_decorated (GTK_WINDOW (chooseprogramwin), FALSE);
@@ -131,7 +139,7 @@ static gboolean make_default_for_program( GtkWidget *widget, GdkEvent *event, XR
             gtk_container_add(GTK_CONTAINER(vbox), button);
             programs_tmp = programs_tmp->next;
         }
-        button = gm_create_label_button("Done", gm_destroy_widget, chooseprogramwin);
+        button = gm_create_label_button("Done", (void*) gm_destroy_widget, chooseprogramwin);
         gtk_container_add(GTK_CONTAINER(vbox), button);
         gtk_container_add(GTK_CONTAINER(chooseprogramwin), vbox);
         gtk_widget_show_all(chooseprogramwin);
@@ -140,8 +148,6 @@ static gboolean make_default_for_program( GtkWidget *widget, GdkEvent *event, XR
     {
         gm_show_error_dialog("No programs found.\nPlease check configuration file.", NULL, NULL);
     }
-
-		return FALSE;
 }
 
 /**
@@ -154,18 +160,23 @@ static void changeresolution(GtkWidget *widget, GdkEvent *event, XRRScreenSize *
 {
     GtkWidget *button;
     GtkWidget *vbox;
-    GtkWidget *label;
-    gchar* markup;
+	GtkWidget *confirmwin;
     static XRRScreenSize oldsize;
-    int nr;
 
 		// only show menu if spacebar or mousebutton were pressed
     if ( ((GdkEventKey*)event)->keyval != 32 && ((GdkEventButton*)event)->button != 1)
 			return;
 
-    gm_get_current_size(&oldsize);
+    if ( gm_res_get_current_size(&oldsize) != GM_SUCCES )
+	{
+		g_warning("Could not get current screen resolution");
+	}
 
-    gm_changeresolution(size[0].width, size[0].height);
+    if ( gm_res_changeresolution(size[0].width, size[0].height) != GM_SUCCES )
+	{
+		gm_show_error_dialog("Could not change screen resolution", NULL, NULL);
+		return;
+	}
 
     confirmwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
@@ -180,12 +191,12 @@ static void changeresolution(GtkWidget *widget, GdkEvent *event, XRRScreenSize *
 
     vbox = gtk_vbox_new(TRUE, 10);
 
-    button = gm_create_label_button("Set resolution as default for program", make_default_for_program, size);
+    button = gm_create_label_button("Set resolution as default for program", (void *) make_default_for_program, NULL);
     gtk_container_add(GTK_CONTAINER(vbox), button);
 
-    button = gm_create_label_button("Cancel", revert_to_old_res, &oldsize);
-		g_signal_connect (G_OBJECT (button), "key_release_event", G_CALLBACK (gm_destroy_widget), confirmwin);	
-		g_signal_connect (G_OBJECT (button), "button_release_event", G_CALLBACK (gm_destroy_widget), confirmwin);	
+    button = gm_create_label_button("Cancel", (void *) revert_to_old_res, &oldsize);
+	(void) g_signal_connect (G_OBJECT (button), "key_release_event", G_CALLBACK (gm_destroy_widget), confirmwin);	
+	(void) g_signal_connect (G_OBJECT (button), "button_release_event", G_CALLBACK (gm_destroy_widget), confirmwin);	
     gtk_container_add(GTK_CONTAINER(vbox), button);
 
     gtk_container_add(GTK_CONTAINER(confirmwin), vbox);
@@ -197,16 +208,14 @@ static void changeresolution(GtkWidget *widget, GdkEvent *event, XRRScreenSize *
     //g_timeout_add_seconds (10, )
 }
 
-static GtkWidget* createrow(XRRScreenSize* size, int width, int height)
+static GtkWidget* createrow(XRRScreenSize* size, int width)
 {
     GtkWidget *button, *hbox, *label;
     gchar *markup;
-    GtkWidget *alignment;
-    int status;
 
     hbox = gtk_hbox_new (FALSE, 10);
 
-    button = gm_create_empty_button(changeresolution, size);
+    button = gm_create_empty_button((void*) changeresolution, size);
 
     label = gtk_label_new("");
 
@@ -229,24 +238,19 @@ static GtkWidget* createrow(XRRScreenSize* size, int width, int height)
 int main (int argc, char **argv)
 {
     GdkScreen *screen;
-    GdkWindow *rootwin;
     GtkWidget *button;
-    GtkWidget *labelimagebox;
     GtkWidget *vbox;
     GtkWidget *hbox;
-    GtkWidget *align;
     GtkWidget *separator;
 
-    int row_height;
     int c;
     int nsize;
     int ret_value;
     int i;
     XRRScreenSize *sizes;
-    const char* conffile = "/etc/gappman/conf.xml";
+    char* conffile = "/etc/gappman/conf.xml";
     gchar* gappman_confpath;
-    static menu_elements *actions;
-
+	
     gtk_init (&argc, &argv);
     screen = gdk_screen_get_default ();
     dialog_width =  gdk_screen_get_width (screen)/3;
@@ -254,9 +258,9 @@ int main (int argc, char **argv)
 
     mainwin = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
-    while (1) {
+    while (TRUE) {
         int option_index = 0;
-        static struct option long_options[] = {
+    	static struct option long_options[] = {
             {"width", 1, 0, 'w'},
             {"height", 1, 0, 'h'},
             {"conffile", 1, 0, 'c'},
@@ -264,7 +268,7 @@ int main (int argc, char **argv)
             {"gtkrc", 1, 0, 'r'},
             {"windowed", 0, 0, 'j'},
             {0, 0, 0, 0}
-        };
+     	};
         c = getopt_long(argc, argv, "w:h:c:r:ij",
                         long_options, &option_index);
         if (c == -1)
@@ -278,7 +282,7 @@ int main (int argc, char **argv)
             dialog_height=atoi(optarg);
             break;
         case 'c':
-            conffile=optarg;
+            conffile=(char*) optarg;
             break;
         case 'r':
             gtk_rc_parse (optarg);
@@ -294,17 +298,17 @@ int main (int argc, char **argv)
 
     gtk_window_set_position(GTK_WINDOW (mainwin), GTK_WIN_POS_CENTER);
     //Remove border
-    if ( !WINDOWED )
+    if ( WINDOWED == 0 )
     {
         gtk_window_set_decorated (GTK_WINDOW (mainwin), FALSE);
     }
     else
     {
         gtk_window_set_decorated (GTK_WINDOW (mainwin), TRUE);
-        g_signal_connect (G_OBJECT (mainwin), "delete_event",
-                          G_CALLBACK (destroy), NULL);
-        g_signal_connect (G_OBJECT (mainwin), "destroy",
-                          G_CALLBACK (destroy), NULL);
+        (void) g_signal_connect (G_OBJECT (mainwin), "delete_event",
+                          G_CALLBACK (destroy), sizes);
+        (void) g_signal_connect (G_OBJECT (mainwin), "destroy",
+                          G_CALLBACK (destroy), sizes);
     }
 
     //get generic fontsize from gappman
@@ -320,16 +324,19 @@ int main (int argc, char **argv)
     //get configuration file path from gappman
     if (gm_get_confpath_from_gappman(2103, "localhost", &gappman_confpath) == GM_SUCCES)
     {
-    	gm_load_conf(gappman_confpath);
-    	programs = gm_get_programs();
-   		actions = gm_get_actions();
+    	if ( gm_load_conf(gappman_confpath) == GM_SUCCES )
+		{
+    		programs = gm_get_programs();
+		}
     }
 
-    ret_value = gm_getpossibleresolutions(&sizes, &nsize);
+		gm_res_init();
+			
+    ret_value = gm_res_getpossibleresolutions(&sizes, &nsize);
     if (ret_value != GM_SUCCES)
     {
         g_warning("Error could not get possible resolutions (error_type: %d)\n", ret_value);
-        gm_show_error_dialog("Changing screen resolution is not supported.", mainwin, destroy);
+        gm_show_error_dialog("Changing screen resolution is not supported.", NULL, (void *) destroy);
     }
     else
     {
@@ -340,7 +347,7 @@ int main (int argc, char **argv)
 
         for (i = 0; i < nsize; i++)
         {
-            hbox = createrow(&sizes[i], dialog_width, row_height);
+            hbox = createrow(&sizes[i], dialog_width);
             gtk_container_add(GTK_CONTAINER(vbox), hbox);
             gtk_widget_show (hbox);
             separator = gtk_hseparator_new();
@@ -349,7 +356,7 @@ int main (int argc, char **argv)
         }
         hbox = gtk_hbox_new (FALSE, 10);
         // cancel button
-        button = gm_create_label_button("Done", gm_quit_program, NULL);
+        button = gm_create_label_button("Done", destroy, NULL);
         gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
         gtk_widget_show(button);
 

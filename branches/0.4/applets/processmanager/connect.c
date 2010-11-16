@@ -1,4 +1,4 @@
-/***
+/**
  * \file connect.c
  *
  *
@@ -9,14 +9,22 @@
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <glib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h> 
+#endif
+#ifdef HAVE_NETDB_H
 #include <netdb.h>
+#endif
+
 #include <string.h>
 #include <gm_connect.h>
 #include <gm_generic.h>
@@ -81,10 +89,13 @@ static void parseProceslistMessage(struct proceslist** procs, gchar *msg)
 
 int getStartedProcsFromGappman(int portno, const char* hostname, struct proceslist **startedprocs)
 {
+#if !defined(HAVE_NETINET_IN_H) || !defined(HAVE_NETDB_H)
+return GM_NET_COMM_NOT_SUPPORTED;
+#else 
     gsize len;
     gchar *msg;
-    int status, sockfd, n, sourceid;
-    int bytes_written;
+    int status, sockfd;
+    gsize bytes_written;
     GIOChannel* gio = NULL;
     GError *gerror = NULL;
 
@@ -124,4 +135,5 @@ int getStartedProcsFromGappman(int portno, const char* hostname, struct procesli
     }
 
     return GM_SUCCES;
+#endif
 }

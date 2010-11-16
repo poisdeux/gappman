@@ -1,4 +1,4 @@
-/***
+/**
  * \file listener.c
  *
  *
@@ -9,6 +9,9 @@
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
 
+#include "listener.h"
+
+#if !defined(NO_LISTENER)
 
 #include <stdio.h>
 #include <glib.h>
@@ -16,18 +19,17 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <string.h>
-#include <netinet/in.h>
 #include <stdlib.h>
+#include <netinet/in.h>
 #include <netdb.h>
 #include <unistd.h>
 #include <gm_layout.h>
 #include "appmanager.h"
-#include "listener.h"
 
-#define SEND_PROCESS_LIST 1
-#define SEND_FONTSIZE 2
-#define UPDATE_RES 3
-#define SEND_CONFPATH 4
+#define SEND_PROCESS_LIST 1 ///< message id used to specify we received a request to sent the current list of programs started by gappman
+#define SEND_FONTSIZE 2 ///< message id used to specify we received a request to sent the current default fontsize used by gappman
+#define UPDATE_RES 3 ///< message id used to specify we received an resolution update request
+#define SEND_CONFPATH 4 ///< message id used to specify we received a request to sent the configuration path gappman uses
 
 static GIOChannel* gio;
 static const gchar* confpath = "";
@@ -35,10 +37,8 @@ static const gchar* rcpath = "";
 
 static int parsemessage(gchar *msg)
 {
-    static int state = 0;
     int msg_id;
     gchar** contentssplit = NULL;
-    int i = 0;
     contentssplit = g_strsplit(msg, "::", 0);
 
     if (g_strcmp0(contentssplit[1], "listprocesses") == 0)
@@ -68,7 +68,7 @@ static void writemsg(GIOChannel* gio, gchar* msg)
     gerror = g_io_channel_write(gio, msg, strlen(msg), &bytes_written);
     if ( gerror != G_IO_ERROR_NONE )
     {
-        g_warning("Error sending message: %s : bytes written %d\n", msg, bytes_written);
+        g_warning("Error sending message: %s : bytes written %d\n", msg, (int) bytes_written);
     }
 }
 
@@ -81,7 +81,7 @@ static void sendprocesslist(GIOChannel* gio)
     appw_list = get_started_apps();
     while (appw_list != NULL)
     {
-        if (strlen(appw_list->menu_elt->name) < 256)
+        if (strlen((const char*) appw_list->menu_elt->name) < 256)
         {
             g_sprintf(msg, "::name::%s", appw_list->menu_elt->name);
         }
@@ -135,17 +135,16 @@ static gboolean handleconnection( GIOChannel* gio , GIOCondition cond, gpointer 
 {
     gsize len;
     gchar *msg;
-    int bytes_read;
     GError *gerror = NULL;
     GIOStatus status = G_IO_STATUS_NORMAL;
     int newsock;
     struct sockaddr_in cli_addr;
-    int cli_len;
+    socklen_t cli_len;
     GIOChannel* new_gio = NULL;
     int msg_id;
 
     cli_len = sizeof(cli_addr);
-    newsock = accept((int) data, (struct sockaddr *) &cli_addr, &cli_len);
+    newsock = accept(*(int*) data, (struct sockaddr *) &cli_addr, &cli_len);
     if (newsock < 0)
     {
         perror("Error accepting message:");
@@ -201,14 +200,11 @@ static gboolean handleconnection( GIOChannel* gio , GIOCondition cond, gpointer 
 
 gboolean gappman_start_listener (GtkWidget* win)
 {
-    int sock;
+    static int sock;
     int s;
-    int sourceid;
-    struct hostent *host;
     struct addrinfo hints;
     struct addrinfo *result = NULL;
     struct addrinfo *rp = NULL;
-    struct sockaddr_in addr;
     const gchar *server = "localhost";
     const gchar *port = "2103";
     gboolean listener_started = FALSE;
@@ -256,7 +252,7 @@ gboolean gappman_start_listener (GtkWidget* win)
         {
             gio = g_io_channel_unix_new (sock);
 
-            if (! g_io_add_watch( gio, G_IO_IN, handleconnection, (gpointer) sock ))
+            if (! g_io_add_watch( gio, G_IO_IN, handleconnection, (gpointer) &sock ))
             {
                 g_warning("Cannot add watch on GIOChannel!\n");
                 listener_started = FALSE;
@@ -305,8 +301,4 @@ void gappman_set_confpath(const gchar *path)
 {
 	confpath = path;
 }
-
-void gappman_set_rcpath(const gchar *path)
-{
-	rcpath = path;
-}
+#endif
