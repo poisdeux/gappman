@@ -1,4 +1,5 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
+EXTRA_DIST = $(srcdir)/xml-config-files/*.xml 
 noinst_HEADERS = nm_parseconf.h
 lib_LTLIBRARIES = libgm_netman.la
 libgm_netman_la_SOURCES = nm_main.c nm_parseconf.c 

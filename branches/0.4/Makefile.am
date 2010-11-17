@@ -2,7 +2,7 @@
 ACLOCAL_AMFLAGS = -I m4
 SUBDIRS = libs src applets
 dist_doc_DATA = README
-EXTRA_DIST = gtk-config/gtkrc xml-config-files/*.xml logos/*.png ChangeLog applets/*/logos applets/*/xml-config-files
+EXTRA_DIST = $(srcdir)/gtk-config/gtkrc $(srcdir)/xml-config-files/*.xml $(srcdir)/logos/*.png $(srcdir)/ChangeLog
 
 dist-hook:
-	find -name "*~" -exec rm {} \;
+	find $(distdir) -depth \( -name "*~" -o -name ".svn" \) -exec rm -rf {} \;
