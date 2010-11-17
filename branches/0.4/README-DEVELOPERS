@@ -115,6 +115,7 @@ Maintenance/update releases should be tested on the branch and result in a
   libtoolize --copy
   aclocal
   autoconf
+	autoheader
   automake --add-missing
   ./configure
 
