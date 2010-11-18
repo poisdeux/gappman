@@ -35,6 +35,7 @@ configure script:
 	libtoolize --copy
 	aclocal
 	autoconf
+	autoheader
 	automake --add-missing
 
 Now you should be able to build appmanager as usual:
