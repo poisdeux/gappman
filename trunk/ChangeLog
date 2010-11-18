@@ -1,6 +1,6 @@
 2010-11-15  Martijn Brekhof  <m.brekhof@gmail.com>
 		
-		* Added new applet called netman (see applets/netman)
+    * Added new applet called netman (see applets/netman)
     * Added configure option (--disable-listener) to disable gappman network support
     * Added Doxygen documentation in docs/doxygen
     * Bugfix: XRRScreenSizes was freed to early
