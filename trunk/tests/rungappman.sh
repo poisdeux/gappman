@@ -5,6 +5,6 @@
 ./applets/netman/daemon/gm_netmand &
 [ $? -ne 0 ] && echo "Error: gm_netmand failed to start" && exit 1
 
-./src/gappman --width 400 --height 300 --conffile xml-config-files/conf.xml \
+./appmanager/gappman --width 400 --height 300 --conffile xml-config-files/conf.xml \
     --gtkrc gtk-config/gtkrc --windowed
 [ $? -ne 0 ] && echo "Error: gappman failed to start" && exit 1
