@@ -34,4 +34,17 @@ NOTE: only update the version(s) when you are about to create a new public
       release. This should minimize the amount of version changes and keep
       the versionnumbers low.
 
- 
+-----------------------------------------------------------------------------
+2. Changing the versionnumber
+-----------------------------------------------------------------------------
+
+The libtool versionnumber can be changed in the Makefile.am of the specific
+library. You will need to edit the line:
+
+..._la_LDFLAGS = -version-info 0:0:0
+
+and change the number after "-version-info"
+
+NOTE: each library has its own Makefile.am and you only need to change the
+number for the library that changed.
+
