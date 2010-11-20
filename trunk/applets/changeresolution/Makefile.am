@@ -1,4 +1,5 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
+EXTRA_DIST = $(srcdir)/logos/*.png
 bin_PROGRAMS = gmchangeresolution
 gmchangeresolution_SOURCES = main.c
 gmchangeresolution_CPPFLAGS = @GTK_INCLUDES@

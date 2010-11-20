@@ -1,4 +1,5 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
+EXTRA_DIST = $(srcdir)/logos/*.png
 noinst_HEADERS = connect.h
 bin_PROGRAMS = gmprocessmanager
 gmprocessmanager_SOURCES = main.c connect.c

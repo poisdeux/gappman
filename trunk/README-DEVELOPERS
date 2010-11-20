@@ -96,10 +96,13 @@ Maintenance/update releases should be tested on the branch and result in a
   make
   ./rungappman.sh
  
+3. Commit the changes on the branch
+
+  svn commit -m "New maintenance version <MAJOR>.<MINOR>.<MAINTENANCE/UPDATE>"
+
 3. Make a maintenance release version
  
-  svn copy -m "New maintenance version <MAJOR>.<MINOR>[.<MAINTENANCE/UPDATE>]"\ 
-    https://gappman.googlecode.com/svn/branches/RELEASEVERSION \
+  svn copy https://gappman.googlecode.com/svn/branches/RELEASEVERSION \
     https://gappman.googlecode.com/svn/tags/release-RELEASEVERSION.x
 
 
@@ -116,15 +119,25 @@ Maintenance/update releases should be tested on the branch and result in a
   libtoolize --copy
   aclocal
   autoconf
-  autoheader
+	autoheader
   automake --add-missing
   ./configure
 
-1. Create the tarball as follows:
+3. Create the tarball as follows:
 
   make dist
 
-2. Copy the tarball to the website.
+4. Test if the tarball builds
+
+  cp gappman-*.tar.gz /tmp
+  cd /tmp
+  tar xzf gappman-*.tar.gz
+  cd gappman-*
+  ./configure
+  make
+  ./src/gappman --conffile xml-config-files/conf.xml --windowed
+
+5. If step 4 was succesfule you may upload the tarball to the website.
 
 -----------------------------------------------------------------------------
 6. Checking the code

@@ -1,4 +1,5 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
+EXTRA_DIST = $(srcdir)/xml-config-files/*.xml $(srcdir)/logos/*.png
 bin_PROGRAMS = gmshutdown
 gmshutdown_SOURCES = main.c
 gmshutdown_CPPFLAGS = @GTK_INCLUDES@
