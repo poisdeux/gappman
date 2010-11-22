@@ -1,7 +1,7 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
 ACLOCAL_AMFLAGS = -I m4
-SUBDIRS = libs appmanager applets
-dist_doc_DATA = README
+SUBDIRS = libs appmanager applets docs/doxygen
+dist_doc_DATA = README ChangeLog COPYING
 EXTRA_DIST = $(srcdir)/gtk-config/gtkrc $(srcdir)/xml-config-files/*.xml $(srcdir)/logos/*.png $(srcdir)/ChangeLog
 
 dist-hook:
