@@ -16,6 +16,9 @@ AC_ARG_ENABLE([listener],
  [AS_HELP_STRING([--disable-listener], [disable listener support @<:@default: no@:>@])],
  [disable_listener=yes], [disable_listener=no])
 
+# Configure variables
+AC_ARG_VAR([LIBGM], [The PATH wherein the gm libraries can be found])
+
 # Checks for programs.
 AC_PROG_CC
 AM_PROG_CC_C_O
@@ -25,8 +28,6 @@ if test "$HAVE_PKG_CONFIG" = "no" ; then
   AC_MSG_ERROR([Could not find required program pkg-config.])
 fi
 
-# Configure variables
-AC_ARG_VAR([LIBGM], [The PATH wherein the gm libraries can be found])
 
 # Checks for libraries.
 AC_SEARCH_LIBS(xmlTextReaderRead, xml2, [
@@ -74,11 +75,6 @@ fi
 #If LIBGM is still empty we check for installed libgm
 if test -z "$LIBGM"
 then
-	AC_CHECK_LIB([gm_connect], [gm_connect_to_gappman],
-		[AC_CHECK_HEADERS([gm_connect.h])
-		  LIBS="-lgm_connect $LIBS"],
-		[AC_MSG_ERROR([No libgm_connect found])])
-
 	AC_CHECK_LIB([gm_layout], [gm_create_button],
 		[AC_CHECK_HEADERS([gm_layout.h gm_changeresolution.h])
 		  LIBS="-lgm_layout $LIBS"],
