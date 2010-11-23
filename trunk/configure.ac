@@ -8,26 +8,26 @@ AC_CONFIG_MACRO_DIR([m4])
 # Pass generic make options to all makefiles
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
-# Check for programs
-AC_PATH_PROG(DOXYGEN, doxygen)
-AM_CONDITIONAL([HAVE_DOXYGEN], [test -n "$DOXYGEN"])
-AM_COND_IF([HAVE_DOXYGEN], AC_CONFIG_FILES([docs/doxygen/Makefile docs/doxygen/Doxyfile]))
-
 # Generic options
+AC_ARG_ENABLE([doxygen-docs], 
+	[AS_HELP_STRING([--disable-doxygen-docs],
+		[disable building the doxygen documentation])],
+	[doxygen_docs=no], [doxygen_docs=yes])
+
 AC_ARG_ENABLE([building-applets], 
-	[AS_HELP_STRING([--enable-building-applets],
-		[enable building the applets @<:@default: yes@:>@])],
-	[building_applets=${enableval}], [building_applets=yes])
+	[AS_HELP_STRING([--disable-building-applets],
+		[disable building the applets])],
+	[building_applets=no], [building_applets=yes])
 
 AC_ARG_ENABLE([building-libs], 
-	[AS_HELP_STRING([--enable-building-libs],
-		[enable building the libs @<:@default: yes@:>@])],
-	[building_libs=${enableval}], [building_libs=yes])
+	[AS_HELP_STRING([--disable-building-libs],
+		[disable building the libs])],
+	[building_libs=no], [building_libs=yes])
 
 AC_ARG_ENABLE([building-gappman], 
-	[AS_HELP_STRING([--enable-building-gappman],
-		[enable building gappman @<:@default: yes@:>@])],
-	[building_gappman=${enableval}], [building_gappman=yes])
+	[AS_HELP_STRING([--disable-building-gappman],
+		[disable building gappman])],
+	[building_gappman=no], [building_gappman=yes])
 
 AM_CONDITIONAL([BUILD_GAPPMAN], [test "x$building_gappman" == "xyes"])
 AM_COND_IF([BUILD_GAPPMAN], AC_CONFIG_SUBDIRS([appmanager]))
@@ -37,6 +37,14 @@ AM_COND_IF([BUILD_LIBS], AC_CONFIG_SUBDIRS([libs]))
 
 AM_CONDITIONAL([BUILD_APPLETS], [test "x$building_applets" == "xyes"])
 AM_COND_IF([BUILD_APPLETS], AC_CONFIG_SUBDIRS([applets]))
+
+# Check for programs if doxygen docs should be build
+AS_IF([test "x$doxygen_docs" == "xyes"],
+  [AC_PATH_PROG(DOXYGEN, doxygen)
+    AS_IF([test -z "$DOXYGEN"], AC_MSG_WARN(Doxygen not found. Doxygen documentation will not be built))
+    AM_CONDITIONAL([HAVE_DOXYGEN], [test -n "$DOXYGEN"])
+    AM_COND_IF([HAVE_DOXYGEN], 
+      AC_CONFIG_FILES([docs/doxygen/Makefile docs/doxygen/Doxyfile]))])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

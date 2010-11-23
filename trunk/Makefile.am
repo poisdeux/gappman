@@ -2,19 +2,19 @@
 ACLOCAL_AMFLAGS = -I m4
 
 if HAVE_DOXYGEN
-	DOXYDIR = docs/doxygen
+DOXYDIR = docs/doxygen	
 endif
 
 if BUILD_GAPPMAN
-	GAPPMANDIR = appmanager
+GAPPMANDIR = appmanager
 endif
 
 if BUILD_LIBS
-	LIBSDIR = libs
+LIBSDIR = libs
 endif
 
 if BUILD_APPLETS
-	APPLETSDIR = applets
+APPLETSDIR = applets
 endif
 
 SUBDIRS = $(LIBSDIR) $(GAPPMANDIR) $(APPLETSDIR) $(DOXYDIR)
