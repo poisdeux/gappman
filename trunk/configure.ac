@@ -10,8 +10,8 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
 # Check for programs
 AC_PATH_PROG(DOXYGEN, doxygen)
-AS_IF([ test -n $DOXYGEN ],
-	AC_CONFIG_FILES([docs/doxygen/Makefile]))
+AM_CONDITIONAL([HAVE_DOXYGEN], [test -n "$DOXYGEN"])
+AM_COND_IF([HAVE_DOXYGEN], AC_CONFIG_FILES([docs/doxygen/Makefile docs/doxygen/Doxyfile]))
 
 # Generic options
 AC_ARG_ENABLE([building-applets], 
@@ -29,14 +29,14 @@ AC_ARG_ENABLE([building-gappman],
 		[enable building gappman @<:@default: yes@:>@])],
 	[building_gappman=${enableval}], [building_gappman=yes])
 
-AS_IF([ test "x$building_gappman" == "xyes" ],
-	AC_CONFIG_SUBDIRS([appmanager]))
+AM_CONDITIONAL([BUILD_GAPPMAN], [test "x$building_gappman" == "xyes"])
+AM_COND_IF([BUILD_GAPPMAN], AC_CONFIG_SUBDIRS([appmanager]))
 
-AS_IF([ test "x$building_applets" == "xyes" ],
-	AC_CONFIG_SUBDIRS([applets]))
+AM_CONDITIONAL([BUILD_LIBS], [test "x$building_libs" == "xyes"])
+AM_COND_IF([BUILD_LIBS], AC_CONFIG_SUBDIRS([libs]))
 
-AS_IF([ test "x$building_libs" == "xyes" ],
-	AC_CONFIG_SUBDIRS([libs]))
+AM_CONDITIONAL([BUILD_APPLETS], [test "x$building_applets" == "xyes"])
+AM_COND_IF([BUILD_APPLETS], AC_CONFIG_SUBDIRS([applets]))
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
