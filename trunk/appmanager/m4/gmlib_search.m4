@@ -1,3 +1,11 @@
+# GMLIB_SEARCH
+# ------------
+# Define user variabel LIBGM which allows the user to specify the location 
+# for libgm. If not specified the following locations will be searched:
+#   1. ../libs/
+#   2. Installed location of libgm on the system
+# If found in 1. GM_INCLUDES and GM_OBJS will be defined pointing to the
+# header and object (.la) files. If found in 2. the libs are included in LIBS.
 AC_DEFUN([GMLIB_SEARCH],
 [
 AC_MSG_CHECKING([for location gmlib])
