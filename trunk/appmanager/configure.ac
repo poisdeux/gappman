@@ -3,6 +3,7 @@
 
 AC_PREREQ([2.61])
 AC_INIT([gappman-main], [TRUNKMUSTNOTGENERATEPACKAGE], [m.brekhof@gmail.com], [gappman-main], [http://code.google.com/p/gappman/])
+AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([appmanager.c])
 AC_CONFIG_HEADERS([config.h])
 
@@ -15,9 +16,6 @@ AC_USE_SYSTEM_EXTENSIONS
 AC_ARG_ENABLE([listener],
  [AS_HELP_STRING([--disable-listener], [disable listener support @<:@default: no@:>@])],
  [disable_listener=yes], [disable_listener=no])
-
-# Configure variables
-AC_ARG_VAR([LIBGM], [The PATH wherein the gm libraries can be found])
 
 # Checks for programs.
 AC_PROG_CC
@@ -51,40 +49,8 @@ AC_SUBST([GTHREAD_OBJS],[`pkg-config --libs gthread-2.0`])
 AC_MSG_ERROR([Error: gtkthread-2.0 not found!])
 ], [])
 
-#Search for libgm
-if test -z "$LIBGM"
-then
-	#user did not specify path so we start
-	#our search. First see if the libs are
-	#available in the project
-	if test	-d "$srcdir/../libs/layout" && \
-	   test	-d "$srcdir/../libs/parseconf"
-	then
-		LIBGM='$(top_srcdir)/../libs'
-	fi
-fi
-
-#If LIBGM is defined we need to make sure the compiler knows
-#where to find the header and library files.
-if test -n "$LIBGM"
-then
-	AC_SUBST([GM_INCLUDES], ["-I$LIBGM/generic -I$LIBGM/layout -I$LIBGM/parseconf"])
-	AC_SUBST([GM_OBJS], ["$LIBGM/layout/libgm_layout.la $LIBGM/parseconf/libgm_parseconf.la"])
-fi
-
-#If LIBGM is still empty we check for installed libgm
-if test -z "$LIBGM"
-then
-	AC_CHECK_LIB([gm_layout], [gm_create_button],
-		[AC_CHECK_HEADERS([gm_layout.h gm_changeresolution.h])
-		  LIBS="-lgm_layout $LIBS"],
-		[AC_MSG_ERROR([No libgm_layout found])])
-
-	AC_CHECK_LIB([gm_parseconf], [gm_load_conf],
-		[AC_CHECK_HEADERS([gm_parseconf.h])
-		  LIBS="-lgm_parseconf $LIBS"],
-		[AC_MSG_ERROR([No libgm_parseconf found])])
-fi
+#Search for gmlib and configure GM_INCLUDES, GM_OBJS or LIBS 
+GMLIB_SEARCH
 
 # Checks for header files.
 AC_PATH_X
