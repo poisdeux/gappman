@@ -12,9 +12,6 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
 AC_USE_SYSTEM_EXTENSIONS
 
-# Configure variables
-AC_ARG_VAR([LIBGM], [The PATH wherein the gm libraries can be found])
-
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_LIBTOOL
@@ -46,48 +43,7 @@ AC_SUBST([GTK_OBJS],[`pkg-config --libs gtk+-2.0`])
 AC_MSG_ERROR([Error: gtk+-2.0 not found!])
 ], [])
 
-
-#Search for libgm
-if test -z "$LIBGM"
-then
-        #user did not specify path so we start
-        #our search. First see if the libs are
-        #available in the project
-        if test -d "$srcdir/../libs/layout" && \
-           test -d "$srcdir/../libs/parseconf" && \
-           test -d "$srcdir/../libs/connect" && \
-           test -d "$srcdir/../libs/generic"
-        then
-                LIBGM='$(top_srcdir)/../libs'
-        fi
-fi
- 
-#If LIBGM is defined we need to make sure the compiler knows
-#where to find the header and library files.
-if test -n "$LIBGM"
-then
-        AC_SUBST([GM_INCLUDES], ["-I$LIBGM/generic -I$LIBGM/layout -I$LIBGM/parseconf -I$LIBGM/connect"])
-        AC_SUBST([GM_OBJS], ["$LIBGM/layout/libgm_layout.la $LIBGM/parseconf/libgm_parseconf.la $LIBGM/connect/libgm_connect.la"])
-fi
- 
-#If LIBGM is still empty we check for installed libgm
-if test -z "$LIBGM"
-then
-        AC_CHECK_LIB([gm_connect], [gm_connect_to_gappman],
-                [AC_CHECK_HEADERS([gm_connect.h])
-                  LIBS="-lgm_connect $LIBS"],
-                [AC_MSG_ERROR([No libgm_connect found])])
- 
-        AC_CHECK_LIB([gm_layout], [gm_create_button],
-                [AC_CHECK_HEADERS([gm_layout.h gm_changeresolution.h])
-                  LIBS="-lgm_layout $LIBS"],
-                [AC_MSG_ERROR([No libgm_layout found])])
- 
-        AC_CHECK_LIB([gm_parseconf], [gm_load_conf],
-                [AC_CHECK_HEADERS([gm_parseconf.h])
-                  LIBS="-lgm_parseconf $LIBS"],
-                [AC_MSG_ERROR([No libgm_parseconf found])])
-fi
+GMLIB_SEARCH
 
 # Checks for header files.
 AC_PATH_X
