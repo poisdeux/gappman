@@ -294,8 +294,8 @@ int main (int argc, char **argv)
     GtkWidget *vbox;
     GtkWidget *hbox;
     GtkWidget *separator;
-    const char* conffile = "/etc/gappman/processmanager.xml";
-    gchar* gappman_confpath = "";
+    const char* conffile = SYSCONFDIR"/processmanager.xml";
+    gchar* gappman_confpath;
     int dialog_width;
     int dialog_height;
     int program_width;

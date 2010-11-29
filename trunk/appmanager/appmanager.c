@@ -388,7 +388,7 @@ int main (int argc, char **argv)
     GtkWidget *vbox;
     menu_elements *actions;
     menu_elements *panel;
-    const char* conffile = "./conf.xml";
+    const char* conffile = SYSCONFDIR"/conf.xml";
     int c;
 
     //Needs to be called before any another glib function

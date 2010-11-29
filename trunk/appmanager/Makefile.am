@@ -7,6 +7,7 @@ gappman_CPPFLAGS = @GTK_INCLUDES@
 gappman_CPPFLAGS += @GTHREAD_INCLUDES@
 gappman_CPPFLAGS += @LIBXML_INCLUDES@
 gappman_CPPFLAGS += @GM_INCLUDES@
+gappman_CPPFLAGS += -DSYSCONFDIR="\"${sysconfdir}\""
 gappman_LDADD = @GM_OBJS@
 gappman_LDADD += @GTHREAD_OBJS@
 gappman_LDADD += @LIBXML_OBJS@

@@ -27,7 +27,7 @@
 static GtkButton *main_button = NULL;
 static int main_button_width = 50;
 static int main_button_height = 50;
-static const char* conffile = "/etc/gappman/netman.xml";
+static const char* conffile = SYSCONFDIR"/netman.xml";
 static gboolean KEEP_RUNNING;
 static GMutex *check_status_mutex;
 static GtkImage* image_unavail;

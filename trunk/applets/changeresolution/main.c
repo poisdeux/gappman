@@ -34,12 +34,13 @@ static int dialog_height;
 
 static void usage()
 {
+    char* conffile = SYSCONFDIR"/conf.xml";
     printf("usage: changeresolution [--help] [--screenwidth <WIDTHINPIXELS>] [--screenheight <HEIGHTINPIXELS>] [--gmconffile <FILENAME>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
     printf("\n");
     printf("--help:\t\tshows this help text\n");
     printf("--screenwidth <WIDTHINPIXELS>:\t\twidth of the main (gappman) window (default: screen width / 3)\n");
     printf("--screenheight <HEIGHTINPIXELS:\t\theight of the main (gappman) window (default: screen height / 3)\n");
-    printf("--gmconffile <FILENAME>:\t\t configuration file specifying the program and actions (default: /etc/gappman/conf.xml)\n");
+    printf("--gmconffile <FILENAME>:\t\t configuration file specifying the program and actions (default: %s)\n", conffile);
     printf("--gtkrc <GTKRCFILENAME>:\t\t gtk configuration file which can be used for themeing\n");
     printf("--windowed:\t\t creates a border around the window\n");
 
@@ -248,7 +249,7 @@ int main (int argc, char **argv)
     int ret_value;
     int i;
     XRRScreenSize *sizes;
-    char* conffile = "/etc/gappman/conf.xml";
+    char* conffile = SYSCONFDIR"/conf.xml";
     gchar* gappman_confpath;
 	
     gtk_init (&argc, &argv);
@@ -325,9 +326,9 @@ int main (int argc, char **argv)
     if (gm_get_confpath_from_gappman(2103, "localhost", &gappman_confpath) == GM_SUCCES)
     {
     	if ( gm_load_conf(gappman_confpath) == GM_SUCCES )
-		{
+	{
     		programs = gm_get_programs();
-		}
+	}
     }
 
 		gm_res_init();

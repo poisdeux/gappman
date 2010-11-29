@@ -4,6 +4,7 @@
 AC_PREREQ([2.61])
 AC_INIT([gappman], [TRUNKMUSTNOTGENERATEPACKAGE], [m.brekhof@gmail.com], [gappman], [http://code.google.com/p/gappman/])
 AC_CONFIG_MACRO_DIR([m4])
+AC_CANONICAL_SYSTEM
 
 # Pass generic make options to all makefiles
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
