@@ -24,9 +24,9 @@ AC_PROG_LIBTOOL
 PKG_PROG_PKG_CONFIG([0.25])
 
 # Checks for libraries.
-PKG_CHECK_MODULES([LIBXML],[libxml-2.0])
-PKG_CHECK_MODULES([GTK],[gtk+-2.0])
-PKG_CHECK_MODULES([XRANDR],[xrandr])
+PKG_CHECK_MODULES([LIBXML],[libxml-2.0 >= 2.7.7])
+PKG_CHECK_MODULES([GTK],[gtk+-2.0 >= 2.22.0])
+PKG_CHECK_MODULES([XRANDR],[xrandr >= 1.3.0])
 
 # Checks for header files.
 AC_PATH_X
