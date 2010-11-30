@@ -29,26 +29,9 @@ fi
 
 
 # Checks for libraries.
-AC_SEARCH_LIBS(xmlTextReaderRead, xml2, [
-AC_SUBST([LIBXML_INCLUDES],[`pkg-config --cflags libxml-2.0`])
-AC_SUBST([LIBXML_OBJS],[`pkg-config --libs libxml-2.0`])
-], [
-AC_MSG_ERROR([Error: libxml2 not found!])
-], [])
-
-AC_SEARCH_LIBS([gtk_main], [gtk-x11-2.0], [
-AC_SUBST([GTK_INCLUDES],[`pkg-config --cflags gtk+-2.0`])
-AC_SUBST([GTK_OBJS],[`pkg-config --libs gtk+-2.0`])
-], [
-AC_MSG_ERROR([Error: gtk+-2.0 not found!])
-], [])
-
-AC_SEARCH_LIBS([g_thread_init], [gthread-2.0], [
-AC_SUBST([GTHREAD_INCLUDES],[`pkg-config --cflags gthread-2.0`])
-AC_SUBST([GTHREAD_OBJS],[`pkg-config --libs gthread-2.0`])
-], [
-AC_MSG_ERROR([Error: gtkthread-2.0 not found!])
-], [])
+PKG_CHECK_MODULES([LIBXML],[libxml-2.0 >= 2.7.7])
+PKG_CHECK_MODULES([GTK],[gtk+-2.0 >= 2.22.0])
+PKG_CHECK_MODULES([GLIB],[gthread-2.0 >= 2.26.0])
 
 #Search for gmlib and configure GM_INCLUDES, GM_OBJS or LIBS 
 GMLIB_SEARCH
@@ -90,6 +73,13 @@ prefix:       ${prefix}
 compiler:     ${CC} ${CFLAGS} ${CPPFLAGS}
 GM Libraries: ${GM_OBJS}
 GM Includes:  ${GM_INCLUDES}
+GTK Libraries: ${GTK_LIBS}
+GTK Includes: ${GTK_CFLAGS}
+GLIB Libraries: ${GLIB_LDFLAGS}
+GLIB Includes: ${GLIB_CFLAGS}
+XML Libraries: ${LIBXML_LDFLAGS}
+XML Includes: ${LIBXML_CFLAGS}
+
 Package features:
   listener disabled: ${disable_listener}
 
