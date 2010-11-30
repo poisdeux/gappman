@@ -22,16 +22,12 @@ AC_ARG_ENABLE([listener],
 AC_PROG_CC
 AM_PROG_CC_C_O
 AC_PROG_LIBTOOL
-AC_CHECK_PROG(HAVE_PKG_CONFIG, pkg-config, "yes", "no",)
-if test "$HAVE_PKG_CONFIG" = "no" ; then
-  AC_MSG_ERROR([Could not find required program pkg-config.])
-fi
-
+PKG_PROG_PKG_CONFIG([0.22])
 
 # Checks for libraries.
-PKG_CHECK_MODULES([LIBXML],[libxml-2.0 >= 2.7.7])
-PKG_CHECK_MODULES([GTK],[gtk+-2.0 >= 2.22.0])
-PKG_CHECK_MODULES([GLIB],[gthread-2.0 >= 2.26.0])
+PKG_CHECK_MODULES([LIBXML],[libxml-2.0 >= 2.6.32])
+PKG_CHECK_MODULES([GTK],[gtk+-2.0 >= 2.12.12])
+PKG_CHECK_MODULES([GLIB],[gthread-2.0 >= 2.16.6])
 
 #Search for gmlib and configure GM_INCLUDES, GM_OBJS or LIBS 
 GMLIB_SEARCH

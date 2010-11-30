@@ -21,12 +21,12 @@ AC_ARG_ENABLE([listener],
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_LIBTOOL
-PKG_PROG_PKG_CONFIG([0.25])
+PKG_PROG_PKG_CONFIG([0.22])
 
 # Checks for libraries.
-PKG_CHECK_MODULES([LIBXML],[libxml-2.0 >= 2.7.7])
-PKG_CHECK_MODULES([GTK],[gtk+-2.0 >= 2.22.0])
-PKG_CHECK_MODULES([XRANDR],[xrandr >= 1.3.0])
+PKG_CHECK_MODULES([LIBXML],[libxml-2.0 >= 2.6.32])
+PKG_CHECK_MODULES([GTK],[gtk+-2.0 >= 2.12.12])
+PKG_CHECK_MODULES([XRANDR],[xrandr >= 1.2.3])
 
 # Checks for header files.
 AC_PATH_X
