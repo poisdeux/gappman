@@ -2,9 +2,9 @@
 EXTRA_DIST = $(srcdir)/logos/*.png
 bin_PROGRAMS = gmchangeresolution
 gmchangeresolution_SOURCES = main.c
-gmchangeresolution_CPPFLAGS = @GTK_INCLUDES@
-gmchangeresolution_CPPFLAGS += @LIBXML_INCLUDES@
+gmchangeresolution_CPPFLAGS = $(GTK_CFLAGS)
+gmchangeresolution_CPPFLAGS += $(LIBXML_CFLAGS)
 gmchangeresolution_CPPFLAGS += @GM_INCLUDES@
 gmchangeresolution_LDADD = @GM_OBJS@
-gmchangeresolution_LDADD += @GTK_OBJS@ 
-gmchangeresolution_LDADD += @LIBXML_OBJS@
+gmchangeresolution_LDADD += $(GTK_LIBS) 
+gmchangeresolution_LDADD += $(LIBXML_LIBS)

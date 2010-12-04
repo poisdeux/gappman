@@ -22,27 +22,10 @@ if test "$HAVE_PKG_CONFIG" = "no" ; then
 fi
 
 # Checks for libraries.
-
-AC_SEARCH_LIBS(dbus_g_bus_get, dbus-glib-1, [
-AC_SUBST([DBUS_INCLUDES],[`pkg-config --cflags dbus-glib-1`])
-AC_SUBST([DBUS_OBJS],[`pkg-config --libs dbus-glib-1`])
-], [
-AC_MSG_ERROR([Error: dbus-glib-1 not found!])
-], [])
-
-AC_SEARCH_LIBS(xmlTextReaderRead, xml2, [
-AC_SUBST([LIBXML_INCLUDES],[`pkg-config --cflags libxml-2.0`])
-AC_SUBST([LIBXML_OBJS],[`pkg-config --libs libxml-2.0`])
-], [
-AC_MSG_ERROR([Error: libxml2 not found!])
-], [])
-
-AC_SEARCH_LIBS([gtk_main], [gtk-x11-2.0], [
-AC_SUBST([GTK_INCLUDES],[`pkg-config --cflags gtk+-2.0`])
-AC_SUBST([GTK_OBJS],[`pkg-config --libs gtk+-2.0`])
-], [
-AC_MSG_ERROR([Error: gtk+-2.0 not found!])
-], [])
+PKG_CHECK_MODULES([DBUS],[dbus-glib-1 >= 0.76])
+PKG_CHECK_MODULES([LIBXML],[libxml-2.0 >= 2.6.32])
+PKG_CHECK_MODULES([GTK],[gtk+-2.0 >= 2.12.12])
+PKG_CHECK_MODULES([GLIB],[glib-2.0 >= 2.26.0])
 
 GMLIB_SEARCH
 
