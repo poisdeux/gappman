@@ -25,9 +25,11 @@ AC_PROG_LIBTOOL
 PKG_PROG_PKG_CONFIG([0.22])
 
 # Checks for libraries.
+PKG_CHECK_MODULES([DBUS],[dbus-glib-1 >= 0.76])
 PKG_CHECK_MODULES([LIBXML],[libxml-2.0 >= 2.6.32])
 PKG_CHECK_MODULES([GTK],[gtk+-2.0 >= 2.12.12])
-PKG_CHECK_MODULES([GLIB],[gthread-2.0 >= 2.16.6])
+PKG_CHECK_MODULES([GLIB],[glib-2.0 >= 2.26.0])
+PKG_CHECK_MODULES([GTHREAD],[gthread-2.0 >= 2.16.6])
 
 #Search for gmlib and configure GM_INCLUDES, GM_OBJS or LIBS 
 GMLIB_SEARCH
@@ -58,7 +60,8 @@ AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 #AC_CHECK_FUNCS([gethostbyname localtime_r memset pow socket sqrt strndup strspn strstr])
 
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile
+								 introspection/Makefile])
 AC_OUTPUT
 
 echo \

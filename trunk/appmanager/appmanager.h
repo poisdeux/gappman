@@ -32,7 +32,7 @@ struct appwidgetinfo
 * \brief Returns the started applications.
 * \return pointer to the appwidgetinfo struct
 */
-struct appwidgetinfo* get_started_apps();
+struct appwidgetinfo* appmanager_get_started_apps();
 
 /**
 * \brief updates the resolution for gappman or any other program
@@ -40,5 +40,5 @@ struct appwidgetinfo* get_started_apps();
 * \param width new width that should be set for the program
 * \param height new height that should be set for the program
 */
-void update_resolution(gchar* programname, int width, int height);
+void appmanager_update_resolution(gchar* programname, int width, int height);
 

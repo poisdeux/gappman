@@ -126,7 +126,7 @@ static void handle_update_resolution(gchar *msg)
     }
     width = atoi(contentssplit[3]);
     height = atoi(contentssplit[4]);
-    update_resolution(name, width, height);
+    appmanager_update_resolution(name, width, height);
 
     g_strfreev(contentssplit);
 }
