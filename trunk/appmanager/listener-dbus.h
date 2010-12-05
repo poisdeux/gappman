@@ -4,7 +4,7 @@
 /*
  * Type macros.
  */
-#define GM_TYPE_APPMANAGER                  (gm_appman_get_type ()) ///< always returns the gm_appman object type
+#define GM_TYPE_APPMANAGER                  (gm_appmanager_get_type ()) ///< always returns the gm_appmanager object type
 #define GM_APPMANAGER(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), GM_TYPE_APPMANAGER, GmAppmanager)) ///< Used to cast an object to type gm_appman
 #define GM_IS_APPMANAGER(obj)               (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GM_TYPE_APPMANAGER)) ///< Checks whether obj is of type gm_appman
 #define GM_APPMANAGER_CLASS(klass)          (G_TYPE_CHECK_CLASS_CAST ((klass), GM_TYPE_APPMANAGER, GmAppmanagerClass)) ///< Used to cast klass to class gm_appman
@@ -42,7 +42,7 @@ struct _GmAppmanagerClass
 * of the object type.
 * \return GType of object GM_APPMANAGER
 */
-GType gm_appman_get_type ();
+GType gm_appmanager_get_type ();
 
 //Functions supporting the introspection objects
 static gboolean send_fontsize(GmAppmanager *obj, gint *fontsize, GError **error);

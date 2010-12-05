@@ -78,7 +78,7 @@ static void sendprocesslist(GIOChannel* gio)
     gchar* msg = NULL;
     msg = (gchar*) malloc((256 + 16) * sizeof(gchar));
 
-    appw_list = get_started_apps();
+    appw_list = appmanager_get_started_apps();
     while (appw_list != NULL)
     {
         if (strlen((const char*) appw_list->menu_elt->name) < 256)

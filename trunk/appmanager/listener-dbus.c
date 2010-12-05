@@ -25,12 +25,12 @@ static gboolean send_proceslist(GmAppmanager *obj, gchar **proceslist, GError **
 
 		//gdk_thread lock??
 
-    appw_list = get_started_apps();
+    appw_list = appmanager_get_started_apps();
     while (appw_list != NULL)
     {	
 			number_of_appws++;
 
-			proceslist = (gchar**) realloc((number_of_appws*2) * sizeof(gchar*));
+			proceslist = (gchar**) realloc(proceslist, (number_of_appws*2) * sizeof(gchar*));
 			if(proceslist == NULL)
 			{ 
 				g_warning("Could not reallocate memory. errno: %d", errno);
@@ -59,11 +59,11 @@ static gboolean update_resolution(GmAppmanager *obj, gchar* name, gint width, gi
 	return TRUE;
 }
 
-static void gm_appmanager_class_init (GmNetmandClass *klass)
+static void gm_appmanager_class_init (GmAppmanagerClass *klass)
 {
 }
 
-static void gm_appmanager_init (GmNetmand *self)
+static void gm_appmanager_init (GmAppmanager *self)
 {
 }
 
@@ -73,7 +73,7 @@ gboolean gappman_setup_dbus_session(GtkWidget *window)
   DBusGConnection *bus;
   DBusGProxy *bus_proxy;
   GError *error = NULL;
-  GmNetmand *obj;
+  GmAppmanager *obj;
   guint request_name_result;
 
   //Install introspection information so we can invoke the methods by name
