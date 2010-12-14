@@ -56,6 +56,7 @@ AC_CHECK_FUNCS([gethostbyname localtime_r memset pow socket sqrt strndup strspn 
 
 AC_CONFIG_FILES([Makefile
                  connect/Makefile
+                 connect/libgm_connect.pc
                  generic/Makefile
                  layout/Makefile
                  parseconf/Makefile])
