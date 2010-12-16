@@ -4,7 +4,10 @@ SUBDIRS = introspection
 ACLOCAL_AMFLAGS = -I m4
 noinst_HEADERS = listener.h appmanager.h listener-dbus.h
 bin_PROGRAMS = gappman 
-gappman_SOURCES = appmanager.c listener.c listener-dbus.c
+gappman_SOURCES = appmanager.c listener.c 
+if WITH_DBUS_SUPPORT
+gappman_SOURCES += dbus-listener.c
+endif
 gappman_CPPFLAGS = $(DBUS_CFLAGS)
 gappman_CPPFLAGS += $(GTK_CFLAGS)
 gappman_CPPFLAGS += $(GLIB_CFLAGS)

@@ -30,9 +30,13 @@ PKG_PROG_PKG_CONFIG([0.22])
 
 # Checks for libraries.
 AS_IF([test "$without_dbus" != "yes" ],
-[PKG_CHECK_MODULES([DBUS],[dbus-glib-1 >= 0.76])]
-[AC_DEFINE([WITH_DBUS_SUPPORT], [1], [Define if you want gappman compiled with dbus support])],
+[PKG_CHECK_MODULES([DBUS],[dbus-glib-1 >= 0.76], [without_dbus=no], [without_dbus=yes])],
 [AC_MSG_WARN([Building gappman without dbus support])])
+
+AS_IF([test "$without_dbus" != "yes" ],
+[AC_DEFINE([WITH_DBUS_SUPPORT], [1], [Define if you want gappman compiled with dbus support])]
+)
+AM_CONDITIONAL([WITH_DBUS_SUPPORT], [test "$without_dbus" != "yes"])
 
 
 PKG_CHECK_MODULES([LIBXML],[libxml-2.0 >= 2.6.32])
