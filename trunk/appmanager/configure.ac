@@ -18,6 +18,10 @@ AC_ARG_ENABLE([listener],
  [AS_HELP_STRING([--disable-listener], [disable listener support @<:@default: no@:>@])],
  [disable_listener=yes], [disable_listener=no])
 
+AC_ARG_WITH([dbus],
+ [AS_HELP_STRING([--without-dbus], [disable dbus support])],
+ [without_dbus=yes], [without_dbus=no])
+
 # Checks for programs.
 AC_PROG_CC
 AM_PROG_CC_C_O
@@ -25,7 +29,12 @@ AC_PROG_LIBTOOL
 PKG_PROG_PKG_CONFIG([0.22])
 
 # Checks for libraries.
-PKG_CHECK_MODULES([DBUS],[dbus-glib-1 >= 0.76])
+AS_IF([test "$without_dbus" != "yes" ],
+[PKG_CHECK_MODULES([DBUS],[dbus-glib-1 >= 0.76])]
+[AC_DEFINE([WITH_DBUS_SUPPORT], [1], [Define if you want gappman compiled with dbus support])],
+[AC_MSG_WARN([Building gappman without dbus support])])
+
+
 PKG_CHECK_MODULES([LIBXML],[libxml-2.0 >= 2.6.32])
 PKG_CHECK_MODULES([GTK],[gtk+-2.0 >= 2.12.12])
 PKG_CHECK_MODULES([GLIB],[glib-2.0 >= 2.16.6])
@@ -36,7 +45,7 @@ GMLIB_SEARCH
 
 # Checks for header files.
 AC_PATH_X
-if test "${disable_listener}" = no; then
+if test "${disable_listener}" != yes; then
 	AC_CHECK_HEADERS([netdb.h netinet/in.h sys/socket.h], [], [disable_listener=yes])
 fi
 
@@ -81,6 +90,7 @@ XML Includes: ${LIBXML_CFLAGS}
 
 Package features:
   listener disabled: ${disable_listener}
+  dbus support disabled: ${without_dbus}
 
 Now type 'make @<:@<target>@:>@'
   where the optional <target> can be:

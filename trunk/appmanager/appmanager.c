@@ -14,8 +14,14 @@
  * \todo Unit-testing with http://klee.llvm.org/
  * \todo Implement support for keybindings. For instance to start specific applets.
  */
-
+#ifdef HAVE_CONFIG
+#include "config.h"
+#endif //HAVE_CONFIG
+#if defined(WITH_DBUS_SUPPORT)
+#include "listener-dbus.h"
+#else
 #include "listener.h"
+#endif // WITH_DBUS_SUPPORT
 #include "appmanager.h"
 #include <glib.h>
 #include <gtk/gtk.h>
