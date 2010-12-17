@@ -143,6 +143,10 @@ Maintenance/update releases should be tested on the branch and result in a
 6. Checking the code
 -----------------------------------------------------------------------------
 
+Splint generates a lot of false positives. A better tool might be cppcheck.
+http://sourceforge.net/projects/cppcheck/
+It supposedly also works for C-code...
+
 Splint might be a nice tool to check the code for security vulnerabilities and 
 coding mistakes. It can be executed as follows:
 
