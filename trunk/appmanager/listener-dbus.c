@@ -9,6 +9,8 @@
 
 G_DEFINE_TYPE (GmAppmanager, gm_appmanager, G_TYPE_OBJECT); ///< will create gm_appmanager and set gm_appmanager_parent_class
 
+static const gchar* confpath = "";
+
 static gboolean send_fontsize(GmAppmanager *obj, gint *fontsize, GError **error)
 {
 	*fontsize = gm_get_fontsize();
@@ -68,7 +70,7 @@ static void gm_appmanager_init (GmAppmanager *self)
 }
 
 
-gboolean gappman_setup_dbus_session(GtkWidget *window)
+gboolean listener_dbus_start_session(GtkWidget *window)
 {
   DBusGConnection *bus;
   DBusGProxy *bus_proxy;
@@ -104,3 +106,10 @@ gboolean gappman_setup_dbus_session(GtkWidget *window)
 
 	return TRUE;
 }
+
+void listener_dbus_set_confpath(const gchar *path)
+{
+  confpath = path;
+}
+
+

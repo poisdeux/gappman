@@ -17,11 +17,6 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif //HAVE_CONFIG_H
-#ifdef WITH_DBUS_SUPPORT
-#include "listener-dbus.h"
-#else
-#include "listener.h"
-#endif // WITH_DBUS_SUPPORT
 #include "appmanager.h"
 #include <glib.h>
 #include <gtk/gtk.h>
@@ -39,6 +34,7 @@
 #include <gm_parseconf.h>
 #include <gm_layout.h>
 #include <gm_generic.h>
+#include "listener.h"
 
 struct appwidgetinfo* started_apps; ///< holds the currently started apps
 menu_elements *programs; ///< list of all programs gappman manages. Currently only programs need to be global as only programs have meta-info that can be updated. E.g. resolution updates for a specific program. 
@@ -452,12 +448,6 @@ int main (int argc, char **argv)
 
 	gm_res_init();
 
-#if !defined(NO_LISTENER)
-	//set confpath so other programs can retrieve
-	//the configuration file gappman used
-	gappman_set_confpath(conffile);
-#endif
-
     /** INIT */
     started_apps = NULL;
 
@@ -552,7 +542,10 @@ int main (int argc, char **argv)
     gtk_widget_show (mainwin);
 
 #if !defined(NO_LISTENER)
-    gappman_start_listener(mainwin);
+		//set confpath so other programs can retrieve
+		//the configuration file gappman used
+		gappman_set_confpath(conffile);
+  	gappman_start_listener(mainwin);
 #else
     g_warning("Gappman compiled without network support");
 #endif
@@ -567,7 +560,7 @@ int main (int argc, char **argv)
     g_message("Closing up.");
     stop_panel( panel );
 #if !defined(NO_LISTENER)
-    gappman_close_listener(NULL);
+    gappman_close_listener();
 #endif
     gm_free_menu_elements( programs );
     gm_free_menu_elements( actions );

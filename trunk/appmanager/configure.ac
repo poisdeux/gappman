@@ -38,7 +38,6 @@ AS_IF([test "$without_dbus" != "yes" ],
 )
 AM_CONDITIONAL([WITH_DBUS_SUPPORT], [test "$without_dbus" != "yes"])
 
-
 PKG_CHECK_MODULES([LIBXML],[libxml-2.0 >= 2.6.32])
 PKG_CHECK_MODULES([GTK],[gtk+-2.0 >= 2.12.12])
 PKG_CHECK_MODULES([GLIB],[glib-2.0 >= 2.16.6])

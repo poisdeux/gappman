@@ -1,5 +1,5 @@
-#ifndef __LISTENER_H__
-#define __LISTENER_H__
+#ifndef __LISTENER_DBUS_H__
+#define __LISTENER_DBUS_H__
 #include <glib.h>
 /*
  * Type macros.
@@ -52,4 +52,6 @@ static gboolean update_resolution(GmAppmanager *obj, gchar* name, gint width, gi
 //This needs to be included after above function prototype
 #include <gm_listener_glue.h>
 
-#endif /* __LISTENER_H__ */
+gboolean listener_dbus_start_session(GtkWidget *window);
+
+#endif /* __LISTENER_DBUS_H__ */
