@@ -25,7 +25,7 @@ fi
 PKG_CHECK_MODULES([DBUS],[dbus-glib-1 >= 0.76])
 PKG_CHECK_MODULES([LIBXML],[libxml-2.0 >= 2.6.32])
 PKG_CHECK_MODULES([GTK],[gtk+-2.0 >= 2.12.12])
-PKG_CHECK_MODULES([GLIB],[glib-2.0 >= 2.26.0])
+PKG_CHECK_MODULES([GLIB],[glib-2.0 >= 2.16.6])
 
 GMLIB_SEARCH
 
