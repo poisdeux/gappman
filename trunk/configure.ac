@@ -9,6 +9,15 @@ AC_CANONICAL_SYSTEM
 # Pass generic make options to all makefiles
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
+# Checks for commandline options
+AC_ARG_ENABLE([listener],
+ [AS_HELP_STRING([--disable-listener], [disable listener support @<:@default: no@:>@])],
+ [disable_listener=yes], [disable_listener=no])
+
+AC_ARG_WITH([dbus],
+ [AS_HELP_STRING([--without-dbus], [disable dbus support])],
+ [without_dbus=yes], [without_dbus=no])
+
 # Generic options
 AC_ARG_ENABLE([doxygen-docs], 
 	[AS_HELP_STRING([--disable-doxygen-docs],

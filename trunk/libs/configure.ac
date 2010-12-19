@@ -68,6 +68,12 @@ Configured ${PACKAGE_NAME} ${PACKAGE_VERSION}
 
 prefix: ${prefix}
 compiler: ${CC} ${CFLAGS} ${CPPFLAGS}
+GTK Libraries: ${GTK_LIBS}
+GTK Includes: ${GTK_CFLAGS}
+XML Libraries: ${LIBXML_LIBS}
+XML Includes: ${LIBXML_CFLAGS}
+XRANDR Libraries: ${XRANDR_LIBS}
+XRANDR Includes: ${XRANDR_CFLAGS}
 
 Package features:
   listener disabled: ${disable_listener}

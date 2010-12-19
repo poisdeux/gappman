@@ -12,7 +12,7 @@
 #define __GAPPMAN_GENERIC_H__
 
 #ifndef SYSCONFDIR
-#define SYSCONFDIR "/etc/gappman"
+#define SYSCONFDIR "/etc/gappman" ///< default location for the configuration files
 #endif
 
 #define GM_SUCCES 0	///< no errors detected

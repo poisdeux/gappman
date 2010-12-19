@@ -27,7 +27,6 @@ gboolean gappman_start_listener (GtkWidget *win);
 
 /**
 * \brief Closes a listener.
-* \param *gio pointer to an open GIOChannel, if NULL it will close gappman's listener
 * \return TRUE if closing the channel succeeded. False otherwise.
 */
 gboolean gappman_close_listener ();

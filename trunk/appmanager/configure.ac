@@ -86,9 +86,9 @@ GM Libraries: ${GM_OBJS}
 GM Includes:  ${GM_INCLUDES}
 GTK Libraries: ${GTK_LIBS}
 GTK Includes: ${GTK_CFLAGS}
-GLIB Libraries: ${GLIB_LDFLAGS}
+GLIB Libraries: ${GLIB_LIBS}
 GLIB Includes: ${GLIB_CFLAGS}
-XML Libraries: ${LIBXML_LDFLAGS}
+XML Libraries: ${LIBXML_LIBS}
 XML Includes: ${LIBXML_CFLAGS}
 
 Package features:

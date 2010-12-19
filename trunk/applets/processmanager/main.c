@@ -24,7 +24,6 @@
 #include <signal.h>
 #include <gm_connect.h>
 #include <gm_generic.h>
-#include "connect.h"
 
 static int WINDOWED = 0;
 static GtkWidget *mainwin;
@@ -383,7 +382,7 @@ int main (int argc, char **argv)
         fontsize=gm_get_fontsize();
     }
 
-    status = getStartedProcsFromGappman(2103, "localhost", &started_procs);
+    status = gm_get_started_procs_from_gappman(2103, "localhost", &started_procs);
 
 	if ( status != GM_SUCCES )
 	{

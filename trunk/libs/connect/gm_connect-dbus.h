@@ -10,7 +10,6 @@
  *
  * \todo Rewrite to support D-Bus
  * \todo add functions to retrieve proceslist
- * \bug If appmanager is compiled with d-bus support and connect without the UI will fail to draw some widgets
 */
 
 #ifndef __GAPPMAN_CONNECT_H__
