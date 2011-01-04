@@ -59,9 +59,6 @@ Configured ${PACKAGE_NAME} ${PACKAGE_VERSION}
 prefix: ${prefix}
 compiler: ${CC} ${CFLAGS} ${CPPFLAGS}
 
-Package features:
-  listener disabled: ${disable_listener}
-
 Now type 'make @<:@<target>@:>@'
   where the optional <target> can be:
     all         - build all binaries
