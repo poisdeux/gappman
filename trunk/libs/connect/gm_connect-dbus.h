@@ -12,8 +12,8 @@
  * \todo add functions to retrieve proceslist
 */
 
-#ifndef __GAPPMAN_CONNECT_H__
-#define __GAPPMAN_CONNECT_H__
+#ifndef __GM_CONNECT_DBUS_H__
+#define __GM_CONNECT_DBUS_H__
 
 /**
 * \brief struct to hold the process ID and program name retrieved from Gappman
@@ -82,4 +82,4 @@ int gm_connect_to_gappman(int portno, const char* hostname, int *sockfd);
 */
 int gm_send_and_receive_message(int portno, const char* hostname, gchar *msg, void (*callbackfunc)(gchar*));
 
-#endif
+#endif 

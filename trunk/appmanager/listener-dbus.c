@@ -51,6 +51,8 @@ static gboolean send_proceslist(GmAppmanager *obj, gchar **proceslist, GError **
       appw_list = appw_list->prev;
     }
 
+		proceslist[number_of_appws] = NULL;
+
 		//gdk_thread lock??
 
 	return TRUE;
