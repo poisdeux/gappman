@@ -10,14 +10,18 @@ gappman_SOURCES += listener-dbus.c
 else
 gappman_SOURCES += listener-socket.c
 endif
-gappman_CPPFLAGS = $(DBUS_CFLAGS)
-gappman_CPPFLAGS += $(GTK_CFLAGS)
+gappman_CPPFLAGS = $(GTK_CFLAGS)
 gappman_CPPFLAGS += $(GLIB_CFLAGS)
 gappman_CPPFLAGS += $(LIBXML_CFLAGS)
 gappman_CPPFLAGS += @GM_INCLUDES@
 gappman_CPPFLAGS += -DSYSCONFDIR="\"${sysconfdir}\""
+if WITH_DBUS_SUPPORT
+gappman_CPPFLAGS += $(DBUS_CFLAGS)
+endif
 gappman_LDADD = @GM_OBJS@
+if WITH_DBUS_SUPPORT
 gappman_LDADD += $(DBUS_LIBS)
+endif
 gappman_LDADD += $(GLIB_LIBS)
 gappman_LDADD += $(GTHREAD_LIBS)
 gappman_LDADD += $(GTK_LIBS)
