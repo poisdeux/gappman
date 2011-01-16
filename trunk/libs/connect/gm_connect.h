@@ -10,11 +10,15 @@
  *
  * \todo Rewrite to support D-Bus
  * \todo add functions to retrieve proceslist
- * \bug If appmanager is compiled with d-bus support and connect without the UI will fail to draw some widgets
+ * \bug If appmanager is compiled with d-bus support the UI will fail to draw some widgets
 */
 
 #ifndef __GAPPMAN_CONNECT_H__
 #define __GAPPMAN_CONNECT_H__
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 /**
 * \brief struct to hold the process ID and program name retrieved from Gappman
@@ -24,6 +28,12 @@ struct proceslist {
     gchar* name; ///< programname as known by gappman
     struct proceslist* prev; ///< pointer to previous proces in proceslist
 };
+
+#if defined(WITH_DBUS_SUPPORT)
+#include "gm_connect-dbus.h"
+#else
+#include "gm_connect-socket.h"
+#endif //WITH_DBUS_SUPPORT
 
 /**
 * \brief Frees the proceslist structure
@@ -65,7 +75,7 @@ int gm_get_confpath_from_gappman(int portno, const char* hostname, gchar **path)
 int gm_get_fontsize_from_gappman(int portno, const char* hostname, int *fontsize);
 
 /**
-* \brief Connects to gappman
+* \brief Connects to gappman using gm_socket_connect_to_gappman. You only need to use this function if your program using the socket version.
 * \param portno portnumber gappman listens to
 * \param hostname servername of host that runs gappman
 * \param sockfd pointer to int which will hold the socket filedescriptor
@@ -74,7 +84,7 @@ int gm_get_fontsize_from_gappman(int portno, const char* hostname, int *fontsize
 int gm_connect_to_gappman(int portno, const char* hostname, int *sockfd);
 
 /**
-* \brief connects to gappman and sends a message and may receive one or more answers.
+* \brief calls gm_socket_send_and_receive_message to connect to gappman and send a message and receive one or more answers.
 * \param portno portnumber gappman listens to
 * \param hostname servername of host that runs gappman
 * \param msg the message that should be sent to gappman
