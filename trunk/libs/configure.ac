@@ -18,6 +18,20 @@ AC_ARG_ENABLE([listener],
  [AS_HELP_STRING([--disable-listener], [disable listener support @<:@default: no@:>@])],
  [disable_listener=yes], [disable_listener=no])
 
+AC_ARG_WITH([dbus],
+ [AS_HELP_STRING([--without-dbus], [disable dbus support])],
+ [without_dbus=yes], [without_dbus=no])
+
+# Checks for libraries.
+AS_IF([test "$without_dbus" != "yes" ],
+[PKG_CHECK_MODULES([DBUS],[dbus-glib-1 >= 0.76], [without_dbus=no], [without_dbus=yes])],
+[AC_MSG_WARN([Building gappman without dbus support])])
+
+AS_IF([test "$without_dbus" != "yes" ],
+[AC_DEFINE([WITH_DBUS_SUPPORT], [1], [Define if you want gappman compiled with dbus support])]
+)
+AM_CONDITIONAL([WITH_DBUS_SUPPORT], [test "$without_dbus" != "yes"])
+
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_LIBTOOL
