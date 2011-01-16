@@ -80,6 +80,6 @@ int gm_connect_to_gappman(int portno, const char* hostname, int *sockfd);
 * \param callbackfunc callback function that should handle each message received from gappman. If NULL no messages will be received.
 * \return integer value as defined in libs/generic/gm_generic.h
 */
-int gm_send_and_receive_message(int portno, const char* hostname, gchar *msg, void (*callbackfunc)(gchar*));
+int gm_socket_send_and_receive_message(int portno, const char* hostname, gchar *msg, void (*callbackfunc)(gchar*));
 
 #endif
