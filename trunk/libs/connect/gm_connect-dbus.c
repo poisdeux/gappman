@@ -25,7 +25,7 @@
 
 #include <glib.h>
 #include <string.h>
-#include <dbus/dbus-glib.g>
+#include <dbus/dbus-glib.h>
 #include <gm_generic.h>
 #include "gm_connect.h"
 #include "gm_connect-generic.h"
@@ -45,15 +45,16 @@ static void release_lock()
   g_mutex_unlock(check_status_mutex);
 }
 
-int gm_get_started_procs_from_gappman(int portno, const char* hostname, struct proceslist **startedprocs)
+int gm_dbus_get_started_procs_from_gappman(int portno, const char* hostname, struct proceslist **startedprocs)
 {
   GError *error = NULL;
-  gint status;
+  gint foundname;
 	gint n;
+	gint i;
   DBusGProxyCall* proxy_call;
   DBusGConnection *bus;
   DBusGProxy *proxy;
-	gchar **proceslist;
+	gchar **procs;
   gchar **contentssplit = NULL;
 	
   //get_lock();
@@ -81,10 +82,11 @@ int gm_get_started_procs_from_gappman(int portno, const char* hostname, struct p
     return FALSE;
   }
 
-  proxy_call = dbus_g_proxy_call_with_timeout(proxy,
+/*  proxy_call = dbus_g_proxy_call_with_timeout(proxy,
       "GetStartedProcs", 500, &error, 
 			G_TYPE_INVALID, 
-      G_TYPE_STRV, proceslist, G_TYPE_INVALID);
+      G_TYPE_STRV, procs, G_TYPE_INVALID);
+*/
 
   if (proxy_call == NULL)
   {
@@ -95,33 +97,39 @@ int gm_get_started_procs_from_gappman(int portno, const char* hostname, struct p
     return FALSE;
   }
 
-	for(n=0; proceslist[n] != NULL; n++)
+	for(n=0; procs[n] != NULL; n++)
 	{	
-    contentssplit = g_strsplit(msg, "::", 0);
-    if ( g_strcmp0("name", contentssplit[i]) == 0)
+		foundname = 0;
+		contentssplit = g_strsplit(procs[n], "::", 0);
+		for(i=0; contentssplit[i] != NULL; i++)
 		{
-			*proceslist = createnewproceslist(*proceslist);
-			(*proceslist)->name = contentssplit[i+1];
-			state = 1;
-		}
-		else if ( g_strcmp0("pid", contentssplit[i]) == 0)
-		{
-			if ( state == 1 )
+    	if ( g_strcmp0("name", contentssplit[i]) == 0)
 			{
-				(*proceslist)->pid = atoi(contentssplit[i+1]);
-				state = 0;
+				*startedprocs = createnewproceslist(*startedprocs);
+				(*startedprocs)->name = contentssplit[i+1];
+				foundname = 1;
 			}
-    }
+			else if ( g_strcmp0("pid", contentssplit[i]) == 0)
+			{
+				if ( foundname == 1 )
+				{
+					(*startedprocs)->pid = atoi(contentssplit[i+1]);
+					foundname = 0;
+				}
+    	}
+		}
 	}
   //release_lock();
 
 	return TRUE;
 }
 
-int gm_get_confpath_from_gappman(int portno, const char* hostname, gchar** path)
+int gm_dbus_get_confpath_from_gappman(int portno, const char* hostname, gchar** path)
 {
+	return GM_FAIL;
 }
 
-int gm_get_fontsize_from_gappman(int portno, const char* hostname, int *fontsize)
+int gm_dbus_get_fontsize_from_gappman(int portno, const char* hostname, int *fontsize)
 {
+	return GM_FAIL;
 }
