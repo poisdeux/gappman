@@ -9,9 +9,9 @@
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
 
-#include "listener.h"
-
 #if !defined(NO_LISTENER)
+#include "listener.h"
+#include <gm_generic.h>
 
 #if defined(WITH_DBUS_SUPPORT)
 #include "listener-dbus.h"
