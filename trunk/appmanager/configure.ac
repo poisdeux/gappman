@@ -90,6 +90,11 @@ GLIB Libraries: ${GLIB_LIBS}
 GLIB Includes: ${GLIB_CFLAGS}
 XML Libraries: ${LIBXML_LIBS}
 XML Includes: ${LIBXML_CFLAGS}
+DBUS Libraries: ${DBUS_LIBS}
+DBUS Includes: ${DBUS_CFLAGS}
+GTHREAD Libraries: ${GTHREAD_LIBS}
+GTHREAD Includes: ${GTHREAD_CFLAGS}
+
 
 Package features:
   listener disabled: ${disable_listener}
