@@ -58,12 +58,19 @@ Configured ${PACKAGE_NAME} ${PACKAGE_VERSION}
 
 prefix: ${prefix}
 compiler: ${CC} ${CFLAGS} ${CPPFLAGS}
+GTK Libraries: ${GTK_LIBS}
+GTK Includes: ${GTK_CFLAGS}
+GLIB Libraries: ${GLIB_LIBS}
+GLIB Includes: ${GLIB_CFLAGS}
+XML Libraries: ${LIBXML_LIBS}
+XML Includes: ${LIBXML_CFLAGS}
+DBUS Libraries: ${DBUS_LIBS}
+DBUS Includes: ${DBUS_CFLAGS}
 
 Now type 'make @<:@<target>@:>@'
   where the optional <target> can be:
     all         - build all binaries
     install     - install everything
-    check       - create and perform tests
 
 "
 
