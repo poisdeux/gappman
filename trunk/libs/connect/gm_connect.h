@@ -20,6 +20,8 @@
 #include <config.h>
 #endif
 
+#include <glib.h>
+
 /**
 * \brief struct to hold the process ID and program name retrieved from Gappman
 */

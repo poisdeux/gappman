@@ -11,8 +11,9 @@
 */
 
 #include "gm_connect-generic.h"
+#include <glib.h>
 
-static struct proceslist* createnewproceslist(struct proceslist* procs)
+struct proceslist* createnewproceslist(struct proceslist* procs)
 {
     struct proceslist* newproc;
     newproc = (struct proceslist*) g_try_malloc0(sizeof(struct proceslist));

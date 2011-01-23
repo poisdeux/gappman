@@ -1,6 +1,6 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
 lib_LTLIBRARIES = libgm_connect.la
-libgm_connect_la_SOURCES = gm_connect.c 
+libgm_connect_la_SOURCES = gm_connect.c gm_connect-generic.c
 if WITH_DBUS_SUPPORT
 libgm_connect_la_SOURCES += gm_connect-dbus.c
 else
