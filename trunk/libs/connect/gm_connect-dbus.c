@@ -45,19 +45,11 @@ static void release_lock()
   g_mutex_unlock(check_status_mutex);
 }
 
-int gm_dbus_get_started_procs_from_gappman(int portno, const char* hostname, struct proceslist **startedprocs)
+static DBusGProxy* get_proxy()
 {
-  GError *error = NULL;
-  gint foundname;
-	gint n;
-	gint i;
-  DBusGProxyCall* proxy_call;
+	GError *error = NULL;
   DBusGConnection *bus;
-  DBusGProxy *proxy;
-	gchar **procs;
-  gchar **contentssplit = NULL;
-	
-  //get_lock();
+	DBusGProxy *proxy;
 
   bus = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
   if (bus == NULL)
@@ -78,23 +70,38 @@ int gm_dbus_get_started_procs_from_gappman(int portno, const char* hostname, str
   {
     g_warning("Could not get dbus object for gappman.interface");
     dbus_g_connection_unref(bus);
-
-    return FALSE;
   }
 
-/*  proxy_call = dbus_g_proxy_call_with_timeout(proxy,
+	return proxy;
+}
+
+int gm_dbus_get_started_procs_from_gappman(gint portno, const char* hostname, struct proceslist **startedprocs)
+{
+  GError *error = NULL;
+  gint foundname;
+	gint n;
+	gint i;
+  gboolean status;
+  DBusGProxy *proxy;
+	gchar **procs;
+  gchar **contentssplit = NULL;
+	
+  //get_lock();
+
+	//get_proxy(proxy);
+
+	status = dbus_g_proxy_call_with_timeout(proxy,
       "GetStartedProcs", 500, &error, 
 			G_TYPE_INVALID, 
       G_TYPE_STRV, procs, G_TYPE_INVALID);
-*/
 
-  if (proxy_call == NULL)
+  if (status == FALSE)
   {
     g_warning ("Failed to call GetStartedProcs: %s", error->message);
     g_error_free(error);
     error = NULL;
 
-    return FALSE;
+    return GM_FAIL;
   }
 
 	for(n=0; procs[n] != NULL; n++)
@@ -121,15 +128,39 @@ int gm_dbus_get_started_procs_from_gappman(int portno, const char* hostname, str
 	}
   //release_lock();
 
-	return TRUE;
+	return GM_SUCCES;
 }
 
-int gm_dbus_get_confpath_from_gappman(int portno, const char* hostname, gchar** path)
+gint gm_dbus_get_confpath_from_gappman(gint portno, const char* hostname, gchar** path)
 {
 	return GM_FAIL;
 }
 
-int gm_dbus_get_fontsize_from_gappman(int portno, const char* hostname, int *fontsize)
+gint gm_dbus_get_fontsize_from_gappman(gint portno, const char* hostname, gint *fontsize)
 {
-	return GM_FAIL;
+  GError *error = NULL;
+	DBusGProxy *proxy;
+	gboolean status;
+
+	g_debug("calling gm_dbus_get_fontsize_from_gappman");
+	proxy = get_proxy();
+	g_debug("calling GetFontsize");
+  status = dbus_g_proxy_call_with_timeout(proxy,
+      "GetFontsize", 500, &error, 
+			G_TYPE_INVALID, 
+      G_TYPE_INT, fontsize, G_TYPE_INVALID);
+
+	g_debug("got status %d", status);
+
+  if (status == FALSE)
+  {
+    g_warning ("Failed to call GetStartedProcs: %s", error->message);
+    g_error_free(error);
+    error = NULL;
+
+		return GM_FAIL;
+  }
+	
+	g_debug("Success!");
+		return GM_SUCCES;
 }

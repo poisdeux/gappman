@@ -42,7 +42,7 @@ void freeproceslist(struct proceslist* procslist)
 
 int gm_connect_to_gappman(int portno, const char* hostname, int *sockfd)
 {
-#ifdef NO_LISTENER
+#if defined(NO_LISTENER) || defined(WITH_DBUS_SUPPORT)
   return GM_NET_COMM_NOT_SUPPORTED;
 #else
 	return gm_socket_connect_to_gappman(portno, hostname, sockfd);
@@ -85,7 +85,7 @@ int gm_get_fontsize_from_gappman(int portno, const char* hostname, int *fontsize
 
 int gm_send_and_receive_message(int portno, const char* hostname, gchar *msg, void (*callbackfunc)(gchar*))
 {
-#ifdef NO_LISTENER | WITH_DBUS_SUPPORT
+#if defined(WITH_DBUS_SUPPORT) || defined(NO_LISTENER)
     return GM_NET_COMM_NOT_SUPPORTED;
 #else
 	return gm_socket_send_and_receive_message(portno, hostname, msg, callbackfunc);    
