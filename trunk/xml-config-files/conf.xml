@@ -33,7 +33,7 @@
       <name>NX Desktop</name>
       <resolution>1280x1024</resolution>
       <exec>/bin/sleep</exec>
-			<arg>5</arg>
+			<arg>15</arg>
       <logo>./logos/nxclient-icon.png</logo>
       <autostart>1</autostart>
 			<printlabel>1</printlabel>

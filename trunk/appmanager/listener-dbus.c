@@ -31,8 +31,7 @@ static gboolean send_proceslist(GmAppmanager *obj, gchar **proceslist, GError **
     while (appw_list != NULL)
     {	
 			number_of_appws++;
-
-			proceslist = (gchar**) realloc(proceslist, (number_of_appws*2) * sizeof(gchar*));
+			proceslist = (gchar**) realloc(proceslist, (number_of_appws+1) * sizeof(gchar*));
 			if(proceslist == NULL)
 			{ 
 				g_warning("Could not reallocate memory. errno: %d", errno);
@@ -47,11 +46,14 @@ static gboolean send_proceslist(GmAppmanager *obj, gchar **proceslist, GError **
 			}
       g_snprintf(msg, 256, "name::%s::pid::%d", appw_list->menu_elt->name, appw_list->PID);
 			proceslist[number_of_appws-1] = msg;
-
       appw_list = appw_list->prev;
     }
 
-		proceslist[number_of_appws] = NULL;
+		if( number_of_appws > 0 )
+		{
+			g_debug("number_of_appws = %d", number_of_appws);
+			proceslist[number_of_appws] = NULL;
+		}
 
 		//gdk_thread lock??
 
@@ -93,7 +95,7 @@ gboolean listener_dbus_start_session(GtkWidget *window)
 
 
   if (!dbus_g_proxy_call (bus_proxy, "RequestName", &error,
-        G_TYPE_STRING, "gappman.interface",
+        G_TYPE_STRING, "gappman.appmanager",
         G_TYPE_UINT, DBUS_NAME_FLAG_DO_NOT_QUEUE,
         G_TYPE_INVALID,
         G_TYPE_UINT, &request_name_result,

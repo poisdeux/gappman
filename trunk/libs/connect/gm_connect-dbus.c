@@ -62,9 +62,9 @@ static DBusGProxy* get_proxy()
   }
 
   proxy = dbus_g_proxy_new_for_name (bus,
-               "gappman",
-               "/GmAppman",
-               "gappman.interface");
+               "gappman.appmanager",
+               "/GmAppmanager",
+               "gappman.appmanager.Interface");
 
   if(proxy == NULL)
   {
@@ -83,20 +83,23 @@ int gm_dbus_get_started_procs_from_gappman(gint portno, const char* hostname, st
 	gint i;
   gboolean status;
   DBusGProxy *proxy;
-	gchar **procs;
+	gchar **procs = NULL;
   gchar **contentssplit = NULL;
 	
   //get_lock();
 
-	//get_proxy(proxy);
+	proxy = get_proxy();
 
+	g_debug("Starting GetStartedProcs");
 	status = dbus_g_proxy_call_with_timeout(proxy,
       "GetStartedProcs", 500, &error, 
 			G_TYPE_INVALID, 
-      G_TYPE_STRV, procs, G_TYPE_INVALID);
+      G_TYPE_STRV, &procs, G_TYPE_INVALID);
+	g_debug("Ended GetStartedProcs");
 
   if (status == FALSE)
   {
+		g_debug("Failed to call GetStartedProcs");
     g_warning ("Failed to call GetStartedProcs: %s", error->message);
     g_error_free(error);
     error = NULL;
@@ -104,12 +107,15 @@ int gm_dbus_get_started_procs_from_gappman(gint portno, const char* hostname, st
     return GM_FAIL;
   }
 
+	g_debug("Starting creating proceslist struct: %p", procs);
 	for(n=0; procs[n] != NULL; n++)
 	{	
+		g_debug("parsing %s", procs[n]);
 		foundname = 0;
 		contentssplit = g_strsplit(procs[n], "::", 0);
 		for(i=0; contentssplit[i] != NULL; i++)
 		{
+			g_debug("%s", contentssplit[i]);
     	if ( g_strcmp0("name", contentssplit[i]) == 0)
 			{
 				*startedprocs = createnewproceslist(*startedprocs);
@@ -127,7 +133,7 @@ int gm_dbus_get_started_procs_from_gappman(gint portno, const char* hostname, st
 		}
 	}
   //release_lock();
-
+	g_debug("returning from gm_dbus_get_started_procs_from_gappman");
 	return GM_SUCCES;
 }
 
@@ -142,25 +148,20 @@ gint gm_dbus_get_fontsize_from_gappman(gint portno, const char* hostname, gint *
 	DBusGProxy *proxy;
 	gboolean status;
 
-	g_debug("calling gm_dbus_get_fontsize_from_gappman");
 	proxy = get_proxy();
-	g_debug("calling GetFontsize");
   status = dbus_g_proxy_call_with_timeout(proxy,
       "GetFontsize", 500, &error, 
 			G_TYPE_INVALID, 
       G_TYPE_INT, fontsize, G_TYPE_INVALID);
 
-	g_debug("got status %d", status);
-
   if (status == FALSE)
   {
-    g_warning ("Failed to call GetStartedProcs: %s", error->message);
+    g_warning ("Failed to call GetFontsize: %s", error->message);
     g_error_free(error);
     error = NULL;
 
 		return GM_FAIL;
   }
 	
-	g_debug("Success!");
-		return GM_SUCCES;
+	return GM_SUCCES;
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<node name="/GmAppman">
-  <interface name="gappman.interface">
+<node name="/GmAppmanager">
+  <interface name="gappman.appmanager.Interface">
     <method name="GetFontsize">
       <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="send_fontsize"/>
       <arg type="i" name="fontsize" direction="out" />
