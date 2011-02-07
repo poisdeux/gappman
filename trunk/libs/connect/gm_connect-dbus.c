@@ -108,6 +108,7 @@ int gm_dbus_get_started_procs_from_gappman(gint portno, const char* hostname, st
   }
 
 	g_debug("Starting creating proceslist struct: %p", procs);
+	g_debug("procs[0]: %s", procs[0]);
 	for(n=0; procs[n] != NULL; n++)
 	{	
 		g_debug("parsing %s", procs[n]);

@@ -17,22 +17,25 @@ static gboolean send_fontsize(GmAppmanager *obj, gint *fontsize, GError **error)
 	return TRUE;
 }
 
-static gboolean send_proceslist(GmAppmanager *obj, gchar **proceslist, GError **error)
+static gboolean send_proceslist(GmAppmanager *obj, gchar ***proceslist, GError **error)
 {
     struct appwidgetinfo* appw_list;
     gchar* msg = NULL;
 		int number_of_appws = 0;
+		int i;
 
-		proceslist = NULL;
+		*proceslist = NULL;
 
 		//gdk_thread lock??
+
+		g_debug("Started send_proceslist");
 
     appw_list = appmanager_get_started_apps();
     while (appw_list != NULL)
     {	
 			number_of_appws++;
-			proceslist = (gchar**) realloc(proceslist, (number_of_appws+1) * sizeof(gchar*));
-			if(proceslist == NULL)
+			*proceslist = (gchar**) realloc(*proceslist, (number_of_appws+1) * sizeof(gchar*));
+			if(*proceslist == NULL)
 			{ 
 				g_warning("Could not reallocate memory. errno: %d", errno);
 				return FALSE;
@@ -45,16 +48,22 @@ static gboolean send_proceslist(GmAppmanager *obj, gchar **proceslist, GError **
 				return FALSE;
 			}
       g_snprintf(msg, 256, "name::%s::pid::%d", appw_list->menu_elt->name, appw_list->PID);
-			proceslist[number_of_appws-1] = msg;
+			g_debug("%s", msg);
+			(*proceslist)[number_of_appws-1] = msg;
       appw_list = appw_list->prev;
+			g_debug("appw_list");
     }
 
 		if( number_of_appws > 0 )
 		{
 			g_debug("number_of_appws = %d", number_of_appws);
-			proceslist[number_of_appws] = NULL;
+			(*proceslist)[number_of_appws] = NULL;
 		}
 
+	for(i = 0; i < number_of_appws; i++)
+	{
+		g_debug("send_proceslist: *proceslist[%d]=%s", i, (*proceslist)[i]);
+	}
 		//gdk_thread lock??
 
 	return TRUE;

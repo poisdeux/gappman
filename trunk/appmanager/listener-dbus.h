@@ -46,7 +46,7 @@ GType gm_appmanager_get_type ();
 
 //Functions supporting the introspection objects
 static gboolean send_fontsize(GmAppmanager *obj, gint *fontsize, GError **error);
-static gboolean send_proceslist(GmAppmanager *obj, gchar **proceslist, GError **error);
+static gboolean send_proceslist(GmAppmanager *obj, gchar ***proceslist, GError **error);
 static gboolean update_resolution(GmAppmanager *obj, gchar* name, gint width, gint height, GError **error);
 
 //This needs to be included after above function prototype
