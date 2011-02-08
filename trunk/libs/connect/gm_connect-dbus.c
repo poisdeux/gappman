@@ -75,7 +75,7 @@ static DBusGProxy* get_proxy()
 	return proxy;
 }
 
-int gm_dbus_get_started_procs_from_gappman(gint portno, const char* hostname, struct proceslist **startedprocs)
+int gm_dbus_get_started_procs_from_gappman(struct proceslist **startedprocs)
 {
   GError *error = NULL;
   gint foundname;
@@ -90,16 +90,13 @@ int gm_dbus_get_started_procs_from_gappman(gint portno, const char* hostname, st
 
 	proxy = get_proxy();
 
-	g_debug("Starting GetStartedProcs");
 	status = dbus_g_proxy_call_with_timeout(proxy,
       "GetStartedProcs", 500, &error, 
 			G_TYPE_INVALID, 
       G_TYPE_STRV, &procs, G_TYPE_INVALID);
-	g_debug("Ended GetStartedProcs");
 
   if (status == FALSE)
   {
-		g_debug("Failed to call GetStartedProcs");
     g_warning ("Failed to call GetStartedProcs: %s", error->message);
     g_error_free(error);
     error = NULL;
@@ -107,16 +104,12 @@ int gm_dbus_get_started_procs_from_gappman(gint portno, const char* hostname, st
     return GM_FAIL;
   }
 
-	g_debug("Starting creating proceslist struct: %p", procs);
-	g_debug("procs[0]: %s", procs[0]);
 	for(n=0; procs[n] != NULL; n++)
 	{	
-		g_debug("parsing %s", procs[n]);
 		foundname = 0;
 		contentssplit = g_strsplit(procs[n], "::", 0);
 		for(i=0; contentssplit[i] != NULL; i++)
 		{
-			g_debug("%s", contentssplit[i]);
     	if ( g_strcmp0("name", contentssplit[i]) == 0)
 			{
 				*startedprocs = createnewproceslist(*startedprocs);
@@ -134,16 +127,34 @@ int gm_dbus_get_started_procs_from_gappman(gint portno, const char* hostname, st
 		}
 	}
   //release_lock();
-	g_debug("returning from gm_dbus_get_started_procs_from_gappman");
 	return GM_SUCCES;
 }
 
-gint gm_dbus_get_confpath_from_gappman(gint portno, const char* hostname, gchar** path)
+gint gm_dbus_get_confpath_from_gappman(gchar** path)
 {
-	return GM_FAIL;
+  GError *error = NULL;
+	DBusGProxy *proxy;
+	gboolean status;
+
+	proxy = get_proxy();
+  status = dbus_g_proxy_call_with_timeout(proxy,
+      "GetConfPath", 500, &error, 
+			G_TYPE_INVALID, 
+      G_TYPE_STRING, path, G_TYPE_INVALID);
+
+  if (status == FALSE)
+  {
+    g_warning ("Failed to call GetFontpath: %s", error->message);
+    g_error_free(error);
+    error = NULL;
+
+		return GM_FAIL;
+  }
+	
+	return GM_SUCCES;
 }
 
-gint gm_dbus_get_fontsize_from_gappman(gint portno, const char* hostname, gint *fontsize)
+gint gm_dbus_get_fontsize_from_gappman(gint *fontsize)
 {
   GError *error = NULL;
 	DBusGProxy *proxy;

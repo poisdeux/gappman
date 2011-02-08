@@ -27,7 +27,7 @@
 *                       3: Could not send message
 *                       4: Could not shutdown channel/disconnect
 */
-int gm_dbus_get_started_procs_from_gappman(int portno, const char* hostname, struct proceslist **startedprocs);
+int gm_dbus_get_started_procs_from_gappman(struct proceslist **startedprocs);
 
 /**
 * \brief Connects to gappman and requests the fontsize
@@ -36,7 +36,7 @@ int gm_dbus_get_started_procs_from_gappman(int portno, const char* hostname, str
 * \param path pointer to a string holding the configuration path
 * \return integer value (GM_*) as defined in libs/generic/gm_generic.h
 */
-int gm_dbus_get_confpath_from_gappman(int portno, const char* hostname, gchar **path);
+int gm_dbus_get_confpath_from_gappman(gchar **path);
 
 
 /**
@@ -46,7 +46,7 @@ int gm_dbus_get_confpath_from_gappman(int portno, const char* hostname, gchar **
 * \param fontsize adres of the pointer to an integer value (call by reference)
 * \return integer value (GM_*) as defined in libs/generic/gm_generic.h
 */
-int gm_dbus_get_fontsize_from_gappman(int portno, const char* hostname, int *fontsize);
+int gm_dbus_get_fontsize_from_gappman(int *fontsize);
 
 /**
 * \brief Connects to gappman
@@ -55,6 +55,6 @@ int gm_dbus_get_fontsize_from_gappman(int portno, const char* hostname, int *fon
 * \param sockfd pointer to int which will hold the socket filedescriptor
 * \return filedescriptor
 */
-int gm_dbus_connect_to_gappman(int portno, const char* hostname, int *sockfd);
+int gm_dbus_connect_to_gappman(int *sockfd);
 
 #endif //__GM_CONNECT_DBUS_H__

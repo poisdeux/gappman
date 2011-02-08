@@ -11,6 +11,12 @@ G_DEFINE_TYPE (GmAppmanager, gm_appmanager, G_TYPE_OBJECT); ///< will create gm_
 
 static const gchar* confpath = "";
 
+static gboolean send_confpath(GmAppmanager *obj, gchar **path, GError **error)
+{
+	*path = g_strdup(confpath);
+	return TRUE;
+}
+
 static gboolean send_fontsize(GmAppmanager *obj, gint *fontsize, GError **error)
 {
 	*fontsize = gm_get_fontsize();
@@ -28,7 +34,6 @@ static gboolean send_proceslist(GmAppmanager *obj, gchar ***proceslist, GError *
 
 		//gdk_thread lock??
 
-		g_debug("Started send_proceslist");
 
     appw_list = appmanager_get_started_apps();
     while (appw_list != NULL)
@@ -48,22 +53,15 @@ static gboolean send_proceslist(GmAppmanager *obj, gchar ***proceslist, GError *
 				return FALSE;
 			}
       g_snprintf(msg, 256, "name::%s::pid::%d", appw_list->menu_elt->name, appw_list->PID);
-			g_debug("%s", msg);
 			(*proceslist)[number_of_appws-1] = msg;
       appw_list = appw_list->prev;
-			g_debug("appw_list");
     }
 
 		if( number_of_appws > 0 )
 		{
-			g_debug("number_of_appws = %d", number_of_appws);
 			(*proceslist)[number_of_appws] = NULL;
 		}
 
-	for(i = 0; i < number_of_appws; i++)
-	{
-		g_debug("send_proceslist: *proceslist[%d]=%s", i, (*proceslist)[i]);
-	}
 		//gdk_thread lock??
 
 	return TRUE;

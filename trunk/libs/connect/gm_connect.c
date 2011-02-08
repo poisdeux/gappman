@@ -54,7 +54,7 @@ int gm_get_started_procs_from_gappman(int portno, const char* hostname, struct p
 #ifdef NO_LISTENER
 	return GM_NET_COMM_NOT_SUPPORTED;
 #elif defined(WITH_DBUS_SUPPORT)
-	return gm_dbus_get_started_procs_from_gappman(portno,hostname, startedprocs);
+	return gm_dbus_get_started_procs_from_gappman(startedprocs);
 #else
 	return gm_socket_get_started_procs_from_gappman(portno,hostname, startedprocs);
 #endif
@@ -65,7 +65,7 @@ int gm_get_confpath_from_gappman(int portno, const char* hostname, gchar** path)
 #ifdef NO_LISTENER
     return GM_NET_COMM_NOT_SUPPORTED;
 #elif defined(WITH_DBUS_SUPPORT)
-	return gm_dbus_get_confpath_from_gappman( portno, hostname, path);
+	return gm_dbus_get_confpath_from_gappman(path);
 #else
 	return gm_socket_get_confpath_from_gappman( portno, hostname, path);
 #endif
@@ -77,7 +77,7 @@ int gm_get_fontsize_from_gappman(int portno, const char* hostname, int *fontsize
 #ifdef NO_LISTENER
     return GM_NET_COMM_NOT_SUPPORTED;
 #elif defined(WITH_DBUS_SUPPORT)
-	return gm_dbus_get_fontsize_from_gappman(portno, hostname, fontsize);
+	return gm_dbus_get_fontsize_from_gappman(fontsize);
 #else
 	return gm_socket_get_fontsize_from_gappman(portno, hostname, fontsize);
 #endif

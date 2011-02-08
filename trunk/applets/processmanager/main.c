@@ -370,7 +370,6 @@ int main (int argc, char **argv)
         g_signal_connect (G_OBJECT (mainwin), "destroy",
                           G_CALLBACK (destroy), NULL);
     }
-		g_debug("1");
     status = gm_get_fontsize_from_gappman(2103, "localhost", &fontsize);;
     if (status == GM_SUCCES)
     {
@@ -381,7 +380,6 @@ int main (int argc, char **argv)
         //fallback on default
         fontsize=gm_get_fontsize();
     }
-		g_debug("2");
 
     status = gm_get_started_procs_from_gappman(2103, "localhost", &started_procs);
 
