@@ -13,6 +13,7 @@
  *    	 solved by gappman.
  * \todo Unit-testing with http://klee.llvm.org/
  * \todo Implement support for keybindings. For instance to start specific applets.
+ * \todo Startup indicator when starting programs. We could do this through an animated mouse-pointer or animate the program-button.
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"

@@ -69,6 +69,7 @@ static gboolean send_proceslist(GmAppmanager *obj, gchar ***proceslist, GError *
 
 static gboolean update_resolution(GmAppmanager *obj, gchar* name, gint width, gint height, GError **error)
 {
+	appmanager_update_resolution(name, width, height);
 	return TRUE;
 }
 
