@@ -25,12 +25,6 @@ struct proceslist {
 };
 
 /**
-* \brief Frees the proceslist structure
-* \param procslist pointer to the last element of the proceslist linked list
-*/
-void gm_free_proceslist(struct proceslist* procslist);
-
-/**
 * \brief Connects to gappman and requests the proceslist
 * \param portno portnumber gappman listens to
 * \param hostname servername of host that runs gappman

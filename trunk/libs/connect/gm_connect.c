@@ -28,8 +28,13 @@
 #include <gm_generic.h>
 #include "gm_connect.h"
 
+#if defined(WITH_DBUS_SUPPORT) && !defined(NO_LISTENER)
+#include "gm_connect-dbus.h"
+#elif !defined(NO_LISTENER)
+#include "gm_connect-socket.h"
+#endif
 
-void freeproceslist(struct proceslist* procslist)
+void gm_free_proceslist(struct proceslist* procslist)
 {
     struct proceslist* tmp;
     while (procslist != NULL)
@@ -89,5 +94,16 @@ int gm_send_and_receive_message(int portno, const char* hostname, gchar *msg, vo
     return GM_NET_COMM_NOT_SUPPORTED;
 #else
 	return gm_socket_send_and_receive_message(portno, hostname, msg, callbackfunc);    
+#endif
+}
+
+int gm_set_default_resolution_for_program(int portno, const char* hostname, const gchar* name, int width, int height)
+{
+#ifdef NO_LISTENER
+    return GM_NET_COMM_NOT_SUPPORTED;
+#elif defined(WITH_DBUS_SUPPORT)
+  return gm_dbus_set_default_resolution_for_program(name, width, height);
+#else
+  return gm_socket_set_default_resolution_for_program(portno, hostname, name, width, height);
 #endif
 }

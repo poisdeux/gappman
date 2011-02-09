@@ -82,23 +82,17 @@ static void revert_to_old_res(GtkWidget *widget, GdkEvent *event, XRRScreenSize*
 static void set_default_res_for_program( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
 {
     XRRScreenSize current_size;
-    gchar *msg;
     //Check if spacebar or mousebutton is pressed
     if ( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
     {
-        if( gm_res_get_current_size(&current_size) == GM_SUCCES )
-		{
-        	msg = g_strdup_printf("::updateres::%s::%d::%d::", elt->name, current_size.width, current_size.height);
-        	if ( gm_send_and_receive_message(2103, "localhost", msg, NULL) != GM_SUCCES )
-        	{
-           		gm_show_error_dialog("Could not connect to gappman.", NULL, NULL);
-        	}
-			g_free(msg);
-		}
-		else
-		{
-			g_warning("Could not get current screen resolution");
-		}
+			if( gm_res_get_current_size(&current_size) == GM_SUCCES )
+			{
+				gm_set_default_resolution_for_program(2103, "localhost", elt->name, current_size.width, current_size.height);
+			}
+			else
+			{
+				g_warning("Could not get current screen resolution");
+			}
     }
 }
 

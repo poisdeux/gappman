@@ -45,8 +45,8 @@ void gm_free_proceslist(struct proceslist* procslist);
 
 /**
 * \brief Connects to gappman and requests the proceslist
-* \param portno portnumber gappman listens to
-* \param hostname servername of host that runs gappman
+* \param portno	portnumber gappman listens to. Note, this is actually not used when calling this function using the dbus version.
+* \param hostname servername of host that runs gappman. Note, this is actually not used when calling this function using the dbus version.
 * \param startedprocs adres of the pointer to a proceslist structure (call by reference). Needs to be freed after use with gm_free_proceslist(*startedprocs)
 * \return integer value
 *                       0: OK
@@ -59,8 +59,8 @@ int gm_get_started_procs_from_gappman(int portno, const char* hostname, struct p
 
 /**
 * \brief Connects to gappman and requests the fontsize
-* \param portno portnumber gappman listens to
-* \param hostname servername of host that runs gappman
+* \param portno	portnumber gappman listens to. Note, this is actually not used when calling this function using the dbus version.
+* \param hostname servername of host that runs gappman. Note, this is actually not used when calling this function using the dbus version.
 * \param path pointer to a string holding the configuration path
 * \return integer value (GM_*) as defined in libs/generic/gm_generic.h
 */
@@ -69,8 +69,8 @@ int gm_get_confpath_from_gappman(int portno, const char* hostname, gchar **path)
 
 /**
 * \brief Connects to gappman and requests the fontsize
-* \param portno portnumber gappman listens to
-* \param hostname servername of host that runs gappman
+* \param portno	portnumber gappman listens to. Note, this is actually not used when calling this function using the dbus version.
+* \param hostname servername of host that runs gappman. Note, this is actually not used when calling this function using the dbus version.
 * \param fontsize adres of the pointer to an integer value (call by reference)
 * \return integer value (GM_*) as defined in libs/generic/gm_generic.h
 */
@@ -94,5 +94,17 @@ int gm_connect_to_gappman(int portno, const char* hostname, int *sockfd);
 * \return integer value as defined in libs/generic/gm_generic.h
 */
 int gm_send_and_receive_message(int portno, const char* hostname, gchar *msg, void (*callbackfunc)(gchar*));
+
+/**
+* \brief Connects to gappman to update the resolution for a program
+* \param portno	portnumber gappman listens to. Note, this is actually not used when calling this function using the dbus version.
+* \param hostname servername of host that runs gappman. Note, this is actually not used when calling this function using the dbus version.
+* \param name name of the program for which the startup resolution should be changed.
+* \param width screen-width in pixels
+* \param height screen-height in pixels
+* \return integer value as defined in libs/generic/gm_generic.h
+*/
+ 
+int gm_set_default_resolution_for_program(int portno, const char* hostname, const gchar* name, int width, int height);
 
 #endif

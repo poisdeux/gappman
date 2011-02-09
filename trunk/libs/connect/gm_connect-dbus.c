@@ -27,8 +27,8 @@
 #include <string.h>
 #include <dbus/dbus-glib.h>
 #include <gm_generic.h>
-#include "gm_connect.h"
 #include "gm_connect-generic.h"
+#include "gm_connect-dbus.h"
 
 static GMutex *check_status_mutex;
 
@@ -176,4 +176,29 @@ gint gm_dbus_get_fontsize_from_gappman(gint *fontsize)
   }
 	
 	return GM_SUCCES;
+}
+
+int gm_dbus_set_default_resolution_for_program(gchar* name, int width, int height)
+{
+	GError *error = NULL;
+  DBusGProxy *proxy;
+  gboolean status;
+
+  proxy = get_proxy();
+  status = dbus_g_proxy_call_with_timeout(proxy,
+      "UpdateResolution", 500, &error,
+      G_TYPE_STRING, name, G_TYPE_INT, width, height, 
+			G_TYPE_INT, height, G_TYPE_INVALID,
+      G_TYPE_INVALID);
+
+  if (status == FALSE)
+  {
+    g_warning ("Failed to call UpdateResolution: %s", error->message);
+    g_error_free(error);
+    error = NULL;
+
+    return GM_FAIL;
+  }
+
+  return GM_SUCCES;
 }

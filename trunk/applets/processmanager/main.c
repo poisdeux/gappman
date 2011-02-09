@@ -494,7 +494,7 @@ int main (int argc, char **argv)
               }
               action_elts = action_elts->next;
           }
-          freeproceslist(started_procs);
+          gm_free_proceslist(started_procs);
           if ( no_progsacts_found == 0 )
           {
               hbox = gtk_hbox_new (FALSE, 10);
