@@ -16,7 +16,7 @@
 
 /**
 * \struct nm_element
-* \brief structure to hold the attributes to create the button to start a program
+* \brief structure to hold the attributes associated with a network action that netman should execute to check the network status
 */
 struct nm_element
 {

@@ -187,7 +187,7 @@ int gm_dbus_set_default_resolution_for_program(gchar* name, int width, int heigh
   proxy = get_proxy();
   status = dbus_g_proxy_call_with_timeout(proxy,
       "UpdateResolution", 500, &error,
-      G_TYPE_STRING, name, G_TYPE_INT, width, height, 
+      G_TYPE_STRING, name, G_TYPE_INT, width, 
 			G_TYPE_INT, height, G_TYPE_INVALID,
       G_TYPE_INVALID);
 

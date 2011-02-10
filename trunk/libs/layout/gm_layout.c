@@ -8,9 +8,6 @@
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
  *
- * \todo Fix fontsize calculation. This is now performed by gm_create_buttonbox
- *       everytime it is called but should be done only once. Preferrably only 
- *       when the programs-button_box is calculated.
  */
 
 

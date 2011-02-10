@@ -1,5 +1,5 @@
 /**
- * \file gm_connect.h
+ * \file gm_connect-dbus.h
  * \brief generic functions to retrieve or sent information from or to gappman
  *
  *
@@ -8,8 +8,6 @@
  * \author
  *   Martijn Brekhof <m.brekhof@gmail.com>
  *
- * \todo Rewrite to support D-Bus
- * \todo add functions to retrieve proceslist
 */
 
 #ifndef __GM_CONNECT_DBUS_H__

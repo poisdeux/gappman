@@ -7,6 +7,10 @@
  *
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
+ *
+ * \todo show current resolution
+ * \todo add button to keep selected resolution
+ * 
  */
 
 #include <gtk/gtk.h>

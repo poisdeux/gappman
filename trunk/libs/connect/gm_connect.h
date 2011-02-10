@@ -8,9 +8,6 @@
  * \author
  *   Martijn Brekhof <m.brekhof@gmail.com>
  *
- * \todo Rewrite to support D-Bus
- * \todo add functions to retrieve proceslist
- * \bug If appmanager is compiled with d-bus support the UI will fail to draw some widgets
 */
 
 #ifndef __GAPPMAN_CONNECT_H__

@@ -77,16 +77,17 @@ static int parse_fontsize_message(gchar *msg)
 * \param gio will hold the newly created GIO channel for the connection
 * \param sockfd will hold the socket filedescriptor for this connection to close the socket later on
 */
-static int create_gio_channel(int portno, const char* hostname, GIOChannel** gio, int *sockfd)
+static int create_gio_channel(int portno, const char* hostname, GIOChannel** gio)
 {
     int status;
+		int sockfd;
 
-    status = gm_socket_connect_to_gappman(portno, hostname, sockfd);
+    status = gm_socket_connect_to_gappman(portno, hostname, &sockfd);
     if (status != GM_SUCCES)
     {
         return GM_COULD_NOT_CONNECT;
     }
-    *gio = g_io_channel_unix_new (*sockfd);
+    *gio = g_io_channel_unix_new (sockfd);
     g_io_channel_set_buffer_size (*gio, 0);
     g_io_channel_set_line_term (*gio, NULL, 2);
     g_io_channel_set_encoding (*gio, "UTF-8", NULL);
@@ -152,6 +153,7 @@ int gm_socket_connect_to_gappman(int portno, const char* hostname, int *sockfd)
         g_warning("Error: could not connect.\n");
         return GM_COULD_NOT_CONNECT;
     }
+		
     return GM_SUCCES;
 #endif
 }
@@ -163,21 +165,14 @@ return GM_NET_COMM_NOT_SUPPORTED;
 #else
     gsize len;
     gchar *msg;
-    int status, sockfd;
+    int status;
     gsize bytes_written;
     GIOChannel* gio = NULL;
     GError *gerror = NULL;
 
-    status = gm_socket_connect_to_gappman(portno, hostname, &sockfd);
-    if (status != GM_SUCCES)
-    {
+    status = create_gio_channel(portno, hostname, &gio);
+    if ( status != GM_SUCCES )
         return status;
-    }
-
-    gio = g_io_channel_unix_new (sockfd);
-    g_io_channel_set_buffer_size (gio, 0);
-    g_io_channel_set_line_term (gio, NULL, 2);
-    g_io_channel_set_encoding (gio, "UTF-8", NULL);
 
     msg = g_strdup("::listprocesses::\n");
     status = g_io_channel_write_chars(gio, (const gchar*) msg, -1, &bytes_written, &gerror);
@@ -213,7 +208,6 @@ int gm_socket_get_confpath_from_gappman(int portno, const char* hostname, gchar*
     return GM_NET_COMM_NOT_SUPPORTED;
 #else
     gsize len;
-    int socket;
     gchar *msg;
     int status;
     gsize bytes_written;
@@ -221,7 +215,7 @@ int gm_socket_get_confpath_from_gappman(int portno, const char* hostname, gchar*
     GError *gerror = NULL;
 
 
-    status = create_gio_channel(portno, hostname, &gio, &socket);
+    status = create_gio_channel(portno, hostname, &gio);
     if ( status != GM_SUCCES )
         return status;
     msg = g_strdup("::showconfpath::\n");
@@ -248,7 +242,6 @@ int gm_socket_get_confpath_from_gappman(int portno, const char* hostname, gchar*
 
     g_free(msg);
 
-    g_io_channel_unref(gio);
     status = g_io_channel_shutdown( gio, TRUE, &gerror );
     if ( status == G_IO_STATUS_ERROR )
     {
@@ -256,7 +249,6 @@ int gm_socket_get_confpath_from_gappman(int portno, const char* hostname, gchar*
         return GM_COULD_NOT_DISCONNECT;
     }
 
-    close(socket);
 
     return GM_SUCCES;
 #endif
@@ -269,14 +261,13 @@ int gm_socket_get_fontsize_from_gappman(int portno, const char* hostname, int *f
     return GM_NET_COMM_NOT_SUPPORTED;
 #else
     gsize len;
-    int socket;
     gchar *msg;
     int status;
     gsize bytes_written;
     GIOChannel* gio = NULL;
     GError *gerror = NULL;
 
-    status = create_gio_channel(portno, hostname, &gio, &socket);
+    status = create_gio_channel(portno, hostname, &gio);
     if ( status != GM_SUCCES )
         return status;
     msg = g_strdup("::showfontsize::\n");
@@ -301,7 +292,6 @@ int gm_socket_get_fontsize_from_gappman(int portno, const char* hostname, int *f
     }
 
 
-    g_io_channel_unref(gio);
     status = g_io_channel_shutdown( gio, TRUE, &gerror );
     if ( status == G_IO_STATUS_ERROR )
     {
@@ -309,7 +299,6 @@ int gm_socket_get_fontsize_from_gappman(int portno, const char* hostname, int *f
         return GM_COULD_NOT_DISCONNECT;
     }
 
-    close(socket);
 
     return GM_SUCCES;
 #endif
@@ -321,14 +310,13 @@ int gm_socket_send_and_receive_message(int portno, const char* hostname, gchar *
     return GM_NET_COMM_NOT_SUPPORTED;
 #else
     gsize len;
-    int socket;
     int status;
     gsize bytes_written;
     GIOChannel* gio = NULL;
     GError *gerror = NULL;
 		gchar* recv_msg;
 
-    status = create_gio_channel(portno, hostname, &gio, &socket);
+    status = create_gio_channel(portno, hostname, &gio);
     if ( status != GM_SUCCES )
         return status;
     status = g_io_channel_write_chars(gio, (const gchar*) msg, -1, &bytes_written, &gerror);
@@ -352,7 +340,6 @@ int gm_socket_send_and_receive_message(int portno, const char* hostname, gchar *
     	}
 	}
 
-    g_io_channel_unref(gio);
     status = g_io_channel_shutdown( gio, TRUE, &gerror );
     if ( status == G_IO_STATUS_ERROR )
     {
@@ -360,22 +347,19 @@ int gm_socket_send_and_receive_message(int portno, const char* hostname, gchar *
         return GM_COULD_NOT_DISCONNECT;
     }
 
-    close(socket);
-
     return GM_SUCCES;
 #endif
 }
 
 int gm_socket_set_default_resolution_for_program(int portno, const char* hostname, gchar* name, int width, int height)
 {
-	int socket;
   int status;
   gsize bytes_written;
   GIOChannel* gio = NULL;
   GError *gerror = NULL;
 	gchar *msg;
 	
-	status = create_gio_channel(portno, hostname, &gio, &socket);
+	status = create_gio_channel(portno, hostname, &gio);
 	if ( status != GM_SUCCES )
         return status;
     msg = g_strdup_printf("::updateres::%s::%d::%d::", name, width, height);
@@ -394,15 +378,12 @@ int gm_socket_set_default_resolution_for_program(int portno, const char* hostnam
 
     g_free(msg);
 
-    g_io_channel_unref(gio);
     status = g_io_channel_shutdown( gio, TRUE, &gerror );
     if ( status == G_IO_STATUS_ERROR )
     {
         g_warning("gm_socket_set_default_resolution_for_program: %s\n", gerror->message );
         return GM_COULD_NOT_DISCONNECT;
     }
-
-    close(socket);
 
     return GM_SUCCES;
 }
