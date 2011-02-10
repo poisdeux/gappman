@@ -190,7 +190,6 @@ static gboolean handleconnection( GIOChannel* gio , GIOCondition cond, gpointer 
             g_free(msg);
         }
         listener_socket_close(new_gio);
-	close(newsock);
     }
     //Always return TRUE to keep watch active.
     return TRUE;
