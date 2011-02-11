@@ -53,6 +53,51 @@ static void destroy_widget(GtkWidget* dummy, GdkEvent *event, GtkWidget* widget)
 		}
 }
 
+static gint exec_program(nm_elements* elt)
+{
+    int status = -1;
+    int ret;
+    int i;
+  	char **args;
+    __pid_t childpid;
+    FILE *fp;
+
+
+    fp = fopen((char *) elt->exec,"r");
+    if ( fp )
+    {
+        fclose(fp);
+
+        childpid = fork();
+        if ( childpid == 0 )
+        {
+            /**
+            Create argument list. First element should be the filename
+            of the executable and last element needs to be NULL.
+            see man exec for more details
+            */
+            args = (char **) malloc((elt->numArguments + 2)* sizeof(char *));
+            args[0] = (char *) elt->exec;
+            for (i = 0; i < elt->numArguments; i++ )
+            {
+                args[i+1] = elt->args[i];
+            }
+            args[i+1] = NULL;
+
+            execvp((char *) elt->exec, args);
+            _exit(0);
+        }
+				elt->pid = childpid;
+    }
+    else
+    {
+        g_warning("Could not open %s\n", elt->exec);
+    }
+
+		free(args);
+    return TRUE;
+}
+
 
 static DBusGProxyCallNotify collect_status(DBusGProxy *proxy, DBusGProxyCall* proxy_call, nm_elements *nm_elt)
 {
@@ -83,48 +128,11 @@ static gboolean run_command(GtkWidget *widget, GdkEvent *event, nm_elements *nm_
 {
   GError *error = NULL;
 	gint status;
-	DBusGProxyCall* proxy_call;
-  DBusGConnection *bus;
-  DBusGProxy *proxy;
 
 	get_lock();
 
-	bus = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
-  if (bus == NULL)
-  {
-    g_warning ("Couldn't connect to session bus: %s\n", error->message);
-    g_error_free(error);
-    error = NULL;
-		
-    return FALSE;
-  }
-
-  proxy = dbus_g_proxy_new_for_name (bus,
-               "gappman.netman",
-               "/GmNetmand",
-               "gappman.netman.NetmanInterface");
-
-  if(proxy == NULL)
-  {
-    g_warning("Could not get dbus object for gappman.netman.NetmanInterface");
-    dbus_g_connection_unref(bus);
-		
-		return FALSE;
-  }
-
-	proxy_call = dbus_g_proxy_begin_call(proxy, 
-			"RunCommand", (DBusGProxyCallNotify) collect_status, nm_elt,	NULL, 
-			G_TYPE_STRING, nm_elt->exec, G_TYPE_STRV, nm_elt->args, G_TYPE_INVALID);
-
-	if (proxy_call == NULL)
-  {
-  	g_warning ("Failed to call RunCommand: %s", error->message);
-   	g_error_free(error);
-    error = NULL;
-
-		return FALSE;
-  }
-
+	nm_elt->prev_status = nm_elt->status;
+  nm_elt->status = exec_program(nm_elt);
 	nm_elt->running = TRUE;
 
 	release_lock();
@@ -150,69 +158,55 @@ static void perform_action( GtkWidget *widget, GdkEvent *event, nm_elements *elt
 	}
 }
 
-static void check_status()
+static void check_status(nm_elements* elt)
 {
-	nm_elements *checks;
+	int status;
 
-	get_lock();
-	checks = nm_get_stati();
-	while((checks != NULL) && KEEP_RUNNING)
+	waitpid(elt->PID, &status, WNOHANG);
+
+	if ( WIFEXITED(status) )
 	{
-		if( checks->running != TRUE )
-		{
-			release_lock();
-  		gdk_threads_enter();
-			run_command(NULL, NULL, checks);
-			gdk_threads_leave();
-			get_lock();
-		}
-		checks = checks->next;
-		release_lock();
+		//program exited normally
+		elt->running = FALSE;
+		elt->status = WEXITSTATUS(status);
+	}
+	else if ( WIFSIGNALED )
+	{
+		//program did not exit normally
+		elt->running = FALSE;
+		elt->status = -1;	
 	}
 }
 
 static void update_button()
 {
-	nm_elements* checks;
-	int status_changed_to_succes = 0;
+	nm_elements* elts;
 
-
-	checks = nm_get_stati();
+	elts = nm_get_stati();
 	
 	get_lock();
 
-	while(checks != NULL)
+	while(elts != NULL)
 	{
 		//we only need to do something if the status changed
-		if(checks->prev_status != checks->status)
+		if( (elts->prev_status != elts->status)
 		{
-			if( checks->status == -1 )
+			if( ( elts->status == -1 ) || (elts->status != elts->success) )
 			{
 				gtk_button_set_image(main_button, GTK_WIDGET(image_unavail));
-			}
-			else if(checks->status != checks->success)
-			{
-				gtk_button_set_image(main_button, GTK_WIDGET(checks->image_fail));
 
 				// Network will only succeed if all checks succeed. So we can stop
 				// if one of the checks fails
 				release_lock();
 				return;
 			}
-			else
-			{
-				status_changed_to_succes = 1;
-			}
 		}
-		checks = checks->next;
+		elts = elts->next;
 	}	
 	//we'll only get this far if none of the checks failed or did not change
 	//since the previous check.
-	if( status_changed_to_succes )
-	{
-		checks = nm_get_stati();
-		gtk_button_set_image(main_button, GTK_WIDGET(checks->image_success));
-	}
+	elts = nm_get_stati();
+	gtk_button_set_image(main_button, GTK_WIDGET(elts->image_success));
 
 	release_lock();
 }
@@ -375,7 +369,7 @@ G_MODULE_EXPORT void gm_module_set_conffile(const char* filename)
 */
 G_MODULE_EXPORT void gm_module_start()
 {
-
+	nm_elements *elts;
 
 	if ( KEEP_RUNNING == TRUE )
 	{
@@ -387,7 +381,25 @@ G_MODULE_EXPORT void gm_module_start()
 
 	while(KEEP_RUNNING)
 	{
-		check_status();
+		get_lock();
+		elts = nm_get_stati();
+		while((elts != NULL) && KEEP_RUNNING)
+		{
+			if( elts->running != TRUE )
+			{
+				release_lock();
+  			gdk_threads_enter();
+				run_command(NULL, NULL, elts);
+				gdk_threads_leave();
+				get_lock();
+			}
+			else
+			{
+				check_status(elts);
+			}
+			elts = elts->next;
+		}
+		release_lock();
 		update_button();
 		sleep(2);
 	}
@@ -400,7 +412,7 @@ G_MODULE_EXPORT void gm_module_start()
 */
 G_MODULE_EXPORT int gm_module_stop()
 {
-  nm_elements *checks, *tmp;
+  nm_elements *elts, *tmp;
 	
 	if ( KEEP_RUNNING == FALSE )
 	{
@@ -417,15 +429,15 @@ G_MODULE_EXPORT int gm_module_stop()
 
 	g_object_unref(image_unavail);
 
-  checks = nm_get_stati();
-	tmp = checks;
+  elts = nm_get_stati();
+	tmp = elts;
 	while(tmp != NULL)
 	{
 		g_object_unref(tmp->image_success);
 		g_object_unref(tmp->image_fail);
 		tmp = tmp->next;
 	}
-	nm_free_elements(checks);
+	nm_free_elements(elts);
 
 	release_lock();	
 
