@@ -18,6 +18,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <gm_layout.h>
 #include <gm_generic.h>
 #include <dbus/dbus-glib.h>
@@ -162,7 +164,7 @@ static void check_status(nm_elements* elt)
 {
 	int status;
 
-	waitpid(elt->PID, &status, WNOHANG);
+	waitpid(elt->pid, &status, WNOHANG);
 
 	if ( WIFEXITED(status) )
 	{
@@ -170,7 +172,7 @@ static void check_status(nm_elements* elt)
 		elt->running = FALSE;
 		elt->status = WEXITSTATUS(status);
 	}
-	else if ( WIFSIGNALED )
+	else if ( WIFSIGNALED(status) )
 	{
 		//program did not exit normally
 		elt->running = FALSE;
@@ -189,7 +191,7 @@ static void update_button()
 	while(elts != NULL)
 	{
 		//we only need to do something if the status changed
-		if( (elts->prev_status != elts->status)
+		if( elts->prev_status != elts->status )
 		{
 			if( ( elts->status == -1 ) || (elts->status != elts->success) )
 			{
