@@ -57,7 +57,6 @@
 			<printlabel>1</printlabel>
     </program>
   </programs>
-<!--  
 	<panel width="10%" height="10%" align="top,right">
 		<applet>
 			<name>Network manager</name>
@@ -65,5 +64,4 @@
 			<conffile>./applets/netman/applet/xml-config-files/netman.xml</conffile>
 		</applet>
   </panel>
--->
 </appmanager>

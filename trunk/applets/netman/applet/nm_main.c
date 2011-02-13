@@ -101,37 +101,10 @@ static gint exec_program(nm_elements* elt)
 }
 
 
-static DBusGProxyCallNotify collect_status(DBusGProxy *proxy, DBusGProxyCall* proxy_call, nm_elements *nm_elt)
-{
-	GError *error = NULL;
-	gint status;
-
-	get_lock();
-	if( ! dbus_g_proxy_end_call(proxy, proxy_call, &error,
-      	G_TYPE_INT, &status, G_TYPE_INVALID) )
-	{
-		g_warning("Error retrieving status for command %s: %s", nm_elt->exec, error->message);
-		g_error_free(error);
-
-		nm_elt->prev_status = nm_elt->status;
-		nm_elt->status = -1;
-	}
-	else
-	{
-		nm_elt->prev_status = nm_elt->status;
-		nm_elt->status = status;
-	}
-	g_message("%s got status: %d", nm_elt->name, nm_elt->status);
-	nm_elt->running = FALSE;
-	release_lock();
-}
-
 static gboolean run_command(GtkWidget *widget, GdkEvent *event, nm_elements *nm_elt)
 {
   GError *error = NULL;
 	gint status;
-
-	get_lock();
 
 	nm_elt->prev_status = nm_elt->status;
   nm_elt->status = exec_program(nm_elt);
@@ -186,8 +159,6 @@ static void update_button()
 
 	elts = nm_get_stati();
 	
-	get_lock();
-
 	while(elts != NULL)
 	{
 		//we only need to do something if the status changed
@@ -195,7 +166,9 @@ static void update_button()
 		{
 			if( ( elts->status == -1 ) || (elts->status != elts->success) )
 			{
+  			gdk_threads_enter();
 				gtk_button_set_image(main_button, GTK_WIDGET(image_unavail));
+  			gdk_threads_leave();
 
 				// Network will only succeed if all checks succeed. So we can stop
 				// if one of the checks fails
@@ -208,7 +181,9 @@ static void update_button()
 	//we'll only get this far if none of the checks failed or did not change
 	//since the previous check.
 	elts = nm_get_stati();
+ 	gdk_threads_enter();
 	gtk_button_set_image(main_button, GTK_WIDGET(elts->image_success));
+ 	gdk_threads_leave();
 
 	release_lock();
 }
@@ -234,8 +209,6 @@ static void show_menu()
 
 		gtk_widget_set_name(menuwin, "gm_applet");
     vbox = gtk_vbox_new (FALSE, 10);
-
-		get_lock();
 
     stati = nm_get_stati();
 
@@ -385,15 +358,11 @@ G_MODULE_EXPORT void gm_module_start()
 	{
 		get_lock();
 		elts = nm_get_stati();
-		while((elts != NULL) && KEEP_RUNNING)
+		while((elts != NULL))
 		{
 			if( elts->running != TRUE )
 			{
-				release_lock();
-  			gdk_threads_enter();
 				run_command(NULL, NULL, elts);
-				gdk_threads_leave();
-				get_lock();
 			}
 			else
 			{
@@ -401,8 +370,8 @@ G_MODULE_EXPORT void gm_module_start()
 			}
 			elts = elts->next;
 		}
-		release_lock();
 		update_button();
+		release_lock();
 		sleep(2);
 	}
 }
