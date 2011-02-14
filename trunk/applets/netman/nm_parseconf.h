@@ -22,11 +22,13 @@ struct nm_element
 {
 		gboolean running; //!< Should be TRUE if exec has been executed and is still running. FALSE otherwise.
     int *amount_of_elements; //!< total number of elements
+		guint	g_source_tag; 
     const xmlChar *name; //!< holds the name of the program
     const xmlChar *exec; //!< absolute path to executable
     const xmlChar *logosuccess; //!< absolute path to image file
     const xmlChar *logofail; //!< absolute path to image file
     char **args; //!< array of strings containing arguments that need to be passed to the executable
+    char **argv; //!< Same as args but suited for use with execv
     int numArguments; //!< will hold the total amount of elements in the args array
     int pid; //!< should hold the process ID of the process that was started by this nm_element
     int status; //!< should hold the last exit value of the executable

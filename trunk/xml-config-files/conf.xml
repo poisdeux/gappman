@@ -60,8 +60,8 @@
 	<panel width="10%" height="10%" align="top,right">
 		<applet>
 			<name>Network manager</name>
-			<objectfile>./applets/netman/applet/.libs/gm_netman.so</objectfile>
-			<conffile>./applets/netman/applet/xml-config-files/netman.xml</conffile>
+			<objectfile>./applets/netman/.libs/gm_netman.so</objectfile>
+			<conffile>./applets/netman/xml-config-files/netman.xml</conffile>
 		</applet>
   </panel>
 </appmanager>

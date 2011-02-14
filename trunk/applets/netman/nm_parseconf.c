@@ -36,10 +36,10 @@ struct nm_element* create_nm_element(nm_elements* prev)
     elt->exec = NULL;
     elt->next = prev;
     elt->args = NULL;
+    elt->argv = NULL;
     elt->status = 1; //default fail
 		elt->prev_status = 1; //default fail
     elt->pid = -1;
-    elt->numArguments = 0;
 	elt->image_success = NULL;
 	elt->image_fail = NULL;
     if (prev == NULL)
@@ -162,12 +162,17 @@ void nm_free_elements( nm_elements *elt )
             free((xmlChar *) elt->logosuccess);
             free((xmlChar *) elt->logofail);
 
-            for (i = 0; i < elt->numArguments; i++)
+            for (i = 0; elt->args[i] != NULL; i++)
             {
                 free(elt->args[i]);
             }
             free(elt->args[i]);
             free(elt->args);
+
+						for (i = 0; elt->argv[i] != NULL; i++)
+						{	
+							free(elt->argv[i]);
+						}
 
             next = elt->next;
             free(elt);

@@ -9,8 +9,7 @@
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
  *
- * \todo Redesign applet making it independent from gm_netmand. Applet can call
- *       the actions itself instead of sending the command to gm_netmand
+ * \todo Implement support for network unavailability when no network-interfaces have been configured.
  * \todo Implement support for keybindings which should trigger the menu to pop-up.
  */
 #include <gtk/gtk.h>
@@ -55,64 +54,81 @@ static void destroy_widget(GtkWidget* dummy, GdkEvent *event, GtkWidget* widget)
 		}
 }
 
+static void check_status(GPid pid, gint status, nm_elements* elt)
+{
+	g_debug("Enter check_status");
+//	waitpid(elt->pid, &status, WNOHANG);
+	if ( WIFEXITED(status) )
+	{
+		//program exited normally
+		elt->running = FALSE;
+		elt->prev_status = elt->status;
+		elt->status = WEXITSTATUS(status);
+	}
+	else if ( WIFSIGNALED(status) )
+	{
+		//program did not exit normally
+		elt->running = FALSE;
+		elt->prev_status = elt->status;
+		elt->status = -1;	
+	}
+
+	if( g_source_remove(elt->g_source_tag) )
+	{
+		g_spawn_close_pid(pid);
+	}
+	g_debug("Leaving check_status");
+}
+
 static gint exec_program(nm_elements* elt)
 {
-    int status = -1;
-    int ret;
-    int i;
+		GError *error;
+		int i;
   	char **args;
-    __pid_t childpid;
-    FILE *fp;
+    GPid childpid;
 
+		error = NULL;
 
-    fp = fopen((char *) elt->exec,"r");
-    if ( fp )
-    {
-        fclose(fp);
+		//We keep the conversion to execv format in elt->argv
+		//to prevent converting it each time we exec the program
+		if ( elt->argv == NULL )
+		{
+			args = (char **) malloc((elt->numArguments + 2)* sizeof(char *));
+			args[0] = (char *) elt->exec;
+			for (i = 0; i < elt->numArguments; i++ )
+			{
+					args[i+1] = elt->args[i];
+			}
+			args[i+1] = NULL;
+			elt->argv = args;
+		}
 
-        childpid = fork();
-        if ( childpid == 0 )
-        {
-            /**
-            Create argument list. First element should be the filename
-            of the executable and last element needs to be NULL.
-            see man exec for more details
-            */
-            args = (char **) malloc((elt->numArguments + 2)* sizeof(char *));
-            args[0] = (char *) elt->exec;
-            for (i = 0; i < elt->numArguments; i++ )
-            {
-                args[i+1] = elt->args[i];
-            }
-            args[i+1] = NULL;
+	  if ( ! g_spawn_async(NULL, elt->argv, NULL, \
+					G_SPAWN_DO_NOT_REAP_CHILD | G_SPAWN_STDOUT_TO_DEV_NULL \
+					| G_SPAWN_STDERR_TO_DEV_NULL, \
+					NULL, NULL, &childpid, &error) )
+		{
+			g_warning("Error executing program: %s", error->message);
+			g_error_free(error);
+			error = NULL;
+			return FALSE;
+		}
 
-            execvp((char *) elt->exec, args);
-            _exit(0);
-        }
-				elt->pid = childpid;
-    }
-    else
-    {
-        g_warning("Could not open %s\n", elt->exec);
-    }
+		elt->pid = childpid;
 
-		free(args);
+		g_debug("Adding watch for exec %s", elt->name);
+		elt->g_source_tag = g_child_watch_add(childpid, (GChildWatchFunc) check_status, elt);
+
     return TRUE;
 }
 
-
-static gboolean run_command(GtkWidget *widget, GdkEvent *event, nm_elements *nm_elt)
+static void exec_program_by_gtk_callback( GtkWidget *widget, GdkEvent *event, nm_elements *elt )
 {
-  GError *error = NULL;
-	gint status;
-
-	nm_elt->prev_status = nm_elt->status;
-  nm_elt->status = exec_program(nm_elt);
-	nm_elt->running = TRUE;
-
-	release_lock();
-
-  return TRUE;
+	if ( check_key(event) == FALSE )
+	{
+		return;
+	}
+	exec_program(elt);
 }
 
 static void perform_action( GtkWidget *widget, GdkEvent *event, nm_elements *elt )
@@ -124,38 +140,21 @@ static void perform_action( GtkWidget *widget, GdkEvent *event, nm_elements *elt
 	
 	if ( elt->running != TRUE )
 	{ 
-		run_command(widget, event, elt);
+		exec_program(elt);
 	}
 	else
 	{
 		gm_show_confirmation_dialog("Action already started.\nDo you want to start it anyway?", 
-			"Start action", run_command, elt, "Cancel", NULL, NULL, NULL);  
+			"Start action", exec_program_by_gtk_callback, elt, "Cancel", NULL, NULL, NULL);  
 	}
 }
 
-static void check_status(nm_elements* elt)
-{
-	int status;
 
-	waitpid(elt->pid, &status, WNOHANG);
-
-	if ( WIFEXITED(status) )
-	{
-		//program exited normally
-		elt->running = FALSE;
-		elt->status = WEXITSTATUS(status);
-	}
-	else if ( WIFSIGNALED(status) )
-	{
-		//program did not exit normally
-		elt->running = FALSE;
-		elt->status = -1;	
-	}
-}
 
 static void update_button()
 {
 	nm_elements* elts;
+	int success = 0;
 
 	elts = nm_get_stati();
 	
@@ -167,25 +166,28 @@ static void update_button()
 			if( ( elts->status == -1 ) || (elts->status != elts->success) )
 			{
   			gdk_threads_enter();
-				gtk_button_set_image(main_button, GTK_WIDGET(image_unavail));
+				gtk_button_set_image(main_button, GTK_WIDGET(elts->image_fail));
   			gdk_threads_leave();
 
 				// Network will only succeed if all checks succeed. So we can stop
 				// if one of the checks fails
-				release_lock();
 				return;
+			}
+			else
+			{
+				success = 1;
 			}
 		}
 		elts = elts->next;
 	}	
-	//we'll only get this far if none of the checks failed or did not change
-	//since the previous check.
-	elts = nm_get_stati();
- 	gdk_threads_enter();
-	gtk_button_set_image(main_button, GTK_WIDGET(elts->image_success));
- 	gdk_threads_leave();
 
-	release_lock();
+	if ( success )
+	{
+		elts = nm_get_stati();
+ 		gdk_threads_enter();
+		gtk_button_set_image(main_button, GTK_WIDGET(elts->image_success));
+ 		gdk_threads_leave();
+	}
 }
 
 static void show_menu()
@@ -258,8 +260,6 @@ static void show_menu()
         actions = actions->next;
     }
 
-		release_lock();
-
     button = gm_create_label_button("Cancel", destroy_widget, menuwin);
     gtk_container_add(GTK_CONTAINER(vbox), button);
     gtk_widget_show(button);
@@ -325,15 +325,10 @@ G_MODULE_EXPORT int gm_module_init()
   return GM_SUCCES;
 }
 
-/**
-* \brief Supposed to be used by gappman to make the module aware of its configuration file
-* Not really used so will be deprecated pretty soon.
-*/
 G_MODULE_EXPORT void gm_module_set_conffile(const char* filename)
 {
     conffile = filename;
 }
-
 
 
 /**
@@ -362,17 +357,16 @@ G_MODULE_EXPORT void gm_module_start()
 		{
 			if( elts->running != TRUE )
 			{
-				run_command(NULL, NULL, elts);
-			}
-			else
-			{
-				check_status(elts);
+				g_debug("Executing %s", elts->name);
+  			exec_program(elts);
+				elts->running = TRUE;
 			}
 			elts = elts->next;
 		}
+		g_debug("Updating button");
 		update_button();
 		release_lock();
-		sleep(2);
+		sleep(20);
 	}
 }
 
