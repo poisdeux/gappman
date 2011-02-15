@@ -13,16 +13,15 @@
 #include "gm_connect-generic.h"
 #include <glib.h>
 
-struct proceslist* createnewproceslist(struct proceslist* procs)
+struct proceslist *createnewproceslist(struct proceslist *procs)
 {
-    struct proceslist* newproc;
-    newproc = (struct proceslist*) g_try_malloc0(sizeof(struct proceslist));
-    if ( newproc != NULL)
-    {
-        newproc->name = "";
-        newproc->pid = -1;
-        newproc->prev = procs;
-    }
-    return newproc;
+	struct proceslist *newproc;
+	newproc = (struct proceslist *)g_try_malloc0(sizeof(struct proceslist));
+	if (newproc != NULL)
+	{
+		newproc->name = "";
+		newproc->pid = -1;
+		newproc->prev = procs;
+	}
+	return newproc;
 }
-

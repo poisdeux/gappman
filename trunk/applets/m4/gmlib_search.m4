@@ -32,6 +32,9 @@ if test -n "$LIBGM"
 then
         AC_SUBST([GM_INCLUDES], ["-I$LIBGM/generic -I$LIBGM/layout -I$LIBGM/parseconf -I$LIBGM/connect"])
         AC_SUBST([GM_OBJS], ["$LIBGM/layout/libgm_layout.la $LIBGM/parseconf/libgm_parseconf.la $LIBGM/connect/libgm_connect.la"])
+else
+        AC_SUBST([GM_INCLUDES], [""])
+        AC_SUBST([GM_OBJS], [""])
 fi
 
 #If LIBGM is still empty we check for installed libgm

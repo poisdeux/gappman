@@ -20,6 +20,6 @@
 * \param procs list of proceslist structs. If this is the first this should be NULL
 * \return pointer to the last proceslist struct
 */
-struct proceslist* createnewproceslist(struct proceslist* procs);
+struct proceslist *createnewproceslist(struct proceslist *procs);
 
 #endif

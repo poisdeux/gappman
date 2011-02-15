@@ -19,12 +19,16 @@
 */
 struct appwidgetinfo
 {
-    int PID; ///< Process ID of running app (child replaced through execvp)
-    int status; ///< Process status which can be either running, sleeping, waiting, stopped, or zombie
-    struct menu_element *menu_elt; ///< Pointer to menu_element structure of started application
-    GtkWidget *widget; ///< Button that started the process
-    struct appwidgetinfo* prev; ///< Pointer to previous appwidgetinfo
-    struct appwidgetinfo* next; ///< Pointer to previous appwidgetinfo
+	int PID;					///< Process ID of running app (child
+								// replaced through execvp)
+	int status;					///< Process status which can be either
+								// running, sleeping, waiting, stopped, or
+								// zombie
+	struct menu_element *menu_elt;	///< Pointer to menu_element structure of 
+									// started application
+	GtkWidget *widget;			///< Button that started the process
+	struct appwidgetinfo *prev;	///< Pointer to previous appwidgetinfo
+	struct appwidgetinfo *next;	///< Pointer to previous appwidgetinfo
 };
 
 
@@ -32,7 +36,7 @@ struct appwidgetinfo
 * \brief Returns the started applications.
 * \return pointer to the appwidgetinfo struct
 */
-struct appwidgetinfo* appmanager_get_started_apps();
+struct appwidgetinfo *appmanager_get_started_apps();
 
 /**
 * \brief updates the resolution for gappman or any other program
@@ -40,5 +44,4 @@ struct appwidgetinfo* appmanager_get_started_apps();
 * \param width new width that should be set for the program
 * \param height new height that should be set for the program
 */
-void appmanager_update_resolution(gchar* programname, int width, int height);
-
+void appmanager_update_resolution(gchar * programname, int width, int height);

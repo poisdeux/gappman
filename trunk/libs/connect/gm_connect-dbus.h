@@ -34,7 +34,7 @@ int gm_dbus_get_started_procs_from_gappman(struct proceslist **startedprocs);
 * \param path pointer to a string holding the configuration path
 * \return integer value (GM_*) as defined in libs/generic/gm_generic.h
 */
-int gm_dbus_get_confpath_from_gappman(gchar **path);
+int gm_dbus_get_confpath_from_gappman(gchar ** path);
 
 
 /**
@@ -55,4 +55,4 @@ int gm_dbus_get_fontsize_from_gappman(int *fontsize);
 */
 int gm_dbus_connect_to_gappman(int *sockfd);
 
-#endif //__GM_CONNECT_DBUS_H__
+#endif // __GM_CONNECT_DBUS_H__
