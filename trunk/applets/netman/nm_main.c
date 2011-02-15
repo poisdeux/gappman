@@ -56,8 +56,6 @@ static void destroy_widget(GtkWidget* dummy, GdkEvent *event, GtkWidget* widget)
 
 static void check_status(GPid pid, gint status, nm_elements* elt)
 {
-	g_debug("Enter check_status");
-//	waitpid(elt->pid, &status, WNOHANG);
 	if ( WIFEXITED(status) )
 	{
 		//program exited normally
@@ -77,7 +75,7 @@ static void check_status(GPid pid, gint status, nm_elements* elt)
 	{
 		g_spawn_close_pid(pid);
 	}
-	g_debug("Leaving check_status");
+
 }
 
 static gint exec_program(nm_elements* elt)
@@ -116,7 +114,6 @@ static gint exec_program(nm_elements* elt)
 
 		elt->pid = childpid;
 
-		g_debug("Adding watch for exec %s", elt->name);
 		elt->g_source_tag = g_child_watch_add(childpid, (GChildWatchFunc) check_status, elt);
 
     return TRUE;
@@ -340,7 +337,7 @@ G_MODULE_EXPORT void gm_module_set_conffile(const char* filename)
 G_MODULE_EXPORT void gm_module_start()
 {
 	nm_elements *elts;
-
+	int sleep_left = 0;
 	if ( KEEP_RUNNING == TRUE )
 	{
 		g_warning("gm_netman applet already started");
@@ -357,16 +354,18 @@ G_MODULE_EXPORT void gm_module_start()
 		{
 			if( elts->running != TRUE )
 			{
-				g_debug("Executing %s", elts->name);
   			exec_program(elts);
 				elts->running = TRUE;
 			}
 			elts = elts->next;
 		}
-		g_debug("Updating button");
 		update_button();
 		release_lock();
-		sleep(20);
+		sleep_left = sleep(10);
+		while ( sleep_left != 0 )
+		{
+			sleep_left = sleep(sleep_left);
+		}
 	}
 }
 
