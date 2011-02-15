@@ -11,6 +11,10 @@
 #ifndef __GAPPMAN_GENERIC_H__
 #define __GAPPMAN_GENERIC_H__
 
+#ifndef SYSCONFDIR
+#define SYSCONFDIR "/etc/gappman" ///< default location for the configuration files
+#endif
+
 #define GM_SUCCES 0	///< no errors detected
 #define GM_FAIL 9 ///< used to represent a general error
 #define GM_NO_RANDR_EXTENSION 1 ///< Xorg has no support for the XRANDR extension. This is fatal for gm_changeresolution

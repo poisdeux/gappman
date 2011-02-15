@@ -9,14 +9,15 @@
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
  *
- * \todo Redesign applet making it independent from gm_netmand. Applet can call
- *       the actions itself instead of sending the command to gm_netmand
+ * \todo Implement support for network unavailability when no network-interfaces have been configured.
  * \todo Implement support for keybindings which should trigger the menu to pop-up.
  */
 #include <gtk/gtk.h>
 #include <gmodule.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/wait.h>
+#include <sys/types.h>
 #include <sys/wait.h>
 #include <gm_layout.h>
 #include <gm_generic.h>
@@ -27,7 +28,7 @@
 static GtkButton *main_button = NULL;
 static int main_button_width = 50;
 static int main_button_height = 50;
-static const char* conffile = "/etc/gappman/netman.xml";
+static const char* conffile = SYSCONFDIR"/netman.xml";
 static gboolean KEEP_RUNNING;
 static GMutex *check_status_mutex;
 static GtkImage* image_unavail;
@@ -53,83 +54,78 @@ static void destroy_widget(GtkWidget* dummy, GdkEvent *event, GtkWidget* widget)
 		}
 }
 
-
-static DBusGProxyCallNotify collect_status(DBusGProxy *proxy, DBusGProxyCall* proxy_call, nm_elements *nm_elt)
+static void check_status(GPid pid, gint status, nm_elements* elt)
 {
-	GError *error = NULL;
-	gint status;
-
-	get_lock();
-	if( ! dbus_g_proxy_end_call(proxy, proxy_call, &error,
-      	G_TYPE_INT, &status, G_TYPE_INVALID) )
+	if ( WIFEXITED(status) )
 	{
-		g_warning("Error retrieving status for command %s: %s", nm_elt->exec, error->message);
-		g_error_free(error);
-
-		nm_elt->prev_status = nm_elt->status;
-		nm_elt->status = -1;
+		//program exited normally
+		elt->running = FALSE;
+		elt->prev_status = elt->status;
+		elt->status = WEXITSTATUS(status);
 	}
-	else
+	else if ( WIFSIGNALED(status) )
 	{
-		nm_elt->prev_status = nm_elt->status;
-		nm_elt->status = status;
+		//program did not exit normally
+		elt->running = FALSE;
+		elt->prev_status = elt->status;
+		elt->status = -1;	
 	}
-	g_message("%s got status: %d", nm_elt->name, nm_elt->status);
-	nm_elt->running = FALSE;
-	release_lock();
+
+	if( g_source_remove(elt->g_source_tag) )
+	{
+		g_spawn_close_pid(pid);
+	}
+
 }
 
-static gboolean run_command(GtkWidget *widget, GdkEvent *event, nm_elements *nm_elt)
+static gint exec_program(nm_elements* elt)
 {
-  GError *error = NULL;
-	gint status;
-	DBusGProxyCall* proxy_call;
-  DBusGConnection *bus;
-  DBusGProxy *proxy;
+		GError *error;
+		int i;
+  	char **args;
+    GPid childpid;
 
-	get_lock();
+		error = NULL;
 
-	bus = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
-  if (bus == NULL)
-  {
-    g_warning ("Couldn't connect to session bus: %s\n", error->message);
-    g_error_free(error);
-    error = NULL;
-		
-    return FALSE;
-  }
+		//We keep the conversion to execv format in elt->argv
+		//to prevent converting it each time we exec the program
+		if ( elt->argv == NULL )
+		{
+			args = (char **) malloc((elt->numArguments + 2)* sizeof(char *));
+			args[0] = (char *) elt->exec;
+			for (i = 0; i < elt->numArguments; i++ )
+			{
+					args[i+1] = elt->args[i];
+			}
+			args[i+1] = NULL;
+			elt->argv = args;
+		}
 
-  proxy = dbus_g_proxy_new_for_name (bus,
-               "gappman.netman",
-               "/GmNetmand",
-               "gappman.netman.NetmanInterface");
+	  if ( ! g_spawn_async(NULL, elt->argv, NULL, \
+					G_SPAWN_DO_NOT_REAP_CHILD | G_SPAWN_STDOUT_TO_DEV_NULL \
+					| G_SPAWN_STDERR_TO_DEV_NULL, \
+					NULL, NULL, &childpid, &error) )
+		{
+			g_warning("Error executing program: %s", error->message);
+			g_error_free(error);
+			error = NULL;
+			return FALSE;
+		}
 
-  if(proxy == NULL)
-  {
-    g_warning("Could not get dbus object for gappman.netman.NetmanInterface");
-    dbus_g_connection_unref(bus);
-		
-		return FALSE;
-  }
+		elt->pid = childpid;
 
-	proxy_call = dbus_g_proxy_begin_call(proxy, 
-			"RunCommand", (DBusGProxyCallNotify) collect_status, nm_elt,	NULL, 
-			G_TYPE_STRING, nm_elt->exec, G_TYPE_STRV, nm_elt->args, G_TYPE_INVALID);
+		elt->g_source_tag = g_child_watch_add(childpid, (GChildWatchFunc) check_status, elt);
 
-	if (proxy_call == NULL)
-  {
-  	g_warning ("Failed to call RunCommand: %s", error->message);
-   	g_error_free(error);
-    error = NULL;
+    return TRUE;
+}
 
-		return FALSE;
-  }
-
-	nm_elt->running = TRUE;
-
-	release_lock();
-
-  return TRUE;
+static void exec_program_by_gtk_callback( GtkWidget *widget, GdkEvent *event, nm_elements *elt )
+{
+	if ( check_key(event) == FALSE )
+	{
+		return;
+	}
+	exec_program(elt);
 }
 
 static void perform_action( GtkWidget *widget, GdkEvent *event, nm_elements *elt )
@@ -141,80 +137,54 @@ static void perform_action( GtkWidget *widget, GdkEvent *event, nm_elements *elt
 	
 	if ( elt->running != TRUE )
 	{ 
-		run_command(widget, event, elt);
+		exec_program(elt);
 	}
 	else
 	{
 		gm_show_confirmation_dialog("Action already started.\nDo you want to start it anyway?", 
-			"Start action", run_command, elt, "Cancel", NULL, NULL, NULL);  
+			"Start action", exec_program_by_gtk_callback, elt, "Cancel", NULL, NULL, NULL);  
 	}
 }
 
-static void check_status()
-{
-	nm_elements *checks;
 
-	get_lock();
-	checks = nm_get_stati();
-	while((checks != NULL) && KEEP_RUNNING)
-	{
-		if( checks->running != TRUE )
-		{
-			release_lock();
-  		gdk_threads_enter();
-			run_command(NULL, NULL, checks);
-			gdk_threads_leave();
-			get_lock();
-		}
-		checks = checks->next;
-		release_lock();
-	}
-}
 
 static void update_button()
 {
-	nm_elements* checks;
-	int status_changed_to_succes = 0;
+	nm_elements* elts;
+	int success = 0;
 
-
-	checks = nm_get_stati();
+	elts = nm_get_stati();
 	
-	get_lock();
-
-	while(checks != NULL)
+	while(elts != NULL)
 	{
 		//we only need to do something if the status changed
-		if(checks->prev_status != checks->status)
+		if( elts->prev_status != elts->status )
 		{
-			if( checks->status == -1 )
+			if( ( elts->status == -1 ) || (elts->status != elts->success) )
 			{
-				gtk_button_set_image(main_button, GTK_WIDGET(image_unavail));
-			}
-			else if(checks->status != checks->success)
-			{
-				gtk_button_set_image(main_button, GTK_WIDGET(checks->image_fail));
+  			gdk_threads_enter();
+				gtk_button_set_image(main_button, GTK_WIDGET(elts->image_fail));
+  			gdk_threads_leave();
 
 				// Network will only succeed if all checks succeed. So we can stop
 				// if one of the checks fails
-				release_lock();
 				return;
 			}
 			else
 			{
-				status_changed_to_succes = 1;
+				success = 1;
 			}
 		}
-		checks = checks->next;
+		elts = elts->next;
 	}	
-	//we'll only get this far if none of the checks failed or did not change
-	//since the previous check.
-	if( status_changed_to_succes )
-	{
-		checks = nm_get_stati();
-		gtk_button_set_image(main_button, GTK_WIDGET(checks->image_success));
-	}
 
-	release_lock();
+	if ( success )
+	{
+		elts = nm_get_stati();
+ 		gdk_threads_enter();
+		gtk_button_set_image(main_button, GTK_WIDGET(elts->image_success));
+ 		gdk_threads_leave();
+	}
 }
 
 static void show_menu()
@@ -238,8 +208,6 @@ static void show_menu()
 
 		gtk_widget_set_name(menuwin, "gm_applet");
     vbox = gtk_vbox_new (FALSE, 10);
-
-		get_lock();
 
     stati = nm_get_stati();
 
@@ -288,8 +256,6 @@ static void show_menu()
 
         actions = actions->next;
     }
-
-		release_lock();
 
     button = gm_create_label_button("Cancel", destroy_widget, menuwin);
     gtk_container_add(GTK_CONTAINER(vbox), button);
@@ -356,15 +322,10 @@ G_MODULE_EXPORT int gm_module_init()
   return GM_SUCCES;
 }
 
-/**
-* \brief Supposed to be used by gappman to make the module aware of its configuration file
-* Not really used so will be deprecated pretty soon.
-*/
 G_MODULE_EXPORT void gm_module_set_conffile(const char* filename)
 {
     conffile = filename;
 }
-
 
 
 /**
@@ -375,8 +336,8 @@ G_MODULE_EXPORT void gm_module_set_conffile(const char* filename)
 */
 G_MODULE_EXPORT void gm_module_start()
 {
-
-
+	nm_elements *elts;
+	int sleep_left = 0;
 	if ( KEEP_RUNNING == TRUE )
 	{
 		g_warning("gm_netman applet already started");
@@ -387,9 +348,24 @@ G_MODULE_EXPORT void gm_module_start()
 
 	while(KEEP_RUNNING)
 	{
-		check_status();
+		get_lock();
+		elts = nm_get_stati();
+		while((elts != NULL))
+		{
+			if( elts->running != TRUE )
+			{
+  			exec_program(elts);
+				elts->running = TRUE;
+			}
+			elts = elts->next;
+		}
 		update_button();
-		sleep(2);
+		release_lock();
+		sleep_left = sleep(10);
+		while ( sleep_left != 0 )
+		{
+			sleep_left = sleep(sleep_left);
+		}
 	}
 }
 
@@ -400,7 +376,7 @@ G_MODULE_EXPORT void gm_module_start()
 */
 G_MODULE_EXPORT int gm_module_stop()
 {
-  nm_elements *checks, *tmp;
+  nm_elements *elts, *tmp;
 	
 	if ( KEEP_RUNNING == FALSE )
 	{
@@ -417,15 +393,15 @@ G_MODULE_EXPORT int gm_module_stop()
 
 	g_object_unref(image_unavail);
 
-  checks = nm_get_stati();
-	tmp = checks;
+  elts = nm_get_stati();
+	tmp = elts;
 	while(tmp != NULL)
 	{
 		g_object_unref(tmp->image_success);
 		g_object_unref(tmp->image_fail);
 		tmp = tmp->next;
 	}
-	nm_free_elements(checks);
+	nm_free_elements(elts);
 
 	release_lock();	
 

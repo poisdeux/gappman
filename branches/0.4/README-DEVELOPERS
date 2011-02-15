@@ -24,12 +24,13 @@ The following versioning scheme is used by gappman.
 
 <MAJOR>.<MINOR>[.<MAINTENANCE/UPDATE>]
 
-MAJOR version releases represent a complete implementation of a set of major
-features. NOTE: the major set for the 1.0 release still has to be 
-determined. 
-MINOR version releases include one or more major features.
-MAINTENANCE/UPDATE releases are optional and include bugfixes, security fixes, 
-new applets.
+*  MAJOR version releases represent a complete implementation of a set of major
+   features. NOTE: the major set for the 1.0 release still has to be 
+   determined. 
+*  MINOR version releases include one or more major features, design changes, 
+   and interface changes.
+*  MAINTENANCE/UPDATE releases are optional and include bugfixes, security fixes, 
+   new applets.
 
 Only integers are allowed as versionnumbers.
 For example, the following versions are accepted:
@@ -54,18 +55,21 @@ bottom.
 
 2. Edit the Changelog and raise the version number in configure.ac
 
-3. Commit the changes on the branch
+3. Check the libs/ versions and change if necessary. See libs/README-DEVELOPERS 
+   for details.
+
+4. Commit the changes on the branch
 
   svn commit -m "New branch <MAJOR>.<MINOR>"
 
-4. After testing and debugging commit the changes, if any. 
+5. After testing and debugging commit the changes, if any. 
 
-5. Make a release version
+6. Make a release version
 
   svn copy https://gappman.googlecode.com/svn/branches/<MAJOR>.<MINOR> \
     https://gappman.googlecode.com/svn/tags/release-<MAJOR>.<MINOR>
 
-6. Commit the new release
+7. Commit the new release
 
   svn commit -m "New release <MAJOR>.<MINOR>"
 
@@ -138,6 +142,10 @@ Maintenance/update releases should be tested on the branch and result in a
 -----------------------------------------------------------------------------
 6. Checking the code
 -----------------------------------------------------------------------------
+
+Splint generates a lot of false positives. A better tool might be cppcheck.
+http://sourceforge.net/projects/cppcheck/
+It supposedly also works for C-code...
 
 Splint might be a nice tool to check the code for security vulnerabilities and 
 coding mistakes. It can be executed as follows:

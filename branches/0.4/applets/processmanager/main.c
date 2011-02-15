@@ -24,7 +24,6 @@
 #include <signal.h>
 #include <gm_connect.h>
 #include <gm_generic.h>
-#include "connect.h"
 
 static int WINDOWED = 0;
 static GtkWidget *mainwin;
@@ -294,8 +293,8 @@ int main (int argc, char **argv)
     GtkWidget *vbox;
     GtkWidget *hbox;
     GtkWidget *separator;
-    const char* conffile = "/etc/gappman/processmanager.xml";
-    gchar* gappman_confpath = "";
+    const char* conffile = SYSCONFDIR"/processmanager.xml";
+    gchar* gappman_confpath;
     int dialog_width;
     int dialog_height;
     int program_width;
@@ -371,9 +370,8 @@ int main (int argc, char **argv)
         g_signal_connect (G_OBJECT (mainwin), "destroy",
                           G_CALLBACK (destroy), NULL);
     }
-
     status = gm_get_fontsize_from_gappman(2103, "localhost", &fontsize);;
-    if (status == 0)
+    if (status == GM_SUCCES)
     {
         gm_set_fontsize(fontsize);
     }
@@ -383,7 +381,7 @@ int main (int argc, char **argv)
         fontsize=gm_get_fontsize();
     }
 
-    status = getStartedProcsFromGappman(2103, "localhost", &started_procs);
+    status = gm_get_started_procs_from_gappman(2103, "localhost", &started_procs);
 
 	if ( status != GM_SUCCES )
 	{
@@ -496,7 +494,7 @@ int main (int argc, char **argv)
               }
               action_elts = action_elts->next;
           }
-          freeproceslist(started_procs);
+          gm_free_proceslist(started_procs);
           if ( no_progsacts_found == 0 )
           {
               hbox = gtk_hbox_new (FALSE, 10);

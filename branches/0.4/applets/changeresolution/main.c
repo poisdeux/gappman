@@ -7,6 +7,10 @@
  *
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
+ *
+ * \todo show current resolution
+ * \todo add button to keep selected resolution
+ * 
  */
 
 #include <gtk/gtk.h>
@@ -34,12 +38,13 @@ static int dialog_height;
 
 static void usage()
 {
+    char* conffile = SYSCONFDIR"/conf.xml";
     printf("usage: changeresolution [--help] [--screenwidth <WIDTHINPIXELS>] [--screenheight <HEIGHTINPIXELS>] [--gmconffile <FILENAME>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
     printf("\n");
     printf("--help:\t\tshows this help text\n");
     printf("--screenwidth <WIDTHINPIXELS>:\t\twidth of the main (gappman) window (default: screen width / 3)\n");
     printf("--screenheight <HEIGHTINPIXELS:\t\theight of the main (gappman) window (default: screen height / 3)\n");
-    printf("--gmconffile <FILENAME>:\t\t configuration file specifying the program and actions (default: /etc/gappman/conf.xml)\n");
+    printf("--gmconffile <FILENAME>:\t\t configuration file specifying the program and actions (default: %s)\n", conffile);
     printf("--gtkrc <GTKRCFILENAME>:\t\t gtk configuration file which can be used for themeing\n");
     printf("--windowed:\t\t creates a border around the window\n");
 
@@ -81,23 +86,17 @@ static void revert_to_old_res(GtkWidget *widget, GdkEvent *event, XRRScreenSize*
 static void set_default_res_for_program( GtkWidget *widget, GdkEvent *event, menu_elements *elt )
 {
     XRRScreenSize current_size;
-    gchar *msg;
     //Check if spacebar or mousebutton is pressed
     if ( ((GdkEventKey*)event)->keyval == 32 || ((GdkEventButton*)event)->button == 1)
     {
-        if( gm_res_get_current_size(&current_size) == GM_SUCCES )
-		{
-        	msg = g_strdup_printf("::updateres::%s::%d::%d::", elt->name, current_size.width, current_size.height);
-        	if ( gm_send_and_receive_message(2103, "localhost", msg, NULL) != GM_SUCCES )
-        	{
-           		gm_show_error_dialog("Could not connect to gappman.", NULL, NULL);
-        	}
-			g_free(msg);
-		}
-		else
-		{
-			g_warning("Could not get current screen resolution");
-		}
+			if( gm_res_get_current_size(&current_size) == GM_SUCCES )
+			{
+				gm_set_default_resolution_for_program(2103, "localhost", elt->name, current_size.width, current_size.height);
+			}
+			else
+			{
+				g_warning("Could not get current screen resolution");
+			}
     }
 }
 
@@ -248,7 +247,7 @@ int main (int argc, char **argv)
     int ret_value;
     int i;
     XRRScreenSize *sizes;
-    char* conffile = "/etc/gappman/conf.xml";
+    char* conffile = SYSCONFDIR"/conf.xml";
     gchar* gappman_confpath;
 	
     gtk_init (&argc, &argv);
@@ -325,9 +324,9 @@ int main (int argc, char **argv)
     if (gm_get_confpath_from_gappman(2103, "localhost", &gappman_confpath) == GM_SUCCES)
     {
     	if ( gm_load_conf(gappman_confpath) == GM_SUCCES )
-		{
+	{
     		programs = gm_get_programs();
-		}
+	}
     }
 
 		gm_res_init();

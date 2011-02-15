@@ -1,6 +1,18 @@
+2011-02-15  Martijn Brekhof  <m.brekhof@gmail.com>
+ 	
+		* Splitted configure.ac to make the project modulair. Now libs, appmanager,
+			and applets can be build separately
+		* Added dbus support for gappman. You can disable it with 
+			./configure --without-dbus
+		* Added dbus support for connect library (libgm_connect). No interface 
+			changes have been made. Dbus or socket implementation is determined 
+			compile time.
+		*	Rewritten netman applet. gm_netmand has been removed, applet executes the
+			checks by itself now.
+
 2010-11-15  Martijn Brekhof  <m.brekhof@gmail.com>
 		
-		* Added new applet called netman (see applets/netman)
+    * Added new applet called netman (see applets/netman)
     * Added configure option (--disable-listener) to disable gappman network support
     * Added Doxygen documentation in docs/doxygen
     * Bugfix: XRRScreenSizes was freed to early

@@ -8,9 +8,6 @@
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
  *
- * \todo Fix fontsize calculation. This is now performed by gm_create_buttonbox
- *       everytime it is called but should be done only once. Preferrably only 
- *       when the programs-button_box is calculated.
  */
 
 
@@ -684,6 +681,7 @@ GtkWidget* gm_create_buttonbox( menu_elements *elts, void (*processevent)(GtkWid
         button = gm_create_button(cur, button_width, box_height, processevent);
         gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 1);
         gtk_widget_show (button);
+				cur->widget = button;
         cur = next;
         count++;
     }

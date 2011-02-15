@@ -1,5 +1,5 @@
 /**
- * \file listener.c
+ * \file listener-socket.c
  *
  *
  *
@@ -9,9 +9,7 @@
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
 
-#include "listener.h"
-
-#if !defined(NO_LISTENER)
+#include "listener-socket.h"
 
 #include <stdio.h>
 #include <glib.h>
@@ -78,7 +76,7 @@ static void sendprocesslist(GIOChannel* gio)
     gchar* msg = NULL;
     msg = (gchar*) malloc((256 + 16) * sizeof(gchar));
 
-    appw_list = get_started_apps();
+    appw_list = appmanager_get_started_apps();
     while (appw_list != NULL)
     {
         if (strlen((const char*) appw_list->menu_elt->name) < 256)
@@ -126,7 +124,7 @@ static void handle_update_resolution(gchar *msg)
     }
     width = atoi(contentssplit[3]);
     height = atoi(contentssplit[4]);
-    update_resolution(name, width, height);
+    appmanager_update_resolution(name, width, height);
 
     g_strfreev(contentssplit);
 }
@@ -191,14 +189,13 @@ static gboolean handleconnection( GIOChannel* gio , GIOCondition cond, gpointer 
             }
             g_free(msg);
         }
-        gappman_close_listener(new_gio);
-	close(newsock);
+        listener_socket_close(new_gio);
     }
     //Always return TRUE to keep watch active.
     return TRUE;
 }
 
-gboolean gappman_start_listener (GtkWidget* win)
+gboolean listener_socket_open (GtkWidget* win)
 {
     static int sock;
     int s;
@@ -269,12 +266,13 @@ gboolean gappman_start_listener (GtkWidget* win)
     {
         close(sock);
         g_warning("Could not start listener");
-        gm_show_confirmation_dialog("Could not start listener.\nShould I try again?", "Restart listener", gappman_start_listener, win, "Cancel", NULL, NULL, win);
+        gm_show_confirmation_dialog("Could not start listener.\nShould I try again?", "Restart listener", listener_socket_open, win, "Cancel", NULL, NULL, win);
         return FALSE;
     }
 }
 
-gboolean gappman_close_listener (GIOChannel* close_gio)
+
+gboolean listener_socket_close (GIOChannel* close_gio)
 {
     GIOStatus status;
     GError *gerror = NULL;
@@ -290,15 +288,14 @@ gboolean gappman_close_listener (GIOChannel* close_gio)
     status = g_io_channel_shutdown( close_gio, TRUE, &gerror);
     if ( status == G_IO_STATUS_ERROR )
     {
-        g_warning("Listener (gappman_close_listener): %s\n", gerror->message);
+        g_warning("Listener (listener_socket_close): %s\n", gerror->message);
         return FALSE;
     }
 
     return TRUE;
 }
 
-void gappman_set_confpath(const gchar *path)
+void listener_socket_set_confpath(const gchar *path)
 {
 	confpath = path;
 }
-#endif

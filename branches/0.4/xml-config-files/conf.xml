@@ -33,9 +33,9 @@
       <name>NX Desktop</name>
       <resolution>1280x1024</resolution>
       <exec>/bin/sleep</exec>
-			<arg>50</arg>
+			<arg>15</arg>
       <logo>./logos/nxclient-icon.png</logo>
-      <autostart>0</autostart>
+      <autostart>1</autostart>
 			<printlabel>1</printlabel>
     </program>
     <program>
@@ -57,11 +57,11 @@
 			<printlabel>1</printlabel>
     </program>
   </programs>
-  <panel width="10%" height="10%" align="top,right">
+	<panel width="10%" height="10%" align="top,right">
 		<applet>
 			<name>Network manager</name>
-			<objectfile>./applets/netman/applet/.libs/libgm_netman.so</objectfile>
-			<conffile>./applets/netman/applet/xml-config-files/netman.xml</conffile>
+			<objectfile>./applets/netman/.libs/gm_netman.so</objectfile>
+			<conffile>./applets/netman/xml-config-files/netman.xml</conffile>
 		</applet>
   </panel>
 </appmanager>

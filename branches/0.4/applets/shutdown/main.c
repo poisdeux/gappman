@@ -130,7 +130,7 @@ int main (int argc, char **argv)
     GtkWidget *align;
     GtkWidget *mainwin;
     menu_elements *actions;
-    const char* conffile = "/etc/gappman/shutdown.xml";
+    const char* conffile = SYSCONFDIR"/shutdown.xml";
     int c;
     int fontsize;
 

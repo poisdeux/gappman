@@ -13,9 +13,11 @@
  *    	 solved by gappman.
  * \todo Unit-testing with http://klee.llvm.org/
  * \todo Implement support for keybindings. For instance to start specific applets.
+ * \todo Startup indicator when starting programs. We could do this through an animated mouse-pointer or animate the program-button.
  */
-
-#include "listener.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif //HAVE_CONFIG_H
 #include "appmanager.h"
 #include <glib.h>
 #include <gtk/gtk.h>
@@ -33,6 +35,7 @@
 #include <gm_parseconf.h>
 #include <gm_layout.h>
 #include <gm_generic.h>
+#include "listener.h"
 
 struct appwidgetinfo* started_apps; ///< holds the currently started apps
 menu_elements *programs; ///< list of all programs gappman manages. Currently only programs need to be global as only programs have meta-info that can be updated. E.g. resolution updates for a specific program. 
@@ -44,7 +47,7 @@ static int screen_height=-1;
 static int window_width=-1;
 static int window_height=-1;
 
-void update_resolution(gchar* programname, int width, int height)
+void appmanager_update_resolution(gchar* programname, int width, int height)
 {
     menu_elements* elt = NULL;
     if ( programname != NULL )
@@ -63,7 +66,7 @@ void update_resolution(gchar* programname, int width, int height)
     }
 }
 
-struct appwidgetinfo* get_started_apps()
+struct appwidgetinfo* appmanager_get_started_apps()
 {
     return started_apps;
 }
@@ -285,7 +288,7 @@ static void autostartprograms( menu_elements *elts )
     {
         if ( cur->autostart == 1 )
         {
-            startprogram( NULL, cur );
+            startprogram( cur->widget, cur );
         }
         cur = cur->next;
     }
@@ -388,7 +391,7 @@ int main (int argc, char **argv)
     GtkWidget *vbox;
     menu_elements *actions;
     menu_elements *panel;
-    const char* conffile = "./conf.xml";
+    const char* conffile = SYSCONFDIR"/conf.xml";
     int c;
 
     //Needs to be called before any another glib function
@@ -445,12 +448,6 @@ int main (int argc, char **argv)
 
 
 	gm_res_init();
-
-#if !defined(NO_LISTENER)
-	//set confpath so other programs can retrieve
-	//the configuration file gappman used
-	gappman_set_confpath(conffile);
-#endif
 
     /** INIT */
     started_apps = NULL;
@@ -545,13 +542,16 @@ int main (int argc, char **argv)
     gtk_widget_show (vbox);
     gtk_widget_show (mainwin);
 
-    autostartprograms( programs );
-
 #if !defined(NO_LISTENER)
-    gappman_start_listener(mainwin);
+		//set confpath so other programs can retrieve
+		//the configuration file gappman used
+		gappman_set_confpath(conffile);
+  	gappman_start_listener(mainwin);
 #else
     g_warning("Gappman compiled without network support");
 #endif
+
+    autostartprograms( programs );
 
     gdk_threads_enter();
     gtk_main ();
@@ -561,7 +561,7 @@ int main (int argc, char **argv)
     g_message("Closing up.");
     stop_panel( panel );
 #if !defined(NO_LISTENER)
-    gappman_close_listener(NULL);
+    gappman_close_listener();
 #endif
     gm_free_menu_elements( programs );
     gm_free_menu_elements( actions );
