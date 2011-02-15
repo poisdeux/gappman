@@ -34,53 +34,61 @@
 #include "gm_connect-socket.h"
 #endif
 
-void gm_free_proceslist(struct proceslist* procslist)
+void gm_free_proceslist(struct proceslist *procslist)
 {
-    struct proceslist* tmp;
-    while (procslist != NULL)
-    {
-        tmp = procslist->prev;
-        free(procslist);
-        procslist = tmp;
-    }
+	struct proceslist *tmp;
+	while (procslist != NULL)
+	{
+		tmp = procslist->prev;
+		free(procslist);
+		procslist = tmp;
+	}
 }
 
-int gm_connect_to_gappman(int portno, const char* hostname, int *sockfd)
+int gm_connect_to_gappman(int portno, const char *hostname, int *sockfd)
 {
 #if defined(NO_LISTENER) || defined(WITH_DBUS_SUPPORT)
-  return GM_NET_COMM_NOT_SUPPORTED;
+	return GM_NET_COMM_NOT_SUPPORTED;
 #else
 	return gm_socket_connect_to_gappman(portno, hostname, sockfd);
 #endif
 }
 
-int gm_get_started_procs_from_gappman(int portno, const char* hostname, struct proceslist **startedprocs)
+int gm_get_started_procs_from_gappman(int portno, const char *hostname,
+									  struct proceslist **startedprocs)
 {
 #ifdef NO_LISTENER
 	return GM_NET_COMM_NOT_SUPPORTED;
 #elif defined(WITH_DBUS_SUPPORT)
 	return gm_dbus_get_started_procs_from_gappman(startedprocs);
 #else
-	return gm_socket_get_started_procs_from_gappman(portno,hostname, startedprocs);
+	return gm_socket_get_started_procs_from_gappman(portno, hostname,
+													startedprocs);
 #endif
 }
 
-int gm_get_confpath_from_gappman(int portno, const char* hostname, gchar** path)
+int gm_get_confpath_from_gappman(int portno, const char *hostname,
+								 gchar ** path)
 {
 #ifdef NO_LISTENER
-    return GM_NET_COMM_NOT_SUPPORTED;
+	return GM_NET_COMM_NOT_SUPPORTED;
+#elif defined(WITH_DBUS_SUPPORT)
+	return gm_dbus_get_confpath_from_gappman(path);
 #elif defined(WITH_DBUS_SUPPORT)
 	return gm_dbus_get_confpath_from_gappman(path);
 #else
-	return gm_socket_get_confpath_from_gappman( portno, hostname, path);
+	return gm_socket_get_confpath_from_gappman(portno, hostname, path);
 #endif
 }
 
 
-int gm_get_fontsize_from_gappman(int portno, const char* hostname, int *fontsize)
+int gm_get_fontsize_from_gappman(int portno, const char *hostname,
+								 int *fontsize)
 {
 #ifdef NO_LISTENER
-    return GM_NET_COMM_NOT_SUPPORTED;
+	return GM_NET_COMM_NOT_SUPPORTED;
+#elif defined(WITH_DBUS_SUPPORT)
+	return gm_dbus_get_fontsize_from_gappman(fontsize);
 #elif defined(WITH_DBUS_SUPPORT)
 	return gm_dbus_get_fontsize_from_gappman(fontsize);
 #else
@@ -88,22 +96,27 @@ int gm_get_fontsize_from_gappman(int portno, const char* hostname, int *fontsize
 #endif
 }
 
-int gm_send_and_receive_message(int portno, const char* hostname, gchar *msg, void (*callbackfunc)(gchar*))
+int gm_send_and_receive_message(int portno, const char *hostname, gchar * msg,
+								void (*callbackfunc) (gchar *))
 {
 #if defined(WITH_DBUS_SUPPORT) || defined(NO_LISTENER)
-    return GM_NET_COMM_NOT_SUPPORTED;
+	return GM_NET_COMM_NOT_SUPPORTED;
 #else
-	return gm_socket_send_and_receive_message(portno, hostname, msg, callbackfunc);    
+	return gm_socket_send_and_receive_message(portno, hostname, msg,
+											  callbackfunc);
 #endif
 }
 
-int gm_set_default_resolution_for_program(int portno, const char* hostname, const gchar* name, int width, int height)
+int gm_set_default_resolution_for_program(int portno, const char *hostname,
+										  const gchar * name, int width,
+										  int height)
 {
-#ifdef NO_LISTENER
-    return GM_NET_COMM_NOT_SUPPORTED;
+#if defined(WITH_DBUS_SUPPORT) || defined(NO_LISTENER)
+	return GM_NET_COMM_NOT_SUPPORTED;
 #elif defined(WITH_DBUS_SUPPORT)
-  return gm_dbus_set_default_resolution_for_program(name, width, height);
+	return gm_dbus_set_default_resolution_for_program(name, width, height);
 #else
-  return gm_socket_set_default_resolution_for_program(portno, hostname, name, width, height);
+	return gm_socket_set_default_resolution_for_program(portno, hostname, name,
+														width, height);
 #endif
 }

@@ -1,6 +1,6 @@
------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 1. Coding style
------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
 GAppMan is written in the so-called Allman style. Hence, the brace following
 a control statement is put on the next line on the same indentation level as 
@@ -15,10 +15,15 @@ To get your code pretty-printed in the Allman style you can use the program
 
 NOTE: above automatic pretty-printing may cause doxygen comments like ///< 
 to be rewritten as // /< which causes doxygen to fail.
+The following command will pretty-print the code and fix the doxygen comments:
 
------------------------------------------------------------------------------
+find -name '*.[ch]' -type f \ 
+ -exec indent -bap -bli0 -i4 -l79 -ncs -npcs -npsl -fca -lc79 -fc1 -ts4 {} \; \
+ -exec sed -i 's@// /<@///<@' {} \;
+
+-------------------------------------------------------------------------------
 2. Version number scheme
------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
 The following versioning scheme is used by gappman.
 
@@ -87,20 +92,47 @@ Maintenance/update releases should be tested on the branch and result in a
 	cd gappman/branch/<MAJOR>.<MINOR>
   svn merge --reintegrate https://gappman.googlecode.com/svn/trunk  
 
-2. Edit the Changelog and raise the version number in configure.ac
+2. Fix conflicts and commit the merge
 
-3. Build and test:
+	svn commit -m "Merge from trunk for upcoming release"
+
+3. Test the merge and fix any issues on the branch
 
   autoreconf -i
   ./configure
   make
-  ./rungappman.sh
- 
-3. Commit the changes on the branch
+  ./tests/rungappman.sh
+
+4. Create a new clean checkout and build and test the new release. Fix any
+	 issues on the branch (ofcourse)
+
+	TMPDIR=$(mktemp -d)
+	pushd ${TMPDIR}
+	svn checkout http://gappman.googlecode.com/svn/branches/<MAJOR>.<MINOR> \
+		gappman-read-only
+
+	pushd gappman-read-only
+  libtoolize --copy
+	for CONFIGURE_AC in . appmanager libs applets
+	do
+		pushd ${CONFIGURE_AC}
+  	aclocal
+  	autoconf
+  	autoheader
+  	automake --add-missing
+		popd
+	done
+  ./configure
+  make
+  ./tests/rungappman.sh
+	 
+5. Edit the Changelog and raise the version number in configure.ac
+
+6. Commit the changes on the branch
 
   svn commit -m "New maintenance version <MAJOR>.<MINOR>.<MAINTENANCE/UPDATE>"
 
-3. Make a maintenance release version
+7. Make a maintenance release version
  
   svn copy https://gappman.googlecode.com/svn/branches/RELEASEVERSION \
     https://gappman.googlecode.com/svn/tags/release-RELEASEVERSION.x

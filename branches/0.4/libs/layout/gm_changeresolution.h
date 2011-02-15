@@ -31,7 +31,7 @@ void gm_res_free();
 * \param height new display height
 * \return gm_res_error
 */
-int gm_res_changeresolution (int width, int height);
+int gm_res_changeresolution(int width, int height);
 
 /**
 * \brief Queries using Xrandr the possible screen resolutions
@@ -39,12 +39,12 @@ int gm_res_changeresolution (int width, int height);
 * \param size pointer to integer that will hold the amount of available sizes
 * \return int Error type, see enum error_types
 */
-int gm_res_getpossibleresolutions (XRRScreenSize **sizes, int *size);
+int gm_res_getpossibleresolutions(XRRScreenSize ** sizes, int *size);
 
 /**
 * \brief returns the current screen resolution
 * \return XRRScreenSize* pointer to a XRRScreenSize struct that will hold the resolution
 */
-int gm_res_get_current_size(XRRScreenSize *size);
+int gm_res_get_current_size(XRRScreenSize * size);
 
 #endif
