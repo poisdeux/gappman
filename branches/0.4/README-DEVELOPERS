@@ -112,16 +112,7 @@ Maintenance/update releases should be tested on the branch and result in a
 		gappman-read-only
 
 	pushd gappman-read-only
-  libtoolize --copy
-	for CONFIGURE_AC in . appmanager libs applets
-	do
-		pushd ${CONFIGURE_AC}
-  	aclocal
-  	autoconf
-  	autoheader
-  	automake --add-missing
-		popd
-	done
+	autoreconf -vif
   ./configure
   make
   ./tests/rungappman.sh
