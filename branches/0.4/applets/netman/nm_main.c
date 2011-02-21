@@ -322,6 +322,10 @@ G_MODULE_EXPORT int gm_module_init()
   return GM_SUCCES;
 }
 
+/**
+* \brief Used by gappman to point the location of the configuration file
+* \param filename string holding the absolute pathname to the configuration file
+*/
 G_MODULE_EXPORT void gm_module_set_conffile(const char* filename)
 {
     conffile = filename;

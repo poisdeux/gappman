@@ -14,24 +14,21 @@
 #include <gtk/gtk.h>
 #include <libxml/xmlreader.h>
 
-typedef int (*GM_MODULE_INIT) (void);	///< Function to initialize the
-										// module
+/**
+* \brief Function to initialize the module
+*/
+typedef int (*GM_MODULE_INIT) (void);
+/**
+* \brief Function returning the widget the module use. If any.
+*/
 typedef GtkWidget *(*GM_MODULE_WIDGET) (void);	///< Function returning the
 												// widget the module use. If
 												// any/
-typedef void (*GM_MODULE_SET_ICON_SIZE) (int width, int height);	///<
-																	// Function 
-																	// to set
-																	// the
-																	// width
-																	// and
-																	// height
-																	// of the
-																	// image
-																	// used by 
-																	// the
-																	// module, 
-																	// if any.
+/**
+* \brief Function to set the width and height of the image used 
+* by the module, if any.
+*/
+typedef void (*GM_MODULE_SET_ICON_SIZE) (int width, int height);	
 typedef void (*GM_MODULE_SET_CONFFILE) (const char *filename);	///< Function 
 																// for gappman 
 																// to provide

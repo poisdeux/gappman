@@ -139,11 +139,7 @@ Maintenance/update releases should be tested on the branch and result in a
 
 2. Create the makefiles
 
-  libtoolize --copy
-  aclocal
-  autoconf
-	autoheader
-  automake --add-missing
+  autoreconf -vif
   ./configure
 
 3. Create the tarball as follows:
