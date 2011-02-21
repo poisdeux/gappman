@@ -113,11 +113,13 @@ Maintenance/update releases should be tested on the branch and result in a
 
 	pushd gappman-read-only
 	autoreconf -vif
-  ./configure
-  make
-  ./tests/rungappman.sh
-	 
-5. Edit the Changelog and raise the version number in configure.ac
+	./configure
+	make
+	./tests/rungappman.sh
+	popd
+	popd
+ 
+5. Edit the Changelog. Raise the version number in configure.ac
 
 6. Commit the changes on the branch
 
