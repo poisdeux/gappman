@@ -22,8 +22,8 @@ struct nm_element
 {
 		gboolean running; //!< Should be TRUE if exec has been executed and is still running. FALSE otherwise.
     int *amount_of_elements; //!< total number of elements
-		guint	g_source_tag; 
-    const xmlChar *name; //!< holds the name of the program
+		guint	g_source_tag; //!< used to hold the source id returned by g_child_watch_add
+    const xmlChar *name; //!< used hold the name of the program
     const xmlChar *exec; //!< absolute path to executable
     const xmlChar *logosuccess; //!< absolute path to image file
     const xmlChar *logofail; //!< absolute path to image file

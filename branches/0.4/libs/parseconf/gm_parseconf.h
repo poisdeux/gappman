@@ -18,33 +18,33 @@
 * \brief Function to initialize the module
 */
 typedef int (*GM_MODULE_INIT) (void);
+
 /**
 * \brief Function returning the widget the module use. If any.
 */
-typedef GtkWidget *(*GM_MODULE_WIDGET) (void);	///< Function returning the
-												// widget the module use. If
-												// any/
+typedef GtkWidget *(*GM_MODULE_WIDGET) (void);
+
 /**
 * \brief Function to set the width and height of the image used 
 * by the module, if any.
 */
 typedef void (*GM_MODULE_SET_ICON_SIZE) (int width, int height);	
-typedef void (*GM_MODULE_SET_CONFFILE) (const char *filename);	///< Function 
-																// for gappman 
-																// to provide
-																// the
-																// location of 
-																// its
-																// configuration 
-																// file to the 
-																// module.
-typedef void *(*GM_MODULE_START) (void);	///< Function to start the
-											// module. Should be called after
-											// GM_MODULE_INIT.
-typedef int (*GM_MODULE_STOP) (void);	///< Function to stop the module.
-										// This should release all memory
-										// occupied by the module. Gappman
-										// does no garbage collection.
+
+/**
+* \brief Function for gappman to provide the location of its configuration
+* file to the module.
+*/
+typedef void (*GM_MODULE_SET_CONFFILE) (const char *filename);	
+
+/**
+* \brief Function to start the module. Should be called after GM_MODULE_INIT.
+*/
+typedef void *(*GM_MODULE_START) (void);
+
+/**
+* \brief Function to stop the module. This should release all memory occupied by the module. Gappman does no garbage collection.
+*/
+typedef int (*GM_MODULE_STOP) (void);	
 
 /**
 * Enumeration for length types.
