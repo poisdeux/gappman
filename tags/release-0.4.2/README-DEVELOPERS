@@ -156,7 +156,7 @@ Maintenance/update releases should be tested on the branch and result in a
   cd gappman-*
   ./configure
   make
-  ./src/gappman --conffile xml-config-files/conf.xml --windowed
+	./tests/rungappman.sh
 
 5. If step 4 was succesfule you may upload the tarball to the website.
 
