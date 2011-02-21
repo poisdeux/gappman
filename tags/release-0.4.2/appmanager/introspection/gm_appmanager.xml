@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<node name="/GmAppmanager">
+  <interface name="gappman.appmanager.Interface">
+    <method name="GetFontsize">
+      <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="send_fontsize"/>
+      <arg type="i" name="fontsize" direction="out" />
+    </method>
+    <method name="GetStartedProcs">
+      <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="send_proceslist"/>
+      <arg type="as" name="proceslist" direction="out" />
+    </method>
+    <method name="UpdateResolution">
+      <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="update_resolution"/>
+      <arg type="s" name="name" direction="in" />
+      <arg type="i" name="width" direction="in" />
+      <arg type="i" name="height" direction="in" />
+    </method>
+		<method name="GetConfPath">
+      <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="send_confpath"/>
+      <arg type="s" name="name" direction="out" />
+		</method>
+  </interface>
+</node>
+

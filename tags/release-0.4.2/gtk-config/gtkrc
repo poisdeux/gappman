@@ -1,0 +1,53 @@
+pixmap_path "/usr/share/backgrounds/"
+
+style "main-window-style"
+{
+  # set the background to black
+  bg[NORMAL] = "#000000"
+  bg_pixmap[NORMAL] = ""
+}
+
+style "applet-style"
+{
+	fg[NORMAL] = "#A0A0A0"
+  fg[PRELIGHT] = "#FFFFFF"
+	fg[SELECTED] = "#202020"
+	fg[ACTIVE] = "#404040"
+  bg[NORMAL] = "#202020"
+  bg[PRELIGHT] = "#AAAAAA"
+	bg[SELECTED] = "#404040"
+	bg[ACTIVE] = "#505050"
+}
+
+style "text-style"
+{
+	fg[NORMAL] = "#A0A0A0"
+  fg[PRELIGHT] = "#FFFFFF"
+	fg[SELECTED] = "#202020"
+	fg[ACTIVE] = "#404040"
+	fg[INSENSITIVE] = "#202020"
+  bg[NORMAL] = "#202020"
+  bg[PRELIGHT] = "#AAAAAA"
+	bg[SELECTED] = "#101010"
+	bg[ACTIVE] = "#303030"
+	bg[INSENSITIVE] = "#101010"
+}
+
+style "button-style"
+{
+  fg[NORMAL] = "#505050"
+  fg[PRELIGHT] = "#FFFFFF"
+	fg[SELECTED] = "#404040"
+	fg[ACTIVE] = "#505050"
+  bg[NORMAL] = "#404040"
+  bg[PRELIGHT] = "#303030"
+	bg[SELECTED] = "#303030"
+	bg[ACTIVE] = "#404040"
+	GtkButton::relief = GTK_RELIEF_NONE
+}
+
+class "GtkWindow" style "applet-style"
+class "GtkButton" style "button-style"
+class "GtkLabel" style "text-style"
+widget "gm_mainwindow" style "main-window-style"
+widget "gm_applet" style "applet-style"
