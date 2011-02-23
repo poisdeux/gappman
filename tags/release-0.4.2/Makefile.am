@@ -20,7 +20,7 @@ endif
 SUBDIRS = $(LIBSDIR) $(GAPPMANDIR) $(APPLETSDIR) $(DOXYDIR)
 
 dist_doc_DATA = README ChangeLog COPYING
-EXTRA_DIST = $(srcdir)/gtk-config/gtkrc $(srcdir)/xml-config-files/*.xml $(srcdir)/logos/*.png $(srcdir)/ChangeLog
+EXTRA_DIST = $(srcdir)/gtk-config/gtkrc $(srcdir)/xml-config-files/*.xml $(srcdir)/logos/*.png $(srcdir)/ChangeLog $(srcdir)/tests
 
 dist-hook:
 	find $(distdir) -depth \( -name "*~" -o -name ".svn" \) -exec rm -rf {} \;

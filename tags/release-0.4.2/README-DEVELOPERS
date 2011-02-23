@@ -118,6 +118,7 @@ Maintenance/update releases should be tested on the branch and result in a
 	./tests/rungappman.sh
 	popd
 	popd
+	rm -rf ${TMPDIR}
  
 5. Edit the Changelog. Raise the version number in configure.ac
 
@@ -150,15 +151,18 @@ Maintenance/update releases should be tested on the branch and result in a
 
 4. Test if the tarball builds
 
-  cp gappman-*.tar.gz /tmp
-  cd /tmp
+  TMPDIR=$(mktemp -d)
+  cp gappman-*.tar.gz ${TMPDIR}
+  pushd ${TMPDIR}
   tar xzf gappman-*.tar.gz
   cd gappman-*
   ./configure
   make
-	./tests/rungappman.sh
+  ./tests/rungappman.sh
+  popd
+  rm -rf ${TMPDIR}
 
-5. If step 4 was succesfule you may upload the tarball to the website.
+5. If step 4 was succesful you may upload the tarball to the website.
 
 -----------------------------------------------------------------------------
 6. Checking the code
