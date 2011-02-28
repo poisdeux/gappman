@@ -60,14 +60,12 @@ static void check_status(GPid pid, gint status, nm_elements* elt)
 	{
 		//program exited normally
 		elt->running = FALSE;
-		elt->prev_status = elt->status;
 		elt->status = WEXITSTATUS(status);
 	}
 	else if ( WIFSIGNALED(status) )
 	{
 		//program did not exit normally
 		elt->running = FALSE;
-		elt->prev_status = elt->status;
 		elt->status = -1;	
 	}
 
@@ -157,23 +155,16 @@ static void update_button()
 	
 	while(elts != NULL)
 	{
-		//we only need to do something if the status changed
-		if( elts->prev_status != elts->status )
+		if( ( elts->status == -1 ) || (elts->status != elts->success) )
 		{
-			if( ( elts->status == -1 ) || (elts->status != elts->success) )
-			{
+			g_debug("Fail for %s old:%d new:%d", elts->name, elts->status);
   			gdk_threads_enter();
-				gtk_button_set_image(main_button, GTK_WIDGET(elts->image_fail));
+			gtk_button_set_image(main_button, GTK_WIDGET(elts->image_fail));
   			gdk_threads_leave();
 
-				// Network will only succeed if all checks succeed. So we can stop
-				// if one of the checks fails
-				return;
-			}
-			else
-			{
-				success = 1;
-			}
+			// Network will only succeed if all checks succeed. So we can stop
+			// if one of the checks fails
+			return;
 		}
 		elts = elts->next;
 	}	

@@ -145,7 +145,8 @@ Maintenance/update releases should be tested on the branch and result in a
   autoreconf -vif
   ./configure
 
-3. Create the tarball as follows:
+3. Create the tarball as follows 
+   (make sure all dependencies are installed, e.g. doxygen):
 
   make dist
 

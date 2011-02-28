@@ -17,4 +17,4 @@ libgm_connect_la_CPPFLAGS += -I$(top_builddir)/generic
 if WITH_DBUS_SUPPORT
 libgm_connect_la_LIBADD = $(DBUS_LIBS)
 endif
-libgm_connect_la_LDFLAGS = -version-info 0:0:0
+libgm_connect_la_LDFLAGS = -version-info 0:1:0
