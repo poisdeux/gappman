@@ -157,7 +157,6 @@ static void update_button()
 	{
 		if( ( elts->status == -1 ) || (elts->status != elts->success) )
 		{
-			g_debug("Fail for %s old:%d new:%d", elts->name, elts->status);
   			gdk_threads_enter();
 			gtk_button_set_image(main_button, GTK_WIDGET(elts->image_fail));
   			gdk_threads_leave();
