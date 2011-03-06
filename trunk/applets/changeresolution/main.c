@@ -273,6 +273,7 @@ int main(int argc, char **argv)
 	GtkWidget *button;
 	GtkWidget *vbox;
 	GtkWidget *hbox;
+	GtkWidget *label;
 	GtkWidget *separator;
 
 	int c;
@@ -280,8 +281,10 @@ int main(int argc, char **argv)
 	int ret_value;
 	int i;
 	XRRScreenSize *sizes;
+	XRRScreenSize *current_size;
 	char *conffile = SYSCONFDIR "/conf.xml";
 	gchar *gappman_confpath;
+	gchar *markup;
 
 	gtk_init(&argc, &argv);
 	screen = gdk_screen_get_default();
@@ -378,13 +381,33 @@ int main(int argc, char **argv)
 	}
 	else
 	{
-		// Make window transparent
-		// gtk_window_set_opacity (GTK_WINDOW (mainwin), 0.8);
-
 		vbox = gtk_vbox_new(FALSE, 10);
 
+		g_debug("0.1");
+		if ( gm_res_get_current_size(current_size) == GM_SUCCES )
+		{
+			g_debug("1");
+			hbox = gtk_hbox_new(FALSE, 10);
+			label = gtk_label_new("");
+			markup =
+				g_markup_printf_escaped("<span size=\"%d\">%dx%d</span>", fontsize,
+								current_size->width, current_size->height);
+			gtk_label_set_markup(GTK_LABEL(label), markup);
+			g_free(markup);
+			gtk_container_add(GTK_CONTAINER(hbox), label);
+			gtk_widget_show(label);
+			gtk_container_add(GTK_CONTAINER(vbox), hbox);
+			gtk_widget_show(hbox);
+			separator = gtk_hseparator_new();
+			gtk_container_add(GTK_CONTAINER(vbox), separator);
+			gtk_widget_show(separator);
+			g_debug("2");
+		}
+
+			g_debug("2.1");
 		for (i = 0; i < nsize; i++)
 		{
+			g_debug("3");
 			hbox = createrow(&sizes[i], dialog_width);
 			gtk_container_add(GTK_CONTAINER(vbox), hbox);
 			gtk_widget_show(hbox);

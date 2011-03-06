@@ -30,13 +30,13 @@ The following versioning scheme is used by gappman.
 <MAJOR>.<MINOR>[.<MAINTENANCE/UPDATE>]
 
 *  MAJOR version releases represent a complete implementation of a set of major
-   features. NOTE: the major set for the 1.0 release still has to be 
-   determined. 
+   features. 
 *  MINOR version releases include one or more major features, design changes, 
    and interface changes.
 *  MAINTENANCE/UPDATE releases are optional and include bugfixes, security fixes, 
    new applets.
 
+See docs/doxygen/html/index.html for the list of MAJOR and MINOR features.
 Only integers are allowed as versionnumbers.
 For example, the following versions are accepted:
 

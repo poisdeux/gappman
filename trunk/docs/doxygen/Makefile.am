@@ -5,7 +5,7 @@ doc_DATA = $(docpkg)
 $(docpkg): doxygen.stamp
 				tar chof - html | gzip -9 -c >$@
 
-doxygen.stamp: Doxyfile
+doxygen.stamp: Doxyfile mainpage
 				$(DOXYGEN) $<
 				echo stamp > $@
 
