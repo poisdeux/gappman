@@ -46,6 +46,7 @@ AC_CONFIG_FILES([Makefile
                  changeresolution/Makefile
                  netman/Makefile
                  processmanager/Makefile
+                 digitalclock/Makefile
                  shutdown/Makefile])
 AC_OUTPUT
 
