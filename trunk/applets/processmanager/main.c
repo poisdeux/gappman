@@ -406,7 +406,6 @@ int main(int argc, char **argv)
 		// fallback on default
 		fontsize = gm_get_fontsize();
 	}
-
 	status =
 		gm_get_started_procs_from_gappman(2103, "localhost", &started_procs);
 

@@ -181,7 +181,7 @@ int gm_res_changeresolution(int width, int height)
 	return GM_SUCCES;
 }
 
-XRRScreenSize  gm_res_get_current_size()
+int gm_res_get_current_size(XRRScreenSize * size)
 {
 	int nsize;
 	SizeID size_id;
@@ -189,20 +189,18 @@ XRRScreenSize  gm_res_get_current_size()
 	GdkDisplay *gdk_dpy;
 	XRRScreenSize *sizes;
 
-	g_debug("1");
 	gdk_dpy = gdk_display_get_default();
-	g_debug("2");
 
 	if (sc == NULL)
 	{
 		g_warning("sc is NULL");
-		return NULL;
+		return GM_NO_SCREEN_CONFIGURATION;
 	}
 	sizes = XRRConfigSizes(sc, &nsize);
-	g_debug("3");
 
 	size_id = XRRConfigCurrentConfiguration(sc, &current_rotation);
-	g_debug("4 %d", size_id);
 
-	return sizes[size_id];
+	*size = sizes[size_id];
+
+	return GM_SUCCES;
 }
