@@ -56,7 +56,7 @@ Now you should be able to build appmanager as usual:
 The program can be executed as follows from the source tarball after
 building it:
 
-src/gappman --conffile xml-config-files/conf.xml --gtkrc gtk-config/gtkrc
+appmanager/gappman --conffile xml-config-files/conf.xml --gtkrc gtk-config/gtkrc
 
 This will start appmanager using the sample configuration file
 in "xml-config-files/conf.xml" and the gtk configuration file

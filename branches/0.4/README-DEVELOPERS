@@ -86,15 +86,15 @@ Maintenance/update releases should be tested on the branch and result in a
 <MAJOR>.<MINOR>.<MAINTENANCE/UPDATE> version.
 
 1. Merge wanted/needed changes from trunk to branch.
-	 NOTE: svn has a problem merging repos where dirs or files are moved or 
+     NOTE: svn has a problem merging repos where dirs or files are moved or 
          deleted. ALWAYS CHECK!!!
 
-	cd gappman/branch/<MAJOR>.<MINOR>
+    cd gappman/branch/<MAJOR>.<MINOR>
   svn merge --reintegrate https://gappman.googlecode.com/svn/trunk  
 
 2. Fix conflicts and commit the merge
 
-	svn commit -m "Merge from trunk for upcoming release"
+    svn commit -m "Merge from trunk for upcoming release"
 
 3. Test the merge and fix any issues on the branch
 
@@ -104,20 +104,21 @@ Maintenance/update releases should be tested on the branch and result in a
   ./tests/rungappman.sh
 
 4. Create a new clean checkout and build and test the new release. Fix any
-	 issues on the branch (ofcourse)
+     issues on the branch (ofcourse)
 
-	TMPDIR=$(mktemp -d)
-	pushd ${TMPDIR}
-	svn checkout http://gappman.googlecode.com/svn/branches/<MAJOR>.<MINOR> \
-		gappman-read-only
+    TMPDIR=$(mktemp -d)
+    pushd ${TMPDIR}
+    svn checkout http://gappman.googlecode.com/svn/branches/<MAJOR>.<MINOR> \
+        gappman-read-only
 
-	pushd gappman-read-only
-	autoreconf -vif
-	./configure
-	make
-	./tests/rungappman.sh
-	popd
-	popd
+    pushd gappman-read-only
+    autoreconf -vif
+    ./configure
+    make
+    ./tests/rungappman.sh
+    popd
+    popd
+    rm -rf ${TMPDIR}
  
 5. Edit the Changelog. Raise the version number in configure.ac
 
@@ -144,21 +145,25 @@ Maintenance/update releases should be tested on the branch and result in a
   autoreconf -vif
   ./configure
 
-3. Create the tarball as follows:
+3. Create the tarball as follows 
+   (make sure all dependencies are installed, e.g. doxygen):
 
   make dist
 
 4. Test if the tarball builds
 
-  cp gappman-*.tar.gz /tmp
-  cd /tmp
+  TMPDIR=$(mktemp -d)
+  cp gappman-*.tar.gz ${TMPDIR}
+  pushd ${TMPDIR}
   tar xzf gappman-*.tar.gz
   cd gappman-*
   ./configure
   make
-  ./src/gappman --conffile xml-config-files/conf.xml --windowed
+  ./tests/rungappman.sh
+  popd
+  rm -rf ${TMPDIR}
 
-5. If step 4 was succesfule you may upload the tarball to the website.
+5. If step 4 was succesful you may upload the tarball to the website.
 
 -----------------------------------------------------------------------------
 6. Checking the code
@@ -172,26 +177,26 @@ Splint might be a nice tool to check the code for security vulnerabilities and
 coding mistakes. It can be executed as follows:
 
 splint +charint -warnposix -paramuse -nullpass \
-	-I `pkg-config gtk+-2.0 --cflags` `pkg-config libxml-2.0 --cflags` \
-	-I./libs/connect/ -I./libs/generic/ -I./libs/layout/ -I./libs/parseconf/ \
-  	<SOURCEFILE>
+    -I `pkg-config gtk+-2.0 --cflags` `pkg-config libxml-2.0 --cflags` \
+    -I./libs/connect/ -I./libs/generic/ -I./libs/layout/ -I./libs/parseconf/ \
+    <SOURCEFILE>
 
 It currently shows a lot of warnings.
 
 We use the following parameters to reduce the amount of warnings:
 
-  -paramuse			As we use callbacks for GTK there are functions which
-					contain parameters that are not always used in the 
-					function
-  -nullpass			Some of the gm functions use NULL as an indication that
-					the default should be used. Example: gm_show_error_dialog
-					where the callback may be NULL to use the default callback
-					function that destroys the dialog upon pressing the 
-					close-button.
-  -warnposix		the posix libs make splint barf about bugs in the posix libraries.
-					Unless we intend to debug these libs we can ignore the posix warnings.
-  +charint			We use get_opts to parse commandline options. As we use chars in the 
-					switch-statement to select the commandline options, we use chars in the 
-					long_options struct, although the struct requires type int. As long as
-					we use the same chars in the struct as in the switch-statement there is
-					no problem. Hence, we may ignore these warnings.
+  -paramuse         As we use callbacks for GTK there are functions which
+                    contain parameters that are not always used in the 
+                    function
+  -nullpass         Some of the gm functions use NULL as an indication that
+                    the default should be used. Example: gm_show_error_dialog
+                    where the callback may be NULL to use the default callback
+                    function that destroys the dialog upon pressing the 
+                    close-button.
+  -warnposix        the posix libs make splint barf about bugs in the posix libraries.
+                    Unless we intend to debug these libs we can ignore the posix warnings.
+  +charint          We use get_opts to parse commandline options. As we use chars in the 
+                    switch-statement to select the commandline options, we use chars in the 
+                    long_options struct, although the struct requires type int. As long as
+                    we use the same chars in the struct as in the switch-statement there is
+                    no problem. Hence, we may ignore these warnings.

@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.61])
-AC_INIT([gappman-applets], [TRUNKMUSTNOTGENERATEPACKAGE], [m.brekhof@gmail.com], [gappman-applets], [http://code.google.com/p/gappman/])
+AC_INIT([gappman-applets], [0.4.2], [m.brekhof@gmail.com], [gappman-applets], [http://code.google.com/p/gappman/])
 AC_CONFIG_SRCDIR([netman/nm_main.c])
 AC_CANONICAL_SYSTEM
 AC_CONFIG_HEADERS([config.h])

@@ -2,7 +2,7 @@
 SUBDIRS = introspection
 
 ACLOCAL_AMFLAGS = -I m4
-noinst_HEADERS = listener.h appmanager.h listener-dbus.h
+noinst_HEADERS = listener.h appmanager.h listener-dbus.h listener-socket.h
 bin_PROGRAMS = gappman 
 gappman_SOURCES = appmanager.c listener.c
 if WITH_DBUS_SUPPORT
