@@ -1,6 +1,94 @@
 #include <gtk/gtk.h>
 
 static gdouble linewidth = 10.0;
+static double vert_bar_length;
+static double hor_bar_length;
+
+static gint bars_for_digit[9][6];
+
+static void create_bars_for_digit()
+{
+	//digit 0
+	bars_for_digit[0][0] = 1;
+	bars_for_digit[0][1] = 1;
+	bars_for_digit[0][2] = 1;
+	bars_for_digit[0][3] = 0;
+	bars_for_digit[0][4] = 1;
+	bars_for_digit[0][5] = 1;
+	bars_for_digit[0][6] = 1;
+	//digit 1 
+	bars_for_digit[1][0] = 0;
+	bars_for_digit[1][1] = 0;
+	bars_for_digit[1][2] = 1;
+	bars_for_digit[1][3] = 0;
+	bars_for_digit[1][4] = 0;
+	bars_for_digit[1][5] = 1;
+	bars_for_digit[1][6] = 0;
+	//digit 2 
+	bars_for_digit[2][0] = 1;
+	bars_for_digit[2][1] = 0;
+	bars_for_digit[2][2] = 1;
+	bars_for_digit[2][3] = 1;
+	bars_for_digit[2][4] = 1;
+	bars_for_digit[2][5] = 0;
+	bars_for_digit[2][6] = 1;
+	//digit 3
+	bars_for_digit[3][0] = 1;
+	bars_for_digit[3][1] = 0;
+	bars_for_digit[3][2] = 1;
+	bars_for_digit[3][3] = 1;
+	bars_for_digit[3][4] = 0;
+	bars_for_digit[3][5] = 1;
+	bars_for_digit[3][6] = 1;
+	//digit 4 
+	bars_for_digit[4][0] = 0;
+	bars_for_digit[4][1] = 1;
+	bars_for_digit[4][2] = 1;
+	bars_for_digit[4][3] = 1;
+	bars_for_digit[4][4] = 0;
+	bars_for_digit[4][5] = 1;
+	bars_for_digit[4][6] = 0;
+	//digit 5 
+	bars_for_digit[5][0] = 1;
+	bars_for_digit[5][1] = 1;
+	bars_for_digit[5][2] = 0;
+	bars_for_digit[5][3] = 1;
+	bars_for_digit[5][4] = 0;
+	bars_for_digit[5][5] = 1;
+	bars_for_digit[5][6] = 1;
+	//digit 6
+	bars_for_digit[6][0] = 1;
+	bars_for_digit[6][1] = 1;
+	bars_for_digit[6][2] = 0;
+	bars_for_digit[6][3] = 1;
+	bars_for_digit[6][4] = 1;
+	bars_for_digit[6][5] = 1;
+	bars_for_digit[6][6] = 1;
+	//digit 7
+	bars_for_digit[7][0] = 1;
+	bars_for_digit[7][1] = 0;
+	bars_for_digit[7][2] = 1;
+	bars_for_digit[7][3] = 0;
+	bars_for_digit[7][4] = 0;
+	bars_for_digit[7][5] = 1;
+	bars_for_digit[7][6] = 0;
+	//digit 8
+	bars_for_digit[8][0] = 1;
+	bars_for_digit[8][1] = 1;
+	bars_for_digit[8][2] = 1;
+	bars_for_digit[8][3] = 1;
+	bars_for_digit[8][4] = 1;
+	bars_for_digit[8][5] = 1;
+	bars_for_digit[8][6] = 1;
+	//digit 9
+	bars_for_digit[9][0] = 1;
+	bars_for_digit[9][1] = 1;
+	bars_for_digit[9][2] = 1;
+	bars_for_digit[9][3] = 1;
+	bars_for_digit[9][4] = 0;
+	bars_for_digit[9][5] = 1;
+	bars_for_digit[9][6] = 1;
+}
 
 static gboolean draw_horizontal_bar(cairo_t *cr, int x, int y, int length)
 {
@@ -51,6 +139,64 @@ static gboolean draw_vertical_bar(cairo_t *cr, double x, double y, double length
 	cairo_fill(cr);
 }
 
+static void draw_bar(cairo_t *cr, int bar, gdouble x, gdouble y)
+{
+/*
+bar positions:
+
+ 0		
+1 2
+ 3
+4 5
+ 6 
+*/
+
+
+	switch(bar)
+	{
+		case 0:
+			draw_horizontal_bar(cr, x, y, hor_bar_length);
+			break;
+		case 1:
+			draw_vertical_bar(cr, x - linewidth , y + linewidth, vert_bar_length);
+			break;
+		case 2:
+			draw_vertical_bar(cr, x + hor_bar_length , y + linewidth, vert_bar_length);
+			break;
+		case 3:
+			draw_horizontal_bar(cr, x, y + linewidth + vert_bar_length, hor_bar_length);
+			break;
+		case 4:
+			draw_vertical_bar(cr, x - linewidth, y + (2*linewidth) + vert_bar_length, vert_bar_length);
+			break;
+		case 5:
+			draw_vertical_bar(cr, x + hor_bar_length, y + (2*linewidth) + vert_bar_length, vert_bar_length);
+			break;
+		case 6:
+			draw_horizontal_bar(cr, x, y + (2*vert_bar_length) + (2*linewidth), hor_bar_length);
+			break;
+		default:
+			g_warning("Sorry sir, but I have no knowledge of bar number %d", bar);
+			break;
+	}
+}
+
+static draw_digit(cairo_t *cr, int digit, gdouble x_offset, gdouble y_offset)
+{
+	int i;
+
+	for(i = 0; i < 7; i++)
+	{
+		g_warning("bar: %d", bars_for_digit[digit][i]);
+		if( bars_for_digit[digit][i] == 1 )
+		{
+			g_warning("%d", i);
+			draw_bar(cr, i, x_offset, y_offset);
+		}
+	}  
+}
+
+
 static gboolean
 on_expose_event(GtkWidget *widget,
     GdkEventExpose *event,
@@ -58,8 +204,6 @@ on_expose_event(GtkWidget *widget,
 {
 	cairo_t *cr;
 	double x, y;
-	double vert_bar_length;
-	double hor_bar_length;
 	gint w_width, w_height;
 
 	cr = gdk_cairo_create (widget->window);
@@ -75,31 +219,8 @@ on_expose_event(GtkWidget *widget,
 	hor_bar_length =  (w_width/5) - 5;
 
 	linewidth = hor_bar_length/5;
-/*
 
-	bar positions:
-
-	 1
-  2 3
-   4
-  5 6
-   7
-*/
-
-	//pos 1
-	draw_horizontal_bar(cr, x, y, hor_bar_length);
-	//pos 2
-	draw_vertical_bar(cr, x - linewidth , y + linewidth, vert_bar_length);
-	//pos 3
-	draw_vertical_bar(cr, x + hor_bar_length , y + linewidth, vert_bar_length);
-	//pos 4 
-	draw_horizontal_bar(cr, x, y + linewidth + vert_bar_length, hor_bar_length);
-	//pos 5 
-	draw_vertical_bar(cr, x - linewidth, y + (2*linewidth) + vert_bar_length, vert_bar_length);
-	//pos 6
-	draw_vertical_bar(cr, x + hor_bar_length, y + (2*linewidth) + vert_bar_length, vert_bar_length);
-	//pos 7
-	draw_horizontal_bar(cr, x, y + (2*vert_bar_length) + (2*linewidth), hor_bar_length);
+	draw_digit(cr, 2, 10, 10);
 
 	cairo_stroke (cr);
 
