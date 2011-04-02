@@ -3,6 +3,8 @@
 static gdouble linewidth = 10.0;
 static double vert_bar_length;
 static double hor_bar_length;
+static GtkWidget *window;
+static gint digit;
 
 static gint bars_for_digit[9][6];
 
@@ -187,10 +189,8 @@ static draw_digit(cairo_t *cr, int digit, gdouble x_offset, gdouble y_offset)
 
 	for(i = 0; i < 7; i++)
 	{
-		g_warning("bar: %d", bars_for_digit[digit][i]);
 		if( bars_for_digit[digit][i] == 1 )
 		{
-			g_warning("%d", i);
 			draw_bar(cr, i, x_offset, y_offset);
 		}
 	}  
@@ -206,6 +206,8 @@ on_expose_event(GtkWidget *widget,
 	double x, y;
 	gint w_width, w_height;
 
+	g_debug("setting digit %d", digit);
+
 	cr = gdk_cairo_create (widget->window);
 
 	gtk_window_get_size(GTK_WINDOW(widget), &w_width, &w_height);
@@ -220,7 +222,7 @@ on_expose_event(GtkWidget *widget,
 
 	linewidth = hor_bar_length/5;
 
-	draw_digit(cr, 2, 10, 10);
+	draw_digit(cr, digit, 10, 10);
 
 	cairo_stroke (cr);
 
@@ -228,9 +230,16 @@ on_expose_event(GtkWidget *widget,
 	return FALSE;
 }
 
+static gboolean update_time(gpointer data)
+{
+	g_warning("update_time");
+	digit = random()%10;
+	g_signal_emit_by_name(window, "expose-event", NULL);
+	return TRUE;
+}
+
 int main(int argc, char** argv)
 {
-	GtkWidget *window;
 	
 	gtk_init(&argc, &argv);
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -241,10 +250,13 @@ int main(int argc, char** argv)
   g_signal_connect(window, "destroy",
       G_CALLBACK(gtk_main_quit), NULL);
 
+	create_bars_for_digit();
+
 	gtk_widget_set_app_paintable(window, TRUE);
 
 	g_signal_connect(G_OBJECT(window), "expose-event", G_CALLBACK(on_expose_event), NULL);
 	
+	g_timeout_add(1000, update_time, NULL);
 	gtk_widget_show_all(window);
 
 	gtk_main();
