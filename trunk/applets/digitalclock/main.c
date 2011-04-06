@@ -1,3 +1,15 @@
+/**
+ * \file main.c
+ * \brief Creates a window showing the time in digital letters as some LED displays show
+ *
+ *
+ * GPL v2
+ *
+ * Authors:
+ *   Martijn Brekhof <m.brekhof@gmail.com>
+ *
+ */
+
 #include <gtk/gtk.h>
 
 static gdouble linewidth = 10.0;
@@ -175,7 +187,6 @@ bar positions:
 			draw_vertical_bar(cr, x + hor_bar_length, y + (2*linewidth) + vert_bar_length, vert_bar_length);
 			break;
 		case 6:
-			g_warning("drawing bar 6");
 			draw_horizontal_bar(cr, x, y + (2*vert_bar_length) + (2*linewidth), hor_bar_length);
 			break;
 		default:
@@ -188,10 +199,8 @@ static draw_digit(cairo_t *cr, int digit, gdouble x_offset, gdouble y_offset)
 {
 	int i;
 
-	g_debug("drawing digit %d", digit);
 	for(i = 0; i < 7; i++)
 	{
-		g_debug("bars_for_digit[%d][%d] = %d\n", digit, i, bars_for_digit[digit][i]);
 		if( bars_for_digit[digit][i] == 1 )
 		{
 			draw_bar(cr, i, x_offset, y_offset);
@@ -206,9 +215,10 @@ on_expose_event(GtkWidget *widget,
     gpointer data)
 {
 	cairo_t *cr;
-	double x, y;
 	gint w_width, w_height;
-
+	gdouble x_offset, y_offset;
+	gdouble x_delta;
+	gint i;
 
 	cr = gdk_cairo_create (widget->window);
 
@@ -217,14 +227,28 @@ on_expose_event(GtkWidget *widget,
 	cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
 	cairo_set_line_width(cr, 0);
 
-	x = 20.0;
-	y = 10.0;
-	vert_bar_length = (w_height/2) - 20.0;
-	hor_bar_length =  (w_width/5) - 5;
-
+	hor_bar_length =  (w_width/5);
 	linewidth = hor_bar_length/5;
+	vert_bar_length = (w_height/2) - (2 * linewidth);
+	hor_bar_length -=  2 * linewidth;
 
-	draw_digit(cr, digit, 10, 10);
+	g_debug("vert_bar_length=%f, hor_bar_length=%f, linewidth=%f", vert_bar_length, hor_bar_length, linewidth);
+	x_offset = linewidth;
+	x_delta = hor_bar_length + (3 * linewidth);
+
+	//hours
+	draw_digit(cr, digit, x_offset, 0);
+	x_offset += x_delta;
+	draw_digit(cr, digit, x_offset, 0);
+	x_offset += x_delta;
+
+	//draw_column(cr, 10 + (2*hor_bar), 10);
+	x_offset += 2*linewidth;
+
+  //minutes
+	draw_digit(cr, digit, x_offset, 0);
+	x_offset += x_delta;
+	draw_digit(cr, digit, x_offset, 0);
 
 	cairo_stroke (cr);
 
@@ -237,7 +261,6 @@ static gboolean update_time(gpointer data)
 	GtkWidget *widget;
 	GdkRegion *region;
 
-	g_warning("update_time");
 	widget = GTK_WIDGET(data);	
 	digit = random()%10;
 
