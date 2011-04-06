@@ -242,8 +242,10 @@ on_expose_event(GtkWidget *widget,
 	draw_digit(cr, digit, x_offset, 0);
 	x_offset += x_delta;
 
-	//draw_column(cr, 10 + (2*hor_bar), 10);
-	x_offset += 2*linewidth;
+	//column
+  cairo_rectangle(cr, x_offset, vert_bar_length, linewidth, linewidth);
+  cairo_rectangle(cr, x_offset, vert_bar_length+(4*linewidth), linewidth, linewidth);
+	x_offset += 4*linewidth;
 
   //minutes
 	draw_digit(cr, digit, x_offset, 0);
