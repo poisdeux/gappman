@@ -6,7 +6,7 @@ static double hor_bar_length;
 static GtkWidget *window;
 static gint digit;
 
-static gint bars_for_digit[9][6];
+static gint bars_for_digit[10][7];
 
 static void create_bars_for_digit()
 {
@@ -175,6 +175,7 @@ bar positions:
 			draw_vertical_bar(cr, x + hor_bar_length, y + (2*linewidth) + vert_bar_length, vert_bar_length);
 			break;
 		case 6:
+			g_warning("drawing bar 6");
 			draw_horizontal_bar(cr, x, y + (2*vert_bar_length) + (2*linewidth), hor_bar_length);
 			break;
 		default:
@@ -187,8 +188,10 @@ static draw_digit(cairo_t *cr, int digit, gdouble x_offset, gdouble y_offset)
 {
 	int i;
 
+	g_debug("drawing digit %d", digit);
 	for(i = 0; i < 7; i++)
 	{
+		g_debug("bars_for_digit[%d][%d] = %d\n", digit, i, bars_for_digit[digit][i]);
 		if( bars_for_digit[digit][i] == 1 )
 		{
 			draw_bar(cr, i, x_offset, y_offset);
@@ -206,7 +209,6 @@ on_expose_event(GtkWidget *widget,
 	double x, y;
 	gint w_width, w_height;
 
-	g_debug("setting digit %d", digit);
 
 	cr = gdk_cairo_create (widget->window);
 
@@ -232,9 +234,22 @@ on_expose_event(GtkWidget *widget,
 
 static gboolean update_time(gpointer data)
 {
+	GtkWidget *widget;
+	GdkRegion *region;
+
 	g_warning("update_time");
+	widget = GTK_WIDGET(data);	
 	digit = random()%10;
-	g_signal_emit_by_name(window, "expose-event", NULL);
+
+	if (!widget->window)
+		return FALSE;
+	
+  region = gdk_drawable_get_clip_region (widget->window);
+  gdk_window_invalidate_region (widget->window, region, TRUE);
+  gdk_window_process_updates (widget->window, TRUE);
+
+  gdk_region_destroy (region);
+
 	return TRUE;
 }
 
@@ -256,7 +271,7 @@ int main(int argc, char** argv)
 
 	g_signal_connect(G_OBJECT(window), "expose-event", G_CALLBACK(on_expose_event), NULL);
 	
-	g_timeout_add(1000, update_time, NULL);
+	g_timeout_add(1000, update_time, window);
 	gtk_widget_show_all(window);
 
 	gtk_main();
