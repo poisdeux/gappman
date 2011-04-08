@@ -9,6 +9,8 @@
  *   Martijn Brekhof <m.brekhof@gmail.com>
  *
  * \todo see if drawing of digits can be done only once a minute, instead of each second
+ * \todo fix alignment of vertical and horizontal blocks at the joints.
+ * \todo add configuration option for color (through gtkrc?)
  */
 
 #include <gtk/gtk.h>
@@ -218,7 +220,7 @@ on_expose_event(GtkWidget *widget,
 	cairo_t *cr;
 	gint w_width, w_height;
 	gdouble x_offset, y_offset;
-	gdouble x_delta;
+	gdouble column_width;
 	gint i;
 	gint first_digit, second_digit;
 	static gint draw_column = 1; 
@@ -229,41 +231,54 @@ on_expose_event(GtkWidget *widget,
 	cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
 	cairo_set_line_width(cr, 0);
 
-	hor_bar_length =  (w_width/5);
-	x_delta = hor_bar_length;
-	linewidth = hor_bar_length/5;
-	x_offset = linewidth;
-	vert_bar_length = (w_height/2) - (2 * linewidth);
+	//empirically determined 1/25th of the window width
+  //provides a nice width for the bars		
+	linewidth = w_width/25.0;
+
+	//Column takes 5% of total width
+	column_width = 0.05*w_width;
+
+	//We have four digits that each take 1/4th
+  //of w_width minus column_width. Each box for
+  //the digits needs to be one horizontal bar
+  //wide.
+	hor_bar_length =  (w_width - column_width)/4.0;
+
+	//compensate for triangles at endpoints of the
+  //digit-bars (see draw_horizontal_bar or draw_vertical_bar)
 	hor_bar_length -=  3 * linewidth;
 
-	//g_debug("vert_bar_length=%f, hor_bar_length=%f, linewidth=%f", vert_bar_length, hor_bar_length, linewidth);
+	//Each box for the digits needs to hold two vertical bars
+	vert_bar_length = (w_height/2.0) - (1.5 * linewidth);
+
+	x_offset = linewidth;
 
 	//hours
 	first_digit = time_tm.tm_hour / 10;
 	second_digit = time_tm.tm_hour % 10;
 	draw_digit(cr, first_digit, x_offset, 0);
-	x_offset += x_delta;
+	x_offset += hor_bar_length;
 	draw_digit(cr, second_digit, x_offset, 0);
-	x_offset += x_delta;
+	x_offset += hor_bar_length - (1.5*linewidth) + (0.025 * w_width);
 
 	//column
 	if(draw_column)
 	{
   	cairo_rectangle(cr, x_offset, vert_bar_length, linewidth, linewidth);
-  	cairo_rectangle(cr, x_offset, vert_bar_length+(4*linewidth), linewidth, linewidth);
+  	cairo_rectangle(cr, x_offset, 1.5 * vert_bar_length, linewidth, linewidth);
 		draw_column = 0;	
 	}
 	else
 	{
 		draw_column = 1;
 	}	
-	x_offset += 4*linewidth;
+	x_offset += 2.5*linewidth + (0.025*w_width);
 
   //minutes
 	first_digit = time_tm.tm_min / 10;
 	second_digit = time_tm.tm_min % 10;
 	draw_digit(cr, first_digit, x_offset, 0);
-	x_offset += x_delta;
+	x_offset += hor_bar_length;
 	draw_digit(cr, second_digit, x_offset, 0);
 
 	cairo_stroke (cr);
