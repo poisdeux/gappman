@@ -219,7 +219,7 @@ on_expose_event(GtkWidget *widget,
 {
 	cairo_t *cr;
 	gint w_width, w_height;
-	gdouble x_offset, y_offset;
+	gdouble x_offset, y_offset, x_delta;
 	gdouble column_width;
 	gint i;
 	gint first_digit, second_digit;
@@ -246,6 +246,8 @@ on_expose_event(GtkWidget *widget,
 
 	//compensate for triangles at endpoints of the
   //digit-bars (see draw_horizontal_bar or draw_vertical_bar)
+  //we use x_delta to specify the x_offset for each digit
+	x_delta = hor_bar_length;
 	hor_bar_length -=  3 * linewidth;
 
 	//Each box for the digits needs to hold two vertical bars
@@ -257,9 +259,9 @@ on_expose_event(GtkWidget *widget,
 	first_digit = time_tm.tm_hour / 10;
 	second_digit = time_tm.tm_hour % 10;
 	draw_digit(cr, first_digit, x_offset, 0);
-	x_offset += hor_bar_length;
+	x_offset += x_delta;
 	draw_digit(cr, second_digit, x_offset, 0);
-	x_offset += hor_bar_length - (1.5*linewidth) + (0.025 * w_width);
+	x_offset += x_delta - (1.5*linewidth) + (0.025 * w_width);
 
 	//column
 	if(draw_column)
@@ -278,7 +280,7 @@ on_expose_event(GtkWidget *widget,
 	first_digit = time_tm.tm_min / 10;
 	second_digit = time_tm.tm_min % 10;
 	draw_digit(cr, first_digit, x_offset, 0);
-	x_offset += hor_bar_length;
+	x_offset += x_delta;
 	draw_digit(cr, second_digit, x_offset, 0);
 
 	cairo_stroke (cr);
