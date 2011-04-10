@@ -18,10 +18,10 @@
 static gdouble linewidth = 10.0;
 static double vert_bar_length;
 static double hor_bar_length;
-static GtkWidget *window;
-static gint digit;
 static struct tm time_tm;
 static gint bars_for_digit[10][7];
+static gdouble x_1_4_offset, x_2_5_offset,y_1_2_offset, y_4_5_offset, y_3_offset, y_6_offset;
+static gdouble x_delta;
 
 static void create_bars_for_digit()
 {
@@ -168,29 +168,28 @@ bar positions:
  6 
 */
 
-
 	switch(bar)
 	{
 		case 0:
 			draw_horizontal_bar(cr, x, y, hor_bar_length);
 			break;
 		case 1:
-			draw_vertical_bar(cr, x - linewidth , y + linewidth, vert_bar_length);
+			draw_vertical_bar(cr, x + x_1_4_offset , y + y_1_2_offset, vert_bar_length);
 			break;
 		case 2:
-			draw_vertical_bar(cr, x + hor_bar_length , y + linewidth, vert_bar_length);
+			draw_vertical_bar(cr, x + x_2_5_offset, y + y_1_2_offset, vert_bar_length);
 			break;
 		case 3:
-			draw_horizontal_bar(cr, x, y + linewidth + vert_bar_length, hor_bar_length);
+			draw_horizontal_bar(cr, x, y + y_3_offset, hor_bar_length);
 			break;
 		case 4:
-			draw_vertical_bar(cr, x - linewidth, y + (2*linewidth) + vert_bar_length, vert_bar_length);
+			draw_vertical_bar(cr, x + x_1_4_offset, y + y_4_5_offset, vert_bar_length);
 			break;
 		case 5:
-			draw_vertical_bar(cr, x + hor_bar_length, y + (2*linewidth) + vert_bar_length, vert_bar_length);
+			draw_vertical_bar(cr, x + x_2_5_offset, y + y_4_5_offset, vert_bar_length);
 			break;
 		case 6:
-			draw_horizontal_bar(cr, x, y + (2*vert_bar_length) + (2*linewidth), hor_bar_length);
+			draw_horizontal_bar(cr, x, y + y_6_offset, hor_bar_length);
 			break;
 		default:
 			g_warning("Sorry sir, but I have no knowledge of bar number %d", bar);
@@ -212,24 +211,81 @@ static draw_digit(cairo_t *cr, int digit, gdouble x_offset, gdouble y_offset)
 }
 
 
-static gboolean
-on_expose_event(GtkWidget *widget,
-    GdkEventExpose *event,
-    gpointer data)
+static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data)
 {
 	cairo_t *cr;
-	gint w_width, w_height;
-	gdouble x_offset, y_offset, x_delta;
-	gdouble column_width;
+	gdouble x_offset;
 	gint i;
 	gint first_digit, second_digit;
 	static gint draw_column = 1; 
 	cr = gdk_cairo_create (widget->window);
 
-	gtk_window_get_size(GTK_WINDOW(widget), &w_width, &w_height);
-
 	cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
 	cairo_set_line_width(cr, 0);
+
+	x_offset = linewidth;
+
+	//hours
+	first_digit = time_tm.tm_hour / 10;
+	second_digit = time_tm.tm_hour % 10;
+	draw_digit(cr, first_digit, x_offset, 0);
+	x_offset += x_delta;
+	draw_digit(cr, second_digit, x_offset, 0);
+	x_offset += x_delta - (1.5*linewidth);
+
+	//column
+	if(draw_column)
+	{
+  	cairo_rectangle(cr, x_offset, vert_bar_length, linewidth, linewidth);
+  	cairo_rectangle(cr, x_offset, 1.5 * vert_bar_length, linewidth, linewidth);
+		draw_column = 0;	
+	}
+	else
+	{
+		draw_column = 1;
+	}	
+	x_offset += 2.5*linewidth;
+
+  //minutes
+	first_digit = time_tm.tm_min / 10;
+	second_digit = time_tm.tm_min % 10;
+	draw_digit(cr, first_digit, x_offset, 0);
+	x_offset += x_delta;
+	draw_digit(cr, second_digit, x_offset, 0);
+
+	cairo_stroke (cr);
+
+	cairo_destroy(cr);
+	return FALSE;
+}
+
+static gboolean update_time(gpointer data)
+{
+	GtkWidget *widget;
+	GdkRegion *region;
+	time_t time_secs;
+
+	widget = GTK_WIDGET(data);	
+
+	if (!widget->window)
+		return FALSE;
+
+	time( &time_secs );
+	localtime_r (&time_secs, &time_tm);
+
+	region = gdk_drawable_get_clip_region (widget->window);
+  gdk_window_invalidate_region (widget->window, region, TRUE);
+  gdk_window_process_updates (widget->window, TRUE);
+  gdk_region_destroy (region);
+
+	return TRUE;
+}
+
+static gboolean calculate_sizes_and_offsets(GtkWidget *widget, GdkEventConfigure *event, gpointer data)
+{
+	gint w_width, w_height;
+	gdouble column_width;
+	gtk_window_get_size(GTK_WINDOW(widget), &w_width, &w_height);
 
 	//empirically determined 1/25th of the window width
   //provides a nice width for the bars		
@@ -253,68 +309,18 @@ on_expose_event(GtkWidget *widget,
 	//Each box for the digits needs to hold two vertical bars
 	vert_bar_length = (w_height/2.0) - (1.5 * linewidth);
 
-	x_offset = linewidth;
-
-	//hours
-	first_digit = time_tm.tm_hour / 10;
-	second_digit = time_tm.tm_hour % 10;
-	draw_digit(cr, first_digit, x_offset, 0);
-	x_offset += x_delta;
-	draw_digit(cr, second_digit, x_offset, 0);
-	x_offset += x_delta - (1.5*linewidth) + (0.025 * w_width);
-
-	//column
-	if(draw_column)
-	{
-  	cairo_rectangle(cr, x_offset, vert_bar_length, linewidth, linewidth);
-  	cairo_rectangle(cr, x_offset, 1.5 * vert_bar_length, linewidth, linewidth);
-		draw_column = 0;	
-	}
-	else
-	{
-		draw_column = 1;
-	}	
-	x_offset += 2.5*linewidth + (0.025*w_width);
-
-  //minutes
-	first_digit = time_tm.tm_min / 10;
-	second_digit = time_tm.tm_min % 10;
-	draw_digit(cr, first_digit, x_offset, 0);
-	x_offset += x_delta;
-	draw_digit(cr, second_digit, x_offset, 0);
-
-	cairo_stroke (cr);
-
-	cairo_destroy(cr);
-	return FALSE;
-}
-
-static gboolean update_time(gpointer data)
-{
-	GtkWidget *widget;
-	GdkRegion *region;
-	time_t time_secs;
-
-	widget = GTK_WIDGET(data);	
-	digit = random()%10;
-
-	if (!widget->window)
-		return FALSE;
-
-	time( &time_secs );
-	localtime_r (&time_secs, &time_tm);
-
-	region = gdk_drawable_get_clip_region (widget->window);
-  gdk_window_invalidate_region (widget->window, region, TRUE);
-  gdk_window_process_updates (widget->window, TRUE);
-  gdk_region_destroy (region);
-
-	return TRUE;
+	x_1_4_offset = -1.25*linewidth;
+	x_2_5_offset = hor_bar_length + (0.25*linewidth);
+	y_1_2_offset = 1.25*linewidth;
+	y_3_offset = 1.5*linewidth + vert_bar_length;
+	y_4_5_offset = 2.75*linewidth + vert_bar_length;
+	y_6_offset = (2*vert_bar_length) + (3*linewidth);
 }
 
 int main(int argc, char** argv)
 {
 	time_t time_secs;	
+	GtkWidget *window;
 
 	gtk_init(&argc, &argv);
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -323,10 +329,13 @@ int main(int argc, char** argv)
 	time( &time_secs );
 	localtime_r (&time_secs, &time_tm);
 
-	g_signal_connect(G_OBJECT(window), "expose-event", G_CALLBACK(on_expose_event), NULL);
+	g_signal_connect(window, "expose-event", G_CALLBACK(on_expose_event), NULL);
+	g_signal_connect(window, "configure-event", G_CALLBACK(calculate_sizes_and_offsets), NULL);
   g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
 	create_bars_for_digit();
+
+	calculate_sizes_and_offsets(window, NULL, NULL);
 
 	gtk_widget_set_app_paintable(window, TRUE);
 	
