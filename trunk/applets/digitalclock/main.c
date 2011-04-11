@@ -218,6 +218,7 @@ static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpoint
 	gint i;
 	gint first_digit, second_digit;
 	static gint draw_column = 1; 
+	static gint count;
 	cr = gdk_cairo_create (widget->window);
 
 	cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
@@ -256,7 +257,7 @@ static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpoint
 	cairo_stroke (cr);
 
 	cairo_destroy(cr);
-	return FALSE;
+	return TRUE;
 }
 
 static gboolean update_time(gpointer data)
@@ -285,8 +286,13 @@ static gboolean calculate_sizes_and_offsets(GtkWidget *widget, GdkEventConfigure
 {
 	gint w_width, w_height;
 	gdouble column_width;
+	static gint count = 0;
+
+	//see bar-diagram.dia to make sense out of these numbers
+
 	gtk_window_get_size(GTK_WINDOW(widget), &w_width, &w_height);
 
+	g_debug("calculate_sizes_and_offsets %d", count++);
 	//empirically determined 1/25th of the window width
   //provides a nice width for the bars		
 	linewidth = w_width/25.0;
@@ -298,7 +304,7 @@ static gboolean calculate_sizes_and_offsets(GtkWidget *widget, GdkEventConfigure
   //of w_width minus column_width. Each box for
   //the digits needs to be one horizontal bar
   //wide.
-	hor_bar_length =  (w_width - column_width)/4.0;
+	hor_bar_length =  ((w_width - column_width)/4.0) - 3 * linewidth;
 
 	//compensate for triangles at endpoints of the
   //digit-bars (see draw_horizontal_bar or draw_vertical_bar)
@@ -307,7 +313,7 @@ static gboolean calculate_sizes_and_offsets(GtkWidget *widget, GdkEventConfigure
 	hor_bar_length -=  3 * linewidth;
 
 	//Each box for the digits needs to hold two vertical bars
-	vert_bar_length = (w_height/2.0) - (1.5 * linewidth);
+	vert_bar_length = (w_height - (4 * linewidth))/2.0;
 
 	x_1_4_offset = -1.25*linewidth;
 	x_2_5_offset = hor_bar_length + (0.25*linewidth);
@@ -315,6 +321,8 @@ static gboolean calculate_sizes_and_offsets(GtkWidget *widget, GdkEventConfigure
 	y_3_offset = 1.5*linewidth + vert_bar_length;
 	y_4_5_offset = 2.75*linewidth + vert_bar_length;
 	y_6_offset = (2*vert_bar_length) + (3*linewidth);
+
+	return TRUE;
 }
 
 int main(int argc, char** argv)
