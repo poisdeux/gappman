@@ -9,15 +9,16 @@
  *   Martijn Brekhof <m.brekhof@gmail.com>
  *
  * \todo see if drawing of digits can be done only once a minute, instead of each second
- * \todo fix alignment of vertical and horizontal blocks at the joints.
+ * \todo fix horizontal measures to match diagram
  * \todo add configuration option for color (through gtkrc?)
  */
 
 #include <gtk/gtk.h>
 
 static gdouble linewidth = 10.0;
-static double vert_bar_length;
-static double hor_bar_length;
+static gdouble vert_bar_length;
+static gdouble hor_bar_length;
+static gdouble column_width;
 static struct tm time_tm;
 static gint bars_for_digit[10][7];
 static gdouble x_1_4_offset, x_2_5_offset,y_1_2_offset, y_4_5_offset, y_3_offset, y_6_offset;
@@ -230,9 +231,9 @@ static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpoint
 	first_digit = time_tm.tm_hour / 10;
 	second_digit = time_tm.tm_hour % 10;
 	draw_digit(cr, first_digit, x_offset, 0);
-	x_offset += x_delta;
+	x_offset += x_delta + 0.5*linewidth;
 	draw_digit(cr, second_digit, x_offset, 0);
-	x_offset += x_delta - (1.5*linewidth);
+	x_offset += x_delta;
 
 	//column
 	if(draw_column)
@@ -245,13 +246,13 @@ static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpoint
 	{
 		draw_column = 1;
 	}	
-	x_offset += 2.5*linewidth;
+	x_offset += column_width;
 
   //minutes
 	first_digit = time_tm.tm_min / 10;
 	second_digit = time_tm.tm_min % 10;
 	draw_digit(cr, first_digit, x_offset, 0);
-	x_offset += x_delta;
+	x_offset += x_delta + 0.5*linewidth;
 	draw_digit(cr, second_digit, x_offset, 0);
 
 	cairo_stroke (cr);
@@ -285,7 +286,6 @@ static gboolean update_time(gpointer data)
 static gboolean calculate_sizes_and_offsets(GtkWidget *widget, GdkEventConfigure *event, gpointer data)
 {
 	gint w_width, w_height;
-	gdouble column_width;
 	static gint count = 0;
 
 	//see bar-diagram.dia to make sense out of these numbers
@@ -295,22 +295,21 @@ static gboolean calculate_sizes_and_offsets(GtkWidget *widget, GdkEventConfigure
 	g_debug("calculate_sizes_and_offsets %d", count++);
 	//empirically determined 1/25th of the window width
   //provides a nice width for the bars		
-	linewidth = w_width/25.0;
+	linewidth = w_width/26.0;
 
 	//Column takes 5% of total width
-	column_width = 0.05*w_width;
+	column_width = 2*linewidth;
 
 	//We have four digits that each take 1/4th
   //of w_width minus column_width. Each box for
   //the digits needs to be one horizontal bar
   //wide.
-	hor_bar_length =  ((w_width - column_width)/4.0) - 3 * linewidth;
+	x_delta =  6*linewidth;
 
 	//compensate for triangles at endpoints of the
   //digit-bars (see draw_horizontal_bar or draw_vertical_bar)
   //we use x_delta to specify the x_offset for each digit
-	x_delta = hor_bar_length;
-	hor_bar_length -=  3 * linewidth;
+	hor_bar_length =  3 * linewidth;
 
 	//Each box for the digits needs to hold two vertical bars
 	vert_bar_length = (w_height - (4 * linewidth))/2.0;
