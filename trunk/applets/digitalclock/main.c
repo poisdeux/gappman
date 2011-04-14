@@ -233,7 +233,7 @@ static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpoint
 	draw_digit(cr, first_digit, x_offset, 0);
 	x_offset += x_delta + 0.5*linewidth;
 	draw_digit(cr, second_digit, x_offset, 0);
-	x_offset += x_delta;
+	x_offset += x_delta - linewidth;
 
 	//column
 	if(draw_column)
@@ -246,7 +246,7 @@ static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpoint
 	{
 		draw_column = 1;
 	}	
-	x_offset += column_width;
+	x_offset += column_width + linewidth;
 
   //minutes
 	first_digit = time_tm.tm_min / 10;
@@ -276,10 +276,9 @@ static gboolean update_time(gpointer data)
 	localtime_r (&time_secs, &time_tm);
 
 	region = gdk_drawable_get_clip_region (widget->window);
-  gdk_window_invalidate_region (widget->window, region, TRUE);
-  gdk_window_process_updates (widget->window, TRUE);
-  gdk_region_destroy (region);
-
+  	gdk_window_invalidate_region (widget->window, region, TRUE);
+  	gdk_window_process_updates (widget->window, TRUE);
+  	gdk_region_destroy (region);
 	return TRUE;
 }
 
@@ -298,28 +297,28 @@ static gboolean calculate_sizes_and_offsets(GtkWidget *widget, GdkEventConfigure
 	linewidth = w_width/26.0;
 
 	//Column takes 5% of total width
-	column_width = 2*linewidth;
+	column_width = 2.0*linewidth;
 
 	//We have four digits that each take 1/4th
   //of w_width minus column_width. Each box for
   //the digits needs to be one horizontal bar
   //wide.
-	x_delta =  6*linewidth;
+	x_delta =  6.0*linewidth;
 
 	//compensate for triangles at endpoints of the
   //digit-bars (see draw_horizontal_bar or draw_vertical_bar)
   //we use x_delta to specify the x_offset for each digit
-	hor_bar_length =  3 * linewidth;
+	hor_bar_length =  3.0 * linewidth;
 
 	//Each box for the digits needs to hold two vertical bars
-	vert_bar_length = (w_height - (4 * linewidth))/2.0;
+	vert_bar_length = (w_height - (4.0 * linewidth))/2.0;
 
 	x_1_4_offset = -1.25*linewidth;
 	x_2_5_offset = hor_bar_length + (0.25*linewidth);
 	y_1_2_offset = 1.25*linewidth;
 	y_3_offset = 1.5*linewidth + vert_bar_length;
 	y_4_5_offset = 2.75*linewidth + vert_bar_length;
-	y_6_offset = (2*vert_bar_length) + (3*linewidth);
+	y_6_offset = (2.0*vert_bar_length) + (3.0*linewidth);
 
 	return TRUE;
 }
