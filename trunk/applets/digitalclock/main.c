@@ -8,7 +8,8 @@
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
  *
- * \todo see if drawing of digits can be done only once a minute, instead of each second
+ * \todo see if drawing of digits can be done only once a minute, instead of each second.
+ * 			 depending on the digits drawn it takes 1000 to 2000 microseconds.
  * \todo fix horizontal measures to match diagram
  * \todo add configuration option for color (through gtkrc?)
  */
@@ -23,6 +24,20 @@ static struct tm time_tm;
 static gint bars_for_digit[10][7];
 static gdouble x_1_4_offset, x_2_5_offset,y_1_2_offset, y_4_5_offset, y_3_offset, y_6_offset;
 static gdouble x_delta;
+
+static void measure_time(int *prev_microseconds)
+{
+	struct timeval time_tv;
+	
+	if(*prev_microseconds)
+	{
+		gettimeofday( &time_tv, NULL );
+		g_debug("Microseconds passed: %d", (int) time_tv.tv_usec - *prev_microseconds);
+		*prev_microseconds = (int) time_tv.tv_usec;
+	}	
+	gettimeofday( &time_tv, NULL );
+	*prev_microseconds = (int) time_tv.tv_usec;
+}
 
 static void create_bars_for_digit()
 {
@@ -201,7 +216,9 @@ bar positions:
 static draw_digit(cairo_t *cr, int digit, gdouble x_offset, gdouble y_offset)
 {
 	int i;
+	gint time_passed = 0;
 
+	measure_time(&time_passed);	
 	for(i = 0; i < 7; i++)
 	{
 		if( bars_for_digit[digit][i] == 1 )
@@ -209,6 +226,8 @@ static draw_digit(cairo_t *cr, int digit, gdouble x_offset, gdouble y_offset)
 			draw_bar(cr, i, x_offset, y_offset);
 		}
 	}  
+	g_debug("Drawing digit %d", digit);
+	measure_time(&time_passed);	
 }
 
 
@@ -220,6 +239,9 @@ static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpoint
 	gint first_digit, second_digit;
 	static gint draw_column = 1; 
 	static gint count;
+	gint time_passed = 0;
+
+	measure_time(&time_passed);
 	cr = gdk_cairo_create (widget->window);
 
 	cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
@@ -258,6 +280,8 @@ static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpoint
 	cairo_stroke (cr);
 
 	cairo_destroy(cr);
+	g_debug("on_expose_event");
+	measure_time(&time_passed);
 	return TRUE;
 }
 
@@ -285,13 +309,13 @@ static gboolean update_time(gpointer data)
 static gboolean calculate_sizes_and_offsets(GtkWidget *widget, GdkEventConfigure *event, gpointer data)
 {
 	gint w_width, w_height;
-	static gint count = 0;
-
+	gint time_passed = 0;
+	
+	measure_time(&time_passed);	
 	//see bar-diagram.dia to make sense out of these numbers
 
 	gtk_window_get_size(GTK_WINDOW(widget), &w_width, &w_height);
 
-	g_debug("calculate_sizes_and_offsets %d", count++);
 	//empirically determined 1/25th of the window width
   //provides a nice width for the bars		
 	linewidth = w_width/26.0;
@@ -320,6 +344,8 @@ static gboolean calculate_sizes_and_offsets(GtkWidget *widget, GdkEventConfigure
 	y_4_5_offset = 2.75*linewidth + vert_bar_length;
 	y_6_offset = (2.0*vert_bar_length) + (3.0*linewidth);
 
+	g_debug("calculate_sizes_and_offsets");
+	measure_time(&time_passed);	
 	return TRUE;
 }
 
