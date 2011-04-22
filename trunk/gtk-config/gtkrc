@@ -9,7 +9,7 @@ style "main-window-style"
 
 style "applet-style"
 {
-	fg[NORMAL] = "#00A0A0"
+	fg[NORMAL] = "#A0A0A0"
 	bg[NORMAL] = "#000000"
 }
 
