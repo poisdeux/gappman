@@ -10,12 +10,13 @@
  *
  * \todo see if drawing of digits can be done only once a minute, instead of each second.
  * 			 depending on the digits drawn it takes 1000 to 2000 microseconds.
- * \todo add configuration option for color (through gtkrc?)
  * \todo add day/month/year
  * \todo add calendar
+ * \todo make this loadable as a module by gappman
  */
 
 #include <gtk/gtk.h>
+#include <gm_generic.h>
 
 static gdouble linewidth = 10.0;
 static gdouble vert_bar_length;
@@ -235,17 +236,25 @@ static draw_digit(cairo_t *cr, int digit, gdouble x_offset, gdouble y_offset)
 static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data)
 {
 	cairo_t *cr;
+	cairo_surface_t *surface;
 	gdouble x_offset;
 	gint i;
 	gint first_digit, second_digit;
 	static gint draw_column = 1; 
 	static gint count;
+	GtkStyle *rc_style;
 	gint time_passed = 0;
 
 	measure_time(&time_passed);
 	cr = gdk_cairo_create (widget->window);
 
-	cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
+	rc_style = gtk_rc_get_style(widget);
+
+	cairo_set_source_rgb (cr, 
+		rc_style->fg[0].red,
+		rc_style->fg[0].green,
+		rc_style->fg[0].blue);
+
 	cairo_set_line_width(cr, 0);
 
 	x_offset = 0;
@@ -350,15 +359,52 @@ static gboolean calculate_sizes_and_offsets(GtkWidget *widget, GdkEventConfigure
 	return TRUE;
 }
 
+G_MODULE_EXPORT int gm_module_init()
+{
+ //Initializes the module. As a minimal action it should create the widget.
+	GtkWidget *window;
+
+	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_default_size(GTK_WINDOW(window), 200, 200);
+
+	g_signal_connect(window, "expose-event", G_CALLBACK(on_expose_event), NULL);
+	g_signal_connect(window, "configure-event", G_CALLBACK(calculate_sizes_and_offsets), NULL);
+  g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+
+	create_bars_for_digit();
+
+	gtk_widget_set_app_paintable(window, TRUE);
+
+	return GM_SUCCES;
+}
+
+G_MODULE_EXPORT void gm_module_start()
+{
+  //Start the applet
+	g_timeout_add(1000, update_time, window);
+}
+
+G_MODULE_EXPORT int gm_module_stop()
+{
+  //Stop the applet
+}
+
+G_MODULE_EXPORT GtkWidget *gm_module_get_widget()
+{
+  //Return the widget that should be added to the panel
+}
+
 int main(int argc, char** argv)
 {
 	time_t time_secs;	
 	GtkWidget *window;
 
 	gtk_init(&argc, &argv);
+	gtk_rc_parse( "./test.rc" );
+
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_default_size(GTK_WINDOW(window), 200, 200);
-	
+
 	time( &time_secs );
 	localtime_r (&time_secs, &time_tm);
 
@@ -367,8 +413,6 @@ int main(int argc, char** argv)
   g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
 	create_bars_for_digit();
-
-	calculate_sizes_and_offsets(window, NULL, NULL);
 
 	gtk_widget_set_app_paintable(window, TRUE);
 	

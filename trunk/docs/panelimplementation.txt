@@ -1,27 +1,58 @@
 Panel should support dynamic loading of modules that can be added to the panel area.
 
-Basic functions:
+Creating your own panel-applet
+==============================
 
-gm_module_init()
-Initializes the module. As a minimal action it should create the widget.
+Functions you must include in your module:
 
-gm_module_start()
+G_MODULE_EXPORT int gm_module_init()
+{
+ //Initializes the module. As a minimal action it should create the widget.
+}
 
-gm_module_stop()
+G_MODULE_EXPORT void gm_module_start()
+{
+	//Start the applet
+}
 
-gm_module_set_icon_size()
+G_MODULE_EXPORT int gm_module_stop()
+{
+	//Stop the applet
+}
 
-//Following function should return the widget that should be added to the panel.
-gm_module_get_widget()
+G_MODULE_EXPORT GtkWidget *gm_module_get_widget()
+{
+  //Return the widget that should be added to the panel
+}
 
+
+Optional functions are:
+
+G_MODULE_EXPORT void gm_module_set_icon_size(int width, int height)
+{
+	//Called by gappman to set the applet maximum width and height 
+  //as calculated by gappman
+}
+
+G_MODULE_EXPORT void gm_module_set_conffile(const char *filename)
+{
+  //called when you include <conffile>...</conffile> in the <applet>
+  //segment in gappman's configuration file 
+}
+
+
+Configuring gappman to include your applet in the panel
+=======================================================
 
 Adding an applet should be done in the main gappman config file using the panel sub-element:
 
-  <panel width=100% height=20%>
+  <panel width="10%" height="10%" align="top,right">
     <applet>
-      <name>Network manager</name>
-      <module>./widgets/netman/gm_netman.so</module>
-    <applet>
+      <name>APPLET_NAME</name>
+      <objectfile>FILENAME</objectfile>
+      <conffile>FILENAME</conffile>
+    </applet>
   </panel>
+
 
 

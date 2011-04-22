@@ -568,11 +568,6 @@ int main(int argc, char **argv)
 	gtk_container_add(GTK_CONTAINER(vbox), hbox_middle);
 	gtk_container_add(GTK_CONTAINER(vbox), hbox_bottom);
 	gtk_container_add(GTK_CONTAINER(mainwin), vbox);
-	gtk_widget_show(hbox_top);
-	gtk_widget_show(hbox_middle);
-	gtk_widget_show(hbox_bottom);
-	gtk_widget_show(vbox);
-	gtk_widget_show(mainwin);
 
 #if !defined(NO_LISTENER)
 	// set confpath so other programs can retrieve
@@ -584,6 +579,8 @@ int main(int argc, char **argv)
 #endif
 
 	autostartprograms(programs);
+
+	gtk_widget_show_all(mainwin);
 
 	gdk_threads_enter();
 	gtk_main();
