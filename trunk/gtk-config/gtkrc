@@ -9,14 +9,8 @@ style "main-window-style"
 
 style "applet-style"
 {
-	fg[NORMAL] = "#A0A0A0"
-  fg[PRELIGHT] = "#FFFFFF"
-	fg[SELECTED] = "#202020"
-	fg[ACTIVE] = "#404040"
-  bg[NORMAL] = "#202020"
-  bg[PRELIGHT] = "#AAAAAA"
-	bg[SELECTED] = "#404040"
-	bg[ACTIVE] = "#505050"
+	fg[NORMAL] = "#00A0A0"
+	bg[NORMAL] = "#000000"
 }
 
 style "text-style"
@@ -46,7 +40,8 @@ style "button-style"
 	GtkButton::relief = GTK_RELIEF_NONE
 }
 
-class "GtkWindow" style "applet-style"
+class "GtkWindow" style "main-window-style"
+class "GtkDrawingArea" style "applet-style"
 class "GtkButton" style "button-style"
 class "GtkLabel" style "text-style"
 widget "gm_mainwindow" style "main-window-style"

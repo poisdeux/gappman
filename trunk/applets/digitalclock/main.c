@@ -17,7 +17,9 @@
 
 #include <gtk/gtk.h>
 #include <gm_generic.h>
+#include <sys/time.h>
 
+static GtkWidget *window = NULL;
 static gdouble linewidth = 10.0;
 static gdouble vert_bar_length;
 static gdouble hor_bar_length;
@@ -26,6 +28,7 @@ static struct tm time_tm;
 static gint bars_for_digit[10][7];
 static gdouble x_delta;
 static gdouble x_0_3_6_offset, x_2_5_offset, y_0_offset, y_3_offset, y_4_5_offset, y_6_offset;
+static gint w_width, w_height;
 
 static void measure_time(int *prev_microseconds)
 {
@@ -303,8 +306,8 @@ static gboolean update_time(gpointer data)
 
 	widget = GTK_WIDGET(data);	
 
-	if (!widget->window)
-		return FALSE;
+	//if (!widget->window)
+	//	return FALSE;
 
 	time( &time_secs );
 	localtime_r (&time_secs, &time_tm);
@@ -318,13 +321,10 @@ static gboolean update_time(gpointer data)
 
 static gboolean calculate_sizes_and_offsets(GtkWidget *widget, GdkEventConfigure *event, gpointer data)
 {
-	gint w_width, w_height;
 	gint time_passed = 0;
 	
 	measure_time(&time_passed);	
 	//see bar-diagram.dia to make sense out of these numbers
-
-	gtk_window_get_size(GTK_WINDOW(widget), &w_width, &w_height);
 
 	//empirically determined 1/25th of the window width
   //provides a nice width for the bars		
@@ -361,11 +361,8 @@ static gboolean calculate_sizes_and_offsets(GtkWidget *widget, GdkEventConfigure
 
 G_MODULE_EXPORT int gm_module_init()
 {
- //Initializes the module. As a minimal action it should create the widget.
-	GtkWidget *window;
-
-	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_default_size(GTK_WINDOW(window), 200, 200);
+	window = gtk_drawing_area_new();
+	gtk_widget_set_size_request (window, w_width, w_height);
 
 	g_signal_connect(window, "expose-event", G_CALLBACK(on_expose_event), NULL);
 	g_signal_connect(window, "configure-event", G_CALLBACK(calculate_sizes_and_offsets), NULL);
@@ -375,29 +372,36 @@ G_MODULE_EXPORT int gm_module_init()
 
 	gtk_widget_set_app_paintable(window, TRUE);
 
+	//gtk_widget_show(window);
+	
 	return GM_SUCCES;
 }
 
 G_MODULE_EXPORT void gm_module_start()
 {
-  //Start the applet
 	g_timeout_add(1000, update_time, window);
 }
 
 G_MODULE_EXPORT int gm_module_stop()
 {
   //Stop the applet
+	gtk_widget_destroy(window);
 }
 
-G_MODULE_EXPORT GtkWidget *gm_module_get_widget()
+G_MODULE_EXPORT GtkWidget* gm_module_get_widget()
 {
-  //Return the widget that should be added to the panel
+	return window;
+}
+
+G_MODULE_EXPORT void gm_module_set_icon_size(int width, int height)
+{
+	w_width = width;
+	w_height = height;
 }
 
 int main(int argc, char** argv)
 {
 	time_t time_secs;	
-	GtkWidget *window;
 
 	gtk_init(&argc, &argv);
 	gtk_rc_parse( "./test.rc" );

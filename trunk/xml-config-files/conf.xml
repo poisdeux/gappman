@@ -63,5 +63,9 @@
 			<objectfile>./applets/netman/.libs/gm_netman.so</objectfile>
 			<conffile>./applets/netman/xml-config-files/netman.xml</conffile>
 		</applet>
+		<applet>
+			<name>Digital Clock</name>
+			<objectfile>./applets/digitalclock/.libs/gm_digitalclock.so</objectfile>
+		</applet>
   </panel>
 </appmanager>
