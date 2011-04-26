@@ -128,10 +128,10 @@ static void create_bars_for_digit()
 	bars_for_digit[9][6] = 1;
 }
 
-static gboolean draw_horizontal_bar(cairo_t *cr, int x, int y, int length)
+static gboolean draw_horizontal_bar(cairo_t *cr, gdouble x, gdouble y, gdouble length)
 {
 
-	double halflinewidth = linewidth/2;
+	gdouble halflinewidth = linewidth/2.0;
 
 	//draw left triangle
 	cairo_move_to(cr, x, y);
@@ -153,7 +153,7 @@ static gboolean draw_horizontal_bar(cairo_t *cr, int x, int y, int length)
 }
 
 
-static gboolean draw_vertical_bar(cairo_t *cr, double x, double y, double length)
+static gboolean draw_vertical_bar(cairo_t *cr, gdouble x, gdouble y, gdouble length)
 {
 
 	double halflinewidth = linewidth/2;
@@ -241,6 +241,7 @@ static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpoint
 	cairo_t *cr;
 	cairo_surface_t *surface;
 	gdouble x_offset;
+	gdouble y_offset;
 	gint i;
 	gint first_digit, second_digit;
 	static gint draw_column = 1; 
@@ -261,20 +262,21 @@ static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpoint
 	cairo_set_line_width(cr, 0);
 
 	x_offset = 0;
+	y_offset = 0.5*w_height;
 
 	//hours
 	first_digit = time_tm.tm_hour / 10;
 	second_digit = time_tm.tm_hour % 10;
-	draw_digit(cr, first_digit, x_offset, linewidth);
+	draw_digit(cr, first_digit, x_offset, y_offset);
 	x_offset += x_delta + 0.5*linewidth;
-	draw_digit(cr, second_digit, x_offset, linewidth);
+	draw_digit(cr, second_digit, x_offset, y_offset);
 	x_offset += x_delta;
 
 	//column
 	if(draw_column)
 	{
-  	cairo_rectangle(cr, x_offset, y_3_offset, linewidth, linewidth);
-  	cairo_rectangle(cr, x_offset, y_4_5_offset + linewidth, linewidth, linewidth);
+  	cairo_rectangle(cr, x_offset, y_3_offset + y_offset, linewidth, linewidth);
+  	cairo_rectangle(cr, x_offset, y_4_5_offset + y_offset + linewidth, linewidth, linewidth);
 		draw_column = 0;	
 	}
 	else
@@ -286,9 +288,9 @@ static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpoint
   //minutes
 	first_digit = time_tm.tm_min / 10;
 	second_digit = time_tm.tm_min % 10;
-	draw_digit(cr, first_digit, x_offset, linewidth);
+	draw_digit(cr, first_digit, x_offset, y_offset);
 	x_offset += x_delta + 0.5*linewidth;
-	draw_digit(cr, second_digit, x_offset, linewidth);
+	draw_digit(cr, second_digit, x_offset, y_offset);
 
 	cairo_stroke (cr);
 
@@ -396,7 +398,7 @@ G_MODULE_EXPORT GtkWidget* gm_module_get_widget()
 G_MODULE_EXPORT void gm_module_set_icon_size(int width, int height)
 {
 	w_width = width;
-	w_height = height;
+	w_height = 0.5*height;
 }
 
 int main(int argc, char** argv)
