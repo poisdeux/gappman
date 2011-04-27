@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
 <netman>
-  <cachelocation>/tmp/</cachelocation>
   <stati>
     <logounavail>./applets/netman/logos/gnome-netstatus-error.png</logounavail>
     <status>

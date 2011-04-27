@@ -299,7 +299,7 @@ G_MODULE_EXPORT int gm_module_init()
 	stati = nm_get_stati();
 
 	main_button = GTK_BUTTON(gtk_button_new());
-
+	gtk_widget_set_size_request(GTK_WIDGET(main_button), main_button_width, main_button_height);
 	g_signal_connect(G_OBJECT(main_button),
 					 "clicked", G_CALLBACK(show_menu), NULL);
 

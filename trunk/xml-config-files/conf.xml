@@ -1,5 +1,5 @@
 <appmanager>
-  <actions width="20%" height="10%" align="top,left">
+  <actions width="30%" height="10%" align="top,left">
     <action>
       <name>Shutdown</name>
       <exec>./applets/shutdown/gmshutdown</exec>
@@ -57,7 +57,7 @@
 			<printlabel>1</printlabel>
     </program>
   </programs>
-	<panel width="10%" height="10%" align="top,right">
+	<panel width="20%" height="10%" align="top,right">
 		<applet>
 			<name>Network manager</name>
 			<objectfile>./applets/netman/.libs/gm_netman.so</objectfile>

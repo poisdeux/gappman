@@ -8,6 +8,7 @@
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
  *
+ * \todo created buttons are not set to correct size. Only gm_load_image calculates the max width or height with respect to the aspect ratio.
  */
 
 
@@ -301,7 +302,7 @@ static GdkPixbuf *scale_image(GtkWidget * image, int max_width, int max_height)
 {
 	GdkPixbuf *pixbuf;
 	int width, height;
-	double ratio;
+	gdouble ratio;
 
 	pixbuf = gtk_image_get_pixbuf(GTK_IMAGE(image));
 	width = gdk_pixbuf_get_width(pixbuf);
@@ -309,7 +310,7 @@ static GdkPixbuf *scale_image(GtkWidget * image, int max_width, int max_height)
 
 	// By default we will scale the image to max_width maintaining aspect
 	// ratio
-	ratio = (double)width / max_width;
+	ratio = width / (gdouble) max_width;
 	width /= ratio;
 	height /= ratio;
 
@@ -318,10 +319,14 @@ static GdkPixbuf *scale_image(GtkWidget * image, int max_width, int max_height)
 	// button size based on max_height
 	if (height > max_height)
 	{
-		ratio = (double)height / max_height;
+		width = gdk_pixbuf_get_width(pixbuf);
+		height = gdk_pixbuf_get_height(pixbuf);
+
+		ratio = height / (gdouble) max_height;
 		width /= ratio;
 		height /= ratio;
 	}
+	g_debug("width=%d height=%d, max_width=%d max_height=%d", width, height, max_width, max_height);
 	return gdk_pixbuf_scale_simple(pixbuf, width, height, GDK_INTERP_BILINEAR);
 }
 
@@ -338,7 +343,7 @@ GtkWidget *gm_load_image(const char *elt_name, const char *elt_logo,
 	GtkIconSize stock_size;
 
 
-	// Paths can be of arbitrary lengt.
+	// Paths can be of arbitrary length.
 	// Filenames can not be longer than 255 chars
 	// Width and height will not exceed 9999 (4 chars)
 	if (cacheloc != NULL)
@@ -598,7 +603,6 @@ GtkWidget *gm_create_button(menu_elements * elt, int max_width, int max_height,
 	GtkWidget *button, *imagelabelbox;
 
 	button = gm_create_empty_button(processevent, elt);
-
 	if (elt->logo != NULL)
 	{
 		imagelabelbox = image_label_box_vert(elt, max_width, max_height);

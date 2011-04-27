@@ -28,7 +28,7 @@ static struct tm time_tm;
 static gint bars_for_digit[10][7];
 static gdouble x_delta;
 static gdouble x_0_3_6_offset, x_2_5_offset, y_0_offset, y_3_offset, y_4_5_offset, y_6_offset;
-static gint w_width, w_height;
+static gdouble w_width, w_height;
 
 static void measure_time(int *prev_microseconds)
 {
@@ -262,7 +262,7 @@ static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpoint
 	cairo_set_line_width(cr, 0);
 
 	x_offset = 0;
-	y_offset = 0.5*w_height;
+	y_offset = -y_0_offset;
 
 	//hours
 	first_digit = time_tm.tm_hour / 10;
@@ -275,8 +275,8 @@ static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpoint
 	//column
 	if(draw_column)
 	{
-  	cairo_rectangle(cr, x_offset, y_3_offset + y_offset, linewidth, linewidth);
-  	cairo_rectangle(cr, x_offset, y_4_5_offset + y_offset + linewidth, linewidth, linewidth);
+  	cairo_rectangle(cr, x_offset, y_3_offset - linewidth + y_offset, linewidth, linewidth);
+  	cairo_rectangle(cr, x_offset, y_4_5_offset + y_offset, linewidth, linewidth);
 		draw_column = 0;	
 	}
 	else
@@ -374,8 +374,6 @@ G_MODULE_EXPORT int gm_module_init()
 
 	gtk_widget_set_app_paintable(window, TRUE);
 
-	//gtk_widget_show(window);
-	
 	return GM_SUCCES;
 }
 
@@ -398,7 +396,7 @@ G_MODULE_EXPORT GtkWidget* gm_module_get_widget()
 G_MODULE_EXPORT void gm_module_set_icon_size(int width, int height)
 {
 	w_width = width;
-	w_height = 0.5*height;
+	w_height = height;
 }
 
 int main(int argc, char** argv)
