@@ -9,6 +9,7 @@
  *   Martijn Brekhof <m.brekhof@gmail.com>
  *
  * \todo created buttons are not set to correct size. Only gm_load_image calculates the max width or height with respect to the aspect ratio.
+ * \todo add support for both portrait and landscape oriented layouts. Now button size is calculated using landscape orientation.
  */
 
 
