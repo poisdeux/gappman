@@ -111,7 +111,7 @@ void gm_set_fontsize(int size);
 void gm_set_window_geometry(int width, int height);
 
 /**
-* \brief creates a basic cancel button
+* \brief creates a basic button
 * \param buttontext string that should be used as label
 * \param callbackfunc void pointer to callback function that should be called when button is clicked
 * \param data void pointer to arguments that should be passed to callback function 

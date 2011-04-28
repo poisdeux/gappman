@@ -326,7 +326,6 @@ static GdkPixbuf *scale_image(GtkWidget * image, int max_width, int max_height)
 		width /= ratio;
 		height /= ratio;
 	}
-	g_debug("width=%d height=%d, max_width=%d max_height=%d", width, height, max_width, max_height);
 	return gdk_pixbuf_scale_simple(pixbuf, width, height, GDK_INTERP_BILINEAR);
 }
 
@@ -603,6 +602,7 @@ GtkWidget *gm_create_button(menu_elements * elt, int max_width, int max_height,
 	GtkWidget *button, *imagelabelbox;
 
 	button = gm_create_empty_button(processevent, elt);
+	gtk_widget_set_size_request(button, max_width, max_height);
 	if (elt->logo != NULL)
 	{
 		imagelabelbox = image_label_box_vert(elt, max_width, max_height);
