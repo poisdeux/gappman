@@ -327,6 +327,7 @@ static GdkPixbuf *scale_image(GtkWidget * image, int max_width, int max_height)
 		width /= ratio;
 		height /= ratio;
 	}
+	g_debug("scale_image: width: %d, height: %d", width, height);
 	return gdk_pixbuf_scale_simple(pixbuf, width, height, GDK_INTERP_BILINEAR);
 }
 
@@ -439,21 +440,14 @@ static GtkWidget *image_label_box_vert(menu_elements * elt, int max_width,
 									   int max_height)
 {
 	GtkWidget *box;
-	GtkWidget *label;
+	GtkWidget *label = NULL;
 	GtkWidget *image;
+	GtkRequisition requisition;
 	gchar *markup;
 
 	/* Create box for image and label */
 	box = gtk_vbox_new(FALSE, 0);
 	gtk_container_set_border_width(GTK_CONTAINER(box), 2);
-
-	/* Now on to the image stuff */
-	image =
-		gm_load_image((char *)elt->name, (char *)elt->logo,
-					  gm_get_cache_location(), gm_get_programname(), max_width,
-					  max_height);
-	gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(image), FALSE, FALSE, 3);
-	gtk_widget_show(GTK_WIDGET(image));
 
 	if ((elt->printlabel != 0) && (elt->name != NULL))
 	{
@@ -463,8 +457,31 @@ static GtkWidget *image_label_box_vert(menu_elements * elt, int max_width,
 									elt->name);
 		gtk_label_set_markup(GTK_LABEL(label), markup);
 		g_free(markup);
-		gtk_box_pack_start(GTK_BOX(box), label, FALSE, FALSE, 3);
+
+		//obtain the size for label so we can account for it
+		//when determining the image size
+		gtk_widget_size_request(label, &requisition);
+		image =
+			gm_load_image((char *)elt->name, (char *)elt->logo,
+						gm_get_cache_location(), gm_get_programname(), max_width,
+					  max_height - requisition.height);
+
+		gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(image), FALSE, FALSE, 0);
+		gtk_widget_show(image);
+
+		gtk_box_pack_start(GTK_BOX(box), label, FALSE, FALSE, 0);
 		gtk_widget_show(label);
+	
+	}
+	else
+	{
+		image =
+			gm_load_image((char *)elt->name, (char *)elt->logo,
+						gm_get_cache_location(), gm_get_programname(), max_width,
+					  max_height);
+		gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(image), FALSE, FALSE, 0);
+		gtk_widget_show(image);
+
 	}
 
 	return box;
@@ -602,6 +619,7 @@ GtkWidget *gm_create_button(menu_elements * elt, int max_width, int max_height,
 {
 	GtkWidget *button, *imagelabelbox;
 
+	g_debug("elt->name: %s, max_width: %d, max_height: %d", elt->name, max_width, max_height);
 	button = gm_create_empty_button(processevent, elt);
 	gtk_widget_set_size_request(button, max_width, max_height);
 	if (elt->logo != NULL)
@@ -762,7 +780,7 @@ GtkWidget *gm_create_buttonbox(menu_elements * elts,
 
 		next = cur->next;
 		button = gm_create_button(cur, button_width, box_height, processevent);
-		gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 1);
+		gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 0);
 		gtk_widget_show(button);
 		cur->widget = button;
 		cur = next;

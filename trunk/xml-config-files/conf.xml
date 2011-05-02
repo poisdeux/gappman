@@ -1,5 +1,5 @@
 <appmanager>
-  <actions width="30%" height="10%" align="top,left">
+  <actions width="20%" height="10%" align="top,left">
     <action>
       <name>Shutdown</name>
       <exec>./applets/shutdown/gmshutdown</exec>
@@ -36,7 +36,7 @@
 			<arg>15</arg>
       <logo>./logos/nxclient-icon.png</logo>
       <autostart>1</autostart>
-			<printlabel>1</printlabel>
+			<printlabel>0</printlabel>
     </program>
     <program>
       <name>MythTV</name>
@@ -45,7 +45,7 @@
 			<arg>50</arg>
       <logo>./logos/mythtv.png</logo>
       <autostart>0</autostart>
-			<printlabel>1</printlabel>
+			<printlabel>0</printlabel>
     </program>
     <program>
       <name>Stepmania</name>
@@ -54,7 +54,7 @@
 			<arg>50</arg>
       <logo>./logos/stepmania.png</logo>
       <autostart>0</autostart>
-			<printlabel>1</printlabel>
+			<printlabel>0</printlabel>
     </program>
   </programs>
 	<panel width="20%" height="10%" align="top,right">

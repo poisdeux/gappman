@@ -37,7 +37,7 @@ static void measure_time(int *prev_microseconds)
 	if(*prev_microseconds)
 	{
 		gettimeofday( &time_tv, NULL );
-		g_debug("Microseconds passed: %d", (int) time_tv.tv_usec - *prev_microseconds);
+		//g_debug("Microseconds passed: %d", (int) time_tv.tv_usec - *prev_microseconds);
 		*prev_microseconds = (int) time_tv.tv_usec;
 	}	
 	gettimeofday( &time_tv, NULL );
@@ -231,7 +231,7 @@ static draw_digit(cairo_t *cr, int digit, gdouble x_offset, gdouble y_offset)
 			draw_bar(cr, i, x_offset, y_offset);
 		}
 	}  
-	g_debug("Drawing digit %d", digit);
+	//g_debug("Drawing digit %d", digit);
 	measure_time(&time_passed);	
 }
 
@@ -295,7 +295,7 @@ static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpoint
 	cairo_stroke (cr);
 
 	cairo_destroy(cr);
-	g_debug("on_expose_event");
+	//g_debug("on_expose_event");
 	measure_time(&time_passed);
 	return TRUE;
 }
@@ -356,7 +356,7 @@ static gboolean calculate_sizes_and_offsets(GtkWidget *widget, GdkEventConfigure
 	y_4_5_offset = y_3_offset + 1.25*linewidth;
 	y_6_offset = y_4_5_offset + y_3_offset;
 
-	g_debug("calculate_sizes_and_offsets");
+	//g_debug("calculate_sizes_and_offsets");
 	measure_time(&time_passed);	
 	return TRUE;
 }
