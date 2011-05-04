@@ -8,8 +8,8 @@
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
  *
- * \todo created buttons are not set to correct size. Only gm_load_image calculates the max width or height with respect to the aspect ratio.
  * \todo add support for both portrait and landscape oriented layouts. Now button size is calculated using landscape orientation.
+ * \todo images are not always positioned inside the button. Probably due to spacing issues between the top of the button and the image.
  */
 
 
@@ -327,7 +327,6 @@ static GdkPixbuf *scale_image(GtkWidget * image, int max_width, int max_height)
 		width /= ratio;
 		height /= ratio;
 	}
-	g_debug("scale_image: width: %d, height: %d", width, height);
 	return gdk_pixbuf_scale_simple(pixbuf, width, height, GDK_INTERP_BILINEAR);
 }
 
@@ -618,10 +617,11 @@ GtkWidget *gm_create_button(menu_elements * elt, int max_width, int max_height,
 												  menu_elements *))
 {
 	GtkWidget *button, *imagelabelbox;
+	GtkBorder border;
 
-	g_debug("elt->name: %s, max_width: %d, max_height: %d", elt->name, max_width, max_height);
 	button = gm_create_empty_button(processevent, elt);
 	gtk_widget_set_size_request(button, max_width, max_height);
+
 	if (elt->logo != NULL)
 	{
 		imagelabelbox = image_label_box_vert(elt, max_width, max_height);

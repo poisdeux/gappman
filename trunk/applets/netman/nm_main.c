@@ -11,6 +11,7 @@
  *
  * \todo Implement support for network unavailability when no network-interfaces have been configured.
  * \todo Implement support for keybindings which should trigger the menu to pop-up.
+ * \bug when first check fails, but second passes, netman shows network as OK.
  */
 #include <gtk/gtk.h>
 #include <gmodule.h>
