@@ -621,11 +621,11 @@ GtkWidget *gm_create_button(menu_elements * elt, int max_width, int max_height,
 
 	button = gm_create_empty_button(processevent, elt);
 	gtk_widget_set_size_request(button, max_width, max_height);
-
 	if (elt->logo != NULL)
 	{
 		imagelabelbox = image_label_box_vert(elt, max_width, max_height);
 		gtk_button_set_image(GTK_BUTTON(button), imagelabelbox);
+		gtk_button_set_image_position(GTK_BUTTON(button), GTK_POS_TOP);
 	}
 
 	return button;
