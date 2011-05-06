@@ -11,6 +11,7 @@
  *
  * \todo Implement support for network unavailability when no network-interfaces have been configured.
  * \todo Implement support for keybindings which should trigger the menu to pop-up.
+ * \todo Add a check to see if status has changed to prevent button from being updated every loop.
  */
 #include <gtk/gtk.h>
 #include <gmodule.h>
