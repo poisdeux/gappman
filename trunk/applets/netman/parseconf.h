@@ -38,8 +38,6 @@ struct nm_element
 								// process that was started by this nm_element
 	int status;					// !< should hold the last exit value of the
 								// executable
-	int prev_status;			// !< should hold the last exit value of the
-								// executable of the previous test
 	int success;				// !< should hold the exit value of the
 								// executable (*exec) that represents the
 								// success state

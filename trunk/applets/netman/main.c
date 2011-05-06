@@ -11,7 +11,6 @@
  *
  * \todo Implement support for network unavailability when no network-interfaces have been configured.
  * \todo Implement support for keybindings which should trigger the menu to pop-up.
- * \bug when first check fails, but second passes, netman shows network as OK.
  */
 #include <gtk/gtk.h>
 #include <gmodule.h>
@@ -62,14 +61,12 @@ static void check_status(GPid pid, gint status, nm_elements * elt)
 	{
 		// program exited normally
 		elt->running = FALSE;
-		elt->prev_status = elt->status;
 		elt->status = WEXITSTATUS(status);
 	}
 	else if (WIFSIGNALED(status))
 	{
 		// program did not exit normally
 		elt->running = FALSE;
-		elt->prev_status = elt->status;
 		elt->status = -1;
 	}
 
@@ -158,42 +155,29 @@ static void perform_action(GtkWidget * widget, GdkEvent * event,
 static void update_button()
 {
 	nm_elements *elts;
-	int success = 0;
 
 	elts = nm_get_stati();
 
 	while (elts != NULL)
 	{
-		// we only need to do something if the status changed
-		if (elts->prev_status != elts->status)
+		if ((elts->status == -1) || (elts->status != elts->success))
 		{
-			if ((elts->status == -1) || (elts->status != elts->success))
-			{
-				gdk_threads_enter();
-				gtk_button_set_image(main_button,
-									 GTK_WIDGET(elts->image_fail));
-				gdk_threads_leave();
+			gdk_threads_enter();
+			gtk_button_set_image(main_button,
+								 GTK_WIDGET(elts->image_fail));
+			gdk_threads_leave();
 
-				// Network will only succeed if all checks succeed. So we can
-				// stop
-				// if one of the checks fails
-				return;
-			}
-			else
-			{
-				success = 1;
-			}
+			// Network will only succeed if all checks succeed. So we can
+			// stop if one of the checks fails
+			return;
 		}
 		elts = elts->next;
 	}
 
-	if (success)
-	{
-		elts = nm_get_stati();
-		gdk_threads_enter();
-		gtk_button_set_image(main_button, GTK_WIDGET(elts->image_success));
-		gdk_threads_leave();
-	}
+	elts = nm_get_stati();
+	gdk_threads_enter();
+	gtk_button_set_image(main_button, GTK_WIDGET(elts->image_success));
+	gdk_threads_leave();
 }
 
 static void show_menu()

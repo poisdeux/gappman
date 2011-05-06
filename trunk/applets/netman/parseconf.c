@@ -38,7 +38,6 @@ struct nm_element *create_nm_element(nm_elements * prev)
 	elt->args = NULL;
 	elt->argv = NULL;
 	elt->status = 1;			// default fail
-	elt->prev_status = 1;		// default fail
 	elt->pid = -1;
 	elt->image_success = NULL;
 	elt->image_fail = NULL;
