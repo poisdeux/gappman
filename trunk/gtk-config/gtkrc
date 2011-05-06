@@ -42,6 +42,9 @@ style "button-style"
 	GtkButton::relief = GTK_RELIEF_NONE
 	GtkButton::image-spacing = 0
 	GtkButton::inner-border = {0, 0, 0, 0}
+	GtkBox::padding = 0
+	GtkBox::spacing = 0
+	GtkBox::homogeneous = "FALSE"
 }
 
 class "GtkWindow" style "main-window-style"

@@ -446,7 +446,6 @@ static GtkWidget *image_label_box_vert(menu_elements * elt, int max_width,
 
 	/* Create box for image and label */
 	box = gtk_vbox_new(FALSE, 0);
-	gtk_container_set_border_width(GTK_CONTAINER(box), 2);
 
 	if ((elt->printlabel != 0) && (elt->name != NULL))
 	{
@@ -465,10 +464,10 @@ static GtkWidget *image_label_box_vert(menu_elements * elt, int max_width,
 						gm_get_cache_location(), gm_get_programname(), max_width,
 					  max_height - requisition.height);
 
-		gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(image), FALSE, FALSE, 0);
+		gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(image), TRUE, TRUE, 0);
 		gtk_widget_show(image);
 
-		gtk_box_pack_start(GTK_BOX(box), label, FALSE, FALSE, 0);
+		gtk_box_pack_start(GTK_BOX(box), label, TRUE, TRUE, 0);
 		gtk_widget_show(label);
 	
 	}
@@ -478,9 +477,8 @@ static GtkWidget *image_label_box_vert(menu_elements * elt, int max_width,
 			gm_load_image((char *)elt->name, (char *)elt->logo,
 						gm_get_cache_location(), gm_get_programname(), max_width,
 					  max_height);
-		gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(image), FALSE, FALSE, 0);
+		gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(image), TRUE, TRUE, 0);
 		gtk_widget_show(image);
-
 	}
 
 	return box;
@@ -624,8 +622,8 @@ GtkWidget *gm_create_button(menu_elements * elt, int max_width, int max_height,
 	if (elt->logo != NULL)
 	{
 		imagelabelbox = image_label_box_vert(elt, max_width, max_height);
-		gtk_button_set_image(GTK_BUTTON(button), imagelabelbox);
-		gtk_button_set_image_position(GTK_BUTTON(button), GTK_POS_TOP);
+		gtk_container_add(GTK_CONTAINER(button), imagelabelbox);
+		gtk_widget_show(imagelabelbox);
 	}
 
 	return button;
