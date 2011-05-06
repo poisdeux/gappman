@@ -9,7 +9,7 @@
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
 
-#include "nm_parseconf.h"
+#include "parseconf.h"
 #include <string.h>
 
 static nm_elements *stati;

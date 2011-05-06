@@ -1,9 +1,9 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
 EXTRA_DIST = $(srcdir)/xml-config-files/*.xml 
 EXTRA_DIST += $(srcdir)/logos
-noinst_HEADERS = nm_parseconf.h
+noinst_HEADERS = parseconf.h
 lib_LTLIBRARIES = gm_netman.la
-gm_netman_la_SOURCES = nm_main.c nm_parseconf.c 
+gm_netman_la_SOURCES = main.c parseconf.c 
 gm_netman_la_CPPFLAGS = $(GTK_CFLAGS)
 gm_netman_la_CPPFLAGS += $(LIBXML_CFLAGS)
 gm_netman_la_CPPFLAGS += $(DBUS_CFLAGS)

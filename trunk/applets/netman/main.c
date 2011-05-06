@@ -24,7 +24,7 @@
 #include <gm_generic.h>
 #include <dbus/dbus-glib.h>
 #include <string.h>
-#include "nm_parseconf.h"
+#include "parseconf.h"
 
 static GtkButton *main_button = NULL;
 static int main_button_width = 50;
