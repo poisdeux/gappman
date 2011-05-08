@@ -39,12 +39,9 @@ style "button-style"
 	bg[SELECTED] = "#303030"
 	bg[ACTIVE] = "#404040"
 	bg[INSENSITIVE] = "#202020"
-	GtkButton::relief = GTK_RELIEF_NONE
-	GtkButton::image-spacing = 0
 	GtkButton::inner-border = {0, 0, 0, 0}
-	GtkBox::padding = 0
-	GtkBox::spacing = 0
-	GtkBox::homogeneous = "FALSE"
+	GtkWidget::focus-line-width = 0
+	GtkWidget::focus-padding = 0
 }
 
 class "GtkWindow" style "main-window-style"
