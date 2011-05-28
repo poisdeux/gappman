@@ -7,6 +7,8 @@
  *
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
+ *
+ * \todo replace gm_load_conf with gm_get_programs_from_gappman
  */
 
 #include <gtk/gtk.h>
@@ -285,7 +287,7 @@ static GtkWidget *createrow(menu_elements * elt, int width, int height)
 	gtk_container_add(GTK_CONTAINER(alignment), statuslabel);
 	gtk_widget_show(statuslabel);
 
-	gtk_container_add(GTK_CONTAINER(hbox), elt->widget);
+	gtk_box_pack_start(GTK_BOX(hbox), elt->widget, TRUE, TRUE, 0);
 	gtk_widget_show(elt->widget);
 	gtk_container_add(GTK_CONTAINER(hbox), alignment);
 	gtk_widget_show(alignment);
