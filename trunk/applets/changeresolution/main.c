@@ -8,8 +8,7 @@
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
  *
- * \todo show current resolution
- * \todo add button to keep selected resolution
+ * \todo add support for portrait orientation
  * 
  */
 
@@ -222,6 +221,12 @@ static void changeresolution(GtkWidget * widget, GdkEvent * event,
 	gtk_container_add(GTK_CONTAINER(vbox), button);
 
 	button =
+		gm_create_label_button("Keep resolution",
+							   G_CALLBACK(gm_destroy_widget), confirmwin);
+	gtk_container_add(GTK_CONTAINER(vbox), button);
+
+
+	button =
 		gm_create_label_button("Cancel", (void *)revert_to_old_res, &oldsize);
 	(void)g_signal_connect(G_OBJECT(button), "key_release_event",
 						   G_CALLBACK(gm_destroy_widget), confirmwin);
@@ -238,6 +243,31 @@ static void changeresolution(GtkWidget * widget, GdkEvent * event,
 	// g_timeout_add_seconds (10, )
 }
 
+static GtkWidget *show_current_resolution(int width)
+{
+	GtkWidget *hbox, *label;
+	gchar *markup;
+	XRRScreenSize  size;
+
+	if ( gm_res_get_current_size(&size) != GM_SUCCES )
+	{
+		return NULL;
+	}
+
+	hbox = gtk_hbox_new(FALSE, 10);
+
+	label = gtk_label_new("");
+
+	markup =
+		g_markup_printf_escaped("<span size=\"%d\">Current: %dx%d</span>", fontsize,
+								size.width, size.height);
+	gtk_label_set_markup(GTK_LABEL(label), markup);
+	g_free(markup);
+	gtk_container_add(GTK_CONTAINER(hbox), label);
+	gtk_widget_show(label);
+
+	return hbox;
+}
 static GtkWidget *createrow(XRRScreenSize * size, int width)
 {
 	GtkWidget *button, *hbox, *label;
@@ -382,6 +412,13 @@ int main(int argc, char **argv)
 		// gtk_window_set_opacity (GTK_WINDOW (mainwin), 0.8);
 
 		vbox = gtk_vbox_new(FALSE, 10);
+	
+		hbox = show_current_resolution(dialog_width);
+		gtk_container_add(GTK_CONTAINER(vbox), hbox);
+		gtk_widget_show(hbox);
+		separator = gtk_hseparator_new();
+		gtk_container_add(GTK_CONTAINER(vbox), separator);
+		gtk_widget_show(separator);
 
 		for (i = 0; i < nsize; i++)
 		{
