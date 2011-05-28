@@ -7,6 +7,8 @@
  *
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
+ *
+ * \todo add function gm_get_programs_from_gappman which provides a list of managed programs and URLs to the corresponding buttonimages
  */
 
 #ifdef HAVE_CONFIG_H
