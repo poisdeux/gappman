@@ -8,8 +8,6 @@
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
  *
- * \todo add support for both portrait and landscape oriented layouts. Now button size is calculated using landscape orientation.
- * \todo images are not always positioned inside the button. Probably due to spacing issues between the top of the button and the image.
  */
 
 
@@ -552,26 +550,26 @@ static gboolean dehighlight_button(GtkWidget * widget, GdkEvent * event,
 * \brief Calculates the amount of elements per row to evenly spread all elements on a surface of box_height x box_width.
 * \param box_width width in pixels of the box that should contain the elements.
 * \param box_height height in pixels of the box that should contain the elements.
-* \param amount_of_elements number of elements that should be placed in the box_height x box_width area
+* \param amount_of_elements number of elements that should be placed in one row
 */
-static int calculateAmountOfElementsPerColumn(int box_width, int box_height,
+static int calculateAmountOfElementsPerRow(int box_width, int box_height,
 											  int amount_of_elements)
 {
-	double rows;
+	double elts;
 	double ratio;
 	ratio =
 		(double)MAX(box_height, box_width) / (double)MIN(box_height,
 														 box_width);
-	rows = sqrt(amount_of_elements / ratio);
+	elts = sqrt(amount_of_elements / ratio);
 
 	// Check orientation and adjust accordingly
 	if (box_height > box_width)
 	{
-		return (int)round(rows);
+		return (int)round(elts);
 	}
 	else
 	{
-		return (int)round(rows * ratio);
+		return (int)round(elts * ratio);
 	}
 }
 
@@ -735,12 +733,11 @@ static GtkWidget *createpanelelement(menu_elements * elt, int width,
 
 GtkWidget *gm_create_buttonbox(menu_elements * elts,
 							   void (*processevent) (GtkWidget *, GdkEvent *,
-													 menu_elements *),
-							   gboolean calc_fontsize)
+													 menu_elements *))
 {
 	menu_elements *next, *cur;
 	GtkWidget *button, *hbox, *vbox;
-	int elts_per_row, count, button_width;
+	int elts_per_col, elts_per_row, count, button_height, button_width;
 	int box_width, box_height;
 
 	box_width = gm_calculate_box_length(screen_width, elts->menu_width);
@@ -749,20 +746,27 @@ GtkWidget *gm_create_buttonbox(menu_elements * elts,
 	vbox = gtk_vbox_new(FALSE, 0);
 
 	elts_per_row =
-		calculateAmountOfElementsPerColumn(box_width, box_height,
+		calculateAmountOfElementsPerRow(box_width, box_height,
 										   *elts->amount_of_elements);
 	if (elts_per_row < 1)
 	{
 		elts_per_row = 1;
 	}
 
+	elts_per_col = (*elts->amount_of_elements) / elts_per_row;
+
+	if (elts_per_col < 1)
+	{
+		elts_per_col = 1;
+	}
+
+	g_debug("no_elts: %d col: %d row: %d box: %dx%d", *elts->amount_of_elements, elts_per_col, elts_per_row, box_width, box_height);
+
+	button_height = box_height / elts_per_col;
 	button_width = box_width / elts_per_row;
 
-	if (calc_fontsize)
-	{
-		// The size metric is 1024th of a point.
-		fontsize = (1024 * button_width * 2) / MAXCHARSINLABEL;
-	}
+	// The size metric is 1024th of a point.
+	fontsize = (1024 * button_width) / MAXCHARSINLABEL;
 
 	cur = elts;
 	count = 0;
@@ -777,7 +781,7 @@ GtkWidget *gm_create_buttonbox(menu_elements * elts,
 		}
 
 		next = cur->next;
-		button = gm_create_button(cur, button_width, box_height, processevent);
+		button = gm_create_button(cur, button_width, button_height, processevent);
 		gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 0);
 		gtk_widget_show(button);
 		cur->widget = button;
@@ -801,7 +805,7 @@ GtkWidget *gm_create_panel(menu_elements * elts)
 	vbox = gtk_vbox_new(FALSE, 0);
 
 	elts_per_row =
-		calculateAmountOfElementsPerColumn(box_width, box_height,
+		calculateAmountOfElementsPerRow(box_width, box_height,
 										   *elts->amount_of_elements);
 	if (elts_per_row < 1)
 	{

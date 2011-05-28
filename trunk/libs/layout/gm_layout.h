@@ -144,13 +144,11 @@ GtkWidget *gm_create_empty_button(void *callbackfunc, void *data);
 * \brief Create the button layout using the available screen height and width
 * \param elts pointer to first menu_elements structure
 * \param processevent function pointer to function which should be used as callback when a button is pressed.
-* \param calc_fontsize boolean if true will recalculate fontsize, if false it will take the current fontsize.
 * \return GtkWidget pointer to a vbox
 */
 GtkWidget *gm_create_buttonbox(menu_elements * elts,
 							   void (*processevent) (GtkWidget *, GdkEvent *,
-													 menu_elements *),
-							   gboolean calc_fontsize);
+													 menu_elements *));
 
 /**
 * \brief Creates the panel layout using the available screen height and width
