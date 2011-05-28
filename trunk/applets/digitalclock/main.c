@@ -20,7 +20,7 @@
 #include <sys/time.h>
 
 static GtkWidget *window = NULL;
-static gdouble linewidth = 10.0;
+static gdouble linewidth = 30.0;
 static gdouble vert_bar_length;
 static gdouble hor_bar_length;
 static gdouble column_width;
@@ -328,7 +328,7 @@ static gboolean calculate_sizes_and_offsets(GtkWidget *widget, GdkEventConfigure
 	measure_time(&time_passed);	
 	//see bar-diagram.dia to make sense out of these numbers
 
-	//empirically determined 1/25th of the window width
+	//empirically determined 1/26th of the window width
   //provides a nice width for the bars		
 	linewidth = w_width/26.0;
 
