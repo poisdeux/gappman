@@ -11,6 +11,9 @@ style "applet-style"
 {
 	fg[NORMAL] = "#A0A0A0"
 	bg[NORMAL] = "#000000"
+	GtkButton::inner-border = {0, 0, 0, 0}
+	GtkWidget::focus-line-width = 0
+	GtkWidget::focus-padding = 0
 }
 
 style "text-style"
