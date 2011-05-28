@@ -31,10 +31,6 @@ static void usage()
 	printf("\n");
 	printf("--help:\t\tshows this help text\n");
 	printf
-		("--width <WIDTHINPIXELS>:\t\twidth of the main window (default: screen width / 9)\n");
-	printf
-		("--height <HEIGHTINPIXELS:\t\theight of the main window (default: screen height / 9)\n");
-	printf
 		("--conffile <FILENAME>:\t\t configuration file specifying the program and actions (default: /etc/gappman/shutdown.xml)\n");
 	printf
 		("--gtkrc <GTKRCFILENAME>:\t\t gtk configuration file which can be used for themeing\n");
@@ -152,7 +148,7 @@ int main(int argc, char **argv)
 			{"windowed", 0, 0, 'j'},
 			{0, 0, 0, 0}
 		};
-		c = getopt_long(argc, argv, "w:h:c:d:r:ij",
+		c = getopt_long(argc, argv, "c:r:ij",
 						long_options, &option_index);
 		if (c == -1)
 			break;
@@ -208,22 +204,8 @@ int main(int argc, char **argv)
 
 	if (actions != NULL)
 	{
-		// get generic fontsize from gappman
-		if (gm_get_fontsize_from_gappman(2103, "localhost", &fontsize) ==
-			GM_SUCCES)
-		{
-			gm_set_fontsize(fontsize);
 			align =
-				gm_create_buttonbox(actions, &process_startprogram_event,
-									FALSE);
-		}
-		else
-		{
-			// Recalculate fontsize
-			align =
-				gm_create_buttonbox(actions, &process_startprogram_event,
-									TRUE);
-		}
+				gm_create_buttonbox(actions, &process_startprogram_event);
 		gtk_container_add(GTK_CONTAINER(vbox), align);
 		gtk_widget_show(align);
 	}

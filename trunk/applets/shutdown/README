@@ -18,7 +18,7 @@ It uses the <action> block to configure the buttons.
 
 The program can be executed as follows from the source tarball after building it:
 
-./shutdown --conffile xml-config-files/shutdown.xml
+./gmshutdown --conffile xml-config-files/shutdown.xml
 
 Use --help to get information on more supported options.
 
