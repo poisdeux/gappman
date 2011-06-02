@@ -7,6 +7,7 @@
  *
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
+ * 
  */
 
 #include <string.h>
@@ -65,7 +66,6 @@ static struct menu_element *createMenuElement()
 	elt->app_height = -1;
 	elt->app_width = -1;
 	elt->pid = -1;
-	elt->numArguments = 0;
 	return elt;
 }
 
@@ -225,6 +225,7 @@ void gm_free_menu_elements(menu_elements * elt)
 	if (elt != NULL)
 	{
 		free(elt->amount_of_elements);
+		free(elt->max_elts_in_single_box);
 		free(elt->menu_width);
 		free(elt->menu_height);
 		free(elt->hor_alignment);
@@ -310,7 +311,9 @@ static void processMenuElements(const char *element_name,
 {
 	int ret = 1;
 	xmlChar *name;
+	xmlChar *attr;
 	int *number_elts;
+	int *max_elts;
 	float *hor_align;
 	int *vert_align;
 	menu_elements *prev;
@@ -319,6 +322,7 @@ static void processMenuElements(const char *element_name,
 	prev = NULL;
 
 	number_elts = (int *)malloc(sizeof(int));
+	max_elts = (int *)malloc(sizeof(int));
 	hor_align = (float *)malloc(sizeof(float));
 	vert_align = (int *)malloc(sizeof(int));
 	menu_width = (struct length *)malloc(sizeof(struct length));
@@ -344,8 +348,12 @@ static void processMenuElements(const char *element_name,
 			*elts = createMenuElement();
 			(*elts)->next = prev;
 
-			// the following struct items are shared among all elements of the 
-			// 
+/**
+ *  \todo { redesign menu_element struct. Now global elements are included in each menu_element.
+ *       We better create a parent struct to hold the global elements and a pointer to the
+ *       linked-list of menu elements. }
+ */
+			// the following items are shared among all elements of the 
 			// same group
 			(*elts)->menu_width = menu_width;
 			(*elts)->menu_height = menu_height;
@@ -353,7 +361,7 @@ static void processMenuElements(const char *element_name,
 			(*elts)->vert_alignment = vert_align;
 			(*number_elts)++;
 			(*elts)->amount_of_elements = number_elts;
-
+			(*elts)->max_elts_in_single_box = max_elts;
 			prev = *elts;
 			processMenuElement(reader, *elts, element_name);
 		}
@@ -373,6 +381,15 @@ static void processMenuElements(const char *element_name,
 																	  xmlChar
 																	  *)"align"),
 								   hor_align, vert_align);
+				attr = xmlTextReaderGetAttribute(reader, (const xmlChar *)"max_elts");
+				if ( attr != NULL )
+				{
+					*max_elts = atoi(attr);		
+				}	
+				else
+				{
+					*max_elts = 0;
+				}
 			}
 			// this should end parsing this group of elements
 			ret = 0;

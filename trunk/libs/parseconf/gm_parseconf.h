@@ -63,6 +63,7 @@ enum length_types
 struct menu_element
 {
 	int *amount_of_elements;	///< total number of elements
+	int *max_elts_in_single_box; ///< maximum number of elements allowed in one box.
 	struct length *menu_width;	///< holds the width of the menu this element 
 								// is a part of. Note that all elements in the 
 								// same menu should point to the same length

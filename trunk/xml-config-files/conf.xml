@@ -28,7 +28,7 @@
       <logo>./applets/changeresolution/logos/randr.png</logo>
     </action>
   </actions>
-  <programs width="100%" height="50%" align="bottom,center">
+  <programs max_elts="2" width="100%" height="50%" align="bottom,center">
     <program>
       <name>NX Desktop</name>
       <resolution>1280x1024</resolution>

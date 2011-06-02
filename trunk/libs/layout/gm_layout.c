@@ -8,6 +8,11 @@
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
  *
+ *  \todo Add support for multiple program-menu's. 
+ *  Implementation: Add max_elts attribute to configuration file. In gm_create_buttonbox we
+ *  will need to check if elts->numberElts > max_elts and if so 
+ *  add arrow buttons left and right of the box. These buttons would allow the user to switch
+ *  between different program-menu's.
  */
 
 

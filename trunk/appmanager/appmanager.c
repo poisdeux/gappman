@@ -14,7 +14,6 @@
  * \todo Unit-testing with http://klee.llvm.org/
  * \todo Implement support for keybindings. For instance to start specific applets.
  * \todo Startup indicator when starting programs. We could do this through an animated mouse-pointer or animate the program-button.
- * \todo Add support for multiple program-menu's
  * \todo Make it possible to let gappman redraw the main window when the screen resolution changes
  */
 #ifdef HAVE_CONFIG_H
