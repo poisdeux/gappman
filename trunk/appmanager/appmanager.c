@@ -538,14 +538,14 @@ int main(int argc, char **argv)
 			gm_create_buttonbox(actions, &process_startprogram_event);
 		align_buttonbox(hbox_top, hbox_middle, hbox_bottom, buttonbox,
 						actions);
-		gtk_widget_show(buttonbox);
+		gtk_widget_show_all(buttonbox);
 	}
 
 	if (programs != NULL)
 	{
 		buttonbox =
-			gm_create_buttonbox(programs, &process_startprogram_event);
-		align_buttonbox(hbox_top, hbox_middle, hbox_bottom, buttonbox,
+			gm_create_buttonboxes(programs, &process_startprogram_event);
+			align_buttonbox(hbox_top, hbox_middle, hbox_bottom, buttonbox,
 						programs);
 		gtk_widget_show(buttonbox);
 	}
@@ -557,7 +557,7 @@ int main(int argc, char **argv)
 		{
 			align_buttonbox(hbox_top, hbox_middle, hbox_bottom, buttonbox,
 							panel);
-			gtk_widget_show(buttonbox);
+			gtk_widget_show_all(buttonbox);
 			start_panel(panel);
 		}
 		else
@@ -566,9 +566,13 @@ int main(int argc, char **argv)
 		}
 	}
 	gtk_container_add(GTK_CONTAINER(vbox), hbox_top);
+	gtk_widget_show(hbox_top);
 	gtk_container_add(GTK_CONTAINER(vbox), hbox_middle);
+	gtk_widget_show(hbox_middle);
 	gtk_container_add(GTK_CONTAINER(vbox), hbox_bottom);
+	gtk_widget_show(hbox_bottom);
 	gtk_container_add(GTK_CONTAINER(mainwin), vbox);
+	gtk_widget_show(vbox);
 
 #if !defined(NO_LISTENER)
 	// set confpath so other programs can retrieve
@@ -581,12 +585,11 @@ int main(int argc, char **argv)
 
 	autostartprograms(programs);
 
-	gtk_widget_show_all(mainwin);
+	gtk_widget_show(mainwin);
 
 	gdk_threads_enter();
 	gtk_main();
 	gdk_threads_leave();
-
 
 	g_message("Closing up.");
 	stop_panel(panel);

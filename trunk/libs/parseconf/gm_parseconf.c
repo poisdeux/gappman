@@ -388,7 +388,9 @@ static void processMenuElements(const char *element_name,
 				}	
 				else
 				{
-					*max_elts = 0;
+					// set to maximum to disable creation of multiple boxes
+					// in gm_create_buttonboxes
+					*max_elts = *number_elts;
 				}
 			}
 			// this should end parsing this group of elements

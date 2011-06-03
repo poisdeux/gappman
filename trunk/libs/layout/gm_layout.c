@@ -736,7 +736,7 @@ static GtkWidget *createpanelelement(menu_elements * elt, int width,
 	return elt->gm_module_get_widget();
 }
 
-GtkWidget *gm_create_buttonbox(menu_elements * elts,
+GtkWidget *gm_create_buttonbox(menu_elements *elts,
 							   void (*processevent) (GtkWidget *, GdkEvent *,
 													 menu_elements *))
 {
@@ -752,20 +752,20 @@ GtkWidget *gm_create_buttonbox(menu_elements * elts,
 
 	elts_per_row =
 		calculateAmountOfElementsPerRow(box_width, box_height,
-										   *elts->amount_of_elements);
+										   *elts->max_elts_in_single_box);
 	if (elts_per_row < 1)
 	{
 		elts_per_row = 1;
 	}
 
-	elts_per_col = (*elts->amount_of_elements) / elts_per_row;
+	elts_per_col = (*elts->max_elts_in_single_box) / elts_per_row;
 
 	if (elts_per_col < 1)
 	{
 		elts_per_col = 1;
 	}
 
-	g_debug("no_elts: %d col: %d row: %d box: %dx%d", *elts->amount_of_elements, elts_per_col, elts_per_row, box_width, box_height);
+	g_debug("no_elts: %d col: %d row: %d box: %dx%d", *elts->max_elts_in_single_box, elts_per_col, elts_per_row, box_width, box_height);
 
 	button_height = box_height / elts_per_col;
 	button_width = box_width / elts_per_row;
@@ -775,26 +775,48 @@ GtkWidget *gm_create_buttonbox(menu_elements * elts,
 
 	cur = elts;
 	count = 0;
-	while (cur != NULL)
+	while ((cur != NULL) && (count < *elts->max_elts_in_single_box))
 	{
 		if ((count % elts_per_row) == 0)
 		{
 			hbox = gtk_hbox_new(FALSE, 0);
 
 			gtk_container_add(GTK_CONTAINER(vbox), hbox);
-			gtk_widget_show(hbox);
 		}
 
 		next = cur->next;
 		button = gm_create_button(cur, button_width, button_height, processevent);
 		gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 0);
-		gtk_widget_show(button);
 		cur->widget = button;
 		cur = next;
 		count++;
 	}
 
 	return vbox;
+}
+
+GtkWidget *gm_create_buttonboxes(menu_elements *elts,
+							   void (*processevent) (GtkWidget *, GdkEvent *,
+													 menu_elements *))
+{
+	GtkWidget **boxes;
+	GtkWidget *hbox;
+	int nr_of_boxes;
+	int i;
+
+	nr_of_boxes = (*elts->amount_of_elements)/(*elts->max_elts_in_single_box);
+
+	boxes = (GtkWidget**) malloc(nr_of_boxes * sizeof(GtkWidget*));
+
+	hbox = gtk_hbox_new(FALSE, 0);
+
+	for(i=0;i<nr_of_boxes;i++)
+	{
+		boxes[i] = gm_create_buttonbox(elts, processevent);
+	}
+	gtk_container_add(GTK_CONTAINER(hbox), boxes[0]);
+	gtk_widget_show_all(boxes[0]);
+	return hbox;
 }
 
 GtkWidget *gm_create_panel(menu_elements * elts)
@@ -828,13 +850,11 @@ GtkWidget *gm_create_panel(menu_elements * elts)
 			hbox = gtk_hbox_new(FALSE, 0);
 
 			gtk_container_add(GTK_CONTAINER(vbox), hbox);
-			gtk_widget_show(hbox);
 		}
 		button = createpanelelement(elts, button_width, box_height);
 		if (button != NULL)
 		{
 			gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 1);
-			gtk_widget_show(button);
 			prev_elt = elts;
 			elts = elts->next;
 			count++;

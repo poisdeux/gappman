@@ -150,6 +150,10 @@ GtkWidget *gm_create_buttonbox(menu_elements * elts,
 							   void (*processevent) (GtkWidget *, GdkEvent *,
 													 menu_elements *));
 
+GtkWidget *gm_create_buttonboxes(menu_elements *elts,
+                 void (*processevent) (GtkWidget *, GdkEvent *,
+                           menu_elements *));
+
 /**
 * \brief Creates the panel layout using the available screen height and width
 * \param elts pointer to first menu_elements structure
