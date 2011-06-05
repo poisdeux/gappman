@@ -205,7 +205,7 @@ int main(int argc, char **argv)
 	if (actions != NULL)
 	{
 			align =
-				gm_create_buttonbox(actions, &process_startprogram_event);
+				gm_create_buttonboxes(actions, &process_startprogram_event);
 		gtk_container_add(GTK_CONTAINER(vbox), align);
 		gtk_widget_show(align);
 	}

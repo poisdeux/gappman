@@ -128,9 +128,9 @@ GtkWidget *gm_create_label_button(gchar * buttontext, void *callbackfunc,
 * \param processevent callback function that will be called when button is pressed
 * \return GtkWidget pointer to the new button
 */
-GtkWidget *gm_create_button(menu_elements * elt, int max_width, int max_height,
+GtkWidget *gm_create_button(struct menu_element * elt, int max_width, int max_height,
 							void (*processevent) (GtkWidget *, GdkEvent *,
-												  menu_elements *));
+												  struct menu_element *));
 
 /**
 * \brief Create a single empty button
@@ -141,24 +141,20 @@ GtkWidget *gm_create_button(menu_elements * elt, int max_width, int max_height,
 GtkWidget *gm_create_empty_button(void *callbackfunc, void *data);
 
 /**
-* \brief Create the button layout using the available screen height and width
+* \brief Creates the button layout using the available screen height and width
 * \param elts pointer to first menu_elements structure
 * \param processevent function pointer to function which should be used as callback when a button is pressed.
-* \return GtkWidget pointer to a vbox
+* \return GtkWidget pointer to a hbox contains one or more vboxes 
 */
-GtkWidget *gm_create_buttonbox(menu_elements * elts,
-							   void (*processevent) (GtkWidget *, GdkEvent *,
-													 menu_elements *));
-
-GtkWidget *gm_create_buttonboxes(menu_elements *elts,
+GtkWidget *gm_create_buttonboxes(struct menu_element *elt,
                  void (*processevent) (GtkWidget *, GdkEvent *,
-                           menu_elements *));
+                           struct menu_element *));
 
 /**
 * \brief Creates the panel layout using the available screen height and width
 * \param elts pointer to first menu_elements structure
 * \return GtkWidget pointer to container holding the panel
 */
-GtkWidget *gm_create_panel(menu_elements * elts);
+GtkWidget *gm_create_panel(struct menu_element * elt);
 
 #endif

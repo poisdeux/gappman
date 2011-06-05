@@ -14,10 +14,9 @@
 #include "gm_parseconf.h"
 #include <gm_generic.h>
 
-static int numberElts;
-static menu_elements *programs = NULL;
-static menu_elements *actions = NULL;
-static menu_elements *panel_elts = NULL;
+static struct menu *programs = NULL;
+static struct menu *actions = NULL;
+static struct menu *panel = NULL;
 static char *program_name;
 static char *cache_location;
 
@@ -50,15 +49,14 @@ static void printElements(xmlTextReaderPtr reader)
 /**
 * \brief creates and initializes a new menu_element struct
 */
-static struct menu_element *createMenuElement()
+static struct menu_element createMenuElement()
 {
 	struct menu_element *elt;
-	elt = (menu_elements *) malloc(sizeof(menu_elements));
+	elt = (struct menu_element *) malloc(sizeof(struct menu_element));
 	elt->numArguments = 0;
 	elt->logo = NULL;
 	elt->name = NULL;
 	elt->exec = NULL;
-	elt->next = NULL;
 	elt->args = NULL;
 	elt->module_conffile = NULL;
 	elt->autostart = 0;
@@ -66,7 +64,7 @@ static struct menu_element *createMenuElement()
 	elt->app_height = -1;
 	elt->app_width = -1;
 	elt->pid = -1;
-	return elt;
+	return *elt;
 }
 
 /**
@@ -98,7 +96,7 @@ static void parseLength(xmlChar * length, struct length *str_length)
 * \param *elt menu_element structure which should have its argument list expanded
 * \param *argument argument that should be added to *elt->args
 */
-static void addArgument(menu_elements * elt, char *argument)
+static void addArgument(struct menu_element *elt, char *argument)
 {
 	elt->numArguments++;
 	elt->args =
@@ -124,7 +122,7 @@ char *gm_get_programname()
 *        is reached.
 */
 static void
-processMenuElement(xmlTextReaderPtr reader, menu_elements * elt,
+processMenuElement(xmlTextReaderPtr reader, struct menu_element *elt,
 				   const char *element_name)
 {
 	xmlChar *name = NULL;
@@ -193,77 +191,55 @@ processMenuElement(xmlTextReaderPtr reader, menu_elements * elt,
 			&& xmlTextReaderNodeType(reader) == 15)
 		{
 			ret = 0;
-
 		}
 		else
 		{
 			ret = xmlTextReaderRead(reader);
 		}
-
-
 	}
 }
 
-
-/**
-* \brief returns the total number of menu_elements
-*/
-int gm_get_number_of_elements()
-{
-	return numberElts;
-}
 
 /**
 * \brief relinguishes the memory occupied by menu_element structures
 * \param *elt first menu_element structure
 */
-void gm_free_menu_elements(menu_elements * elt)
+void gm_free_menu(struct menu *dish)
 {
-	menu_elements *next;
 	int i;
 
-	if (elt != NULL)
+	if (dish != NULL)
 	{
-		free(elt->amount_of_elements);
-		free(elt->max_elts_in_single_box);
-		free(elt->menu_width);
-		free(elt->menu_height);
-		free(elt->hor_alignment);
-		free(elt->vert_alignment);
-
-		while (elt != NULL)
+		for(i = 0; i < dish->amount_of_elements; i++)
 		{
-			free((xmlChar *) elt->name);
-			free((xmlChar *) elt->exec);
-			free((xmlChar *) elt->module);
-			free((xmlChar *) elt->logo);
+			free((xmlChar *) (dish->elts[i]).name);
+			free((xmlChar *) (dish->elts[i]).exec);
+			free((xmlChar *) (dish->elts[i]).module);
+			free((xmlChar *) (dish->elts[i]).logo);
 
-			for (i = 0; i < elt->numArguments; i++)
+			for (i = 0; i < (dish->elts[i]).numArguments; i++)
 			{
-				free(elt->args[i]);
+				free((dish->elts[i]).args[i]);
 			}
-			free(elt->args);
-
-			next = elt->next;
-			free(elt);
-			elt = next;
+			free((dish->elts[i]).args);
 		}
+		free(dish->elts);
 	}
 }
 
-menu_elements *gm_get_programs()
+struct menu *gm_get_programs()
 {
 	return programs;
 }
 
-menu_elements *gm_get_actions()
+struct menu *gm_get_actions()
 {
 	return actions;
 }
 
-menu_elements *gm_get_panel()
+struct menu *gm_get_panel()
 {
-	return panel_elts;
+	return panel;
 }
 
 static void gm_parse_alignment(char *align, float *hor_align, int *vert_align)
@@ -298,7 +274,7 @@ static void gm_parse_alignment(char *align, float *hor_align, int *vert_align)
 }
 
 /**
-* \brief creates the menu_elements structures
+* \brief creates the menu_element structures
 * \param element_name name of the element being processed
 * \param group_element_name name of the group the element belongs to. E.g programs or actions.
 * \param reader the XML reader from libxml
@@ -307,34 +283,18 @@ static void gm_parse_alignment(char *align, float *hor_align, int *vert_align)
 */
 static void processMenuElements(const char *element_name,
 								const char *group_element_name,
-								xmlTextReaderPtr reader, menu_elements ** elts)
+								xmlTextReaderPtr reader, struct menu *dish)
 {
 	int ret = 1;
 	xmlChar *name;
 	xmlChar *attr;
-	int *number_elts;
-	int *max_elts;
-	float *hor_align;
-	int *vert_align;
-	menu_elements *prev;
-	struct length *menu_width;
-	struct length *menu_height;
-	prev = NULL;
-
-	number_elts = (int *)malloc(sizeof(int));
-	max_elts = (int *)malloc(sizeof(int));
-	hor_align = (float *)malloc(sizeof(float));
-	vert_align = (int *)malloc(sizeof(int));
-	menu_width = (struct length *)malloc(sizeof(struct length));
-	menu_height = (struct length *)malloc(sizeof(struct length));
-
-	// Initial default values 100%
-	menu_width->value = 100;
-	menu_width->type = PERCENTAGE;
-	menu_height->value = 100;
-	menu_height->type = PERCENTAGE;
-	*hor_align = 0.5;			// <! default center
-	*vert_align = 1;			// <! default center
+	// Initial default values
+	dish->menu_width.value = 100;
+	dish->menu_width.type = PERCENTAGE;
+	dish->menu_height.value = 100;
+	dish->menu_height.type = PERCENTAGE;
+	dish->hor_alignment = 0.5;			// <! default center
+	dish->vert_alignment = 1;			// <! default center
 
 	while (ret)
 	{
@@ -345,25 +305,16 @@ static void processMenuElements(const char *element_name,
 		if (strcmp((char *)name, element_name) == 0
 			&& xmlTextReaderNodeType(reader) == 1)
 		{
-			*elts = createMenuElement();
-			(*elts)->next = prev;
+			dish->elts[dish->amount_of_elements] = createMenuElement();
+			processMenuElement(reader, &(dish->elts[dish->amount_of_elements]), element_name);
+			dish->amount_of_elements++;
 
-/**
- *  \todo { redesign menu_element struct. Now global elements are included in each menu_element.
- *       We better create a parent struct to hold the global elements and a pointer to the
- *       linked-list of menu elements. }
- */
-			// the following items are shared among all elements of the 
-			// same group
-			(*elts)->menu_width = menu_width;
-			(*elts)->menu_height = menu_height;
-			(*elts)->hor_alignment = hor_align;
-			(*elts)->vert_alignment = vert_align;
-			(*number_elts)++;
-			(*elts)->amount_of_elements = number_elts;
-			(*elts)->max_elts_in_single_box = max_elts;
-			prev = *elts;
-			processMenuElement(reader, *elts, element_name);
+			//check if we need to resize
+			if((dish->amount_of_elements % 5) == 0)
+			{
+				dish->elts = (struct menu_element*) realloc(dish->elts, 
+									(dish->amount_of_elements + 5) * sizeof(struct menu_element));
+			}
 		}
 
 		// parse global parameters when endtag for groupelement is found
@@ -373,24 +324,24 @@ static void processMenuElements(const char *element_name,
 			if (xmlTextReaderHasAttributes(reader))
 			{
 				parseLength(xmlTextReaderGetAttribute
-							(reader, (const xmlChar *)"width"), menu_width);
+							(reader, (const xmlChar *)"width"), &(dish->menu_width));
 				parseLength(xmlTextReaderGetAttribute
-							(reader, (const xmlChar *)"height"), menu_height);
+							(reader, (const xmlChar *)"height"), &(dish->menu_height));
 				gm_parse_alignment((char *)xmlTextReaderGetAttribute(reader,
 																	 (const
 																	  xmlChar
 																	  *)"align"),
-								   hor_align, vert_align);
+								   &(dish->hor_alignment), &(dish->vert_alignment));
 				attr = xmlTextReaderGetAttribute(reader, (const xmlChar *)"max_elts");
 				if ( attr != NULL )
 				{
-					*max_elts = atoi(attr);		
+					dish->max_elts_in_single_box = atoi(attr);		
 				}	
 				else
 				{
 					// set to maximum to disable creation of multiple boxes
 					// in gm_create_buttonboxes
-					*max_elts = *number_elts;
+					dish->max_elts_in_single_box = dish->amount_of_elements;
 				}
 			}
 			// this should end parsing this group of elements
@@ -404,12 +355,11 @@ int gm_load_conf(const char *filename)
 	xmlTextReaderPtr reader;
 	int ret;
 	xmlChar *name;
-	numberElts = 0;
 
 	// Initialize
-	programs = NULL;
-	actions = NULL;
-	panel_elts = NULL;
+	programs = (struct menu*) malloc(sizeof(struct menu));
+	actions = (struct menu*) malloc(sizeof(struct menu));
+	panel = (struct menu*) malloc(sizeof(struct menu));
 	cache_location = NULL;
 	program_name = NULL;
 
@@ -418,7 +368,7 @@ int gm_load_conf(const char *filename)
 	{
 		ret = xmlTextReaderRead(reader);
 
-		// first attribute must be the name of the program
+		// first xml-element must be the name of the program
 		program_name = (char *)xmlTextReaderName(reader);
 
 		while (ret == 1)
@@ -427,17 +377,17 @@ int gm_load_conf(const char *filename)
 			if (strcmp((char *)name, "programs") == 0
 				&& xmlTextReaderNodeType(reader) == 1)
 			{
-				processMenuElements("program", "programs", reader, &programs);
+				processMenuElements("program", "programs", reader, programs);
 			}
 			else if (strcmp((char *)name, "actions") == 0
 					 && xmlTextReaderNodeType(reader) == 1)
 			{
-				processMenuElements("action", "actions", reader, &actions);
+				processMenuElements("action", "actions", reader, actions);
 			}
 			else if (strcmp((char *)name, "panel") == 0
 					 && xmlTextReaderNodeType(reader) == 1)
 			{
-				processMenuElements("applet", "panel", reader, &panel_elts);
+				processMenuElements("applet", "panel", reader, panel);
 			}
 			if (strcmp((char *)name, "cachelocation") == 0
 				&& xmlTextReaderNodeType(reader) == 1)
@@ -473,15 +423,18 @@ int gm_load_conf(const char *filename)
 }
 
 
-menu_elements *gm_search_elt_by_name(gchar * name, menu_elements * programs)
+struct menu_element *gm_search_elt_by_name(gchar * name, struct menu *dish)
 {
-	while (programs != NULL)
+	int i;
+	if(dish != NULL)
 	{
-		if (g_strcmp0(name, (const char *)programs->name) == 0)
-		{
-			return programs;
+		for(i=0;i<dish->amount_of_elements;i++)
+		{	
+			if (g_strcmp0(name, (const char *)(dish->elts[i]).name) == 0)
+			{
+				return &(dish->elts[i]);
+			}
 		}
-		programs = programs->next;
 	}
 	return NULL;
 }

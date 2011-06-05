@@ -57,33 +57,30 @@ enum length_types
 };
 
 /**
+* \struct length
+* \brief structure to hold the length type (pixel, percentage) and its value.
+*/
+struct length
+{
+	enum length_types type;		///< Type of the value, i.e. percentage or
+								// pixels?
+	int value;					///< Actual length value without metric
+								// indicator, e.g. % or px.
+};
+
+
+/**
 * \struct menu_element
 * \brief structure to hold the attributes to create the button to start a program
 */
 struct menu_element
 {
-	int *amount_of_elements;	///< total number of elements
-	int *max_elts_in_single_box; ///< maximum number of elements allowed in one box.
-	struct length *menu_width;	///< holds the width of the menu this element 
-								// is a part of. Note that all elements in the 
-								// same menu should point to the same length
-								// struct for menu_width.
-	struct length *menu_height;	///< holds the height of the menu this
-								// elements is a part of. Note that all
-								// elements in the same menu should point to
-								// the same length struct for menu_width.
 	int app_width;				///< screen resolution width that should be
 								// used when the application of this
 								// menu_element is started.
 	int app_height;				///< screen resolution height that should be
 								// used when the application of this
 								// menu_element is started.
-	float *hor_alignment;		///< horizontal alignment of group (NOT A
-								// SINGLE WIDGET). 0.0 = left, 0.5 = center,
-								// 1.0 = right
-	int *vert_alignment;		///< vertical alignment of group (NOT A
-								// SINGLE WIDGET). 0 = top, 1 = center, 2 =
-								// bottom
 	GtkWidget *widget;			///< widget associated with this
 								// menu_element. Usually a GtkButton.
 	const xmlChar *name;		///< holds the name of the program
@@ -104,8 +101,6 @@ struct menu_element
 	int pid;					///< should hold the process ID of the
 								// process that was started by this
 								// menu_element
-	struct menu_element *next;	///< pointer to the next menu_element
-								// structure
 	GM_MODULE_INIT gm_module_init;	///< pointer to the init function for a
 									// panel module
 	GM_MODULE_START gm_module_start;	///< pointer to the start function
@@ -125,24 +120,28 @@ struct menu_element
 };
 
 /**
-* \struct length
-* \brief structure to hold the length type (pixel, percentage) and its value.
+* \struct menu
+* \brief structure which holds a list of menu elements and all meta-information regarding the menu
 */
-struct length
+struct menu
 {
-	enum length_types type;		///< Type of the value, i.e. percentage or
-								// pixels?
-	int value;					///< Actual length value without metric
-								// indicator, e.g. % or px.
+	int amount_of_elements;	///< total number of elements
+	int max_elts_in_single_box; ///< maximum number of elements allowed in one box.
+	struct length menu_width;	///< holds the width of the menu this element 
+								// is a part of. Note that all elements in the 
+								// same menu should point to the same length
+								// struct for menu_width.
+	struct length menu_height;	///< holds the height of the menu this
+								// elements is a part of. Note that all
+								// elements in the same menu should point to
+								// the same length struct for menu_width.
+	float hor_alignment;		///< horizontal alignment of menu 
+								// 0.0 = left, 0.5 = center, 1.0 = right
+	int vert_alignment;		///< vertical alignment of menu
+								// 0 = top, 1 = center, 2 = bottom
+	struct menu_element *elts;
 };
 
-/**
-* \typedef menu_elements
-* Struct menu_element has a pointer next that can be used to create a linked list of
-* menu_element structs. This typedef is merely used to make clear in the code that
-* a list is used instead of a single element. 
-*/
-typedef struct menu_element menu_elements;
 
 /**
 * \brief load the configuration file and parses it to create the menu_elements structures.
@@ -152,10 +151,10 @@ typedef struct menu_element menu_elements;
 int gm_load_conf(const char *filename);
 
 /**
-* \brief relinguishes the memory occupied by menu_element structures
-* \param *elt first menu_element structure
+* \brief relinguishes the memory occupied by menu structures
+* \param *dish menu structure
 */
-void gm_free_menu_elements(menu_elements * elt);
+void gm_free_menu(struct menu *dish);
 
 /**
 * \brief returns the total number of menu_elements
@@ -185,19 +184,19 @@ char *gm_get_programname();
 * \brief returns the menu_elements structure that contains the programs
 * \return pointer to menu_elements structure
 */
-menu_elements *gm_get_programs();
+struct menu *gm_get_programs();
 
 /**
 * \brief returns the menu_elements structure that contains the actions
 * \return pointer to menu_elements structure
 */
-menu_elements *gm_get_actions();
+struct menu *gm_get_actions();
 
 /**
 * \brief returns the menu_elements structure that contains the panel elements
 * \return pointer to menu_elements structure
 */
-menu_elements *gm_get_panel();
+struct menu *gm_get_panel();
 
 /**
 * \brief returns the menu element with the given name
@@ -205,6 +204,6 @@ menu_elements *gm_get_panel();
 * \param programs list of menu_element structs holding the programs managed by gappman
 * \return pointer to the menu element structure
 */
-menu_elements *gm_search_elt_by_name(gchar * name, menu_elements * programs);
+struct menu_element *gm_search_elt_by_name(gchar *name, struct menu *programs);
 
 #endif

@@ -736,17 +736,14 @@ static GtkWidget *createpanelelement(menu_elements * elt, int width,
 	return elt->gm_module_get_widget();
 }
 
-GtkWidget *gm_create_buttonbox(menu_elements *elts,
-							   void (*processevent) (GtkWidget *, GdkEvent *,
+static GtkWidget *gm_create_buttonbox(menu_elements *elts, int elts_index, 
+								int box_width, int box_height,
+								void (*processevent) (GtkWidget *, GdkEvent *,
 													 menu_elements *))
 {
 	menu_elements *next, *cur;
 	GtkWidget *button, *hbox, *vbox;
 	int elts_per_col, elts_per_row, count, button_height, button_width;
-	int box_width, box_height;
-
-	box_width = gm_calculate_box_length(screen_width, elts->menu_width);
-	box_height = gm_calculate_box_length(screen_height, elts->menu_height);
 
 	vbox = gtk_vbox_new(FALSE, 0);
 
@@ -799,20 +796,26 @@ GtkWidget *gm_create_buttonboxes(menu_elements *elts,
 							   void (*processevent) (GtkWidget *, GdkEvent *,
 													 menu_elements *))
 {
-	GtkWidget **boxes;
+	GtkWidget *boxes[10];
 	GtkWidget *hbox;
-	int nr_of_boxes;
 	int i;
+	int index = 0;
+	int box_width, box_height;
 
-	nr_of_boxes = (*elts->amount_of_elements)/(*elts->max_elts_in_single_box);
-
-	boxes = (GtkWidget**) malloc(nr_of_boxes * sizeof(GtkWidget*));
+	box_width = gm_calculate_box_length(screen_width, elts->menu_width);
+	box_height = gm_calculate_box_length(screen_height, elts->menu_height);
 
 	hbox = gtk_hbox_new(FALSE, 0);
 
-	for(i=0;i<nr_of_boxes;i++)
+	for(i=0;i<*elts->amount_of_elements;i+=*elts->max_elts_in_single_box)
 	{
-		boxes[i] = gm_create_buttonbox(elts, processevent);
+		g_debug("Creating box %d", index);
+		boxes[index++] = gm_create_buttonbox(elts, i, box_width, box_height, processevent);
+		if(index > 9)
+		{
+			g_debug("Maximum number of boxes reached");
+			break;
+		}
 	}
 	gtk_container_add(GTK_CONTAINER(hbox), boxes[0]);
 	gtk_widget_show_all(boxes[0]);

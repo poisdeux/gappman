@@ -535,7 +535,7 @@ int main(int argc, char **argv)
 	if (actions != NULL)
 	{
 		buttonbox =
-			gm_create_buttonbox(actions, &process_startprogram_event);
+			gm_create_buttonboxes(actions, &process_startprogram_event);
 		align_buttonbox(hbox_top, hbox_middle, hbox_bottom, buttonbox,
 						actions);
 		gtk_widget_show_all(buttonbox);
