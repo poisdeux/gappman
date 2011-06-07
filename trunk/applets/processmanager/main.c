@@ -33,8 +33,8 @@ static char *color[4] = { "green", "orange", "red", "yellow" };
 static char *statusarray[6] =
 	{ "running", "sleeping", "stopped", "waiting", "zombie", "paging" };
 static int fontsize;
-static menu_elements *program_elts;
-static menu_elements *action_elts;
+static struct menu *programs;
+static struct menu *actions;
 
 static void usage()
 {
@@ -115,7 +115,7 @@ static int get_status(int PID)
 }
 
 static int kill_program(GtkWidget * widget, GdkEvent * event,
-						menu_elements * elt)
+						struct menu_element * elt)
 {
 	int status;
 	int count = 0;
@@ -189,7 +189,7 @@ static int kill_program(GtkWidget * widget, GdkEvent * event,
 * \brief creates a popup dialog window that allows the user to stop a program
 * \param *elt pointer to menu_element structure that contains the program to be stopped
 */
-static void showprocessdialog(menu_elements * elt)
+static void showprocessdialog(struct menu_element * elt)
 {
 	GtkWidget *button, *buttonbox, *label;
 	static GtkWidget *killdialogwin;
@@ -244,7 +244,7 @@ static void showprocessdialog(menu_elements * elt)
 * \param *elt menu_element structure containing the filename and arguments of the program that should be started
 */
 static void process_startprogram_event(GtkWidget * widget, GdkEvent * event,
-									   menu_elements * elt)
+									   struct menu_element * elt)
 {
 
 	// Only start program if spacebar or mousebutton is pressed
@@ -258,7 +258,7 @@ static void process_startprogram_event(GtkWidget * widget, GdkEvent * event,
 }
 
 
-static GtkWidget *createrow(menu_elements * elt, int width, int height)
+static GtkWidget *createrow(struct menu_element * elt, int width, int height)
 {
 	GtkWidget *hbox, *statuslabel;
 	gchar *markup;
@@ -302,8 +302,8 @@ static GtkWidget *createrow(menu_elements * elt, int width, int height)
 */
 static void destroy(GtkWidget * widget, gpointer data)
 {
-	gm_free_menu_elements(program_elts);
-	gm_free_menu_elements(action_elts);
+	gm_free_menu(programs);
+	gm_free_menu(actions);
 	gtk_main_quit();
 }
 
@@ -329,6 +329,7 @@ int main(int argc, char **argv)
 	int total_amount_of_elements = 1;
 	int status;
 	int c;
+	int i;
 	int mypid;
 	struct proceslist *started_procs = NULL;
 	struct proceslist *started_procs_tmp = NULL;
@@ -339,8 +340,8 @@ int main(int argc, char **argv)
 	dialog_width = gdk_screen_get_width(screen) / 3;
 	dialog_height = gdk_screen_get_height(screen) / 3;
 
-	program_elts = NULL;
-	action_elts = NULL;
+	programs = NULL;
+	actions = NULL;
 
 	mainwin = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
@@ -468,34 +469,35 @@ int main(int argc, char **argv)
 			// max width is 50% of screen width
 			program_width = dialog_width / 2;
 			vbox = gtk_vbox_new(FALSE, 10);
-			program_elts = gm_get_programs();
-			if (program_elts != NULL)
+			programs = gm_get_programs();
+			if (programs != NULL)
 			{
-				total_amount_of_elements += *program_elts->amount_of_elements;
+				total_amount_of_elements += programs->amount_of_elements;
 			}
 
-			action_elts = gm_get_actions();
-			if (action_elts != NULL)
+			actions = gm_get_actions();
+			if (actions != NULL)
 			{
-				total_amount_of_elements += *action_elts->amount_of_elements;
+				total_amount_of_elements += actions->amount_of_elements;
 			}
 
 			row_height = dialog_height / total_amount_of_elements;
 
-			while (program_elts != NULL)
+			while (programs != NULL)
+			for(i = 0; i < programs->amount_of_elements; i++)
 			{
 				started_procs_tmp = started_procs;
 				while (started_procs_tmp != NULL)
 				{
 					if ((g_strcmp0
-						 ((const gchar *)program_elts->name,
+						 ((const gchar *)programs->elts[i].name,
 						  started_procs_tmp->name) == 0)
 						&& (started_procs_tmp->pid != mypid))
 					{
 						no_progsacts_found = 0;
-						program_elts->pid = started_procs_tmp->pid;
+						programs->elts[i].pid = started_procs_tmp->pid;
 						hbox =
-							createrow(program_elts, program_width, row_height);
+							createrow(&(programs->elts[i]), program_width, row_height);
 						gtk_container_add(GTK_CONTAINER(vbox), hbox);
 						gtk_widget_show(hbox);
 						separator = gtk_hseparator_new();
@@ -510,24 +512,23 @@ int main(int argc, char **argv)
 						started_procs_tmp = started_procs_tmp->prev;
 					}
 				}
-				program_elts = program_elts->next;
 			}
 
-			while (action_elts != NULL)
+			for(i = 0; i < actions->amount_of_elements; i++)
 			{
 				started_procs_tmp = started_procs;
 				while (started_procs_tmp != NULL)
 				{
 					if ((g_strcmp0
-						 ((const gchar *)action_elts->name,
+						 ((const gchar *)actions->elts[i].name,
 						  (const gchar *)started_procs_tmp->name) == 0)
 						&& (started_procs_tmp->pid != mypid))
 					{
 						no_progsacts_found = 0;
-						action_elts->pid = started_procs_tmp->pid;
+						actions->elts[i].pid = started_procs_tmp->pid;
 
 						hbox =
-							createrow(action_elts, program_width, row_height);
+							createrow(&(actions->elts[i]), program_width, row_height);
 						gtk_container_add(GTK_CONTAINER(vbox), hbox);
 						gtk_widget_show(hbox);
 						separator = gtk_hseparator_new();
@@ -542,7 +543,6 @@ int main(int argc, char **argv)
 						started_procs_tmp = started_procs_tmp->prev;
 					}
 				}
-				action_elts = action_elts->next;
 			}
 			gm_free_proceslist(started_procs);
 			if (no_progsacts_found == 0)
@@ -570,7 +570,7 @@ int main(int argc, char **argv)
 	}
 	gtk_main();
 
-	gm_free_menu_elements(program_elts);
-	gm_free_menu_elements(action_elts);
+	gm_free_menu(programs);
+	gm_free_menu(actions);
 	return 0;
 }

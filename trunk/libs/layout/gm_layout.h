@@ -122,13 +122,13 @@ GtkWidget *gm_create_label_button(gchar * buttontext, void *callbackfunc,
 
 /**
 * \brief Create a single button possibly with a label
-* \param elt pointer to menu_element struct that contains the logo image filename.
+* \param elt menu_element struct that contains the logo image filename.
 * \param max_width button width
 * \param max_height button height
 * \param processevent callback function that will be called when button is pressed
 * \return GtkWidget pointer to the new button
 */
-GtkWidget *gm_create_button(struct menu_element * elt, int max_width, int max_height,
+GtkWidget *gm_create_button(struct menu_element *elt, int max_width, int max_height,
 							void (*processevent) (GtkWidget *, GdkEvent *,
 												  struct menu_element *));
 
@@ -146,7 +146,7 @@ GtkWidget *gm_create_empty_button(void *callbackfunc, void *data);
 * \param processevent function pointer to function which should be used as callback when a button is pressed.
 * \return GtkWidget pointer to a hbox contains one or more vboxes 
 */
-GtkWidget *gm_create_buttonboxes(struct menu_element *elt,
+GtkWidget *gm_create_buttonboxes(struct menu *dish,
                  void (*processevent) (GtkWidget *, GdkEvent *,
                            struct menu_element *));
 
@@ -155,6 +155,6 @@ GtkWidget *gm_create_buttonboxes(struct menu_element *elt,
 * \param elts pointer to first menu_elements structure
 * \return GtkWidget pointer to container holding the panel
 */
-GtkWidget *gm_create_panel(struct menu_element * elt);
+GtkWidget *gm_create_panel(struct menu *dish);
 
 #endif

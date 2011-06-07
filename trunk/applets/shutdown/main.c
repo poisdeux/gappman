@@ -7,6 +7,8 @@
  *
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
+ *
+ * \todo check if startprogram can be replaced by a generic startprograms in a lib. BTW: Appmanager also uses a startprogram function.
  */
 
 #include <gtk/gtk.h>
@@ -38,7 +40,7 @@ static void usage()
 
 }
 
-static gboolean startprogram(GtkWidget * widget, menu_elements * elt)
+static gboolean startprogram(GtkWidget * widget, struct menu_element *elt)
 {
 	char **args;
 	int i;
@@ -96,7 +98,7 @@ static gboolean startprogram(GtkWidget * widget, menu_elements * elt)
 * \param *elt menu_element structure containing the filename and arguments of the program that should be started
 */
 static void process_startprogram_event(GtkWidget * widget, GdkEvent * event,
-									   menu_elements * elt)
+									   struct menu_element * elt)
 {
 
 
@@ -131,7 +133,7 @@ int main(int argc, char **argv)
 	GtkWidget *hbox;
 	GtkWidget *align;
 	GtkWidget *mainwin;
-	menu_elements *actions;
+	struct menu *actions;
 	const char *conffile = SYSCONFDIR "/shutdown.xml";
 	int c;
 	int fontsize;
@@ -230,7 +232,7 @@ int main(int argc, char **argv)
 
 	gtk_main();
 
-	gm_free_menu_elements(actions);
+	gm_free_menu(actions);
 
 	return 0;
 }

@@ -31,7 +31,7 @@ static gboolean send_fontsize(GmAppmanager * obj, gint * fontsize,
 static gboolean send_proceslist(GmAppmanager * obj, gchar *** proceslist,
 								GError ** error)
 {
-	struct appwidgetinfo *appw_list;
+	struct process_info *started_apps;
 	gchar *msg = NULL;
 	int number_of_appws = 0;
 	int i;
@@ -41,8 +41,8 @@ static gboolean send_proceslist(GmAppmanager * obj, gchar *** proceslist,
 	// gdk_thread lock??
 
 
-	appw_list = appmanager_get_started_apps();
-	while (appw_list != NULL)
+	started_apps = appmanager_get_started_apps();
+	while (started_apps != NULL)
 	{
 		number_of_appws++;
 		*proceslist =
@@ -60,10 +60,10 @@ static gboolean send_proceslist(GmAppmanager * obj, gchar *** proceslist,
 			g_warning("Could not allocate memory. errno: %d", errno);
 			return FALSE;
 		}
-		g_snprintf(msg, 256, "name::%s::pid::%d", appw_list->menu_elt->name,
-				   appw_list->PID);
+		g_snprintf(msg, 256, "name::%s::pid::%d", started_apps->menu_elt->name,
+				   started_apps->PID);
 		(*proceslist)[number_of_appws - 1] = msg;
-		appw_list = appw_list->prev;
+		started_apps = started_apps->prev;
 	}
 
 	if (number_of_appws > 0)

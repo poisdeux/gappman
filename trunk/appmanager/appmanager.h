@@ -17,7 +17,7 @@
 /**
 * \brief Struct that holds all relevant info about started applications
 */
-struct appwidgetinfo
+struct process_info
 {
 	int PID;					///< Process ID of running app (child
 								// replaced through execvp)
@@ -26,17 +26,16 @@ struct appwidgetinfo
 								// zombie
 	struct menu_element *menu_elt;	///< Pointer to menu_element structure of 
 									// started application
-	GtkWidget *widget;			///< Button that started the process
-	struct appwidgetinfo *prev;	///< Pointer to previous appwidgetinfo
-	struct appwidgetinfo *next;	///< Pointer to previous appwidgetinfo
+	struct process_info *prev;	///< Pointer to previous process_info
+	struct process_info *next;	///< Pointer to next process_info
 };
 
 
 /**
 * \brief Returns the started applications.
-* \return pointer to the appwidgetinfo struct
+* \return pointer to the process_info struct
 */
-struct appwidgetinfo *appmanager_get_started_apps();
+struct process_info *appmanager_get_started_apps();
 
 /**
 * \brief updates the resolution for gappman or any other program

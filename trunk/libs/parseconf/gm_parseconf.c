@@ -46,6 +46,24 @@ static void printElements(xmlTextReaderPtr reader)
 	}
 }
 
+static struct menu *createMenu()
+{
+	struct menu *dish;
+	dish = (struct menu *) malloc(sizeof(struct menu));
+
+	// Initial default values
+	dish->menu_width.value = 100;
+	dish->menu_width.type = PERCENTAGE;
+	dish->menu_height.value = 100;
+	dish->menu_height.type = PERCENTAGE;
+	dish->hor_alignment = 0.5;			// <! default center
+	dish->vert_alignment = 1;			// <! default center
+	dish->amount_of_elements = 0;
+
+	dish->elts = (struct menu_element*) malloc(5 * sizeof(struct menu_element));
+	return dish;
+}
+
 /**
 * \brief creates and initializes a new menu_element struct
 */
@@ -288,27 +306,23 @@ static void processMenuElements(const char *element_name,
 	int ret = 1;
 	xmlChar *name;
 	xmlChar *attr;
-	// Initial default values
-	dish->menu_width.value = 100;
-	dish->menu_width.type = PERCENTAGE;
-	dish->menu_height.value = 100;
-	dish->menu_height.type = PERCENTAGE;
-	dish->hor_alignment = 0.5;			// <! default center
-	dish->vert_alignment = 1;			// <! default center
 
 	while (ret)
 	{
 		ret = xmlTextReaderRead(reader);
 		name = xmlTextReaderName(reader);
 
+		g_debug("Processing %s", name);
 		// Parse new program or action and create a new menu_element for it.
 		if (strcmp((char *)name, element_name) == 0
 			&& xmlTextReaderNodeType(reader) == 1)
 		{
+			g_debug("dish->amount_of_elements: %d", dish->amount_of_elements);
 			dish->elts[dish->amount_of_elements] = createMenuElement();
 			processMenuElement(reader, &(dish->elts[dish->amount_of_elements]), element_name);
 			dish->amount_of_elements++;
 
+			g_debug("dish->amount_of_elements: %d", dish->amount_of_elements);
 			//check if we need to resize
 			if((dish->amount_of_elements % 5) == 0)
 			{
@@ -357,9 +371,9 @@ int gm_load_conf(const char *filename)
 	xmlChar *name;
 
 	// Initialize
-	programs = (struct menu*) malloc(sizeof(struct menu));
-	actions = (struct menu*) malloc(sizeof(struct menu));
-	panel = (struct menu*) malloc(sizeof(struct menu));
+	programs = createMenu();
+	actions = createMenu();
+	panel = createMenu();
 	cache_location = NULL;
 	program_name = NULL;
 
@@ -377,17 +391,23 @@ int gm_load_conf(const char *filename)
 			if (strcmp((char *)name, "programs") == 0
 				&& xmlTextReaderNodeType(reader) == 1)
 			{
+				g_debug("Doing programs");
 				processMenuElements("program", "programs", reader, programs);
+				g_debug("Done programs");
 			}
 			else if (strcmp((char *)name, "actions") == 0
 					 && xmlTextReaderNodeType(reader) == 1)
 			{
+				g_debug("Doing actions");
 				processMenuElements("action", "actions", reader, actions);
+				g_debug("Done actions");
 			}
 			else if (strcmp((char *)name, "panel") == 0
 					 && xmlTextReaderNodeType(reader) == 1)
 			{
+				g_debug("Doing panel");
 				processMenuElements("applet", "panel", reader, panel);
+				g_debug("Done panel");
 			}
 			if (strcmp((char *)name, "cachelocation") == 0
 				&& xmlTextReaderNodeType(reader) == 1)

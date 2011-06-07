@@ -15,6 +15,7 @@
  * \todo Implement support for keybindings. For instance to start specific applets.
  * \todo Startup indicator when starting programs. We could do this through an animated mouse-pointer or animate the program-button.
  * \todo Make it possible to let gappman redraw the main window when the screen resolution changes
+ * \todo align_buttonbox calls gm_calculate_boxlength. This is also called in gm_layout when creating the box. We might want to capture the values in struct menu to prevent recalculation.
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -38,11 +39,10 @@
 #include <gm_generic.h>
 #include "listener.h"
 
-struct appwidgetinfo *started_apps;	// /< holds the currently started apps
-menu_elements *programs;		// /< list of all programs gappman manages.
+struct process_info *started_apps;	// /< holds the currently started apps
+struct menu *programs;		// /< list of all programs gappman manages.
 								// Currently only programs need to be global
 								// as only programs have meta-info that can be 
-								// 
 								// updated. E.g. resolution updates for a
 								// specific program. 
 
@@ -55,7 +55,7 @@ static int window_height = -1;
 
 void appmanager_update_resolution(gchar * programname, int width, int height)
 {
-	menu_elements *elt = NULL;
+	struct menu_element *elt = NULL;
 	if (programname != NULL)
 	{
 		elt = gm_search_elt_by_name(programname, programs);
@@ -72,19 +72,19 @@ void appmanager_update_resolution(gchar * programname, int width, int height)
 	}
 }
 
-struct appwidgetinfo *appmanager_get_started_apps()
+struct process_info *appmanager_get_started_apps()
 {
 	return started_apps;
 }
 
 /**
 * \brief Checks if the application is still responding and enables the button when it doesn't respond.
-* \param local_appw appwidgetinfo structure which holds the application's button widget and the PID of the running application.
+* \param local_appw process_info structure which holds the application's button widget and the PID of the running application.
 * \return TRUE if application responds, FALSE if not.
 */
-static gint check_app_status(struct appwidgetinfo *local_appw)
+static gint check_app_status(struct process_info *local_appw)
 {
-	struct appwidgetinfo *tmp;
+	struct process_info *tmp;
 	struct menu_element *elt;
 
 	waitpid(local_appw->PID, &(local_appw->status), WNOHANG);
@@ -93,10 +93,10 @@ static gint check_app_status(struct appwidgetinfo *local_appw)
 	// and check if process does not respond
 	if (kill(local_appw->PID, 0) == -1)
 	{
-		if (GTK_IS_WIDGET(local_appw->widget))
+		if (GTK_IS_WIDGET(local_appw->menu_elt->widget))
 		{
 			// Enable button
-			gtk_widget_set_sensitive(GTK_WIDGET(local_appw->widget), TRUE);
+			gtk_widget_set_sensitive(GTK_WIDGET(local_appw->menu_elt->widget), TRUE);
 		}
 
 		// remove local_appw from list
@@ -156,30 +156,28 @@ static gint check_app_status(struct appwidgetinfo *local_appw)
 }
 
 /**
-* \brief Creates an appwidgetinfo structure
+* \brief Creates an process_info structure
 * \param PID the process ID of the application
 * \param widget pointer to the GtkWidget which belongs to the button of the application
-* \param *elt menu_element of the application the new appwidgetinfo must be created for 
+* \param *elt menu_element of the application the new process_info must be created for 
 */
-static void create_new_appwidgetinfo(int PID, GtkWidget * widget,
-									 struct menu_element *elt)
+static void create_new_process_info_struct(int PID, struct menu_element *elt)
 {
-	struct appwidgetinfo *local_appw;
-	local_appw = (struct appwidgetinfo *)malloc(sizeof(struct appwidgetinfo));
-	if (local_appw != NULL)
+	struct process_info *tmp;
+	tmp = (struct process_info *)malloc(sizeof(struct process_info));
+	if (tmp != NULL)
 	{
-		local_appw->PID = PID;
-		local_appw->menu_elt = elt;
-		local_appw->widget = widget;
-		local_appw->prev = started_apps;
-		local_appw->next = NULL;
+		tmp->PID = PID;
+		tmp->menu_elt = elt;
+		tmp->prev = started_apps;
+		tmp->next = NULL;
 		if (started_apps != NULL)
 		{
-			started_apps->next = local_appw;
+			started_apps->next = tmp;
 		}
 		// shift global started_apps pointer so it always points to
 		// last started process
-		started_apps = local_appw;
+		started_apps = tmp;
 	}
 }
 
@@ -189,7 +187,7 @@ static void create_new_appwidgetinfo(int PID, GtkWidget * widget,
 * \param elt pointer to the menu_element structure for the application that needs to be started
 * \return gboolean FALSE if the fork failed or the program's executable could not be found. TRUE if fork succeeded and program was found.
 */
-static gboolean startprogram(GtkWidget * widget, menu_elements * elt)
+static gboolean startprogram(struct menu_element *elt)
 {
 	char **args;
 	int i;
@@ -213,7 +211,7 @@ static gboolean startprogram(GtkWidget * widget, menu_elements * elt)
 	if (fp)
 	{
 		// Disable button
-		gtk_widget_set_sensitive(GTK_WIDGET(widget), FALSE);
+		gtk_widget_set_sensitive(elt->widget, FALSE);
 
 		fclose(fp);
 
@@ -240,7 +238,7 @@ static gboolean startprogram(GtkWidget * widget, menu_elements * elt)
 		}
 		else
 		{
-			create_new_appwidgetinfo(childpid, widget, elt);
+			create_new_process_info_struct(childpid, elt);
 			g_timeout_add(1000, (GSourceFunc) check_app_status,
 						  (gpointer) started_apps);
 		}
@@ -262,14 +260,14 @@ static gboolean startprogram(GtkWidget * widget, menu_elements * elt)
 * \param *elt menu_element structure containing the filename and arguments of the program that should be started
 */
 static void process_startprogram_event(GtkWidget * widget, GdkEvent * event,
-									   menu_elements * elt)
+									   struct menu_element *elt)
 {
 
 	// Only start program if spacebar or mousebutton is pressed
 	if (((GdkEventKey *) event)->keyval == 32
 		|| ((GdkEventButton *) event)->button == 1)
 	{
-		startprogram(widget, elt);
+		startprogram(elt);
 	}
 }
 
@@ -295,19 +293,15 @@ static void usage()
 * \brief Check all elements in elts if the integer autostart is set to 1 and start the
 *  corresponding program
 */
-static void autostartprograms(menu_elements * elts)
+static void autostartprograms(struct menu *dish)
 {
-	menu_elements *cur;
-
-	cur = elts;
-
-	while (cur != NULL)
+	int i;
+	for(i = 0; i < dish->amount_of_elements; i++)
 	{
-		if (cur->autostart == 1)
+		if (dish->elts[i].autostart == 1)
 		{
-			startprogram(cur->widget, cur);
+			startprogram(&(dish->elts[i]));
 		}
-		cur = cur->next;
 	}
 }
 
@@ -325,15 +319,15 @@ static void destroy(GtkWidget * widget, gpointer data)
 *	\brief stops the elements in the panel
 * \param *panel pointer to the menu_elements structures holding the panel elementts
 */
-static void stop_panel(menu_elements * panel)
+static void stop_panel(struct menu *panel)
 {
-	while (panel != NULL)
+	int i;
+	for(i = 0; i < panel->amount_of_elements; i++)
 	{
-		if (panel->gm_module_stop != NULL)
+		if (panel->elts[i].gm_module_stop != NULL)
 		{
-			panel->gm_module_stop();
+			panel->elts[i].gm_module_stop();
 		}
-		panel = panel->next;
 	}
 }
 
@@ -342,53 +336,49 @@ static void stop_panel(menu_elements * panel)
 *	\brief starts the elements in the panel
 * \param *panel pointer to the menu_elements structures holding the panel elementts
 */
-static void start_panel(menu_elements * panel)
+static void start_panel(struct menu *panel)
 {
 	GThread *thread;
-
-	while (panel != NULL)
+	int i;
+	
+	for(i = 0; i < panel->amount_of_elements; i++)
 	{
-		if (panel->gm_module_start != NULL)
+		if (panel->elts[i].gm_module_start != NULL)
 		{
 			thread =
-				g_thread_create((GThreadFunc) panel->gm_module_start, NULL,
+				g_thread_create((GThreadFunc) panel->elts[i].gm_module_start, NULL,
 								TRUE, NULL);
 			if (!thread)
 			{
 				g_warning("Failed to create thread");
 			}
-			else
-			{
-				// g_thread_join(thread);
-			}
 		}
-		panel = panel->next;
 	}
 }
 
 static void align_buttonbox(GtkWidget * hbox_top, GtkWidget * hbox_middle,
 							GtkWidget * hbox_bottom, GtkWidget * buttonbox,
-							menu_elements * elts)
+							struct menu *dish)
 {
 	GtkWidget *hor_align;
 	int box_width;
 	int box_height;
 
-	box_width = gm_calculate_box_length(window_width, elts->menu_width);
-	box_height = gm_calculate_box_length(window_height, elts->menu_height);
-	// vertical alignment is calculated by dividing elts->vert_alignment by 2
+	box_width = gm_calculate_box_length(window_width, &(dish->menu_width));
+	box_height = gm_calculate_box_length(window_height, &(dish->menu_height));
+	// vertical alignment is calculated by dividing dish->vert_alignment by 2
 	// this results in hbox_top having 0.0, hbox_middle 0,5, and hbox_bottom
 	// 1.0
 	// to have the widgets aligned respectively to the top, center, or bottom
 	hor_align =
-		gtk_alignment_new(*elts->hor_alignment,
-						  (float)*elts->vert_alignment / 2,
+		gtk_alignment_new(dish->hor_alignment,
+						  (float)dish->vert_alignment / 2,
 						  (float)box_width / window_width,
 						  (float)box_height / window_height);
 	gtk_container_add(GTK_CONTAINER(hor_align), buttonbox);
 	gtk_widget_show(hor_align);
 
-	switch (*elts->vert_alignment)
+	switch (dish->vert_alignment)
 	{
 	case 0:
 		gtk_container_add(GTK_CONTAINER(hbox_top), hor_align);
@@ -414,8 +404,8 @@ int main(int argc, char **argv)
 	GtkWidget *hbox_middle;
 	GtkWidget *hbox_bottom;
 	GtkWidget *vbox;
-	menu_elements *actions;
-	menu_elements *panel;
+	struct menu *actions;
+	struct menu *panel;
 	const char *conffile = SYSCONFDIR "/conf.xml";
 	int c;
 
@@ -479,11 +469,16 @@ int main(int argc, char **argv)
 	/** INIT */
 	started_apps = NULL;
 
+	g_debug("0");
 	/** Load configuration elements */
 	gm_load_conf(conffile);
+	g_debug("1");
 	programs = gm_get_programs();
+	g_debug("2");
 	actions = gm_get_actions();
+	g_debug("3");
 	panel = gm_get_panel();
+	g_debug("4");
 
 	screen = gdk_screen_get_default();
 	screen_width = gdk_screen_get_width(screen);
@@ -596,9 +591,9 @@ int main(int argc, char **argv)
 #if !defined(NO_LISTENER)
 	gappman_close_listener();
 #endif
-	gm_free_menu_elements(programs);
-	gm_free_menu_elements(actions);
-	gm_free_menu_elements(panel);
+	gm_free_menu(programs);
+	gm_free_menu(actions);
+	gm_free_menu(panel);
 
 	g_message("Goodbye.");
 	return 0;

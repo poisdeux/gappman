@@ -401,7 +401,7 @@ GtkWidget *gm_load_image(const char *elt_name, const char *elt_logo,
 * \param max_height maximum height for the box
 * \return GtkWidget pointer to the hbox containing the label
 */
-static GtkWidget *image_label_box_hor(menu_elements * elt, int max_width,
+static GtkWidget *image_label_box_hor(struct menu_element * elt, int max_width,
 									  int max_height)
 {
 	GtkWidget *box;
@@ -438,7 +438,7 @@ static GtkWidget *image_label_box_hor(menu_elements * elt, int max_width,
 * \param max_height maximum height for the box
 * \return GtkWidget pointer to the hbox containing the label
 */
-static GtkWidget *image_label_box_vert(menu_elements * elt, int max_width,
+static GtkWidget *image_label_box_vert(struct menu_element * elt, int max_width,
 									   int max_height)
 {
 	GtkWidget *box;
@@ -516,8 +516,7 @@ int gm_calculate_box_length(int total_length, struct length *box_length)
 * \param *event the GdkEvent that occured.
 * \param *elt will not be used, but must be defined.
 */
-static gboolean press_button(GtkWidget * widget, GdkEvent * event,
-							 menu_elements * elt)
+static gboolean press_button(GtkWidget * widget, GdkEvent * event)
 {
 	gtk_widget_activate(widget);
 	return FALSE;
@@ -529,8 +528,7 @@ static gboolean press_button(GtkWidget * widget, GdkEvent * event,
 * \param *event the GdkEvent that occured.
 * \param *elt will not be used, but must be defined.
 */
-static gboolean highlight_button(GtkWidget * widget, GdkEvent * event,
-								 menu_elements * elt)
+static gboolean highlight_button(GtkWidget * widget, GdkEvent * event)
 {
 	gtk_button_set_relief(GTK_BUTTON(widget), GTK_RELIEF_NORMAL);
 	gtk_widget_grab_focus(widget);
@@ -543,10 +541,8 @@ static gboolean highlight_button(GtkWidget * widget, GdkEvent * event,
 * \param *event the GdkEvent that occured.
 * \param *elt will not be used, but must be defined.
 */
-static gboolean dehighlight_button(GtkWidget * widget, GdkEvent * event,
-								   menu_elements * elt)
+static gboolean dehighlight_button(GtkWidget * widget, GdkEvent * event)
 {
-
 	gtk_button_set_relief(GTK_BUTTON(widget), GTK_RELIEF_NONE);
 	return FALSE;
 }
@@ -613,9 +609,9 @@ GtkWidget *gm_create_empty_button(void *callbackfunc, void *data)
 	return button;
 }
 
-GtkWidget *gm_create_button(menu_elements * elt, int max_width, int max_height,
+GtkWidget *gm_create_button(struct menu_element *elt, int max_width, int max_height,
 							void (*processevent) (GtkWidget *, GdkEvent *,
-												  menu_elements *))
+												  struct menu_element *))
 {
 	GtkWidget *button, *imagelabelbox;
 	GtkBorder border;
@@ -638,15 +634,10 @@ GtkWidget *gm_create_button(menu_elements * elt, int max_width, int max_height,
 * \param width button width
 * \param height button height
 */
-static GtkWidget *createpanelelement(menu_elements * elt, int width,
+static GtkWidget *createpanelelement(struct menu_element * elt, int width,
 									 int height)
 {
 	GModule *module;
-
-	if (!g_module_supported())
-	{
-		return NULL;
-	}
 
 	module = g_module_open((const gchar *)elt->module, G_MODULE_BIND_LAZY);
 
@@ -736,33 +727,34 @@ static GtkWidget *createpanelelement(menu_elements * elt, int width,
 	return elt->gm_module_get_widget();
 }
 
-static GtkWidget *gm_create_buttonbox(menu_elements *elts, int elts_index, 
+static GtkWidget *gm_create_buttonbox(struct menu *dish, int elts_index, 
 								int box_width, int box_height,
 								void (*processevent) (GtkWidget *, GdkEvent *,
-													 menu_elements *))
+													 struct menu_element *))
 {
-	menu_elements *next, *cur;
 	GtkWidget *button, *hbox, *vbox;
-	int elts_per_col, elts_per_row, count, button_height, button_width;
+	int i;
+	int elts_per_col, elts_per_row;
+  int button_height, button_width;
 
 	vbox = gtk_vbox_new(FALSE, 0);
 
 	elts_per_row =
 		calculateAmountOfElementsPerRow(box_width, box_height,
-										   *elts->max_elts_in_single_box);
+										   dish->max_elts_in_single_box);
 	if (elts_per_row < 1)
 	{
 		elts_per_row = 1;
 	}
 
-	elts_per_col = (*elts->max_elts_in_single_box) / elts_per_row;
+	elts_per_col = dish->max_elts_in_single_box / elts_per_row;
 
 	if (elts_per_col < 1)
 	{
 		elts_per_col = 1;
 	}
 
-	g_debug("no_elts: %d col: %d row: %d box: %dx%d", *elts->max_elts_in_single_box, elts_per_col, elts_per_row, box_width, box_height);
+	g_debug("no_elts: %d col: %d row: %d box: %dx%d", dish->max_elts_in_single_box, elts_per_col, elts_per_row, box_width, box_height);
 
 	button_height = box_height / elts_per_col;
 	button_width = box_width / elts_per_row;
@@ -770,31 +762,26 @@ static GtkWidget *gm_create_buttonbox(menu_elements *elts, int elts_index,
 	// The size metric is 1024th of a point.
 	fontsize = (1024 * button_width) / MAXCHARSINLABEL;
 
-	cur = elts;
-	count = 0;
-	while ((cur != NULL) && (count < *elts->max_elts_in_single_box))
+	for(i = 0; (i < dish->max_elts_in_single_box) && (i < dish->amount_of_elements); i++)
 	{
-		if ((count % elts_per_row) == 0)
+		if ((i % elts_per_row) == 0)
 		{
 			hbox = gtk_hbox_new(FALSE, 0);
 
 			gtk_container_add(GTK_CONTAINER(vbox), hbox);
 		}
 
-		next = cur->next;
-		button = gm_create_button(cur, button_width, button_height, processevent);
+		button = gm_create_button(&(dish->elts[i]), button_width, button_height, processevent);
 		gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 0);
-		cur->widget = button;
-		cur = next;
-		count++;
+		dish->elts[i].widget = button;
 	}
 
 	return vbox;
 }
 
-GtkWidget *gm_create_buttonboxes(menu_elements *elts,
+GtkWidget *gm_create_buttonboxes(struct menu *dish,
 							   void (*processevent) (GtkWidget *, GdkEvent *,
-													 menu_elements *))
+													 struct menu_element *))
 {
 	GtkWidget *boxes[10];
 	GtkWidget *hbox;
@@ -802,15 +789,17 @@ GtkWidget *gm_create_buttonboxes(menu_elements *elts,
 	int index = 0;
 	int box_width, box_height;
 
-	box_width = gm_calculate_box_length(screen_width, elts->menu_width);
-	box_height = gm_calculate_box_length(screen_height, elts->menu_height);
+	g_debug("Creating boxes");
+
+	box_width = gm_calculate_box_length(screen_width, &(dish->menu_width));
+	box_height = gm_calculate_box_length(screen_height, &(dish->menu_height));
 
 	hbox = gtk_hbox_new(FALSE, 0);
 
-	for(i=0;i<*elts->amount_of_elements;i+=*elts->max_elts_in_single_box)
+	for(i=0;i<dish->amount_of_elements;i+=dish->max_elts_in_single_box)
 	{
 		g_debug("Creating box %d", index);
-		boxes[index++] = gm_create_buttonbox(elts, i, box_width, box_height, processevent);
+		boxes[index++] = gm_create_buttonbox(dish, i, box_width, box_height, processevent);
 		if(index > 9)
 		{
 			g_debug("Maximum number of boxes reached");
@@ -822,67 +811,51 @@ GtkWidget *gm_create_buttonboxes(menu_elements *elts,
 	return hbox;
 }
 
-GtkWidget *gm_create_panel(menu_elements * elts)
+GtkWidget *gm_create_panel(struct menu *dish)
 {
 	GtkWidget *button, *hbox, *vbox;
-	int elts_per_row, count, button_width;
-	int box_width, box_height;
-	menu_elements *prev_elt;
+	int elts_per_row, button_width, box_width, box_height;
+	int i, count;
 
-	box_width = gm_calculate_box_length(screen_width, elts->menu_width);
-	box_height = gm_calculate_box_length(screen_height, elts->menu_height);
+	if (!g_module_supported())
+	{
+		return NULL;
+	}
+
+	box_width = gm_calculate_box_length(screen_width, &(dish->menu_width));
+	box_height = gm_calculate_box_length(screen_height, &(dish->menu_height));
 
 	vbox = gtk_vbox_new(FALSE, 0);
 
 	elts_per_row =
 		calculateAmountOfElementsPerRow(box_width, box_height,
-										   *elts->amount_of_elements);
+										   dish->amount_of_elements);
 	if (elts_per_row < 1)
 	{
 		elts_per_row = 1;
 	}
 
 	button_width = box_width / elts_per_row;
-
-	count = 0;
-	prev_elt = NULL;
-	while (elts != NULL)
+	
+	count=0;
+	for(i = 0; i < dish->amount_of_elements; i++)
 	{
-		if ((count % elts_per_row) == 0)
+		if ((i % elts_per_row) == 0)
 		{
 			hbox = gtk_hbox_new(FALSE, 0);
 
 			gtk_container_add(GTK_CONTAINER(vbox), hbox);
 		}
-		button = createpanelelement(elts, button_width, box_height);
+		button = createpanelelement(&(dish->elts[i]), button_width, box_height);
 		if (button != NULL)
 		{
 			gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 1);
-			prev_elt = elts;
-			elts = elts->next;
 			count++;
-		}
-		else
-		{
-			// remove element from list
-			if (prev_elt != NULL)
-			{
-				prev_elt->next = elts->next;
-				elts->next = NULL;
-				gm_free_menu_elements(elts);
-				elts = prev_elt->next;
-			}
-			else
-			{
-				prev_elt = elts->next;
-				elts->next = NULL;
-				gm_free_menu_elements(elts);
-				elts = prev_elt;
-			}
 		}
 	}
 
-	if (count == 0)
+	//check if any of the panelelements was succesfully added to the panel
+	if (count == i)
 		return NULL;
 	else
 		return vbox;

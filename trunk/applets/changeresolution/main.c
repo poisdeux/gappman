@@ -31,7 +31,7 @@
 static int WINDOWED = 0;
 static GtkWidget *mainwin;
 static int fontsize;
-static menu_elements *programs = NULL;
+static struct menu *programs = NULL;
 static int dialog_width;
 static int dialog_height;
 
@@ -93,7 +93,7 @@ static void revert_to_old_res(GtkWidget * widget, GdkEvent * event,
 * \param *elt menu_element pointer to the program for which the resolution must be updated
 */
 static void set_default_res_for_program(GtkWidget * widget, GdkEvent * event,
-										menu_elements * elt)
+										struct menu_element * elt)
 {
 	XRRScreenSize current_size;
 	// Check if spacebar or mousebutton is pressed
@@ -124,7 +124,8 @@ static void make_default_for_program(GtkWidget * widget, GdkEvent * event)
 	GtkWidget *chooseprogramwin;
 	GtkWidget *vbox;
 	int button_height;
-	menu_elements *programs_tmp;
+	int i;
+	struct menu *programs_tmp;
 
 	// only show menu if spacebar or mousebutton were pressed
 	if (((GdkEventKey *) event)->keyval != 32
@@ -143,18 +144,16 @@ static void make_default_for_program(GtkWidget * widget, GdkEvent * event)
 	// Remove border
 	gtk_window_set_decorated(GTK_WINDOW(chooseprogramwin), FALSE);
 
-	programs_tmp = programs;
-	if (programs_tmp != NULL)
+	if (programs != NULL)
 	{
 		vbox = gtk_vbox_new(FALSE, 10);
-		button_height = dialog_height / (*programs_tmp->amount_of_elements);
-		while (programs_tmp != NULL)
+		button_height = dialog_height / (programs_tmp->amount_of_elements);
+		for(i = 0; i < programs->amount_of_elements; i++)
 		{
 			button =
-				gm_create_button(programs_tmp, dialog_width, button_height,
+				gm_create_button(&(programs->elts[i]), dialog_width, button_height,
 								 set_default_res_for_program);
 			gtk_container_add(GTK_CONTAINER(vbox), button);
-			programs_tmp = programs_tmp->next;
 		}
 		button =
 			gm_create_label_button("Done", (void *)gm_destroy_widget,
