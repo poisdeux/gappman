@@ -56,6 +56,7 @@ static int window_height = -1;
 void appmanager_update_resolution(gchar * programname, int width, int height)
 {
 	struct menu_element *elt = NULL;
+	g_debug("setting resolution %dx%d for %s", width, height, programname);
 	if (programname != NULL)
 	{
 		elt = gm_search_elt_by_name(programname, programs);
@@ -469,16 +470,11 @@ int main(int argc, char **argv)
 	/** INIT */
 	started_apps = NULL;
 
-	g_debug("0");
 	/** Load configuration elements */
 	gm_load_conf(conffile);
-	g_debug("1");
 	programs = gm_get_programs();
-	g_debug("2");
 	actions = gm_get_actions();
-	g_debug("3");
 	panel = gm_get_panel();
-	g_debug("4");
 
 	screen = gdk_screen_get_default();
 	screen_width = gdk_screen_get_width(screen);

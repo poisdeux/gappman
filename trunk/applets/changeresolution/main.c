@@ -9,6 +9,7 @@
  *   Martijn Brekhof <m.brekhof@gmail.com>
  *
  * \todo add support for portrait orientation
+ * \bug resolution update for program is not sent/received to/by gappman
  * 
  */
 
@@ -125,7 +126,6 @@ static void make_default_for_program(GtkWidget * widget, GdkEvent * event)
 	GtkWidget *vbox;
 	int button_height;
 	int i;
-	struct menu *programs_tmp;
 
 	// only show menu if spacebar or mousebutton were pressed
 	if (((GdkEventKey *) event)->keyval != 32
@@ -147,7 +147,7 @@ static void make_default_for_program(GtkWidget * widget, GdkEvent * event)
 	if (programs != NULL)
 	{
 		vbox = gtk_vbox_new(FALSE, 10);
-		button_height = dialog_height / (programs_tmp->amount_of_elements);
+		button_height = dialog_height / (programs->amount_of_elements);
 		for(i = 0; i < programs->amount_of_elements; i++)
 		{
 			button =
@@ -267,6 +267,7 @@ static GtkWidget *show_current_resolution(int width)
 
 	return hbox;
 }
+
 static GtkWidget *createrow(XRRScreenSize * size, int width)
 {
 	GtkWidget *button, *hbox, *label;

@@ -76,6 +76,7 @@ static struct menu_element createMenuElement()
 	elt->name = NULL;
 	elt->exec = NULL;
 	elt->args = NULL;
+	elt->module = NULL;
 	elt->module_conffile = NULL;
 	elt->autostart = 0;
 	elt->printlabel = 0;
@@ -224,7 +225,7 @@ processMenuElement(xmlTextReaderPtr reader, struct menu_element *elt,
 */
 void gm_free_menu(struct menu *dish)
 {
-	int i;
+	int i,j;
 
 	if (dish != NULL)
 	{
@@ -233,11 +234,12 @@ void gm_free_menu(struct menu *dish)
 			free((xmlChar *) (dish->elts[i]).name);
 			free((xmlChar *) (dish->elts[i]).exec);
 			free((xmlChar *) (dish->elts[i]).module);
+			free((xmlChar *) (dish->elts[i]).module_conffile);
 			free((xmlChar *) (dish->elts[i]).logo);
 
-			for (i = 0; i < (dish->elts[i]).numArguments; i++)
+			for (j = 0; j < (dish->elts[i]).numArguments; j++)
 			{
-				free((dish->elts[i]).args[i]);
+				free((dish->elts[i]).args[j]);
 			}
 			free((dish->elts[i]).args);
 		}
@@ -312,17 +314,13 @@ static void processMenuElements(const char *element_name,
 		ret = xmlTextReaderRead(reader);
 		name = xmlTextReaderName(reader);
 
-		g_debug("Processing %s", name);
 		// Parse new program or action and create a new menu_element for it.
 		if (strcmp((char *)name, element_name) == 0
 			&& xmlTextReaderNodeType(reader) == 1)
 		{
-			g_debug("dish->amount_of_elements: %d", dish->amount_of_elements);
 			dish->elts[dish->amount_of_elements] = createMenuElement();
 			processMenuElement(reader, &(dish->elts[dish->amount_of_elements]), element_name);
 			dish->amount_of_elements++;
-
-			g_debug("dish->amount_of_elements: %d", dish->amount_of_elements);
 			//check if we need to resize
 			if((dish->amount_of_elements % 5) == 0)
 			{
@@ -391,23 +389,17 @@ int gm_load_conf(const char *filename)
 			if (strcmp((char *)name, "programs") == 0
 				&& xmlTextReaderNodeType(reader) == 1)
 			{
-				g_debug("Doing programs");
 				processMenuElements("program", "programs", reader, programs);
-				g_debug("Done programs");
 			}
 			else if (strcmp((char *)name, "actions") == 0
 					 && xmlTextReaderNodeType(reader) == 1)
 			{
-				g_debug("Doing actions");
 				processMenuElements("action", "actions", reader, actions);
-				g_debug("Done actions");
 			}
 			else if (strcmp((char *)name, "panel") == 0
 					 && xmlTextReaderNodeType(reader) == 1)
 			{
-				g_debug("Doing panel");
 				processMenuElements("applet", "panel", reader, panel);
-				g_debug("Done panel");
 			}
 			if (strcmp((char *)name, "cachelocation") == 0
 				&& xmlTextReaderNodeType(reader) == 1)

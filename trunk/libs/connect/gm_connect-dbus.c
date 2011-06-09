@@ -188,6 +188,7 @@ int gm_dbus_set_default_resolution_for_program(gchar * name, int width,
 	DBusGProxy *proxy;
 	gboolean status;
 
+	g_debug("gm_dbus_set_default_resolution_for_program");
 	proxy = get_proxy();
 	status = dbus_g_proxy_call_with_timeout(proxy,
 											"UpdateResolution", 500, &error,

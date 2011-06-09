@@ -302,8 +302,6 @@ static GtkWidget *createrow(struct menu_element * elt, int width, int height)
 */
 static void destroy(GtkWidget * widget, gpointer data)
 {
-	gm_free_menu(programs);
-	gm_free_menu(actions);
 	gtk_main_quit();
 }
 
@@ -395,9 +393,9 @@ int main(int argc, char **argv)
 	{
 		gtk_window_set_decorated(GTK_WINDOW(mainwin), TRUE);
 		g_signal_connect(G_OBJECT(mainwin), "delete_event",
-						 G_CALLBACK(destroy), NULL);
+						 G_CALLBACK(gtk_main_quit), NULL);
 		g_signal_connect(G_OBJECT(mainwin), "destroy",
-						 G_CALLBACK(destroy), NULL);
+						 G_CALLBACK(gtk_main_quit), NULL);
 	}
 	status = gm_get_fontsize_from_gappman(2103, "localhost", &fontsize);;
 	if (status == GM_SUCCES)
@@ -418,30 +416,30 @@ int main(int argc, char **argv)
 		{
 		case GM_NET_COMM_NOT_SUPPORTED:
 			gm_show_error_dialog("Gappman compiled without network support",
-								 (void *)mainwin, (void *)destroy);
+								 (void *)mainwin, (void *)gtk_main_quit);
 			break;;
 		case GM_COULD_NOT_RESOLVE_HOSTNAME:
 			gm_show_error_dialog("Could not resolve hostname: localhost",
-								 (void *)mainwin, (void *)destroy);
+								 (void *)mainwin, (void *)gtk_main_quit);
 			break;;
 		case GM_COULD_NOT_CONNECT:
 			gm_show_error_dialog
 				("Could not connect to gappman.\nCheck that gappman is running.",
-				 (void *)mainwin, (void *)destroy);
+				 (void *)mainwin, (void *)gtk_main_quit);
 			break;;
 		case GM_COULD_NOT_SEND_MESSAGE:
 			gm_show_error_dialog
 				("Could not sent message to localhost.\nCheck that gappman is running",
-				 (void *)mainwin, (void *)destroy);
+				 (void *)mainwin, (void *)gtk_main_quit);
 			break;;
 		case GM_COULD_NOT_DISCONNECT:
 			gm_show_error_dialog("Could not disconnect from gappman.",
-								 (void *)mainwin, (void *)destroy);
+								 (void *)mainwin, (void *)gtk_main_quit);
 			break;;
 		default:
 			gm_show_error_dialog
 				("An undefined error occured when contacting gappman.",
-				 (void *)mainwin, (void *)destroy);
+				 (void *)mainwin, (void *)gtk_main_quit);
 			break;;
 		}
 	}
@@ -450,19 +448,19 @@ int main(int argc, char **argv)
 		if (started_procs == NULL)
 		{
 			gm_show_error_dialog("No programs started by gappman.",
-								 (void *)mainwin, (void *)destroy);
+								 (void *)mainwin, (void *)gtk_main_quit);
 		}
 		else if (gm_get_confpath_from_gappman
 				 (2103, "localhost", &gappman_confpath) != GM_SUCCES)
 		{
 			gm_show_error_dialog
 				("Could not retrieve gappman configuration file\n",
-				 (void *)mainwin, (void *)destroy);
+				 (void *)mainwin, (void *)gtk_main_quit);
 		}
 		else if (gm_load_conf(gappman_confpath) != 0)
 		{
 			gm_show_error_dialog("Could not load gappman configuration file\n",
-								 (void *)mainwin, (void *)destroy);
+								 (void *)mainwin, (void *)gtk_main_quit);
 		}
 		else
 		{
@@ -483,7 +481,6 @@ int main(int argc, char **argv)
 
 			row_height = dialog_height / total_amount_of_elements;
 
-			while (programs != NULL)
 			for(i = 0; i < programs->amount_of_elements; i++)
 			{
 				started_procs_tmp = started_procs;
@@ -564,7 +561,7 @@ int main(int argc, char **argv)
 			else
 			{
 				gm_show_error_dialog("No programs started by gappman.",
-									 (void *)mainwin, (void *)destroy);
+									 (void *)mainwin, (void *)gtk_main_quit);
 			}
 		}
 	}

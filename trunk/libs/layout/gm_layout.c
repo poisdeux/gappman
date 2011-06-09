@@ -754,7 +754,6 @@ static GtkWidget *gm_create_buttonbox(struct menu *dish, int elts_index,
 		elts_per_col = 1;
 	}
 
-	g_debug("no_elts: %d col: %d row: %d box: %dx%d", dish->max_elts_in_single_box, elts_per_col, elts_per_row, box_width, box_height);
 
 	button_height = box_height / elts_per_col;
 	button_width = box_width / elts_per_row;
@@ -789,8 +788,6 @@ GtkWidget *gm_create_buttonboxes(struct menu *dish,
 	int index = 0;
 	int box_width, box_height;
 
-	g_debug("Creating boxes");
-
 	box_width = gm_calculate_box_length(screen_width, &(dish->menu_width));
 	box_height = gm_calculate_box_length(screen_height, &(dish->menu_height));
 
@@ -798,7 +795,6 @@ GtkWidget *gm_create_buttonboxes(struct menu *dish,
 
 	for(i=0;i<dish->amount_of_elements;i+=dish->max_elts_in_single_box)
 	{
-		g_debug("Creating box %d", index);
 		boxes[index++] = gm_create_buttonbox(dish, i, box_width, box_height, processevent);
 		if(index > 9)
 		{
@@ -850,6 +846,9 @@ GtkWidget *gm_create_panel(struct menu *dish)
 		if (button != NULL)
 		{
 			gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 1);
+		}
+		else
+		{
 			count++;
 		}
 	}
