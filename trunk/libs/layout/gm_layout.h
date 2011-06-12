@@ -142,11 +142,11 @@ GtkWidget *gm_create_empty_button(void *callbackfunc, void *data);
 
 /**
 * \brief Creates the button layout using the available screen height and width
-* \param elts pointer to first menu_elements structure
+* \param dish pointer to struct menu
 * \param processevent function pointer to function which should be used as callback when a button is pressed.
-* \return GtkWidget pointer to a hbox contains one or more vboxes 
+* \return GtkWidget pointer to a hbox that contains one or more hboxes 
 */
-GtkWidget *gm_create_buttonboxes(struct menu *dish,
+GtkWidget *gm_create_menu(struct menu *dish,
                  void (*processevent) (GtkWidget *, GdkEvent *,
                            struct menu_element *));
 

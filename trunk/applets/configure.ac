@@ -3,7 +3,7 @@
 
 AC_PREREQ([2.61])
 AC_INIT([gappman-applets], [TRUNKMUSTNOTGENERATEPACKAGE], [m.brekhof@gmail.com], [gappman-applets], [http://code.google.com/p/gappman/])
-AC_CONFIG_SRCDIR([netman/nm_main.c])
+AC_CONFIG_SRCDIR([netman/main.c])
 AC_CANONICAL_SYSTEM
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])

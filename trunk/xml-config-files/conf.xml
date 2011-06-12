@@ -29,6 +29,8 @@
     </action>
   </actions>
   <programs max_elts="2" width="100%" height="50%" align="bottom,center">
+		<arrowleft>./logos/leftarrow.png</arrowleft>
+		<arrowright>./logos/rightarrow.png</arrowright>
     <program>
       <name>NX Desktop</name>
       <resolution>1280x1024</resolution>

@@ -727,7 +727,7 @@ static GtkWidget *createpanelelement(struct menu_element * elt, int width,
 	return elt->gm_module_get_widget();
 }
 
-static GtkWidget *gm_create_buttonbox(struct menu *dish, int elts_index, 
+static GtkWidget *create_buttonbox(struct menu *dish, int elts_index, 
 								int box_width, int box_height,
 								void (*processevent) (GtkWidget *, GdkEvent *,
 													 struct menu_element *))
@@ -761,7 +761,7 @@ static GtkWidget *gm_create_buttonbox(struct menu *dish, int elts_index,
 	// The size metric is 1024th of a point.
 	fontsize = (1024 * button_width) / MAXCHARSINLABEL;
 
-	for(i = 0; (i < dish->max_elts_in_single_box) && (i < dish->amount_of_elements); i++)
+	for(i = elts_index; (i < dish->max_elts_in_single_box) && (i < dish->amount_of_elements); i++)
 	{
 		if ((i % elts_per_row) == 0)
 		{
@@ -778,33 +778,102 @@ static GtkWidget *gm_create_buttonbox(struct menu *dish, int elts_index,
 	return vbox;
 }
 
-GtkWidget *gm_create_buttonboxes(struct menu *dish,
+static void switch_menu_left(GtkWidget *widget, GdkEvent *event, struct menu *dish)
+{
+	int i;
+	GtkWidget *tmp;
+
+	if( dish->boxes->prev == NULL )
+		return;
+
+	tmp = dish->boxes->box;
+	dish->boxes = dish->boxes->prev;
+	gtk_widget_hide(tmp);
+	gtk_widget_show_all(dish->boxes->box);
+}
+
+static void switch_menu_right(GtkWidget *widget, GdkEvent *event, struct menu *dish)
+{
+	int i;
+	GtkWidget *tmp;
+
+	if( dish->boxes->next == NULL )
+		return;
+	
+	tmp = dish->boxes->box;
+	dish->boxes = dish->boxes->next;
+	gtk_widget_hide(tmp);
+	gtk_widget_show_all(dish->boxes->box);
+}
+
+/**
+* \brief Creates the button layout using the available screen height and width
+* \param elts pointer to first menu_elements structure
+* \param processevent function pointer to function which should be used as callback when a button is pressed.
+* \return GtkWidget pointer to a hbox that contains one or more hboxes
+*/
+static GtkWidget *gm_create_buttonboxes(struct menu *dish, gint box_width, gint box_height,
 							   void (*processevent) (GtkWidget *, GdkEvent *,
 													 struct menu_element *))
 {
-	GtkWidget *boxes[10];
-	GtkWidget *hbox;
+	GtkWidget *buttonbox, *hbuttonboxes;
+	struct menu_box *tmp;
 	int i;
-	int index = 0;
-	int box_width, box_height;
+
+	hbuttonboxes = gtk_hbox_new(FALSE, 0);
+
+	for(i=0;i<dish->amount_of_elements;i+=dish->max_elts_in_single_box)
+	{
+		buttonbox = create_buttonbox(dish, i, box_width*0.9, box_height, processevent);
+		tmp = dish->boxes;
+		dish->boxes = (struct menu_box *) malloc(sizeof(struct menu_box)); 
+	  dish->boxes->box = buttonbox;
+		tmp->next = dish->boxes;
+		dish->boxes->prev = tmp; 	
+		dish->boxes->next = NULL;
+		gtk_widget_hide_all(buttonbox);
+		gtk_container_add(GTK_CONTAINER(hbuttonboxes), buttonbox);
+	}
+	return hbuttonboxes;
+}
+
+GtkWidget *gm_create_menu(struct menu *dish,
+							   void (*processevent) (GtkWidget *, GdkEvent *,
+													 struct menu_element *))
+{
+	GtkWidget *hbox;
+	GtkWidget *hbuttonbox;
+	GtkWidget *button;
+	gint box_width, box_height;
 
 	box_width = gm_calculate_box_length(screen_width, &(dish->menu_width));
 	box_height = gm_calculate_box_length(screen_height, &(dish->menu_height));
 
-	hbox = gtk_hbox_new(FALSE, 0);
+	hbuttonbox = gm_create_buttonboxes(dish, box_width, box_height, processevent);
 
-	for(i=0;i<dish->amount_of_elements;i+=dish->max_elts_in_single_box)
+	//check if we got more than one buttonbox in the menu
+	if(dish->boxes->prev != NULL)
 	{
-		boxes[index++] = gm_create_buttonbox(dish, i, box_width, box_height, processevent);
-		if(index > 9)
-		{
-			g_debug("Maximum number of boxes reached");
-			break;
-		}
+		//add the left arrowbutton
+		hbox = gtk_hbox_new(FALSE, 0);
+		button = gm_create_empty_button(switch_menu_left, dish);
+		gtk_widget_set_size_request(button, box_width*0.05, box_height);
+		gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 0);
+		gtk_widget_show(button);
+
+		gtk_container_add(GTK_CONTAINER(hbox), hbuttonbox);
+
+		//add the right arrowbutton
+		button = gm_create_empty_button(switch_menu_right, dish);
+		gtk_widget_set_size_request(button, box_width*0.05, box_height);
+		gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 0);
+		gtk_widget_show(button);
+		gtk_widget_show_all(dish->boxes->box);
+		return hbox;
 	}
-	gtk_container_add(GTK_CONTAINER(hbox), boxes[0]);
-	gtk_widget_show_all(boxes[0]);
-	return hbox;
+
+	gtk_widget_show_all(dish->boxes->box);
+	return hbuttonbox;
 }
 
 GtkWidget *gm_create_panel(struct menu *dish)

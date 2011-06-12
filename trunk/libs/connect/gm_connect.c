@@ -113,7 +113,8 @@ int gm_set_default_resolution_for_program(int portno, const char *hostname,
 										  const gchar * name, int width,
 										  int height)
 {
-#if defined(WITH_DBUS_SUPPORT) || defined(NO_LISTENER)
+
+#if defined(NO_LISTENER)
 	return GM_NET_COMM_NOT_SUPPORTED;
 #elif defined(WITH_DBUS_SUPPORT)
 	return gm_dbus_set_default_resolution_for_program(name, width, height);

@@ -59,7 +59,6 @@ static struct menu *createMenu()
 	dish->hor_alignment = 0.5;			// <! default center
 	dish->vert_alignment = 1;			// <! default center
 	dish->amount_of_elements = 0;
-
 	dish->elts = (struct menu_element*) malloc(5 * sizeof(struct menu_element));
 	return dish;
 }

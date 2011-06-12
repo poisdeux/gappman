@@ -120,6 +120,17 @@ struct menu_element
 };
 
 /**
+* \struct menu_box
+* \brief forms a linked list to all boxes in a specific menu
+*/
+struct menu_box
+{
+	GtkWidget *box; ///< pointer to a buttonbox
+	struct menu_box *next; ///< pointer to next menu_box in the linked list;
+	struct menu_box *prev; ///< pointer to previous menu_box in the linked list;
+};
+
+/**
 * \struct menu
 * \brief structure which holds a list of menu elements and all meta-information regarding the menu
 */
@@ -127,6 +138,7 @@ struct menu
 {
 	int amount_of_elements;	///< total number of elements
 	int max_elts_in_single_box; ///< maximum number of elements allowed in one box.
+	struct menu_box *boxes; ///< list of menu boxes
 	struct length menu_width;	///< holds the width of the menu this element 
 								// is a part of. Note that all elements in the 
 								// same menu should point to the same length
