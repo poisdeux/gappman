@@ -817,22 +817,34 @@ static GtkWidget *gm_create_buttonboxes(struct menu *dish, gint box_width, gint 
 													 struct menu_element *))
 {
 	GtkWidget *buttonbox, *hbuttonboxes;
-	struct menu_box *tmp;
+	struct menu_box *tmp = NULL;
 	int i;
 
 	hbuttonboxes = gtk_hbox_new(FALSE, 0);
 
+	g_debug("gm_create_buttonboxes: 1");
 	for(i=0;i<dish->amount_of_elements;i+=dish->max_elts_in_single_box)
 	{
+	g_debug("gm_create_buttonboxes: 2");
 		buttonbox = create_buttonbox(dish, i, box_width*0.9, box_height, processevent);
+	g_debug("gm_create_buttonboxes: 3");
 		tmp = dish->boxes;
+
+	g_debug("gm_create_buttonboxes: 4");
 		dish->boxes = (struct menu_box *) malloc(sizeof(struct menu_box)); 
 	  dish->boxes->box = buttonbox;
-		tmp->next = dish->boxes;
 		dish->boxes->prev = tmp; 	
 		dish->boxes->next = NULL;
+	
+	g_debug("gm_create_buttonboxes: 5");
+		if ( tmp != NULL )
+		{
+			tmp->next = dish->boxes;
+		}
+
 		gtk_widget_hide_all(buttonbox);
 		gtk_container_add(GTK_CONTAINER(hbuttonboxes), buttonbox);
+	g_debug("gm_create_buttonboxes: 4");
 	}
 	return hbuttonboxes;
 }
@@ -848,9 +860,11 @@ GtkWidget *gm_create_menu(struct menu *dish,
 
 	box_width = gm_calculate_box_length(screen_width, &(dish->menu_width));
 	box_height = gm_calculate_box_length(screen_height, &(dish->menu_height));
-
+	
+	g_debug("gm_layout.c: 1");	
 	hbuttonbox = gm_create_buttonboxes(dish, box_width, box_height, processevent);
 
+	g_debug("gm_layout.c: 2");	
 	//check if we got more than one buttonbox in the menu
 	if(dish->boxes->prev != NULL)
 	{
@@ -872,6 +886,7 @@ GtkWidget *gm_create_menu(struct menu *dish,
 		return hbox;
 	}
 
+	g_debug("gm_layout.c: 3");	
 	gtk_widget_show_all(dish->boxes->box);
 	return hbuttonbox;
 }
