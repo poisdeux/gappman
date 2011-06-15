@@ -56,7 +56,6 @@ static int window_height = -1;
 void appmanager_update_resolution(gchar * programname, int width, int height)
 {
 	struct menu_element *elt = NULL;
-	g_debug("setting resolution %dx%d for %s", width, height, programname);
 	if (programname != NULL)
 	{
 		elt = gm_search_elt_by_name(programname, programs);
@@ -470,14 +469,12 @@ int main(int argc, char **argv)
 	/** INIT */
 	started_apps = NULL;
 
-	g_debug("1");
 	/** Load configuration elements */
 	gm_load_conf(conffile);
 	programs = gm_get_programs();
 	actions = gm_get_actions();
 	panel = gm_get_panel();
 
-	g_debug("2");
 	screen = gdk_screen_get_default();
 	screen_width = gdk_screen_get_width(screen);
 	screen_height = gdk_screen_get_height(screen);
@@ -525,7 +522,6 @@ int main(int argc, char **argv)
 	hbox_middle = gtk_hbox_new(FALSE, 0);
 	hbox_bottom = gtk_hbox_new(FALSE, 0);
 
-	g_debug("3");
 	if (actions != NULL)
 	{
 		buttonbox =
@@ -535,7 +531,6 @@ int main(int argc, char **argv)
 		gtk_widget_show(buttonbox);
 	}
 
-	g_debug("4");
 	if (programs != NULL)
 	{
 		buttonbox =
@@ -545,7 +540,6 @@ int main(int argc, char **argv)
 		gtk_widget_show(buttonbox);
 	}
 
-	g_debug("5");
 	if (panel != NULL)
 	{
 		buttonbox = gm_create_panel(panel);
@@ -579,10 +573,8 @@ int main(int argc, char **argv)
 	g_warning("Gappman compiled without network support");
 #endif
 
-	g_debug("6");
 	autostartprograms(programs);
 
-	g_debug("7");
 	gtk_widget_show(mainwin);
 
 	gdk_threads_enter();

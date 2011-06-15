@@ -763,7 +763,7 @@ static GtkWidget *create_buttonbox(struct menu *dish, int elts_index,
 
 	for(i = elts_index; (i < dish->max_elts_in_single_box) && (i < dish->amount_of_elements); i++)
 	{
-		if ((i % elts_per_row) == 0)
+		if (((i - elts_index) % elts_per_row) == 0)
 		{
 			hbox = gtk_hbox_new(FALSE, 0);
 
@@ -786,9 +786,15 @@ static void switch_menu_left(GtkWidget *widget, GdkEvent *event, struct menu *di
 	if( dish->boxes->prev == NULL )
 		return;
 
-	tmp = dish->boxes->box;
+	if( ! check_key(event) )
+		return;
+
+	//hide current box
+	gtk_widget_hide(dish->boxes->box)
+
+	//always make sure dish->boxes points to current
+  //shown box
 	dish->boxes = dish->boxes->prev;
-	gtk_widget_hide(tmp);
 	gtk_widget_show_all(dish->boxes->box);
 }
 
@@ -800,9 +806,15 @@ static void switch_menu_right(GtkWidget *widget, GdkEvent *event, struct menu *d
 	if( dish->boxes->next == NULL )
 		return;
 	
-	tmp = dish->boxes->box;
+	if( ! check_key(event) )
+		return;
+
+	//hide current box
+	gtk_widget_hide(dish->boxes->box)
+
+	//always make sure dish->boxes points to current
+  //shown box
 	dish->boxes = dish->boxes->next;
-	gtk_widget_hide(tmp);
 	gtk_widget_show_all(dish->boxes->box);
 }
 
@@ -822,21 +834,16 @@ static GtkWidget *gm_create_buttonboxes(struct menu *dish, gint box_width, gint 
 
 	hbuttonboxes = gtk_hbox_new(FALSE, 0);
 
-	g_debug("gm_create_buttonboxes: 1");
 	for(i=0;i<dish->amount_of_elements;i+=dish->max_elts_in_single_box)
 	{
-	g_debug("gm_create_buttonboxes: 2");
 		buttonbox = create_buttonbox(dish, i, box_width*0.9, box_height, processevent);
-	g_debug("gm_create_buttonboxes: 3");
 		tmp = dish->boxes;
 
-	g_debug("gm_create_buttonboxes: 4");
 		dish->boxes = (struct menu_box *) malloc(sizeof(struct menu_box)); 
 	  dish->boxes->box = buttonbox;
 		dish->boxes->prev = tmp; 	
 		dish->boxes->next = NULL;
 	
-	g_debug("gm_create_buttonboxes: 5");
 		if ( tmp != NULL )
 		{
 			tmp->next = dish->boxes;
@@ -844,7 +851,6 @@ static GtkWidget *gm_create_buttonboxes(struct menu *dish, gint box_width, gint 
 
 		gtk_widget_hide_all(buttonbox);
 		gtk_container_add(GTK_CONTAINER(hbuttonboxes), buttonbox);
-	g_debug("gm_create_buttonboxes: 4");
 	}
 	return hbuttonboxes;
 }
@@ -861,10 +867,8 @@ GtkWidget *gm_create_menu(struct menu *dish,
 	box_width = gm_calculate_box_length(screen_width, &(dish->menu_width));
 	box_height = gm_calculate_box_length(screen_height, &(dish->menu_height));
 	
-	g_debug("gm_layout.c: 1");	
 	hbuttonbox = gm_create_buttonboxes(dish, box_width, box_height, processevent);
 
-	g_debug("gm_layout.c: 2");	
 	//check if we got more than one buttonbox in the menu
 	if(dish->boxes->prev != NULL)
 	{
@@ -876,6 +880,7 @@ GtkWidget *gm_create_menu(struct menu *dish,
 		gtk_widget_show(button);
 
 		gtk_container_add(GTK_CONTAINER(hbox), hbuttonbox);
+		gtk_widget_show(hbuttonbox);
 
 		//add the right arrowbutton
 		button = gm_create_empty_button(switch_menu_right, dish);
@@ -886,7 +891,6 @@ GtkWidget *gm_create_menu(struct menu *dish,
 		return hbox;
 	}
 
-	g_debug("gm_layout.c: 3");	
 	gtk_widget_show_all(dish->boxes->box);
 	return hbuttonbox;
 }
