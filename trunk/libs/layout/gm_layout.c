@@ -33,7 +33,7 @@ static int fontsize = 10 * 1024;	///< the default generic fontsize for all
 static int screen_width = 800;
 static int screen_height = 600;
 
-#define MAXCHARSINLABEL 15;		///< amount of characters we take as a
+#define MAXCHARSINLABEL 10;		///< amount of characters we take as a
 								// maximum to determine the fontsize.
 
 gboolean check_key(GdkEvent * event)

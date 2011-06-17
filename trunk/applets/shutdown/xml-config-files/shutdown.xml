@@ -1,6 +1,6 @@
 <shutdown>
   <cachelocation>/tmp/</cachelocation>
-  <actions width="30%" height="10%" align="center">
+  <actions width="50%" height="20%" align="center">
     <action>
       <name>Shutdown</name>
       <printlabel>1</printlabel>

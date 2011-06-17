@@ -136,7 +136,6 @@ int main(int argc, char **argv)
 	struct menu *actions;
 	const char *conffile = SYSCONFDIR "/shutdown.xml";
 	int c;
-	int fontsize;
 
 	gtk_init(&argc, &argv);
 
