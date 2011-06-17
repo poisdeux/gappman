@@ -15,6 +15,7 @@
  *  between different program-menu's.
  * \todo support larger sized framed buttons. Now the buttons are calculated using the image width and height. Some images occupy the complete button which makes it hard to see if they are highlighted.
  * \todo add support for different backgrounds in the menu's. This would make it possible to visually divide the UI.
+ * \todo use clutter for the UI (www.clutter-project.org)
  */
 
 
