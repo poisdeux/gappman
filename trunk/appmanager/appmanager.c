@@ -366,15 +366,10 @@ static void align_buttonbox(GtkWidget * hbox_top, GtkWidget * hbox_middle,
 
 	box_width = gm_calculate_box_length(window_width, &(dish->menu_width));
 	box_height = gm_calculate_box_length(window_height, &(dish->menu_height));
-	// vertical alignment is calculated by dividing dish->vert_alignment by 2
-	// this results in hbox_top having 0.0, hbox_middle 0,5, and hbox_bottom
-	// 1.0
-	// to have the widgets aligned respectively to the top, center, or bottom
 	hor_align =
 		gtk_alignment_new(dish->hor_alignment,
 						  (float)dish->vert_alignment / 2,
-						  (float)box_width / window_width,
-						  (float)box_height / window_height);
+							0, 0);
 	gtk_container_add(GTK_CONTAINER(hor_align), buttonbox);
 	gtk_widget_show(hor_align);
 
