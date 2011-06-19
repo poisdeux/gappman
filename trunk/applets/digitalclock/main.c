@@ -1,5 +1,5 @@
 /**
- * \file main.c
+ * \file applets/digitalclock/main.c
  * \brief Creates a window showing the time in digital letters as some LED displays show
  *
  *
@@ -20,15 +20,21 @@
 #include <sys/time.h>
 
 static GtkWidget *window = NULL;
-static gdouble linewidth = 30.0;
-static gdouble vert_bar_length;
-static gdouble hor_bar_length;
-static gdouble column_width;
-static struct tm time_tm;
-static gint bars_for_digit[10][7];
-static gdouble x_delta;
-static gdouble x_0_3_6_offset, x_2_5_offset, y_0_offset, y_3_offset, y_4_5_offset, y_6_offset;
-static gdouble w_width, w_height;
+static gdouble linewidth = 30.0; ///< default linewidth for horizontal and vertical bars
+static gdouble vert_bar_length; ///< length of the vertical bar
+static gdouble hor_bar_length; ///< length of the horizontal bar
+static gdouble column_width; ///< holds the width of the column which is placed between the hour andd minute digits
+static struct tm time_tm; ///< holds the localtime used to calculate the hours and minutes
+static gint bars_for_digit[10][7]; ///< double array to specify which bars should be drawn to display a specific number
+static gdouble x_delta; ///< the amount of space we should move horizontally to start drawing the next digit
+static gdouble x_0_3_6_offset; ///< horizontal offset calculated from the top left corner of the digit to draw the bars at positions 0, 3, and 6
+static gdouble x_2_5_offset; ///< horizontal offset calculated from the top left corner of the digit to draw the bars at positions 2 and 5
+static gdouble y_0_offset; ///< vertical offset calculated from the top left corner of the digit to draw the bar at positions 0
+static gdouble y_3_offset; ///< vertical offset calculated from the top left corner of the digit to draw the bar at position 3
+static gdouble y_4_5_offset; ///< vertical offset calculated from the top left corner of the digit to draw the bars at positions 4 and 5
+static gdouble y_6_offset; ///< vertical offset calculated from the top left corner of the digit to draw the bar at position 6
+static gdouble w_width; ///< width of the window in which the clock will be drawn
+static gdouble w_height; ///< height of the window in which the clock will be drawn
 
 static void measure_time(int *prev_microseconds)
 {
@@ -361,6 +367,10 @@ static gboolean calculate_sizes_and_offsets(GtkWidget *widget, GdkEventConfigure
 	return TRUE;
 }
 
+/**
+* \brief initializes the digital clock
+* \return GM_SUCCES
+*/
 G_MODULE_EXPORT int gm_module_init()
 {
 	window = gtk_drawing_area_new();
@@ -377,51 +387,36 @@ G_MODULE_EXPORT int gm_module_init()
 	return GM_SUCCES;
 }
 
+/**
+* \brief starts the digital clock updating it each second
+*/
 G_MODULE_EXPORT void gm_module_start()
 {
 	g_timeout_add(1000, update_time, window);
 }
 
+/**
+* \brief stops the digital clock and destroys the window
+*/
 G_MODULE_EXPORT int gm_module_stop()
 {
-  //Stop the applet
 	gtk_widget_destroy(window);
 }
 
+/**
+* \brief returns the window that holds the digital clock
+* \return GtkWidget pointer
+*/
 G_MODULE_EXPORT GtkWidget* gm_module_get_widget()
 {
 	return window;
 }
 
+/**
+* \brief sets the maximum width and height of the window that will hold the digital clock
+*/
 G_MODULE_EXPORT void gm_module_set_icon_size(int width, int height)
 {
 	w_width = width;
 	w_height = height;
-}
-
-int main(int argc, char** argv)
-{
-	time_t time_secs;	
-
-	gtk_init(&argc, &argv);
-	gtk_rc_parse( "./test.rc" );
-
-	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_default_size(GTK_WINDOW(window), 200, 200);
-
-	time( &time_secs );
-	localtime_r (&time_secs, &time_tm);
-
-	g_signal_connect(window, "expose-event", G_CALLBACK(on_expose_event), NULL);
-	g_signal_connect(window, "configure-event", G_CALLBACK(calculate_sizes_and_offsets), NULL);
-  g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
-
-	create_bars_for_digit();
-
-	gtk_widget_set_app_paintable(window, TRUE);
-	
-	g_timeout_add(1000, update_time, window);
-	gtk_widget_show_all(window);
-
-	gtk_main();
 }

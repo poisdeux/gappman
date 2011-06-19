@@ -16,6 +16,7 @@
  * \todo Startup indicator when starting programs. We could do this through an animated mouse-pointer or animate the program-button.
  * \todo Make it possible to let gappman redraw the main window when the screen resolution changes
  * \todo align_buttonbox calls gm_calculate_boxlength. This is also called in gm_layout when creating the box. We might want to capture the values in struct menu to prevent recalculation.
+ * \todo Add support to bring already started programs to the front when there button is pressed again. 
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -39,8 +40,8 @@
 #include <gm_generic.h>
 #include "listener.h"
 
-struct process_info *started_apps;	// /< holds the currently started apps
-struct menu *programs;		// /< list of all programs gappman manages.
+struct process_info *started_apps;	///< holds the currently started apps
+struct menu *programs;		///< list of all programs gappman manages.
 								// Currently only programs need to be global
 								// as only programs have meta-info that can be 
 								// updated. E.g. resolution updates for a

@@ -219,10 +219,6 @@ processMenuElement(xmlTextReaderPtr reader, struct menu_element *elt,
 }
 
 
-/**
-* \brief relinguishes the memory occupied by menu_element structures
-* \param *elt first menu_element structure
-*/
 void gm_free_menu(struct menu *dish)
 {
 	int i,j;

@@ -1,5 +1,5 @@
 /**
- * \file nm_main.c
+ * \file applets/netman/main.c
  * \brief applet showing network status and allows users to analyse and restart
  *        the network.
  *
@@ -339,6 +339,9 @@ G_MODULE_EXPORT int gm_module_init()
 	return GM_SUCCES;
 }
 
+/**
+* \brief Sets the location of the configuration file
+*/
 G_MODULE_EXPORT void gm_module_set_conffile(const char *filename)
 {
 	conffile = filename;

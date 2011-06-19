@@ -8,14 +8,10 @@
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
  *
- *  \todo Add support for multiple program-menu's. 
- *  Implementation: Add max_elts attribute to configuration file. In gm_create_buttonbox we
- *  will need to check if elts->numberElts > max_elts and if so 
- *  add arrow buttons left and right of the box. These buttons would allow the user to switch
- *  between different program-menu's.
+ * \todo Instead of specifying only max_elts add support to specify max_cols and/or max_rows. Then the menu will generate new boxes when there are more elts than max_cols*max_rows.
  * \todo support larger sized framed buttons. Now the buttons are calculated using the image width and height. Some images occupy the complete button which makes it hard to see if they are highlighted.
  * \todo add support for different backgrounds in the menu's. This would make it possible to visually divide the UI.
- * \todo use clutter for the UI (www.clutter-project.org)
+ * \todo Add support for clutter (www.clutter-project.org) so we can have a fancy animated menu
  */
 
 

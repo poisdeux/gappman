@@ -1,5 +1,5 @@
 /**
- * \file nm_parseconf.h
+ * \file applets/netman/parseconf.h
  * \brief XML configuration file parser for menu elements
  *
  *
@@ -20,28 +20,28 @@
 */
 struct nm_element
 {
-	gboolean running;			// !< Should be TRUE if exec has been executed 
+	gboolean running;			///< Should be TRUE if exec has been executed 
 								// and is still running. FALSE otherwise.
-	int *amount_of_elements;	// !< total number of elements
-	guint g_source_tag;
-	const xmlChar *name;		// !< holds the name of the program
-	const xmlChar *exec;		// !< absolute path to executable
-	const xmlChar *logosuccess;	// !< absolute path to image file
-	const xmlChar *logofail;	// !< absolute path to image file
-	char **args;				// !< array of strings containing arguments
+	int *amount_of_elements;	///< total number of elements
+	guint g_source_tag; ///< will hold the source id of the event associated with starting the program
+	const xmlChar *name;		///< holds the name of the program
+	const xmlChar *exec;		///< absolute path to executable
+	const xmlChar *logosuccess;	///< absolute path to image file
+	const xmlChar *logofail;	///< absolute path to image file
+	char **args;				///< array of strings containing arguments
 								// that need to be passed to the executable
-	char **argv;				// !< Same as args but suited for use with
+	char **argv;				///< Same as args but suited for use with
 								// execv
-	int numArguments;			// !< will hold the total amount of elements
+	int numArguments;			///< will hold the total amount of elements
 								// in the args array
-	int pid;					// !< should hold the process ID of the
+	int pid;					///< should hold the process ID of the
 								// process that was started by this nm_element
-	int status;					// !< should hold the last exit value of the
+	int status;					///< should hold the last exit value of the
 								// executable
-	int success;				// !< should hold the exit value of the
+	int success;				///< should hold the exit value of the
 								// executable (*exec) that represents the
 								// success state
-	struct nm_element *next;	// !< pointer to the next nm_element structure
+	struct nm_element *next;	///< pointer to the next nm_element structure
 	GtkImage *image_success;	///< image that should be displayed when
 								// check succeeds 
 	GtkImage *image_fail;		///< image that should be displayed when

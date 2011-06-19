@@ -1,5 +1,5 @@
 /**
- * \file nm_parseconf.c
+ * \file applets/netman/parseconf.c
  *
  *
  *

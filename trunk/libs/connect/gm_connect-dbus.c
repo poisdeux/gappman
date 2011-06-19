@@ -32,19 +32,6 @@
 
 static GMutex *check_status_mutex;
 
-static void get_lock()
-{
-	while (g_mutex_trylock(check_status_mutex) == FALSE)
-	{
-		sleep(1);
-	}
-}
-
-static void release_lock()
-{
-	g_mutex_unlock(check_status_mutex);
-}
-
 static DBusGProxy *get_proxy()
 {
 	GError *error = NULL;
@@ -86,7 +73,6 @@ int gm_dbus_get_started_procs_from_gappman(struct proceslist **startedprocs)
 	gchar **procs = NULL;
 	gchar **contentssplit = NULL;
 
-	// get_lock();
 
 	proxy = get_proxy();
 
@@ -127,7 +113,6 @@ int gm_dbus_get_started_procs_from_gappman(struct proceslist **startedprocs)
 			}
 		}
 	}
-	// release_lock();
 	return GM_SUCCES;
 }
 

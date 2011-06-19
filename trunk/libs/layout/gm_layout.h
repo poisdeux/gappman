@@ -152,7 +152,7 @@ GtkWidget *gm_create_menu(struct menu *dish,
 
 /**
 * \brief Creates the panel layout using the available screen height and width
-* \param elts pointer to first menu_elements structure
+* \param dish pointer to menu structure that holds the panel elements
 * \return GtkWidget pointer to container holding the panel
 */
 GtkWidget *gm_create_panel(struct menu *dish);

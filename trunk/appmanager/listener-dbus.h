@@ -1,3 +1,14 @@
+/**
+ * \file listener-dbus.h
+ *
+ *
+ *
+ * GPL v2
+ *
+ * Authors:
+ *   Martijn Brekhof <m.brekhof@gmail.com>
+ */
+
 #ifndef __LISTENER_DBUS_H__
 #define __LISTENER_DBUS_H__
 #include <glib.h>

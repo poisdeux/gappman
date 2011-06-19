@@ -1,5 +1,5 @@
 /**
- * \file gm_connect-dbus.h
+ * \file gm_connect-socket.h
  * \brief generic functions to retrieve or sent information from or to gappman
  *
  *

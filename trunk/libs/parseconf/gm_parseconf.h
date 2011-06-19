@@ -151,7 +151,7 @@ struct menu
 								// 0.0 = left, 0.5 = center, 1.0 = right
 	int vert_alignment;		///< vertical alignment of menu
 								// 0 = top, 1 = center, 2 = bottom
-	struct menu_element *elts;
+	struct menu_element *elts; ///< list of menu elements that are part of this menu
 };
 
 
@@ -163,8 +163,8 @@ struct menu
 int gm_load_conf(const char *filename);
 
 /**
-* \brief relinguishes the memory occupied by menu structures
-* \param *dish menu structure
+* \brief relinguishes the memory occupied by a menu structure
+* \param dish menu structure
 */
 void gm_free_menu(struct menu *dish);
 

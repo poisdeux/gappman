@@ -15,8 +15,6 @@
 
 /**
 * \brief Connects to gappman and requests the proceslist
-* \param portno portnumber gappman listens to
-* \param hostname servername of host that runs gappman
 * \param startedprocs adres of the pointer to a proceslist structure (call by reference). Needs to be freed after use with gm_free_proceslist(*startedprocs)
 * \return integer value
 *                       0: OK
@@ -29,8 +27,6 @@ int gm_dbus_get_started_procs_from_gappman(struct proceslist **startedprocs);
 
 /**
 * \brief Connects to gappman and requests the fontsize
-* \param portno portnumber gappman listens to
-* \param hostname servername of host that runs gappman
 * \param path pointer to a string holding the configuration path
 * \return integer value (GM_*) as defined in libs/generic/gm_generic.h
 */
@@ -39,8 +35,6 @@ int gm_dbus_get_confpath_from_gappman(gchar ** path);
 
 /**
 * \brief Connects to gappman and requests the fontsize
-* \param portno portnumber gappman listens to
-* \param hostname servername of host that runs gappman
 * \param fontsize adres of the pointer to an integer value (call by reference)
 * \return integer value (GM_*) as defined in libs/generic/gm_generic.h
 */
@@ -48,8 +42,6 @@ int gm_dbus_get_fontsize_from_gappman(int *fontsize);
 
 /**
 * \brief Connects to gappman
-* \param portno portnumber gappman listens to
-* \param hostname servername of host that runs gappman
 * \param sockfd pointer to int which will hold the socket filedescriptor
 * \return filedescriptor
 */

@@ -1,3 +1,14 @@
+/**
+ * \file listener-dbus.c
+ *
+ *
+ *
+ * GPL v2
+ *
+ * Authors:
+ *   Martijn Brekhof <m.brekhof@gmail.com>
+ */
+
 #include <unistd.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -7,7 +18,7 @@
 #include "appmanager.h"
 #include "listener-dbus.h"
 
-G_DEFINE_TYPE(GmAppmanager, gm_appmanager, G_TYPE_OBJECT);	// /< will create
+G_DEFINE_TYPE(GmAppmanager, gm_appmanager, G_TYPE_OBJECT);	///< will create
 															// gm_appmanager
 															// and set
 															// gm_appmanager_parent_class

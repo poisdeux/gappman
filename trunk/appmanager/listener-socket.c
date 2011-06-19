@@ -24,15 +24,15 @@
 #include <gm_layout.h>
 #include "appmanager.h"
 
-#define SEND_PROCESS_LIST 1		// /< message id used to specify we received a
+#define SEND_PROCESS_LIST 1		///< message id used to specify we received a
 								// request to sent the current list of
 								// programs started by gappman
-#define SEND_FONTSIZE 2			// /< message id used to specify we received a
+#define SEND_FONTSIZE 2			///< message id used to specify we received a
 								// request to sent the current default
 								// fontsize used by gappman
-#define UPDATE_RES 3			// /< message id used to specify we received
+#define UPDATE_RES 3			///< message id used to specify we received
 								// an resolution update request
-#define SEND_CONFPATH 4			// /< message id used to specify we received a
+#define SEND_CONFPATH 4			///< message id used to specify we received a
 								// request to sent the configuration path
 								// gappman uses
 

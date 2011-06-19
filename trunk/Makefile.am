@@ -24,3 +24,4 @@ EXTRA_DIST = $(srcdir)/gtk-config/gtkrc $(srcdir)/xml-config-files/*.xml $(srcdi
 
 dist-hook:
 	find $(distdir) -depth \( -name "*~" -o -name ".svn" \) -exec rm -rf {} \;
+
