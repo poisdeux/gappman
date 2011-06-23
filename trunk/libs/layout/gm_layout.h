@@ -43,14 +43,6 @@ gboolean check_key(GdkEvent * event);
 void gm_quit_program(GtkWidget * dummy, GdkEvent * event);
 
 /**
-* \brief function to calculate the absolute width based upon the total available width
-* \param total_length Total available width for the box element
-* \param *box_length Pointer to a struct length holding the length value and type of the box
-* \return box width in amount of pixels
-*/
-int gm_calculate_box_length(int total_length, struct length *box_length);
-
-/**
 * \brief loads image and scales it making sure the image fits inside
 * max_width*max_height maintaining the correct aspect ratio
 * \param elt_name name of the element

@@ -15,8 +15,7 @@
  * \todo Implement support for keybindings. For instance to start specific applets.
  * \todo Startup indicator when starting programs. We could do this through an animated mouse-pointer or animate the program-button.
  * \todo Make it possible to let gappman redraw the main window when the screen resolution changes
- * \todo align_buttonbox calls gm_calculate_boxlength. This is also called in gm_layout when creating the box. We might want to capture the values in struct menu to prevent recalculation.
- * \todo Add support to bring already started programs to the front when there button is pressed again. 
+ * \todo Add support to bring already started programs to the front when their button is pressed again. 
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -362,11 +361,7 @@ static void align_buttonbox(GtkWidget * hbox_top, GtkWidget * hbox_middle,
 							struct menu *dish)
 {
 	GtkWidget *hor_align;
-	int box_width;
-	int box_height;
 
-	box_width = gm_calculate_box_length(window_width, &(dish->menu_width));
-	box_height = gm_calculate_box_length(window_height, &(dish->menu_height));
 	hor_align =
 		gtk_alignment_new(dish->hor_alignment,
 						  (float)dish->vert_alignment / 2,

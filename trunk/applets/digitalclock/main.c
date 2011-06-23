@@ -13,6 +13,7 @@
  * \todo add day/month/year
  * \todo add calendar
  * \todo make this loadable as a module by gappman
+ * \todo Add support to use images as horizontal and vertical bars
  */
 
 #include <gtk/gtk.h>

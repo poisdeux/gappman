@@ -66,6 +66,7 @@ struct length
 								// pixels?
 	int value;					///< Actual length value without metric
 								// indicator, e.g. % or px.
+	int pixels; ///< Calculated length in pixels based on type and value
 };
 
 

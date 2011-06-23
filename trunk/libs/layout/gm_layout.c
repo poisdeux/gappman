@@ -486,7 +486,13 @@ static GtkWidget *image_label_box_vert(struct menu_element * elt, int max_width,
 	return box;
 }
 
-int gm_calculate_box_length(int total_length, struct length *box_length)
+/**
+* \brief function to calculate the absolute width based upon the total available width
+* \param total_length Total available width for the box element
+* \param *box_length Pointer to a struct length holding the length value and type of the box
+* \return box width in amount of pixels
+*/
+static int gm_calculate_box_length(int total_length, struct length *box_length)
 {
 	int length;
 
