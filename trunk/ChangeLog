@@ -1,3 +1,10 @@
+2011-06-25  Martijn Brekhof  <m.brekhof@gmail.com>
+    * Added max_elts attribute in gappman configuration file which
+      specifies the maximum amount of elements which may reside in
+      one box of the menu.
+    * Added new applet called digitalclock (see applets/digitalclock)
+    
+		
 2011-02-15  Martijn Brekhof  <m.brekhof@gmail.com>
  	
     * Splitted configure.ac to make the project modulair. Now libs, appmanager,

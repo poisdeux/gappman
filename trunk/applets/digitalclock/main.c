@@ -12,7 +12,6 @@
  * 			 depending on the digits drawn it takes 1000 to 2000 microseconds.
  * \todo add day/month/year
  * \todo add calendar
- * \todo make this loadable as a module by gappman
  * \todo Add support to use images as horizontal and vertical bars
  */
 
@@ -20,22 +19,28 @@
 #include <gm_generic.h>
 #include <sys/time.h>
 
-static GtkWidget *window = NULL;
-static gdouble linewidth = 30.0; ///< default linewidth for horizontal and vertical bars
-static gdouble vert_bar_length; ///< length of the vertical bar
-static gdouble hor_bar_length; ///< length of the horizontal bar
-static gdouble column_width; ///< holds the width of the column which is placed between the hour andd minute digits
 static struct tm time_tm; ///< holds the localtime used to calculate the hours and minutes
 static gint bars_for_digit[10][7]; ///< double array to specify which bars should be drawn to display a specific number
-static gdouble x_delta; ///< the amount of space we should move horizontally to start drawing the next digit
-static gdouble x_0_3_6_offset; ///< horizontal offset calculated from the top left corner of the digit to draw the bars at positions 0, 3, and 6
-static gdouble x_2_5_offset; ///< horizontal offset calculated from the top left corner of the digit to draw the bars at positions 2 and 5
-static gdouble y_0_offset; ///< vertical offset calculated from the top left corner of the digit to draw the bar at positions 0
-static gdouble y_3_offset; ///< vertical offset calculated from the top left corner of the digit to draw the bar at position 3
-static gdouble y_4_5_offset; ///< vertical offset calculated from the top left corner of the digit to draw the bars at positions 4 and 5
-static gdouble y_6_offset; ///< vertical offset calculated from the top left corner of the digit to draw the bar at position 6
-static gdouble w_width; ///< width of the window in which the clock will be drawn
-static gdouble w_height; ///< height of the window in which the clock will be drawn
+static GtkWidget *window = NULL;
+
+static struct _sizes {
+	gdouble w_width; ///< width of the window in which the clock will be drawn
+	gdouble w_height; ///< height of the window in which the clock will be drawn
+	gdouble column_width; ///< holds the width of the column which is placed between the hour andd minute digits
+	gdouble linewidth; ///< default sizes.linewidth for horizontal and vertical bars
+	gdouble vert_bar_length; ///< length of the vertical bar
+	gdouble hor_bar_length; ///< length of the horizontal bar
+} sizes;
+
+static struct _offsets {
+  gdouble x_delta; ///< the amount of space we should move horizontally to start drawing the next digit
+	gdouble x_0_3_6; ///< horizontal offset calculated from the top left corner of the digit to draw the bars at positions 0, 3, and 6
+	gdouble x_2_5; ///< horizontal offset calculated from the top left corner of the digit to draw the bars at positions 2 and 5
+	gdouble y_0; ///< vertical offset calculated from the top left corner of the digit to draw the bar at positions 0
+	gdouble y_3; ///< vertical offset calculated from the top left corner of the digit to draw the bar at position 3
+	gdouble y_4_5; ///< vertical offset calculated from the top left corner of the digit to draw the bars at positions 4 and 5
+	gdouble y_6; ///< vertical offset calculated from the top left corner of the digit to draw the bar at position 6
+} offsets;
 
 static void measure_time(int *prev_microseconds)
 {
@@ -44,7 +49,7 @@ static void measure_time(int *prev_microseconds)
 	if(*prev_microseconds)
 	{
 		gettimeofday( &time_tv, NULL );
-		//g_debug("Microseconds passed: %d", (int) time_tv.tv_usec - *prev_microseconds);
+		g_debug("Microseconds passed: %d", (int) time_tv.tv_usec - *prev_microseconds);
 		*prev_microseconds = (int) time_tv.tv_usec;
 	}	
 	gettimeofday( &time_tv, NULL );
@@ -135,10 +140,10 @@ static void create_bars_for_digit()
 	bars_for_digit[9][6] = 1;
 }
 
-static gboolean draw_horizontal_bar(cairo_t *cr, gdouble x, gdouble y, gdouble length)
+static gboolean draw_horizontal_bar(cairo_t *cr, gdouble x, gdouble y)
 {
 
-	gdouble halflinewidth = linewidth/2.0;
+	gdouble halflinewidth = (sizes.linewidth)/2.0;
 
 	//draw left triangle
 	cairo_move_to(cr, x, y);
@@ -147,10 +152,10 @@ static gboolean draw_horizontal_bar(cairo_t *cr, gdouble x, gdouble y, gdouble l
 	cairo_close_path(cr);
 
 	//draw vertical line
-	cairo_rectangle(cr, x, y, length, linewidth);
+	cairo_rectangle(cr, x, y, sizes.hor_bar_length, sizes.linewidth);
 
 	//draw right triangle
-	cairo_move_to(cr, x+length, y);
+	cairo_move_to(cr, x+sizes.hor_bar_length, y);
 	cairo_rel_line_to(cr, halflinewidth, halflinewidth);
 	cairo_rel_line_to(cr, -halflinewidth, halflinewidth);
 	cairo_close_path(cr);
@@ -160,10 +165,10 @@ static gboolean draw_horizontal_bar(cairo_t *cr, gdouble x, gdouble y, gdouble l
 }
 
 
-static gboolean draw_vertical_bar(cairo_t *cr, gdouble x, gdouble y, gdouble length)
+static gboolean draw_vertical_bar(cairo_t *cr, gdouble x, gdouble y)
 {
 
-	double halflinewidth = linewidth/2;
+	double halflinewidth = sizes.linewidth/2;
 
 	//draw top triangle
 	cairo_move_to(cr, x, y);
@@ -172,10 +177,10 @@ static gboolean draw_vertical_bar(cairo_t *cr, gdouble x, gdouble y, gdouble len
 	cairo_close_path(cr);
 
 	//draw vertical line
-	cairo_rectangle(cr, x, y, linewidth, length);
+	cairo_rectangle(cr, x, y, sizes.linewidth, sizes.vert_bar_length);
 
 	//draw bottom triangle
-	cairo_move_to(cr, x, y+length);
+	cairo_move_to(cr, x, y+sizes.vert_bar_length);
 	cairo_rel_line_to(cr, halflinewidth, halflinewidth);
 	cairo_rel_line_to(cr, halflinewidth, -halflinewidth);
 	cairo_close_path(cr);
@@ -199,25 +204,25 @@ bar positions:
 	switch(bar)
 	{
 		case 0:
-			draw_horizontal_bar(cr, x + x_0_3_6_offset, y + y_0_offset, hor_bar_length);
+			draw_horizontal_bar(cr, x + offsets.x_0_3_6, y + offsets.y_0);
 			break;
 		case 1:
-			draw_vertical_bar(cr, x , y, vert_bar_length);
+			draw_vertical_bar(cr, x , y);
 			break;
 		case 2:
-			draw_vertical_bar(cr, x + x_2_5_offset, y ,vert_bar_length);
+			draw_vertical_bar(cr, x + offsets.x_2_5, y);
 			break;
 		case 3:
-			draw_horizontal_bar(cr, x + x_0_3_6_offset, y + y_3_offset, hor_bar_length);
+			draw_horizontal_bar(cr, x + offsets.x_0_3_6, y + offsets.y_3);
 			break;
 		case 4:
-			draw_vertical_bar(cr, x, y + y_4_5_offset, vert_bar_length);
+			draw_vertical_bar(cr, x, y + offsets.y_4_5);
 			break;
 		case 5:
-			draw_vertical_bar(cr, x + x_2_5_offset, y + y_4_5_offset, vert_bar_length);
+			draw_vertical_bar(cr, x + offsets.x_2_5, y + offsets.y_4_5);
 			break;
 		case 6:
-			draw_horizontal_bar(cr, x + x_0_3_6_offset, y + y_6_offset, hor_bar_length);
+			draw_horizontal_bar(cr, x + offsets.x_0_3_6, y + offsets.y_6);
 			break;
 		default:
 			g_warning("Sorry sir, but I have no knowledge of bar number %d", bar);
@@ -238,7 +243,6 @@ static draw_digit(cairo_t *cr, int digit, gdouble x_offset, gdouble y_offset)
 			draw_bar(cr, i, x_offset, y_offset);
 		}
 	}  
-	//g_debug("Drawing digit %d", digit);
 	measure_time(&time_passed);	
 }
 
@@ -269,34 +273,34 @@ static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpoint
 	cairo_set_line_width(cr, 0);
 
 	x_offset = 0;
-	y_offset = -y_0_offset;
+	y_offset = -offsets.y_0;
 
 	//hours
 	first_digit = time_tm.tm_hour / 10;
 	second_digit = time_tm.tm_hour % 10;
 	draw_digit(cr, first_digit, x_offset, y_offset);
-	x_offset += x_delta + 0.5*linewidth;
+	x_offset += offsets.x_delta + 0.5*sizes.linewidth;
 	draw_digit(cr, second_digit, x_offset, y_offset);
-	x_offset += x_delta;
+	x_offset += offsets.x_delta;
 
 	//column
 	if(draw_column)
 	{
-  	cairo_rectangle(cr, x_offset, y_3_offset - linewidth + y_offset, linewidth, linewidth);
-  	cairo_rectangle(cr, x_offset, y_4_5_offset + y_offset, linewidth, linewidth);
+  	cairo_rectangle(cr, x_offset, offsets.y_3 - sizes.linewidth + y_offset, sizes.linewidth, sizes.linewidth);
+  	cairo_rectangle(cr, x_offset, offsets.y_4_5 + y_offset, sizes.linewidth, sizes.linewidth);
 		draw_column = 0;	
 	}
 	else
 	{
 		draw_column = 1;
 	}	
-	x_offset += column_width - 0.5*linewidth;
+	x_offset += sizes.column_width - 0.5*sizes.linewidth;
 
   //minutes
 	first_digit = time_tm.tm_min / 10;
 	second_digit = time_tm.tm_min % 10;
 	draw_digit(cr, first_digit, x_offset, y_offset);
-	x_offset += x_delta + 0.5*linewidth;
+	x_offset += offsets.x_delta + 0.5*sizes.linewidth;
 	draw_digit(cr, second_digit, x_offset, y_offset);
 
 	cairo_stroke (cr);
@@ -315,20 +319,17 @@ static gboolean update_time(gpointer data)
 
 	widget = GTK_WIDGET(data);	
 
-	//if (!widget->window)
-	//	return FALSE;
-
 	time( &time_secs );
 	localtime_r (&time_secs, &time_tm);
-
+		
 	region = gdk_drawable_get_clip_region (widget->window);
-  	gdk_window_invalidate_region (widget->window, region, TRUE);
-  	gdk_window_process_updates (widget->window, TRUE);
-  	gdk_region_destroy (region);
+ 	gdk_window_invalidate_region (widget->window, region, TRUE);
+ 	gdk_window_process_updates (widget->window, TRUE);
+ 	gdk_region_destroy (region);
 	return TRUE;
 }
 
-static gboolean calculate_sizes_and_offsets(GtkWidget *widget, GdkEventConfigure *event, gpointer data)
+static gboolean calculate_offsets(GtkWidget *widget, GdkEventConfigure *event, gpointer data)
 {
 	gint time_passed = 0;
 	
@@ -337,33 +338,33 @@ static gboolean calculate_sizes_and_offsets(GtkWidget *widget, GdkEventConfigure
 
 	//empirically determined 1/26th of the window width
   //provides a nice width for the bars		
-	linewidth = w_width/26.0;
+	sizes.linewidth = sizes.w_width/26.0;
 
 	//Column takes 5% of total width
-	column_width = 2.0*linewidth;
+	sizes.column_width = 2.0*sizes.linewidth;
 
 	//We have four digits that each take 1/4th
-  //of w_width minus column_width. Each box for
+  //of sizes.w_width minus sizes.column_width. Each box for
   //the digits needs to be one horizontal bar
   //wide.
-	x_delta =  6.0*linewidth;
+	offsets.x_delta =  6.0*sizes.linewidth;
 
 	//compensate for triangles at endpoints of the
   //digit-bars (see draw_horizontal_bar or draw_vertical_bar)
-  //we use x_delta to specify the x_offset for each digit
-	hor_bar_length =  3.0 * linewidth;
+  //we use offset.x_delta to specify the x_offset for each digit
+	sizes.hor_bar_length =  3.0 * sizes.linewidth;
 
 	//Each box for the digits needs to hold two vertical bars
-	vert_bar_length = (w_height - (4.0 * linewidth))/2.0;
+	sizes.vert_bar_length = (sizes.w_height - (4.0 * sizes.linewidth))/2.0;
 
-	x_0_3_6_offset = 1.25*linewidth;
-	x_2_5_offset = hor_bar_length + (1.5*linewidth);
-	y_0_offset = -x_0_3_6_offset;
-	y_3_offset = 0.25*linewidth + vert_bar_length;
-	y_4_5_offset = y_3_offset + 1.25*linewidth;
-	y_6_offset = y_4_5_offset + y_3_offset;
+	offsets.x_0_3_6 = 1.25*sizes.linewidth;
+	offsets.x_2_5 = sizes.hor_bar_length + (1.5*sizes.linewidth);
+	offsets.y_0 = -offsets.x_0_3_6;
+	offsets.y_3 = 0.25*sizes.linewidth + sizes.vert_bar_length;
+	offsets.y_4_5 = offsets.y_3 + 1.25*sizes.linewidth;
+	offsets.y_6 = offsets.y_4_5 + offsets.y_3;
 
-	//g_debug("calculate_sizes_and_offsets");
+	//g_debug("calculate_offsets");
 	measure_time(&time_passed);	
 	return TRUE;
 }
@@ -375,10 +376,10 @@ static gboolean calculate_sizes_and_offsets(GtkWidget *widget, GdkEventConfigure
 G_MODULE_EXPORT int gm_module_init()
 {
 	window = gtk_drawing_area_new();
-	gtk_widget_set_size_request (window, w_width, w_height);
+	gtk_widget_set_size_request (window, sizes.w_width, sizes.w_height);
 
 	g_signal_connect(window, "expose-event", G_CALLBACK(on_expose_event), NULL);
-	g_signal_connect(window, "configure-event", G_CALLBACK(calculate_sizes_and_offsets), NULL);
+	g_signal_connect(window, "configure-event", G_CALLBACK(calculate_offsets), NULL);
   g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
 	create_bars_for_digit();
@@ -418,6 +419,6 @@ G_MODULE_EXPORT GtkWidget* gm_module_get_widget()
 */
 G_MODULE_EXPORT void gm_module_set_icon_size(int width, int height)
 {
-	w_width = width;
-	w_height = height;
+	sizes.w_width = width;
+	sizes.w_height = height;
 }

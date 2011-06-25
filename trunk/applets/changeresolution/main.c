@@ -9,7 +9,6 @@
  *   Martijn Brekhof <m.brekhof@gmail.com>
  *
  * \todo add support for portrait orientation
- * \bug resolution update for program is not sent/received to/by gappman
  * 
  */
 
