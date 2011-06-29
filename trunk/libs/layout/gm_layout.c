@@ -12,6 +12,7 @@
  * \todo support larger sized framed buttons. Now the buttons are calculated using the image width and height. Some images occupy the complete button which makes it hard to see if they are highlighted.
  * \todo add support for different backgrounds in the menu's. This would make it possible to visually divide the UI.
  * \todo Add support for clutter (www.clutter-project.org) so we can have a fancy animated menu
+ * \bugs font calculation is now based on program menu size. This fails when only one program is in the menu and results in extremely large fontsize. Better to take screen/window-width as source for font calculation.
  */
 
 
