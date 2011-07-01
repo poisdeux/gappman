@@ -1,9 +1,5 @@
 #summary Network restart and status applet
 
-NetMan is not available in gappman's official releases.
-It is only available in the trunk. NetMan currently has a
-major design flaw and needs to be redesigned.
-
 = Introduction =
 
 NetMan provides simple network status and restart functionality.
