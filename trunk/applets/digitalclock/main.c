@@ -21,6 +21,7 @@
 #include <gm_generic.h>
 #include <sys/time.h>
 
+static GtkWidget *main_window = NULL;
 static GtkWidget *hour_window = NULL;
 static GtkWidget *minute_window = NULL;
 static GtkWidget *column_window = NULL;
@@ -257,12 +258,9 @@ static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpoint
 
 static gboolean update_time(gpointer data)
 {
-	GtkWidget *widget;
 	GdkRegion *region;
 	time_t time_secs;
 	struct tm cur_time;
-
-	widget = GTK_WIDGET(data);	
 
 	time( &time_secs );
 	localtime_r (&time_secs, &cur_time);
@@ -293,9 +291,9 @@ static gboolean update_time(gpointer data)
 	}
 
 	//TODO: invalidate column window	
-	region = gdk_drawable_get_clip_region (widget->window);
- 	gdk_window_invalidate_region (widget->window, region, TRUE);
- 	gdk_window_process_updates (widget->window, TRUE);
+	region = gdk_drawable_get_clip_region (column_window);
+ 	gdk_window_invalidate_region (column_window, region, TRUE);
+ 	gdk_window_process_updates (column_window, TRUE);
  	gdk_region_destroy (region);
 	return TRUE;
 }
@@ -380,7 +378,9 @@ G_MODULE_EXPORT int gm_module_init()
 	minutes.first_digit = cur_time.tm_min / 10;
 	minutes.second_digit = cur_time.tm_min % 10;
 
-	gtk_widget_set_app_paintable(window, TRUE);
+	gtk_widget_set_app_paintable(hour_window, TRUE);
+	gtk_widget_set_app_paintable(minute_window, TRUE);
+	gtk_widget_set_app_paintable(column_window, TRUE);
 
 	return GM_SUCCES;
 }
@@ -390,7 +390,7 @@ G_MODULE_EXPORT int gm_module_init()
 */
 G_MODULE_EXPORT void gm_module_start()
 {
-	g_timeout_add(1000, update_time, window);
+	g_timeout_add(1000, update_time, NULL);
 }
 
 /**
