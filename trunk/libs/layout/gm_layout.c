@@ -8,7 +8,7 @@
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
  *
- * \todo Instead of specifying only max_elts add support to specify max_cols and/or max_rows. Then the menu will generate new boxes when there are more elts than max_cols*max_rows.
+ * \todo Instead of specifying only max_elts add support to specify max buttonsize. Gappman would then determine based on the amount of buttons and buttonsize the amount of row and columns that are needed to create the menu_box.
  * \todo support larger sized framed buttons. Now the buttons are calculated using the image width and height. Some images occupy the complete button which makes it hard to see if they are highlighted.
  * \todo add support for different backgrounds in the menu's. This would make it possible to visually divide the UI.
  * \todo Add support for clutter (www.clutter-project.org) so we can have a fancy animated menu

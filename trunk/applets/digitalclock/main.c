@@ -13,17 +13,30 @@
  * \todo add day/month/year
  * \todo add calendar
  * \todo Add support to use images as horizontal and vertical bars
+ * \todo Struct sizes now has both w_width, w_height and digit_width, digit_height. We can replace w_widht and w_height with the digit versions.
+ * \todo We now use seperate drawing area's for hours, minutes, and the column. Should we use regions for this?
  */
 
 #include <gtk/gtk.h>
 #include <gm_generic.h>
 #include <sys/time.h>
 
-static struct tm time_tm; ///< holds the localtime used to calculate the hours and minutes
-static gint bars_for_digit[10][7]; ///< double array to specify which bars should be drawn to display a specific number
-static GtkWidget *window = NULL;
+static GtkWidget *hour_window = NULL;
+static GtkWidget *minute_window = NULL;
+static GtkWidget *column_window = NULL;
+
+struct digit_time {
+	gint time; ///< holds the current number shown by the clock
+	gint first_digit; ///< holds the integer number for the first digit
+	gint second_digit; ///< holds the integer number for the second digit
+};
+
+static struct digit_time hours;  ///< represents the current clock value for hours
+static struct digit_time minutes; ///< represents the current clock value for minutes
 
 static struct _sizes {
+	gdouble digit_width; ///< width of the window in which the clock will be drawn
+	gdouble digit_height; ///< height of the window in which the clock will be drawn
 	gdouble w_width; ///< width of the window in which the clock will be drawn
 	gdouble w_height; ///< height of the window in which the clock will be drawn
 	gdouble column_width; ///< holds the width of the column which is placed between the hour andd minute digits
@@ -42,6 +55,21 @@ static struct _offsets {
 	gdouble y_6; ///< vertical offset calculated from the top left corner of the digit to draw the bar at position 6
 } offsets;
 
+//DOES THIS REALLY NEED TO BE GLOBAL?
+///< double array to specify which bars should be drawn to display a specific number
+static gint bars_on_off[10][7] = {
+	{1, 1, 1, 0, 1, 1, 1},
+	{0, 0, 1, 0, 0, 1, 0},
+	{1, 0, 1, 1, 1, 0, 1},
+	{1, 0, 1, 1, 0, 1, 1},
+	{0, 1, 1, 1, 0, 1, 0},
+	{1, 1, 0, 1, 0, 1, 1},
+	{1, 1, 0, 1, 1, 1, 1},
+	{1, 0, 1, 0, 0, 1, 0},
+	{1, 1, 1, 1, 1, 1, 1},
+	{1, 1, 1, 1, 0, 1, 1} 
+};
+
 static void measure_time(int *prev_microseconds)
 {
 	struct timeval time_tv;
@@ -56,89 +84,6 @@ static void measure_time(int *prev_microseconds)
 	*prev_microseconds = (int) time_tv.tv_usec;
 }
 
-static void create_bars_for_digit()
-{
-	//digit 0
-	bars_for_digit[0][0] = 1;
-	bars_for_digit[0][1] = 1;
-	bars_for_digit[0][2] = 1;
-	bars_for_digit[0][3] = 0;
-	bars_for_digit[0][4] = 1;
-	bars_for_digit[0][5] = 1;
-	bars_for_digit[0][6] = 1;
-	//digit 1 
-	bars_for_digit[1][0] = 0;
-	bars_for_digit[1][1] = 0;
-	bars_for_digit[1][2] = 1;
-	bars_for_digit[1][3] = 0;
-	bars_for_digit[1][4] = 0;
-	bars_for_digit[1][5] = 1;
-	bars_for_digit[1][6] = 0;
-	//digit 2 
-	bars_for_digit[2][0] = 1;
-	bars_for_digit[2][1] = 0;
-	bars_for_digit[2][2] = 1;
-	bars_for_digit[2][3] = 1;
-	bars_for_digit[2][4] = 1;
-	bars_for_digit[2][5] = 0;
-	bars_for_digit[2][6] = 1;
-	//digit 3
-	bars_for_digit[3][0] = 1;
-	bars_for_digit[3][1] = 0;
-	bars_for_digit[3][2] = 1;
-	bars_for_digit[3][3] = 1;
-	bars_for_digit[3][4] = 0;
-	bars_for_digit[3][5] = 1;
-	bars_for_digit[3][6] = 1;
-	//digit 4 
-	bars_for_digit[4][0] = 0;
-	bars_for_digit[4][1] = 1;
-	bars_for_digit[4][2] = 1;
-	bars_for_digit[4][3] = 1;
-	bars_for_digit[4][4] = 0;
-	bars_for_digit[4][5] = 1;
-	bars_for_digit[4][6] = 0;
-	//digit 5 
-	bars_for_digit[5][0] = 1;
-	bars_for_digit[5][1] = 1;
-	bars_for_digit[5][2] = 0;
-	bars_for_digit[5][3] = 1;
-	bars_for_digit[5][4] = 0;
-	bars_for_digit[5][5] = 1;
-	bars_for_digit[5][6] = 1;
-	//digit 6
-	bars_for_digit[6][0] = 1;
-	bars_for_digit[6][1] = 1;
-	bars_for_digit[6][2] = 0;
-	bars_for_digit[6][3] = 1;
-	bars_for_digit[6][4] = 1;
-	bars_for_digit[6][5] = 1;
-	bars_for_digit[6][6] = 1;
-	//digit 7
-	bars_for_digit[7][0] = 1;
-	bars_for_digit[7][1] = 0;
-	bars_for_digit[7][2] = 1;
-	bars_for_digit[7][3] = 0;
-	bars_for_digit[7][4] = 0;
-	bars_for_digit[7][5] = 1;
-	bars_for_digit[7][6] = 0;
-	//digit 8
-	bars_for_digit[8][0] = 1;
-	bars_for_digit[8][1] = 1;
-	bars_for_digit[8][2] = 1;
-	bars_for_digit[8][3] = 1;
-	bars_for_digit[8][4] = 1;
-	bars_for_digit[8][5] = 1;
-	bars_for_digit[8][6] = 1;
-	//digit 9
-	bars_for_digit[9][0] = 1;
-	bars_for_digit[9][1] = 1;
-	bars_for_digit[9][2] = 1;
-	bars_for_digit[9][3] = 1;
-	bars_for_digit[9][4] = 0;
-	bars_for_digit[9][5] = 1;
-	bars_for_digit[9][6] = 1;
-}
 
 static gboolean draw_horizontal_bar(cairo_t *cr, gdouble x, gdouble y)
 {
@@ -238,7 +183,7 @@ static draw_digit(cairo_t *cr, int digit, gdouble x_offset, gdouble y_offset)
 	measure_time(&time_passed);	
 	for(i = 0; i < 7; i++)
 	{
-		if( bars_for_digit[digit][i] == 1 )
+		if( bars_on_off[digit][i] == 1 )
 		{
 			draw_bar(cr, i, x_offset, y_offset);
 		}
@@ -250,17 +195,16 @@ static draw_digit(cairo_t *cr, int digit, gdouble x_offset, gdouble y_offset)
 static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data)
 {
 	cairo_t *cr;
-	cairo_surface_t *surface;
 	gdouble x_offset;
 	gdouble y_offset;
-	gint i;
-	gint first_digit, second_digit;
 	static gint draw_column = 1; 
-	static gint count;
 	GtkStyle *rc_style;
+	gchar* widget_name;
 	gint time_passed = 0;
 
 	measure_time(&time_passed);
+	g_object_get(widget->window, "name", &widget_name, NULL);
+
 	cr = gdk_cairo_create (widget->window);
 
 	rc_style = gtk_rc_get_style(widget);
@@ -275,13 +219,13 @@ static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpoint
 	x_offset = 0;
 	y_offset = -offsets.y_0;
 
-	//hours
-	first_digit = time_tm.tm_hour / 10;
-	second_digit = time_tm.tm_hour % 10;
-	draw_digit(cr, first_digit, x_offset, y_offset);
-	x_offset += offsets.x_delta + 0.5*sizes.linewidth;
-	draw_digit(cr, second_digit, x_offset, y_offset);
-	x_offset += offsets.x_delta;
+	if( g_strcmp0(widget_name, "hours" ) == 0 )
+	{
+		draw_digit(cr, hours.first_digit, x_offset, y_offset);
+		x_offset += offsets.x_delta + 0.5*sizes.linewidth;
+		draw_digit(cr, hours.second_digit, x_offset, y_offset);
+		x_offset += offsets.x_delta;
+	}
 
 	//column
 	if(draw_column)
@@ -296,16 +240,16 @@ static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpoint
 	}	
 	x_offset += sizes.column_width - 0.5*sizes.linewidth;
 
-  //minutes
-	first_digit = time_tm.tm_min / 10;
-	second_digit = time_tm.tm_min % 10;
-	draw_digit(cr, first_digit, x_offset, y_offset);
-	x_offset += offsets.x_delta + 0.5*sizes.linewidth;
-	draw_digit(cr, second_digit, x_offset, y_offset);
-
+	if( g_strcmp0(widget_name, "minutes" ) == 0 )
+	{
+		draw_digit(cr, minutes.first_digit, x_offset, y_offset);
+		x_offset += offsets.x_delta + 0.5*sizes.linewidth;
+		draw_digit(cr, minutes.second_digit, x_offset, y_offset);
+	}
 	cairo_stroke (cr);
 
 	cairo_destroy(cr);
+	g_free(widget_name);
 	//g_debug("on_expose_event");
 	measure_time(&time_passed);
 	return TRUE;
@@ -316,12 +260,39 @@ static gboolean update_time(gpointer data)
 	GtkWidget *widget;
 	GdkRegion *region;
 	time_t time_secs;
+	struct tm cur_time;
 
 	widget = GTK_WIDGET(data);	
 
 	time( &time_secs );
-	localtime_r (&time_secs, &time_tm);
-		
+	localtime_r (&time_secs, &cur_time);
+
+	if( hours.time != cur_time.tm_hour )
+	{
+		hours.first_digit = cur_time.tm_hour / 10;
+		hours.second_digit = cur_time.tm_hour % 10;
+
+		hours.time = cur_time.tm_hour;
+
+		//Invalidate hour window
+		region = gdk_drawable_get_clip_region (hour_window);
+ 		gdk_window_invalidate_region (hour_window, region, TRUE);
+ 		gdk_window_process_updates (hour_window, TRUE);
+ 		gdk_region_destroy (region);
+	}
+
+	if( minutes.time != cur_time.tm_min )
+	{
+  	//minutes
+		minutes.first_digit = cur_time.tm_min / 10;
+		minutes.second_digit = cur_time.tm_min % 10;
+
+		minutes.time = cur_time.tm_min;
+	
+		//TODO: invalidate minute window
+	}
+
+	//TODO: invalidate column window	
 	region = gdk_drawable_get_clip_region (widget->window);
  	gdk_window_invalidate_region (widget->window, region, TRUE);
  	gdk_window_process_updates (widget->window, TRUE);
@@ -375,14 +346,39 @@ static gboolean calculate_offsets(GtkWidget *widget, GdkEventConfigure *event, g
 */
 G_MODULE_EXPORT int gm_module_init()
 {
-	window = gtk_drawing_area_new();
-	gtk_widget_set_size_request (window, sizes.w_width, sizes.w_height);
+	time_t time_secs;
+	struct tm cur_time;
 
-	g_signal_connect(window, "expose-event", G_CALLBACK(on_expose_event), NULL);
-	g_signal_connect(window, "configure-event", G_CALLBACK(calculate_offsets), NULL);
-  g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+	main_window = gtk_hbox_new(FALSE, 0);
 
-	create_bars_for_digit();
+	hour_window = gtk_drawing_area_new();
+	gtk_widget_set_size_request (hour_window, sizes.digit_width * 2, sizes.digit_height);
+	g_object_set(GTK_OBJECT(hour_window), "name", "hours");  
+	gtk_container_add(GTK_CONTAINER(main_window), hour_window);
+
+	column_window = gtk_drawing_area_new();
+	gtk_widget_set_size_request (column_window, sizes.column_width, sizes.digit_height);
+	gtk_container_add(GTK_CONTAINER(main_window), column_window);
+	
+	minute_window = gtk_drawing_area_new();
+	gtk_widget_set_size_request (minute_window, sizes.digit_width * 2, sizes.digit_height);
+	g_object_set(GTK_OBJECT(minute_window), "name", "minutes");  
+	gtk_container_add(GTK_CONTAINER(main_window), minute_window);
+
+	g_signal_connect(main_window, "expose-event", G_CALLBACK(on_expose_event), NULL);
+	g_signal_connect(main_window, "configure-event", G_CALLBACK(calculate_offsets), NULL);
+  g_signal_connect(main_window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+
+	time( &time_secs );
+	localtime_r (&time_secs, &cur_time);
+
+	hours.time = cur_time.tm_hour;
+	hours.first_digit = cur_time.tm_hour / 10;
+	hours.second_digit = cur_time.tm_hour % 10;
+
+	minutes.time = cur_time.tm_min;
+	minutes.first_digit = cur_time.tm_min / 10;
+	minutes.second_digit = cur_time.tm_min % 10;
 
 	gtk_widget_set_app_paintable(window, TRUE);
 
@@ -402,7 +398,10 @@ G_MODULE_EXPORT void gm_module_start()
 */
 G_MODULE_EXPORT int gm_module_stop()
 {
-	gtk_widget_destroy(window);
+	gtk_widget_destroy(hour_window);
+	gtk_widget_destroy(minute_window);
+	gtk_widget_destroy(column_window);
+	gtk_widget_destroy(main_window);
 }
 
 /**
@@ -411,7 +410,7 @@ G_MODULE_EXPORT int gm_module_stop()
 */
 G_MODULE_EXPORT GtkWidget* gm_module_get_widget()
 {
-	return window;
+	return main_window;
 }
 
 /**
