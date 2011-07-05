@@ -251,7 +251,6 @@ static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpoint
 	cairo_stroke (cr);
 
 	cairo_destroy(cr);
-	g_free(widget_name);
 	measure_time(&time_passed);
 	return TRUE;
 }
