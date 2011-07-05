@@ -181,7 +181,7 @@ static draw_digit(cairo_t *cr, int digit, gdouble x_offset, gdouble y_offset)
 	int i;
 	gint time_passed = 0;
 
-	measure_time(&time_passed);	
+	//measure_time(&time_passed);	
 	for(i = 0; i < 7; i++)
 	{
 		if( bars_on_off[digit][i] == 1 )
@@ -189,7 +189,7 @@ static draw_digit(cairo_t *cr, int digit, gdouble x_offset, gdouble y_offset)
 			draw_bar(cr, i, x_offset, y_offset);
 		}
 	}  
-	measure_time(&time_passed);	
+	//measure_time(&time_passed);	
 }
 
 
@@ -204,7 +204,8 @@ static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpoint
 	gint time_passed = 0;
 
 	measure_time(&time_passed);
-	g_object_get(widget->window, "name", &widget_name, NULL);
+	widget_name = (gchar*) g_object_get_data(G_OBJECT(widget), "name");
+	g_debug("Exposing %s", widget_name);
 
 	cr = gdk_cairo_create (widget->window);
 
@@ -251,7 +252,6 @@ static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpoint
 
 	cairo_destroy(cr);
 	g_free(widget_name);
-	//g_debug("on_expose_event");
 	measure_time(&time_passed);
 	return TRUE;
 }
@@ -273,9 +273,9 @@ static gboolean update_time(gpointer data)
 		hours.time = cur_time.tm_hour;
 
 		//Invalidate hour window
-		region = gdk_drawable_get_clip_region (hour_window);
- 		gdk_window_invalidate_region (hour_window, region, TRUE);
- 		gdk_window_process_updates (hour_window, TRUE);
+		region = gdk_drawable_get_clip_region (hour_window->window);
+ 		gdk_window_invalidate_region (hour_window->window, region, TRUE);
+ 		gdk_window_process_updates (hour_window->window, TRUE);
  		gdk_region_destroy (region);
 	}
 
@@ -288,12 +288,16 @@ static gboolean update_time(gpointer data)
 		minutes.time = cur_time.tm_min;
 	
 		//TODO: invalidate minute window
+		region = gdk_drawable_get_clip_region (minute_window->window);
+ 		gdk_window_invalidate_region (minute_window->window, region, TRUE);
+ 		gdk_window_process_updates (minute_window->window, TRUE);
+ 		gdk_region_destroy (region);
 	}
 
 	//TODO: invalidate column window	
-	region = gdk_drawable_get_clip_region (column_window);
- 	gdk_window_invalidate_region (column_window, region, TRUE);
- 	gdk_window_process_updates (column_window, TRUE);
+	region = gdk_drawable_get_clip_region (column_window->window);
+ 	gdk_window_invalidate_region (column_window->window, region, TRUE);
+ 	gdk_window_process_updates (column_window->window, TRUE);
  	gdk_region_destroy (region);
 	return TRUE;
 }
@@ -302,7 +306,6 @@ static gboolean calculate_offsets(GtkWidget *widget, GdkEventConfigure *event, g
 {
 	gint time_passed = 0;
 	
-	measure_time(&time_passed);	
 	//see bar-diagram.dia to make sense out of these numbers
 
 	//empirically determined 1/26th of the window width
@@ -333,8 +336,6 @@ static gboolean calculate_offsets(GtkWidget *widget, GdkEventConfigure *event, g
 	offsets.y_4_5 = offsets.y_3 + 1.25*sizes.linewidth;
 	offsets.y_6 = offsets.y_4_5 + offsets.y_3;
 
-	//g_debug("calculate_offsets");
-	measure_time(&time_passed);	
 	return TRUE;
 }
 
@@ -351,7 +352,7 @@ G_MODULE_EXPORT int gm_module_init()
 
 	hour_window = gtk_drawing_area_new();
 	gtk_widget_set_size_request (hour_window, sizes.digit_width * 2, sizes.digit_height);
-	g_object_set(GTK_OBJECT(hour_window), "name", "hours");  
+	g_object_set_data(G_OBJECT(hour_window), "name", g_strdup("hours"));  
 	gtk_container_add(GTK_CONTAINER(main_window), hour_window);
 
 	column_window = gtk_drawing_area_new();
@@ -360,9 +361,12 @@ G_MODULE_EXPORT int gm_module_init()
 	
 	minute_window = gtk_drawing_area_new();
 	gtk_widget_set_size_request (minute_window, sizes.digit_width * 2, sizes.digit_height);
-	g_object_set(GTK_OBJECT(minute_window), "name", "minutes");  
+	g_object_set_data(G_OBJECT(minute_window), "name", g_strdup("minutes"));  
 	gtk_container_add(GTK_CONTAINER(main_window), minute_window);
 
+	g_signal_connect(minute_window, "expose-event", G_CALLBACK(on_expose_event), NULL);
+	g_signal_connect(hour_window, "expose-event", G_CALLBACK(on_expose_event), NULL);
+	g_signal_connect(column_window, "expose-event", G_CALLBACK(on_expose_event), NULL);
 	g_signal_connect(main_window, "expose-event", G_CALLBACK(on_expose_event), NULL);
 	g_signal_connect(main_window, "configure-event", G_CALLBACK(calculate_offsets), NULL);
   g_signal_connect(main_window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
@@ -390,6 +394,7 @@ G_MODULE_EXPORT int gm_module_init()
 */
 G_MODULE_EXPORT void gm_module_start()
 {
+	gtk_widget_show_all(main_window);
 	g_timeout_add(1000, update_time, NULL);
 }
 
@@ -398,6 +403,7 @@ G_MODULE_EXPORT void gm_module_start()
 */
 G_MODULE_EXPORT int gm_module_stop()
 {
+	gtk_widget_hide_all(main_window);
 	gtk_widget_destroy(hour_window);
 	gtk_widget_destroy(minute_window);
 	gtk_widget_destroy(column_window);
