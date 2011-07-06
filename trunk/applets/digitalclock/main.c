@@ -26,6 +26,8 @@ static GtkWidget *hour_window = NULL;
 static GtkWidget *minute_window = NULL;
 static GtkWidget *column_window = NULL;
 
+static gint timeout_source_id = -1;
+
 struct digit_time {
 	gint time; ///< holds the current number shown by the clock
 	gint first_digit; ///< holds the integer number for the first digit
@@ -192,20 +194,15 @@ static draw_digit(cairo_t *cr, int digit, gdouble x_offset, gdouble y_offset)
 	//measure_time(&time_passed);	
 }
 
-
-static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data)
+static gboolean hour_on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data)
 {
 	cairo_t *cr;
-	gdouble x_offset;
-	gdouble y_offset;
-	static gint draw_column = 1; 
 	GtkStyle *rc_style;
-	gchar* widget_name;
 	gint time_passed = 0;
 
+	g_debug("drawing hours");
+
 	measure_time(&time_passed);
-	widget_name = (gchar*) g_object_get_data(G_OBJECT(widget), "name");
-	g_debug("Exposing %s", widget_name);
 
 	cr = gdk_cairo_create (widget->window);
 
@@ -218,42 +215,87 @@ static gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpoint
 
 	cairo_set_line_width(cr, 0);
 
-	x_offset = 0;
-	y_offset = -offsets.y_0;
+	draw_digit(cr, hours.first_digit, 0, -offsets.y_0);
+	draw_digit(cr, hours.second_digit, offsets.x_delta + 0.5*sizes.linewidth, -offsets.y_0);
 
-	if( g_strcmp0(widget_name, "hours" ) == 0 )
-	{
-		draw_digit(cr, hours.first_digit, x_offset, y_offset);
-		x_offset += offsets.x_delta + 0.5*sizes.linewidth;
-		draw_digit(cr, hours.second_digit, x_offset, y_offset);
-		x_offset += offsets.x_delta;
-	}
+	cairo_stroke (cr);
+	cairo_destroy(cr);
+	
+	measure_time(&time_passed);
+	return TRUE;
+}
+
+static gboolean column_on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data)
+{
+	cairo_t *cr;
+	static gint draw_column = 1; 
+	GtkStyle *rc_style;
+	gint time_passed = 0;
+
+	measure_time(&time_passed);
+
+	cr = gdk_cairo_create (widget->window);
+
+	rc_style = gtk_rc_get_style(widget);
+
+	cairo_set_source_rgb (cr, 
+		rc_style->fg[0].red,
+		rc_style->fg[0].green,
+		rc_style->fg[0].blue);
+
+	cairo_set_line_width(cr, 0);
+
+	g_debug("drawing column");
 
 	//column
 	if(draw_column)
 	{
-  	cairo_rectangle(cr, x_offset, offsets.y_3 - sizes.linewidth + y_offset, sizes.linewidth, sizes.linewidth);
-  	cairo_rectangle(cr, x_offset, offsets.y_4_5 + y_offset, sizes.linewidth, sizes.linewidth);
+  	cairo_rectangle(cr, 0, offsets.y_3 - sizes.linewidth - offsets.y_0, sizes.linewidth, sizes.linewidth);
+  	cairo_rectangle(cr, 0, offsets.y_4_5 - offsets.y_0, sizes.linewidth, sizes.linewidth);
 		draw_column = 0;	
 	}
 	else
 	{
 		draw_column = 1;
 	}	
-	x_offset += sizes.column_width - 0.5*sizes.linewidth;
 
-	if( g_strcmp0(widget_name, "minutes" ) == 0 )
-	{
-		draw_digit(cr, minutes.first_digit, x_offset, y_offset);
-		x_offset += offsets.x_delta + 0.5*sizes.linewidth;
-		draw_digit(cr, minutes.second_digit, x_offset, y_offset);
-	}
 	cairo_stroke (cr);
-
 	cairo_destroy(cr);
+
 	measure_time(&time_passed);
 	return TRUE;
 }
+
+static gboolean minute_on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data)
+{
+	cairo_t *cr;
+	GtkStyle *rc_style;
+	gint time_passed = 0;
+
+	g_debug("drawing minutes");
+	measure_time(&time_passed);
+
+	cr = gdk_cairo_create (widget->window);
+
+	rc_style = gtk_rc_get_style(widget);
+
+	cairo_set_source_rgb (cr, 
+		rc_style->fg[0].red,
+		rc_style->fg[0].green,
+		rc_style->fg[0].blue);
+
+	cairo_set_line_width(cr, 0);
+
+	draw_digit(cr, minutes.first_digit, 0, -offsets.y_0);
+	draw_digit(cr, minutes.second_digit, offsets.x_delta + 0.5*sizes.linewidth, -offsets.y_0);
+
+	cairo_stroke (cr);
+	cairo_destroy(cr);
+
+	measure_time(&time_passed);
+	return TRUE;
+}
+
 
 static gboolean update_time(gpointer data)
 {
@@ -314,6 +356,9 @@ static gboolean calculate_offsets(GtkWidget *widget, GdkEventConfigure *event, g
 	//Column takes 5% of total width
 	sizes.column_width = 2.0*sizes.linewidth;
 
+	sizes.digit_width = sizes.w_width/4 - sizes.column_width;
+  sizes.digit_height = sizes.w_height;
+
 	//We have four digits that each take 1/4th
   //of sizes.w_width minus sizes.column_width. Each box for
   //the digits needs to be one horizontal bar
@@ -335,6 +380,10 @@ static gboolean calculate_offsets(GtkWidget *widget, GdkEventConfigure *event, g
 	offsets.y_4_5 = offsets.y_3 + 1.25*sizes.linewidth;
 	offsets.y_6 = offsets.y_4_5 + offsets.y_3;
 
+	gtk_widget_set_size_request (hour_window, sizes.digit_width * 2, sizes.digit_height);
+	gtk_widget_set_size_request (column_window, sizes.column_width, sizes.digit_height);
+	gtk_widget_set_size_request (minute_window, sizes.digit_width * 2, sizes.digit_height);
+	gtk_widget_set_size_request (main_window, sizes.digit_width * 4 + sizes.column_width, sizes.digit_height);
 	return TRUE;
 }
 
@@ -350,25 +399,19 @@ G_MODULE_EXPORT int gm_module_init()
 	main_window = gtk_hbox_new(FALSE, 0);
 
 	hour_window = gtk_drawing_area_new();
-	gtk_widget_set_size_request (hour_window, sizes.digit_width * 2, sizes.digit_height);
-	g_object_set_data(G_OBJECT(hour_window), "name", g_strdup("hours"));  
 	gtk_container_add(GTK_CONTAINER(main_window), hour_window);
 
 	column_window = gtk_drawing_area_new();
-	gtk_widget_set_size_request (column_window, sizes.column_width, sizes.digit_height);
 	gtk_container_add(GTK_CONTAINER(main_window), column_window);
 	
 	minute_window = gtk_drawing_area_new();
-	gtk_widget_set_size_request (minute_window, sizes.digit_width * 2, sizes.digit_height);
-	g_object_set_data(G_OBJECT(minute_window), "name", g_strdup("minutes"));  
 	gtk_container_add(GTK_CONTAINER(main_window), minute_window);
 
-	g_signal_connect(minute_window, "expose-event", G_CALLBACK(on_expose_event), NULL);
-	g_signal_connect(hour_window, "expose-event", G_CALLBACK(on_expose_event), NULL);
-	g_signal_connect(column_window, "expose-event", G_CALLBACK(on_expose_event), NULL);
-	g_signal_connect(main_window, "expose-event", G_CALLBACK(on_expose_event), NULL);
-	g_signal_connect(main_window, "configure-event", G_CALLBACK(calculate_offsets), NULL);
-  g_signal_connect(main_window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+	g_signal_connect(minute_window, "expose-event", G_CALLBACK(minute_on_expose_event), NULL);
+	g_signal_connect(hour_window, "expose-event", G_CALLBACK(hour_on_expose_event), NULL);
+	g_signal_connect(column_window, "expose-event", G_CALLBACK(column_on_expose_event), NULL);
+
+	g_signal_connect(minute_window, "configure-event", G_CALLBACK(calculate_offsets), NULL);
 
 	time( &time_secs );
 	localtime_r (&time_secs, &cur_time);
@@ -384,6 +427,7 @@ G_MODULE_EXPORT int gm_module_init()
 	gtk_widget_set_app_paintable(hour_window, TRUE);
 	gtk_widget_set_app_paintable(minute_window, TRUE);
 	gtk_widget_set_app_paintable(column_window, TRUE);
+	gtk_widget_set_app_paintable(main_window, TRUE);
 
 	return GM_SUCCES;
 }
@@ -394,7 +438,7 @@ G_MODULE_EXPORT int gm_module_init()
 G_MODULE_EXPORT void gm_module_start()
 {
 	gtk_widget_show_all(main_window);
-	g_timeout_add(1000, update_time, NULL);
+	timeout_source_id = g_timeout_add(1000, update_time, NULL);
 }
 
 /**
@@ -402,11 +446,10 @@ G_MODULE_EXPORT void gm_module_start()
 */
 G_MODULE_EXPORT int gm_module_stop()
 {
-	gtk_widget_hide_all(main_window);
-	gtk_widget_destroy(hour_window);
-	gtk_widget_destroy(minute_window);
-	gtk_widget_destroy(column_window);
-	gtk_widget_destroy(main_window);
+	if ( timeout_source_id != -1 )
+	{
+		g_source_remove(timeout_source_id);
+	}
 }
 
 /**
