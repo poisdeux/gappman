@@ -11,7 +11,7 @@
  * \todo Be able to popup main menu when other apps have focus.
  *       This should probably be solved in the window manager used and not 
  *    	 solved by gappman.
- * \todo Unit-testing with http://klee.llvm.org/
+ * \todo (Unit-)testing with http://klee.llvm.org/ and/or glib testing http://developer.gnome.org/glib/unstable/glib-Testing.html and/or http://gcc.gnu.org/onlinedocs/gcc/Gcov.html
  * \todo Implement support for keybindings. For instance to start specific applets.
  * \todo Startup indicator when starting programs. We could do this through an animated mouse-pointer or animate the program-button.
  * \todo Make it possible to let gappman redraw the main window when the screen resolution changes
