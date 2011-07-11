@@ -14,7 +14,7 @@
  * \todo add calendar
  * \todo Add support to use images as horizontal and vertical bars
  * \todo Struct sizes now has both w_width, w_height and digit_width, digit_height. We can replace w_widht and w_height with the digit versions.
- * \todo We now use seperate drawing area's for hours, minutes, and the column. Should we use regions for this?
+ * \todo We now use seperate drawing area's for hours, minutes, and the colon. Should we use regions for this?
  */
 
 #include <gtk/gtk.h>
@@ -24,7 +24,7 @@
 static GtkWidget *main_window = NULL;
 static GtkWidget *hour_window = NULL;
 static GtkWidget *minute_window = NULL;
-static GtkWidget *column_window = NULL;
+static GtkWidget *colon_window = NULL;
 
 static gint timeout_source_id = -1;
 
@@ -42,7 +42,7 @@ static struct _sizes {
 	gdouble digit_height; ///< height of the window in which the clock will be drawn
 	gdouble w_width; ///< width of the window in which the clock will be drawn
 	gdouble w_height; ///< height of the window in which the clock will be drawn
-	gdouble column_width; ///< holds the width of the column which is placed between the hour andd minute digits
+	gdouble colon_width; ///< holds the width of the colon which is placed between the hour andd minute digits
 	gdouble linewidth; ///< default sizes.linewidth for horizontal and vertical bars
 	gdouble vert_bar_length; ///< length of the vertical bar
 	gdouble hor_bar_length; ///< length of the horizontal bar
@@ -218,10 +218,10 @@ static gboolean hour_on_expose_event(GtkWidget *widget, GdkEventExpose *event, g
 	return TRUE;
 }
 
-static gboolean column_on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data)
+static gboolean colon_on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data)
 {
 	cairo_t *cr;
-	static gint draw_column = 1; 
+	static gint draw_colon = 1; 
 	GtkStyle *rc_style;
 	gint time_passed = 0;
 
@@ -237,16 +237,16 @@ static gboolean column_on_expose_event(GtkWidget *widget, GdkEventExpose *event,
 	cairo_set_line_width(cr, 0);
 
 
-	//column
-	if(draw_column)
+	//colon
+	if(draw_colon)
 	{
   	cairo_rectangle(cr, 0.5*sizes.linewidth, offsets.y_3 - sizes.linewidth - offsets.y_0, sizes.linewidth, sizes.linewidth);
   	cairo_rectangle(cr, 0.5*sizes.linewidth, offsets.y_4_5 - offsets.y_0, sizes.linewidth, sizes.linewidth);
-		draw_column = 0;	
+		draw_colon = 0;	
 	}
 	else
 	{
-		draw_column = 1;
+		draw_colon = 1;
 	}	
 
 	cairo_fill (cr);
@@ -320,10 +320,10 @@ static gboolean update_time(gpointer data)
  		gdk_region_destroy (region);
 	}
 
-	//TODO: invalidate column window	
-	region = gdk_drawable_get_clip_region (column_window->window);
- 	gdk_window_invalidate_region (column_window->window, region, TRUE);
- 	gdk_window_process_updates (column_window->window, TRUE);
+	//TODO: invalidate colon window	
+	region = gdk_drawable_get_clip_region (colon_window->window);
+ 	gdk_window_invalidate_region (colon_window->window, region, TRUE);
+ 	gdk_window_process_updates (colon_window->window, TRUE);
  	gdk_region_destroy (region);
 	return TRUE;
 }
@@ -339,13 +339,13 @@ static gboolean calculate_offsets(GtkWidget *widget, GdkEventConfigure *event, g
 	sizes.linewidth = sizes.w_width/26.0;
 
 	//Column takes 5% of total width
-	sizes.column_width = 2.0*sizes.linewidth;
+	sizes.colon_width = 2.0*sizes.linewidth;
 
-	sizes.digit_width = (sizes.w_width - sizes.column_width)/4;
+	sizes.digit_width = (sizes.w_width - sizes.colon_width)/4;
   sizes.digit_height = sizes.w_height;
 
 	//We have four digits that each take 1/4th
-  //of sizes.w_width minus sizes.column_width. Each box for
+  //of sizes.w_width minus sizes.colon_width. Each box for
   //the digits needs to be one horizontal bar
   //wide.
 	offsets.x_delta =  6.0*sizes.linewidth;
@@ -366,7 +366,7 @@ static gboolean calculate_offsets(GtkWidget *widget, GdkEventConfigure *event, g
 	offsets.y_6 = offsets.y_4_5 + offsets.y_3;
 
 	gtk_widget_set_size_request (hour_window, sizes.digit_width * 2, sizes.digit_height);
-	gtk_widget_set_size_request (column_window, sizes.column_width, sizes.digit_height);
+	gtk_widget_set_size_request (colon_window, sizes.colon_width, sizes.digit_height);
 	gtk_widget_set_size_request (minute_window, sizes.digit_width * 2, sizes.digit_height);
 	gtk_widget_set_size_request (main_window, sizes.w_width, sizes.digit_height);
 	return TRUE;
@@ -386,15 +386,15 @@ G_MODULE_EXPORT int gm_module_init()
 	hour_window = gtk_drawing_area_new();
 	gtk_container_add(GTK_CONTAINER(main_window), hour_window);
 
-	column_window = gtk_drawing_area_new();
-	gtk_container_add(GTK_CONTAINER(main_window), column_window);
+	colon_window = gtk_drawing_area_new();
+	gtk_container_add(GTK_CONTAINER(main_window), colon_window);
 	
 	minute_window = gtk_drawing_area_new();
 	gtk_container_add(GTK_CONTAINER(main_window), minute_window);
 
 	g_signal_connect(minute_window, "expose-event", G_CALLBACK(minute_on_expose_event), NULL);
 	g_signal_connect(hour_window, "expose-event", G_CALLBACK(hour_on_expose_event), NULL);
-	g_signal_connect(column_window, "expose-event", G_CALLBACK(column_on_expose_event), NULL);
+	g_signal_connect(colon_window, "expose-event", G_CALLBACK(colon_on_expose_event), NULL);
 
 	g_signal_connect(minute_window, "configure-event", G_CALLBACK(calculate_offsets), NULL);
 
