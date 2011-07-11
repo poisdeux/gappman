@@ -225,33 +225,31 @@ static gboolean colon_on_expose_event(GtkWidget *widget, GdkEventExpose *event, 
 	GtkStyle *rc_style;
 	gint time_passed = 0;
 
-	cr = gdk_cairo_create (widget->window);
-
-	rc_style = gtk_rc_get_style(widget);
-
-	cairo_set_source_rgb (cr, 
-		rc_style->fg[0].red,
-		rc_style->fg[0].green,
-		rc_style->fg[0].blue);
-
-	cairo_set_line_width(cr, 0);
-
-
-	//colon
 	if(draw_colon)
 	{
+		cr = gdk_cairo_create (widget->window);
+
+		rc_style = gtk_rc_get_style(widget);
+
+		cairo_set_source_rgb (cr, 
+			rc_style->fg[0].red,
+			rc_style->fg[0].green,
+			rc_style->fg[0].blue);
+
+		cairo_set_line_width(cr, 0);
+
   	cairo_rectangle(cr, 0.5*sizes.linewidth, offsets.y_3 - sizes.linewidth - offsets.y_0, sizes.linewidth, sizes.linewidth);
   	cairo_rectangle(cr, 0.5*sizes.linewidth, offsets.y_4_5 - offsets.y_0, sizes.linewidth, sizes.linewidth);
+
+		cairo_fill (cr);
+		cairo_destroy(cr);
+
 		draw_colon = 0;	
 	}
 	else
 	{
 		draw_colon = 1;
 	}	
-
-	cairo_fill (cr);
-	cairo_destroy(cr);
-
 	return TRUE;
 }
 
