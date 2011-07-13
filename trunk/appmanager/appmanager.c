@@ -16,7 +16,12 @@
  * \todo Startup indicator when starting programs. We could do this through an animated mouse-pointer or animate the program-button.
  * \todo Make it possible to let gappman redraw the main window when the screen resolution changes
  * \todo Add support to bring already started programs to the front when their button is pressed again. 
+ * \todo Add library preloading for programs
+ * \todo Add monitoring facilities for daemons. This might be implemented using an applet with no button.
+ * \todo Add support for directfb.
+ * \todo Make it possible to start gappman as init proces. This probably requires gappman to start and monitor services as init does. Mimick systemd or upstart.
  */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif // HAVE_CONFIG_H
