@@ -103,7 +103,7 @@ static void gm_appmanager_init(GmAppmanager * self)
 }
 
 
-gboolean listener_dbus_start_session(GtkWidget * window)
+gboolean listener_dbus_start_session()
 {
 	DBusGConnection *bus;
 	DBusGProxy *bus_proxy;

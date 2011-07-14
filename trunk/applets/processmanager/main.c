@@ -9,6 +9,7 @@
  *   Martijn Brekhof <m.brekhof@gmail.com>
  *
  * \todo replace gm_load_conf with gm_get_programs_from_gappman
+ * \todo add support for portrait orientation. To reproduce problem run tests/rungappman.sh 100 500
  */
 
 #include <gtk/gtk.h>

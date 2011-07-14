@@ -15,60 +15,48 @@
 /* 
  * Type macros.
  */
-#define GM_TYPE_APPMANAGER                  (gm_appmanager_get_type ())	///<
-																		// always 
-																		// returns 
-																		// the 
-																		// gm_appmanager 
-																		// object 
-																		// type
-#define GM_APPMANAGER(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), GM_TYPE_APPMANAGER, GmAppmanager))	///< 
-																													// Used 
-																													// to 
-																													// cast 
-																													// an 
-																													// object 
-																													// to 
-																													// type 
-																													// gm_appman
-#define GM_IS_APPMANAGER(obj)               (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GM_TYPE_APPMANAGER))	///< 
-																										// Checks 
-																										// whether 
-																										// obj 
-																										// is 
-																										// of 
-																										// type 
-																										// gm_appman
-#define GM_APPMANAGER_CLASS(klass)          (G_TYPE_CHECK_CLASS_CAST ((klass), GM_TYPE_APPMANAGER, GmAppmanagerClass))	///< 
-																														// Used 
-																														// to 
-																														// cast 
-																														// klass 
-																														// to 
-																														// class 
-																														// gm_appman
-#define GM_IS_APPMANAGER_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), GM_TYPE_APPMANAGER))	///< 
-																									// Checks 
-																									// whether 
-																									// klass 
-																									// is 
-																									// of 
-																									// class 
-																									// gm_appman
-#define GM_APPMANAGER_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), GM_TYPE_APPMANAGER, GmAppmanagerClass))	///< 
-																														// Returns 
-																														// the 
-																														// gm_appman 
-																														// class 
-																														// of 
-																														// obj
 
-typedef struct _GmAppmanager GmAppmanager;	///< Typedef to make switching to 
-											// different struct easier
-typedef struct _GmAppmanagerClass GmAppmanagerClass;	///< Typedef to make
-														// switching to
-														// different struct
-														// easier
+/**
+ * \brief always returns the gm_appmanager object type
+ */
+#define GM_TYPE_APPMANAGER                  (gm_appmanager_get_type ())
+
+/**
+ * \brief Used to cast an object to type GmAppmanager
+ */
+#define GM_APPMANAGER(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), GM_TYPE_APPMANAGER, GmAppmanager))
+
+/**
+ * \brief Checks whether obj is of type GmAppmanager
+ */
+#define GM_IS_APPMANAGER(obj)               (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GM_TYPE_APPMANAGER))
+
+/**
+ * \brief Used to cast klass to class GmAppmanager
+ */
+#define GM_APPMANAGER_CLASS(klass)          (G_TYPE_CHECK_CLASS_CAST ((klass), GM_TYPE_APPMANAGER, GmAppmanagerClass)) 
+
+/**
+ * \brief Checks whether klass isof class GmAppmanager
+ */
+#define GM_IS_APPMANAGER_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), GM_TYPE_APPMANAGER))
+
+/**
+ * \brief Returns the GmAppmanager class of obj
+ */
+#define GM_APPMANAGER_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), GM_TYPE_APPMANAGER, GmAppmanagerClass))
+
+/**
+ * \typedef GmAppmanager
+ * \brief making code more readable....
+ */
+typedef struct _GmAppmanager GmAppmanager;
+
+/**
+ * \typedef GmAppmanagerClass
+ * \brief making code more readable....
+ */
+typedef struct _GmAppmanagerClass GmAppmanagerClass;
 
 /**
 * \struct _GmAppmanager
@@ -114,6 +102,15 @@ static gboolean update_resolution(GmAppmanager * obj, gchar * name, gint width,
 // This needs to be included after above function prototype
 #include <gm_listener_glue.h>
 
-gboolean listener_dbus_start_session(GtkWidget * window);
+/**
+ * \brief registers gappman to the D-Bus session bus
+ * \return always returns true. This might change in the future.
+ */
+gboolean listener_dbus_start_session();
 
+/**
+ * \brief sets the location of gappman's config file which some clients need
+ * \param path the absolute path to the configuration file for gappman
+ */
+void listener_dbus_set_confpath(const gchar * path);
 #endif /* __LISTENER_DBUS_H__ */

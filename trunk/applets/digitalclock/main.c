@@ -28,6 +28,10 @@ static GtkWidget *colon_window = NULL;
 
 static gint timeout_source_id = -1;
 
+/**
+ * \struct digit_time
+ * \brief holds the time for the digits
+ */
 struct digit_time {
 	gint time; ///< holds the current number shown by the clock
 	gint first_digit; ///< holds the integer number for the first digit
@@ -37,6 +41,10 @@ struct digit_time {
 static struct digit_time hours;  ///< represents the current clock value for hours
 static struct digit_time minutes; ///< represents the current clock value for minutes
 
+/**
+ * \struct _sizes
+ * \brief holds all widths and heights needed to draw the clock
+ */
 static struct _sizes {
 	gdouble digit_width; ///< width of the window in which the clock will be drawn
 	gdouble digit_height; ///< height of the window in which the clock will be drawn
@@ -48,6 +56,10 @@ static struct _sizes {
 	gdouble hor_bar_length; ///< length of the horizontal bar
 } sizes;
 
+/**
+ * \struct _offsets
+ * \brief holds all offsets for drawing horizontal and vertical bars in a digit
+ */
 static struct _offsets {
   gdouble x_delta; ///< the amount of space we should move horizontally to start drawing the next digit
 	gdouble x_0_3_6; ///< horizontal offset calculated from the top left corner of the digit to draw the bars at positions 0, 3, and 6

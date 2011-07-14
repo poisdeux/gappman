@@ -8,7 +8,7 @@
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
  *
- * \todo add support for portrait orientation
+ * \todo add support for portrait orientation. To reproduce problem run tests/rungappman.sh 100 500
  * 
  */
 
