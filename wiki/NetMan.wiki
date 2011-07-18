@@ -11,34 +11,32 @@ It consists of an applet which must be loaded by gappman. The applet
 provides a user-interface to the user showing status
 information through the button image. It can also be used to analyze network
 problems and restart a network interface.
-Besides an applet NetMan uses a daemon to perform the actual network analysis. 
-The applet and the daemon communicate using the D-Bus. 
-Besides support for the NetMan daemon the NetMan applet will also include
-support for the much used NetworkManager.
  
 = Screenshot =
 
-Not yet available
+<a href="http://www.flickr.com/photos/53529347@N05/5949512213/" title="netman-screenshot by pietsiroop, on Flickr"><img src="http://farm7.static.flickr.com/6003/5949512213_d8afa3cac6_m.jpg" width="104" height="88" alt="netman-screenshot"/></a>
+
+<a href="http://www.flickr.com/photos/53529347@N05/5950069580/" title="Screenshot-netman-menu by pietsiroop, on Flickr"><img src="http://farm7.static.flickr.com/6134/5950069580_ca5ba1656a_m.jpg" width="240" height="71" alt="Screenshot-netman-menu"/></a>
 
 = Configuration =
 
-This is the current configuration setup. This will change in the future
-as NetMan is redesigned.
-
 {{{
 <netman>
-  <cachelocation>/tmp/</cachelocation>
   <stati>
+    <logounavail>./applets/netman/logos/gnome-netstatus-error.png</logounavail>
     <status>
-      <name>Hostname lookup up or down</name>
-      <exec>/usr/bin/host</exec>
+      <name>Internet reachable</name>
+      <exec>/bin/ping</exec>
+      <arg>-q</arg>
+      <arg>-c</arg>
+      <arg>1</arg>
       <arg>google.com</arg>
       <success>0</success>
       <logosuccess>./applets/netman/logos/network-up.png</logosuccess>
       <logofail>./applets/netman/logos/network-down.png</logofail>
     </status>
-   <status>
-      <name>Network up or down</name>
+    <status>
+      <name>Gateway reachable</name>
       <exec>/bin/ping</exec>
       <arg>-q</arg>
       <arg>-c</arg>
@@ -48,16 +46,20 @@ as NetMan is redesigned.
       <logosuccess>./applets/netman/logos/network-up.png</logosuccess>
       <logofail>./applets/netman/logos/network-down.png</logofail>
     </status>
-   </stati>
+  </stati>
   <actions width="30%" height="10%" align="center">
     <action>
       <name>Restart network</name>
-      <exec>if-restart</exec>
+      <exec>./if-restart</exec>
       <arg>eth0</arg>
-      <logoprogress>./logos/network-restart1.png</logoprogress>
-      <logoprogress>./logos/network-restart2.png</logoprogress>
-      <logoprogress>./logos/network-restart3.png</logoprogress>
     </action>
   </actions>
 </netman>
 }}}
+
+= TODO's =
+
+   * Implement support for network unavailability when no network-interfaces have been configured.
+   * Add a check to see if status has changed to prevent button from being updated every loop.
+   * Add support for portrait orientation. To reproduce problem run tests/rungappman.sh 100 500
+
