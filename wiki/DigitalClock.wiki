@@ -6,6 +6,7 @@ The digital clock is a panel applet that shows the current time in hours:minute 
 
 = Screenshot =
 
+<a href="http://www.flickr.com/photos/53529347@N05/5950056654/" title="Digitalclock-screenshot by pietsiroop, on Flickr"><img src="http://farm7.static.flickr.com/6133/5950056654_f2bca09f49_t.jpg" width="87" height="90" alt="Digitalclock-screenshot" /></a>
 
 = TODO's =
 
