@@ -1,4 +1,5 @@
 #summary The main program
+#sidebar GAppMan
 
 = Introduction =
 
