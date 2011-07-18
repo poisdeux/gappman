@@ -1,5 +1,7 @@
 #summary a simple buttonbox to allow the user to choose between several shutdown options
 
+<wiki:toc max_depth="1" />
+
 = Introduction =
 
 The shutdown applet provides the user with several (configurable) options to shutdown the system.

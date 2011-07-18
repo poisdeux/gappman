@@ -1,5 +1,7 @@
 #summary Network restart and status applet
 
+<wiki:toc max_depth="1" />
+
 = Introduction =
 
 NetMan provides simple network status and restart functionality.

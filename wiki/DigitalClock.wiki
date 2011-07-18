@@ -1,5 +1,7 @@
 #summary Digital Clock
 
+<wiki:toc max_depth="1" />
+
 = Introduction =
 
 The digital clock is a panel applet that shows the current time in hours:minute format. 
