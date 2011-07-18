@@ -8,7 +8,7 @@ starts applications.
 
 The idea is that gappman calculates the best setup for the UI and
 draws and places the buttons on the screen to provide an evenly spaced
-layout. It tracks started applications and provides applets with details 
+layout. It monitors started applications and provides applets with details 
 about the UI layout and started applications.
 
 = Screenshot =
@@ -94,3 +94,18 @@ The screenshot above was created using the following configuration file for GApp
   </panel>
 </appmanager>
 }}}
+
+= TODO's =
+
+   * Be able to popup main menu when other apps have focus. (keybindings?)
+   * (Unit-)testing with http://klee.llvm.org/ and/or glib testing http://developer.gnome.org/glib/unstable/glib-Testing.html and/or http://gcc.gnu.org/onlinedocs/gcc/Gcov.html
+   * Implement support for keybindings. For instance to start specific applets.
+   * Startup indicator when starting programs. We could do this through an animated mouse-pointer or animate the application-button.
+   * Have Gappman redraw the main window when the screen resolution changes
+   * Add support to bring already started programs to the front when their button is pressed again.
+   * Add support for library preloading
+   * Add support for directfb.
+   * Make it possible to start gappman as init proces. 
+      * This probably requires gappman to start and monitor services as init does. Mimick systemd or upstart.
+      * Add monitoring facilities for daemons. This might be implemented using an applet with no button.
+
