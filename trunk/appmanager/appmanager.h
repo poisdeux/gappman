@@ -30,6 +30,16 @@ struct process_info
 	struct process_info *next;	///< Pointer to next process_info
 };
 
+struct metadata
+{
+	gchar* conffile;
+  gint keep_below;
+  gint windowed;
+  gint screen_width;
+  gint screen_height;
+  gint window_width;
+  gint window_height;
+};
 
 /**
 * \brief Returns the started applications.
@@ -44,3 +54,9 @@ struct process_info *appmanager_get_started_apps();
 * \param height new height that should be set for the program
 */
 void appmanager_update_resolution(gchar * programname, int width, int height);
+
+/**
+* \brief Returns the metadata from gappman
+* \return pointer to the metadata struct
+*/
+struct metadata *appmanager_get_metadata();

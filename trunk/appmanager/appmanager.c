@@ -39,12 +39,12 @@ struct menu *programs;		///< list of all programs gappman manages.
 								// updated. E.g. resolution updates for a
 								// specific program. 
 
-static int KEEP_BELOW = 0;
-static int WINDOWED = 0;
-static int screen_width = -1;
-static int screen_height = -1;
-static int window_width = -1;
-static int window_height = -1;
+struct metadata *config; ///< holds the configuration data used by gappman
+
+struct metadata *appmanager_get_metadata()
+{
+	return config;
+}
 
 void appmanager_update_resolution(gchar * programname, int width, int height)
 {
@@ -60,8 +60,8 @@ void appmanager_update_resolution(gchar * programname, int width, int height)
 	}
 	else
 	{
-		screen_width = width;
-		screen_height = height;
+		config->screen_width = width;
+		config->screen_height = height;
 	}
 }
 
@@ -99,7 +99,7 @@ static gint check_app_status(struct process_info *local_appw)
 			// so we reset the list.
 			started_apps = NULL;
 			// change resolution back to gappman menu resolution
-			gm_res_changeresolution(screen_width, screen_height);
+			gm_res_changeresolution(config->screen_width, config->screen_height);
 		}
 		else
 		{
@@ -390,7 +390,6 @@ int main(int argc, char **argv)
 	GtkWidget *vbox;
 	struct menu *actions;
 	struct menu *panel;
-	const char *conffile = SYSCONFDIR "/conf.xml";
 	int c;
 
 	// Needs to be called before any another glib function
@@ -401,7 +400,18 @@ int main(int argc, char **argv)
 		gdk_threads_init();
 	}
 
-	gtk_init(&argc, &argv);
+	gtk_init(&argc, &argv);	
+
+	//initialize configuration data for gappman
+	config = (struct metadata*) malloc(sizeof(struct metadata));
+  config->conffile = g_strdup("/etc/gappman/gui.conf");
+  config->window_width = -1;		
+  config->window_height = -1;		
+  config->keep_below = 0;
+  config->windowed = 0;
+  config->screen_width = -1;
+  config->screen_height = -1;
+
 	while (1)
 	{
 		int option_index = 0;
@@ -424,22 +434,23 @@ int main(int argc, char **argv)
 		switch (c)
 		{
 		case 'w':
-			window_width = atoi(optarg);
+			config->window_width = atoi(optarg);
 			break;
 		case 'h':
-			window_height = atoi(optarg);
+			config->window_height = atoi(optarg);
 			break;
 		case 'c':
-			conffile = optarg;
+			g_free(config->conffile);
+			config->conffile = optarg;
 			break;
 		case 'r':
 			gtk_rc_parse(optarg);
 			break;
 		case 'b':
-			KEEP_BELOW = 1;
+			config->keep_below = 1;
 			break;
 		case 'j':
-			WINDOWED = 1;
+			config->windowed = 1;
 			break;
 		default:
 			usage();
@@ -454,29 +465,28 @@ int main(int argc, char **argv)
 	started_apps = NULL;
 
 	/** Load configuration elements */
-	gm_load_conf(conffile);
+	gm_load_conf(config->conffile);
 	programs = gm_get_programs();
 	actions = gm_get_actions();
 	panel = gm_get_panel();
 
 	screen = gdk_screen_get_default();
-	screen_width = gdk_screen_get_width(screen);
-	screen_height = gdk_screen_get_height(screen);
+	config->screen_width = gdk_screen_get_width(screen);
+	config->screen_height = gdk_screen_get_height(screen);
 
-	if (window_width == -1)
-		window_width = screen_width;
-	if (window_height == -1)
-		window_height = screen_height;
+	if (config->window_width == -1)
+		config->window_width = config->screen_width;
+	if (config->window_height == -1)
+		config->window_height = config->screen_height;
 
-
-	gm_set_window_geometry(window_width, window_height);
+	gm_set_window_geometry(config->window_width, config->window_height);
 
 	mainwin = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
 	gtk_widget_set_name(mainwin, "gm_mainwindow");
 
 	// Keep the main window below all other windows
-	if (KEEP_BELOW)
+	if (config->keep_below)
 	{
 		gtk_window_set_keep_below(GTK_WINDOW(mainwin), TRUE);
 	}
@@ -484,7 +494,7 @@ int main(int argc, char **argv)
 	// Make window transparent
 	// gtk_window_set_opacity (GTK_WINDOW (mainwin), 0.0);
 
-	if (!WINDOWED)
+	if (!config->windowed)
 	{
 		// Remove border
 		gtk_window_set_decorated(GTK_WINDOW(mainwin), FALSE);
@@ -497,8 +507,8 @@ int main(int argc, char **argv)
 						 G_CALLBACK(destroy), NULL);
 	}
 
-	gtk_window_set_default_size(GTK_WINDOW(mainwin), window_width,
-								window_height);
+	gtk_window_set_default_size(GTK_WINDOW(mainwin), config->window_width,
+								config->window_height);
 
 	vbox = gtk_vbox_new(FALSE, 0);
 
@@ -549,9 +559,6 @@ int main(int argc, char **argv)
 	gtk_widget_show(vbox);
 
 #if !defined(NO_LISTENER)
-	// set confpath so other programs can retrieve
-	// the configuration file gappman used
-	gappman_set_confpath(conffile);
 	gappman_start_listener(mainwin);
 #else
 	g_warning("Gappman compiled without network support");
@@ -570,6 +577,8 @@ int main(int argc, char **argv)
 #if !defined(NO_LISTENER)
 	gappman_close_listener();
 #endif
+	
+	g_free(config);
 	gm_free_menu(programs);
 	gm_free_menu(actions);
 	gm_free_menu(panel);

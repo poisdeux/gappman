@@ -7,6 +7,8 @@
  *
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
+ * 
+ * \bug When client sends a message that does not end with a newline gappman stalls as the g_io_read_line function in handleconnection keeps waiting.
  */
 
 #include "listener-socket.h"
@@ -35,15 +37,37 @@
 #define SEND_CONFPATH 4			///< message id used to specify we received a
 								// request to sent the configuration path
 								// gappman uses
+#define SEND_WINDOWGEOMETRY 5 ///< message id used to specify we received a request to sent the window geometry
 
 static GIOChannel *gio;
 static const gchar *confpath = "";
 static const gchar *rcpath = "";
 
+
+/**
+* \brief parses a received message for keywords
+*
+* The protocol requires messages to be surrounded by double colons (i.e. ::)
+* The current supported messages are:
+* - `::listprocesses::` to get a list of processes currently managed by gappman.
+*   - returns: `::<PROGRAMNAMA>::<PID>::[<PROGRAMNAME>::<PID>::]...`
+* - `::showfontsize::` to get the fontsize used by gappman
+*   - returns: `fontsize::<SIZE>`
+* - `::updateres::general|<PROGRAMNAME>::<WIDTH>::<HEIGHT>::` will update the current configuration for application. If general is provided as name it will update the default resolution for gappman.
+*   - returns: nothing
+* - `::showconfpath::` to get the configuration file location used by gappman
+*   - returns: `confpath::<PATH>`
+* - `::showwindowgeometry::` to get the window geometry of the main window used by gappman
+*   - returns: `windowgeometry::<WIDTH>x<HEIGHT>`
+* \param msg received message
+* \return int corresponding to the received message.
+*/
 static int parsemessage(gchar * msg)
 {
 	int msg_id;
 	gchar **contentssplit = NULL;
+
+
 	contentssplit = g_strsplit(msg, "::", 0);
 
 	if (g_strcmp0(contentssplit[1], "listprocesses") == 0)
@@ -61,6 +85,10 @@ static int parsemessage(gchar * msg)
 	else if (g_strcmp0(contentssplit[1], "showconfpath") == 0)
 	{
 		msg_id = SEND_CONFPATH;
+	}
+	else if (g_strcmp0(contentssplit[1], "showwindowgeometry") == 0)
+	{
+		msg_id = SEND_WINDOWGEOMETRY;
 	}
 	return msg_id;
 }
@@ -80,7 +108,7 @@ static void writemsg(GIOChannel * gio, gchar * msg)
 
 static void sendprocesslist(GIOChannel * gio)
 {
-	struct appwidgetinfo *appw_list;
+	struct process_info *appw_list;
 	gchar *msg = NULL;
 	msg = (gchar *) malloc((256 + 16) * sizeof(gchar));
 
@@ -149,6 +177,7 @@ static gboolean handleconnection(GIOChannel * gio, GIOCondition cond,
 	socklen_t cli_len;
 	GIOChannel *new_gio = NULL;
 	int msg_id;
+	struct metadata *appmanager_config;
 
 	cli_len = sizeof(cli_addr);
 	newsock = accept(*(int *)data, (struct sockaddr *)&cli_addr, &cli_len);
@@ -191,9 +220,17 @@ static gboolean handleconnection(GIOChannel * gio, GIOCondition cond,
 				break;;
 			case SEND_CONFPATH:
 				g_free(msg);
+				appmanager_config = appmanager_get_metadata();
 				msg =
-					(gchar *) malloc((10 + strlen(confpath)) * sizeof(gchar));
-				g_sprintf(msg, "confpath::%s", confpath);
+					(gchar *) malloc((10 + strlen(appmanager_config->conffile)) * sizeof(gchar));
+				g_sprintf(msg, "confpath::%s", appmanager_config->conffile);
+				writemsg(new_gio, msg);
+				break;;
+			case SEND_WINDOWGEOMETRY:
+				g_free(msg);
+				appmanager_config = appmanager_get_metadata();
+				msg = (gchar *) malloc(40 * sizeof(gchar));
+				g_sprintf(msg, "windowgeometry::%sx%s", confpath, appmanager_config->window_width, appmanager_config->window_height);
 				writemsg(new_gio, msg);
 				break;;
 			}
