@@ -28,7 +28,7 @@ static int WINDOWED = 0;
 static void usage()
 {
 	printf
-		("usage: shutdown [--help] [--width <WIDTHINPIXELS>] [--height <HEIGHTINPIXELS>] [--conffile <FILENAME>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
+		("usage: shutdown [--help] [--conffile <FILENAME>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
 	printf("\n");
 	printf("--help:\t\tshows this help text\n");
 	printf
@@ -136,6 +136,9 @@ int main(int argc, char **argv)
 	struct menu *actions;
 	const char *conffile = SYSCONFDIR "/shutdown.xml";
 	int c;
+#if defined(DEBUG)
+  int width, height;
+#endif
 
 	gtk_init(&argc, &argv);
 
@@ -202,6 +205,11 @@ int main(int argc, char **argv)
 							   G_CALLBACK(destroy), NULL);
 	}
 	vbox = gtk_vbox_new(FALSE, 10);
+
+#if defined(DEBUG)
+  //gm_get_window_geometry(&width, &height);
+  gm_set_window_geometry(width, height);
+#endif
 
 	if (actions != NULL)
 	{

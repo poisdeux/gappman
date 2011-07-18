@@ -13,6 +13,11 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
 AC_USE_SYSTEM_EXTENSIONS
 
+# Checks for commandline options
+AC_ARG_ENABLE([debug],
+ [AS_HELP_STRING([--enable-debug], [enables debug mode @<:@default: no@:>@])],
+ [enable_debug=yes], [enable_debug=no])
+
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_LIBTOOL
@@ -41,6 +46,16 @@ AC_FUNC_FORK
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_CHECK_FUNCS([gethostbyname localtime_r memset pow socket sqrt strndup strspn strstr])
+
+if test "${enable_debug}" = yes; then
+  AC_MSG_WARN([
+------------------------------------------
+Building debug version.
+This adds additional code.
+------------------------------------------
+])
+AC_DEFINE([DEBUG], 1, [debug code enabled])
+fi
 
 AC_CONFIG_FILES([Makefile
                  changeresolution/Makefile

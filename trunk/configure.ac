@@ -10,12 +10,16 @@ AC_CANONICAL_SYSTEM
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
 # Checks for commandline options
+AC_ARG_ENABLE([debug],
+ [AS_HELP_STRING([--enable-debug], [enables debug mode @<:@default: no@:>@])],
+ [enable_debug=no], [enable_debug=yes])
+
 AC_ARG_ENABLE([listener],
  [AS_HELP_STRING([--disable-listener], [disable listener support @<:@default: no@:>@])],
  [disable_listener=yes], [disable_listener=no])
 
 AC_ARG_WITH([dbus],
- [AS_HELP_STRING([--without-dbus], [disable dbus support])],
+ [AS_HELP_STRING([--without-dbus], [disable dbus support. This will enable the socket version.])],
  [without_dbus=yes], [without_dbus=no])
 
 # Generic options
