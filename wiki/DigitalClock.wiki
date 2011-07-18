@@ -1,0 +1,14 @@
+#summary One-sentence summary of this page.
+
+= Introduction =
+
+The digital clock is a panel applet that shows the current time in hours:minute format. 
+
+= Screenshot =
+
+
+= TODO's =
+
+   * Add day/month/year
+   * Add calendar
+   * Add support to use images as horizontal and vertical bars. Now the bars are drawn using cairo.
