@@ -8,8 +8,6 @@
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
  *
- * \todo replace gm_load_conf with gm_get_programs_from_gappman
- * \todo add support for portrait orientation. To reproduce problem run tests/rungappman.sh 100 500
  */
 
 #include <gtk/gtk.h>
@@ -458,6 +456,7 @@ int main(int argc, char **argv)
 				("Could not retrieve gappman configuration file\n",
 				 (void *)mainwin, (void *)gtk_main_quit);
 		}
+    \\\< \todo replace gm_load_conf with gm_get_programs_from_gappman
 		else if (gm_load_conf(gappman_confpath) != 0)
 		{
 			gm_show_error_dialog("Could not load gappman configuration file\n",

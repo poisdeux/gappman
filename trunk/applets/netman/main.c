@@ -9,10 +9,6 @@
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
  *
- * \todo Implement support for network unavailability when no network-interfaces have been configured.
- * \todo Implement support for keybindings which should trigger the menu to pop-up.
- * \todo Add a check to see if status has changed to prevent button from being updated every loop.
- * \todo add support for portrait orientation. To reproduce problem run tests/rungappman.sh 100 500
  */
 #include <gtk/gtk.h>
 #include <gmodule.h>
@@ -156,6 +152,8 @@ static void perform_action(GtkWidget * widget, GdkEvent * event,
 
 static void update_button()
 {
+  ///< \todo Add a check to see if status has changed to prevent button from being updated every loop.
+
 	nm_elements *elts;
 
 	elts = nm_get_stati();

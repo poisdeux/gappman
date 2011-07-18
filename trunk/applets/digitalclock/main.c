@@ -8,13 +8,6 @@
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
  *
- * \todo see if drawing of digits can be done only once a minute, instead of each second.
- * 			 depending on the digits drawn it takes 1000 to 2000 microseconds.
- * \todo add day/month/year
- * \todo add calendar
- * \todo Add support to use images as horizontal and vertical bars
- * \todo Struct sizes now has both w_width, w_height and digit_width, digit_height. We can replace w_widht and w_height with the digit versions.
- * \todo We now use seperate drawing area's for hours, minutes, and the colon. Should we use regions for this?
  */
 
 #include <gtk/gtk.h>

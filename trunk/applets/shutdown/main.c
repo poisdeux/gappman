@@ -8,8 +8,6 @@
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
  *
- * \todo check if startprogram can be replaced by a generic startprograms in a lib. BTW: Appmanager also uses a startprogram function.
- * \todo add support for portrait orientation. To reproduce problem run tests/rungappman.sh 100 500
  */
 
 #include <gtk/gtk.h>
@@ -41,6 +39,7 @@ static void usage()
 
 }
 
+///< \todo check if startprogram can be replaced by a generic startprograms in a lib. BTW: Appmanager also uses a startprogram function.
 static gboolean startprogram(GtkWidget * widget, struct menu_element *elt)
 {
 	char **args;
