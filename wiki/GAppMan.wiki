@@ -1,4 +1,5 @@
 #summary The main program
+#sidebar TableOfContents
 
 = Introduction =
 
@@ -108,4 +109,3 @@ The screenshot above was created using the following configuration file for GApp
    * Make it possible to start gappman as init proces. 
       * This probably requires gappman to start and monitor services as init does. Mimick systemd or upstart.
       * Add monitoring facilities for daemons. This might be implemented using an applet with no button.
-
