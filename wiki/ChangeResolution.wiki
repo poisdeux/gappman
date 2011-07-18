@@ -11,3 +11,7 @@ The ChangeResolution applet allows you to change the screen resolution using the
 <a href="http://www.flickr.com/photos/53529347@N05/4948902602/" title="changeresolution-main by pietsiroop, on Flickr"><img src="http://farm5.static.flickr.com/4142/4948902602_0b42b8508e.jpg" width="194" height="286" alt="changeresolution-main" /></a>
 
 <a href="http://www.flickr.com/photos/53529347@N05/4948313199/" title="gappman-setdefaultformythtv by pietsiroop, on Flickr"><img src="http://farm5.static.flickr.com/4129/4948313199_ae0c7ddd42.jpg" width="228" height="496" alt="gappman-setdefaultformythtv" /></a>
+
+= TODO's =
+
+   * Add support for portrait orientation. To reproduce problem run tests/rungappman.sh 100 500

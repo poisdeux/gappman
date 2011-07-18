@@ -14,3 +14,8 @@ information from the kernel. It provides the user a summary of the applications 
 = Configuration =
 
 ProcessManager requires the same configuration file gappman uses to retrieve the logo images used by gappman for the buttons to start the applications.
+
+= TODO's =
+
+   * Add support for portrait orientation. To reproduce problem run tests/rungappman.sh 100 500
+
