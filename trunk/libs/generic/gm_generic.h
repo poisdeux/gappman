@@ -40,5 +40,6 @@
 #define GM_COULD_NOT_LOAD_FILE 8	///< Could not open or read a file
 #define GM_NET_COMM_NOT_SUPPORTED 9	///< No support for
 									// network-communications
+#define GM_COULD_NOT_RECEIVE_MESSAGE 10 ///< returned by gm_connect lib when receiving message failed
 
 #endif
