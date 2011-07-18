@@ -1,5 +1,6 @@
 #summary The main program
-#sidebar GAppMan
+
+<wiki:toc max_depth="1" />
 
 = Introduction =
 
