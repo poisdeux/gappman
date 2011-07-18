@@ -80,4 +80,15 @@ int gm_socket_send_and_receive_message(int portno, const char *hostname,
 									   gchar * msg,
 									   void (*callbackfunc) (gchar *));
 
-#endif
+#if defined(DEBUG)
+/**
+* \brief Connects to gappman and requests gappman's main window height and width
+* \param portno portnumber gappman listens to.
+* \param width width of the window in pixels
+* \param height height of the window in pixels
+* \return integer value (GM_*) as defined in libs/generic/gm_generic.h
+*/
+int gm_socket_get_window_geometry_from_gappman(int portno, int *width, int *height);
+#endif // DEBUG
+
+#endif // __GAPPMAN_CONNECT_H__

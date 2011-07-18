@@ -76,21 +76,16 @@ int gm_get_confpath_from_gappman(int portno, const char *hostname,
 	return GM_NET_COMM_NOT_SUPPORTED;
 #elif defined(WITH_DBUS_SUPPORT)
 	return gm_dbus_get_confpath_from_gappman(path);
-#elif defined(WITH_DBUS_SUPPORT)
-	return gm_dbus_get_confpath_from_gappman(path);
 #else
 	return gm_socket_get_confpath_from_gappman(portno, hostname, path);
 #endif
 }
-
 
 int gm_get_fontsize_from_gappman(int portno, const char *hostname,
 								 int *fontsize)
 {
 #ifdef NO_LISTENER
 	return GM_NET_COMM_NOT_SUPPORTED;
-#elif defined(WITH_DBUS_SUPPORT)
-	return gm_dbus_get_fontsize_from_gappman(fontsize);
 #elif defined(WITH_DBUS_SUPPORT)
 	return gm_dbus_get_fontsize_from_gappman(fontsize);
 #else
@@ -123,3 +118,18 @@ int gm_set_default_resolution_for_program(int portno, const char *hostname,
 														width, height);
 #endif
 }
+
+#if defined(DEBUG)
+int gm_get_window_geometry_from_gappman(int portno, int *width, int *height)
+{
+#ifdef NO_LISTENER
+	return GM_NET_COMM_NOT_SUPPORTED;
+#elif defined(WITH_DBUS_SUPPORT)
+	return gm_dbus_get_window_geometry_from_gappman(fontsize);
+#else
+	return gm_socket_get_window_geometry_from_gappman(portno, hostname, fontsize);
+#endif
+}
+#endif
+
+

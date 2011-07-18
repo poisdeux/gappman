@@ -29,45 +29,58 @@
 #include "gm_connect-generic.h"
 #include "gm_connect-socket.h"
 
-/**
-* \brief retrieve the actual configuration path from the message
-* \param msg the message received from the application manager
-* \return fontpath
-*/
-static gchar *parse_confpath_message(gchar * msg)
+static gchar *parse_message(gchar * msg, gchar *keyword)
 {
-	gchar **contentssplit = NULL;
-	int i = 0;
-	contentssplit = g_strsplit(msg, "::", 0);
-	while (contentssplit[i] != NULL)
-	{
-		if (g_strcmp0("confpath", contentssplit[i]) == 0)
-		{
-			return contentssplit[i + 1];
-		}
-		i++;
-	}
+  gchar **contentssplit = NULL;
+  int i = 0;
+  contentssplit = g_strsplit(msg, "::", 0);
+  while (contentssplit[i] != NULL)
+  {
+    if (g_strcmp0(keyword, contentssplit[i]) == 0)
+    {
+      return contentssplit[i + 1];
+    }
+    i++;
+  }
 }
 
-/**
-* \brief retrieve the actual fontsize from the message
-* \param msg the message received from the application manager
-* \return fontsize
-*/
-static int parse_fontsize_message(gchar * msg)
+static int send_and_receive_message(GIOChannel *gio, gchar **rcv_msg, gchar *send_msg)
 {
-	gchar **contentssplit = NULL;
-	int i = 0;
-	contentssplit = g_strsplit(msg, "::", 0);
+  gsize len;
+	gchar *msg = NULL;
+	int status;
+	gsize bytes_written;
+	GError *gerror = NULL;
 
-	while (contentssplit[i] != NULL)
+	status =
+		g_io_channel_write_chars(gio, (const gchar *)send_msg, -1, &bytes_written,
+								 &gerror);
+	if (status == G_IO_STATUS_ERROR)
 	{
-		if (g_strcmp0("fontsize", contentssplit[i]) == 0)
-		{
-			return atoi(contentssplit[i + 1]);
-		}
-		i++;
+		g_warning("gm_socket: %s\n",
+				  gerror->message);
+		return GM_COULD_NOT_SEND_MESSAGE;
 	}
+
+	status = g_io_channel_flush(gio, &gerror);
+	if (status == G_IO_STATUS_ERROR)
+	{
+		g_warning("gm_socket: %s\n",
+				  gerror->message);
+	}
+
+	status = g_io_channel_read_line(gio, &msg, NULL, NULL, &gerror);
+	if (status == G_IO_STATUS_ERROR)
+	{
+		g_warning("gm_socket: %s\n",
+          gerror->message);
+		rcv_msg = NULL;
+		return GM_COULD_NOT_RECEIVE_MESSAGE;
+	}
+
+	*rcv_msg = msg;
+	
+	return GM_SUCCES;
 }
 
 /**
@@ -125,9 +138,6 @@ static void parseProceslistMessage(struct proceslist **procs, gchar * msg)
 
 int gm_socket_connect_to_gappman(int portno, const char *hostname, int *sockfd)
 {
-#ifdef NO_LISTENER
-	return GM_NET_COMM_NOT_SUPPORTED;
-#else
 	struct sockaddr_in serv_addr;
 	struct hostent *server;
 
@@ -157,15 +167,11 @@ int gm_socket_connect_to_gappman(int portno, const char *hostname, int *sockfd)
 	}
 
 	return GM_SUCCES;
-#endif
 }
 
 int gm_socket_get_started_procs_from_gappman(int portno, const char *hostname,
 											 struct proceslist **startedprocs)
 {
-#ifdef NO_LISTENER
-	return GM_NET_COMM_NOT_SUPPORTED;
-#else
 	gsize len;
 	gchar *msg;
 	int status;
@@ -205,54 +211,27 @@ int gm_socket_get_started_procs_from_gappman(int portno, const char *hostname,
 	}
 
 	return GM_SUCCES;
-#endif
 }
 
 int gm_socket_get_confpath_from_gappman(int portno, const char *hostname,
 										gchar ** path)
 {
-#ifdef NO_LISTENER
-	return GM_NET_COMM_NOT_SUPPORTED;
-#else
-	gsize len;
-	gchar *msg;
 	int status;
-	gsize bytes_written;
-	GIOChannel *gio = NULL;
 	GError *gerror = NULL;
-
-
+  gchar *recv_msg;
+	GIOChannel *gio = NULL;
+	
 	status = create_gio_channel(portno, hostname, &gio);
 	if (status != GM_SUCCES)
 		return status;
-	msg = g_strdup("::showconfpath::\n");
-	status =
-		g_io_channel_write_chars(gio, (const gchar *)msg, -1, &bytes_written,
-								 &gerror);
-	if (status == G_IO_STATUS_ERROR)
+
+	status = send_and_receive_message(gio, &recv_msg, "::showconfpath::\n");
+	if( status != GM_SUCCES )
 	{
-		g_warning("gm_socket_get_confpath_from_gappman: %s\n",
-				  gerror->message);
-		return GM_COULD_NOT_SEND_MESSAGE;
+		return status;
 	}
 
-	msg = g_strdup("::showconfpath::\n");
-	status = g_io_channel_flush(gio, &gerror);
-	if (status == G_IO_STATUS_ERROR)
-	{
-		g_warning("gm_socket_get_confpath_from_gappman: %s\n",
-				  gerror->message);
-	}
-
-	g_free(msg);
-
-	while (g_io_channel_read_line(gio, &msg, &len, NULL, &gerror) !=
-		   G_IO_STATUS_EOF)
-	{
-		*path = parse_confpath_message(msg);
-	}
-
-	g_free(msg);
+	*path = parse_message(recv_msg, "confpath");
 
 	status = g_io_channel_shutdown(gio, TRUE, &gerror);
 	if (status == G_IO_STATUS_ERROR)
@@ -262,54 +241,29 @@ int gm_socket_get_confpath_from_gappman(int portno, const char *hostname,
 		return GM_COULD_NOT_DISCONNECT;
 	}
 
-
 	return GM_SUCCES;
-#endif
 }
 
 
 int gm_socket_get_fontsize_from_gappman(int portno, const char *hostname,
 										int *fontsize)
 {
-#ifdef NO_LISTENER
-	return GM_NET_COMM_NOT_SUPPORTED;
-#else
-	gsize len;
-	gchar *msg;
 	int status;
-	gsize bytes_written;
-	GIOChannel *gio = NULL;
 	GError *gerror = NULL;
+  gchar *recv_msg;
+	GIOChannel *gio = NULL;
 
 	status = create_gio_channel(portno, hostname, &gio);
 	if (status != GM_SUCCES)
 		return status;
-	msg = g_strdup("::showfontsize::\n");
-	status =
-		g_io_channel_write_chars(gio, (const gchar *)msg, -1, &bytes_written,
-								 &gerror);
-	if (status == G_IO_STATUS_ERROR)
+
+	status = send_and_receive_message(gio, &recv_msg, "::showfontsize::\n");
+	if( status != GM_SUCCES )
 	{
-		g_warning("gm_socket_get_fontsize_from_gappman: %s\n",
-				  gerror->message);
-		return GM_COULD_NOT_SEND_MESSAGE;
+		return status;
 	}
 
-	status = g_io_channel_flush(gio, &gerror);
-	if (status == G_IO_STATUS_ERROR)
-	{
-		g_warning("gm_socket_get_fontsize_from_gappman: %s\n",
-				  gerror->message);
-	}
-
-	g_free(msg);
-
-	while (g_io_channel_read_line(gio, &msg, &len, NULL, &gerror) !=
-		   G_IO_STATUS_EOF)
-	{
-		*fontsize = parse_fontsize_message(msg);
-	}
-
+	*fontsize = atoi(parse_message(recv_msg, "fontsize"));
 
 	status = g_io_channel_shutdown(gio, TRUE, &gerror);
 	if (status == G_IO_STATUS_ERROR)
@@ -321,16 +275,12 @@ int gm_socket_get_fontsize_from_gappman(int portno, const char *hostname,
 
 
 	return GM_SUCCES;
-#endif
 }
 
 int gm_socket_send_and_receive_message(int portno, const char *hostname,
 									   gchar * msg,
 									   void (*callbackfunc) (gchar *))
 {
-#ifdef NO_LISTENER
-	return GM_NET_COMM_NOT_SUPPORTED;
-#else
 	gsize len;
 	int status;
 	gsize bytes_written;
@@ -374,7 +324,6 @@ int gm_socket_send_and_receive_message(int portno, const char *hostname,
 	}
 
 	return GM_SUCCES;
-#endif
 }
 
 int gm_socket_set_default_resolution_for_program(int portno,
@@ -421,3 +370,39 @@ int gm_socket_set_default_resolution_for_program(int portno,
 
 	return GM_SUCCES;
 }
+
+#if defined(DEBUG)
+int gm_socket_get_window_geometry_from_gappman(int portno, int *width, int *height)
+{
+	int status;
+	GError *gerror = NULL;
+  gchar *recv_msg;
+  gchar *geom_msg;
+	GIOChannel *gio = NULL;
+
+	status = create_gio_channel(portno, hostname, &gio);
+	if (status != GM_SUCCES)
+		return status;
+
+	status = send_and_receive_message(gio, &recv_msg, "::showwindowgeometry::\n");
+	if( status != GM_SUCCES )
+	{
+		return status;
+	}
+
+	geom_msg = parse_message(recv_msg, "windowgeometry");
+
+	g_debug("geom_msg: %s", geom_msg);
+
+	status = g_io_channel_shutdown(gio, TRUE, &gerror);
+	if (status == G_IO_STATUS_ERROR)
+	{
+		g_warning("gm_socket_get_fontsize_from_gappman: %s\n",
+				  gerror->message);
+		return GM_COULD_NOT_DISCONNECT;
+	}
+
+	return GM_SUCCES;
+}
+#endif
+

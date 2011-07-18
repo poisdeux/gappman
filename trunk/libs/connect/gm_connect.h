@@ -111,4 +111,16 @@ int gm_set_default_resolution_for_program(int portno, const char *hostname,
 										  const gchar * name, int width,
 										  int height);
 
-#endif
+#if defined(DEBUG)
+/**
+* \brief Connects to gappman and requests gappman's main window height and width
+* \param portno portnumber gappman listens to. Note, this is actually not used when calling this function using the dbus version.
+* \param width width of the window in pixels
+* \param height height of the window in pixels
+* \return integer value (GM_*) as defined in libs/generic/gm_generic.h
+*/
+int gm_get_window_geometry_from_gappman(int portno, int *width, int *height);
+#endif // DEBUG
+
+
+#endif // __GAPPMAN_CONNECT_H__
