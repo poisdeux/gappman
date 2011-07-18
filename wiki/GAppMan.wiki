@@ -13,8 +13,8 @@ about the UI layout and started applications.
 
 = Screenshot =
 
-<a href="http://www.flickr.com/photos/53529347@N05/5949470585/" title="Screenshot-lt-gappman by pietsiroop, on Flickr"><img src="http://farm7.static.flickr.com/6137/5949470585_3a96afd7d2.jpg" width="500" height="375" alt="Screenshot-lt-gappman"></a>
-
+<a href="http://www.flickr.com/photos/53529347@N05/5949470585/" title="Screenshot-lt-gappman by pietsiroop, on Flickr"><img src="http://farm7.static.flickr.com/6137/5949470585_3a96afd7d2.jpg" width="500" height="375" alt="Screenshot-lt-gappman" /></a>
+ 
 = Configuration =
 
 The screenshot above was created using the following configuration file for GAppMan.
