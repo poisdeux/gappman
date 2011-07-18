@@ -20,24 +20,4 @@
  * - Fully configurable using XML configuration files.
  * - Image caching for fast loading of scaled images.
  * 
- * Wishlist 
- * - Major features for release 1.0
- *  - Redraw layout when screen resolution changes for gappman. Probably more efficient to not change layout when resolutio changes on behalf of a started program.
- *  - Applets
- *   - Weather applet.
- *   - News applet.
- *   - System health applet.
- *  - Dynamic font recalculation when menu gets too big. Now fontsize is calculated based on programs buttonbox. This fontsize might be too big for instance for changeresolution applet to show for all possible screen resolutions.
- *  - Add support for scrollbars when menu is too big for layout.
- *  - Implement support for keybindings. For instance to start specific applets.
- *  - Startup indication. When program is started button should show program is starting up.
- *  - Unit-testing with http://klee.llvm.org/
- * - Minor features
- *  - Be able to popup main menu when other apps have focus. This should probably be solved in the window manager used and not solved by gappman.
- *  - Applet changeresolution
- *   - show current resolution
- *   - add button to keep selected resolution
- *  - Applet netman
- *   - Implement support for network unavailability when no network-interfaces have been configured.
- *   - Implement support for keybindings which should trigger the menu to pop-up.
  */
