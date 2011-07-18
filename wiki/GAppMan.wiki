@@ -1,5 +1,4 @@
 #summary The main program
-#sidebar TableOfContents
 
 = Introduction =
 
