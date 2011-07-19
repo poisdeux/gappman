@@ -39,10 +39,7 @@
 								// gappman uses
 #define SEND_WINDOWGEOMETRY 5 ///< message id used to specify we received a request to sent the window geometry
 
-static GIOChannel *gio;
-static const gchar *confpath = "";
-static const gchar *rcpath = "";
-
+static GIOChannel *mygio;
 
 /**
 * \brief parses a received message for keywords
@@ -67,6 +64,9 @@ static int parsemessage(gchar * msg)
 	int msg_id;
 	gchar **contentssplit = NULL;
 
+#if defined(DEBUG)
+g_debug("received message %s", msg);
+#endif
 
 	contentssplit = g_strsplit(msg, "::", 0);
 
@@ -90,6 +90,7 @@ static int parsemessage(gchar * msg)
 	{
 		msg_id = SEND_WINDOWGEOMETRY;
 	}
+	g_strfreev(contentssplit);
 	return msg_id;
 }
 
@@ -97,6 +98,10 @@ static void writemsg(GIOChannel * gio, gchar * msg)
 {
 	GIOError gerror = G_IO_ERROR_NONE;
 	gsize bytes_written;
+
+#if defined(DEBUG)
+g_debug("sending message %s", msg);
+#endif
 
 	gerror = g_io_channel_write(gio, msg, strlen(msg), &bytes_written);
 	if (gerror != G_IO_ERROR_NONE)
@@ -229,9 +234,13 @@ static gboolean handleconnection(GIOChannel * gio, GIOCondition cond,
 			case SEND_WINDOWGEOMETRY:
 				g_free(msg);
 				appmanager_config = appmanager_get_metadata();
-				msg = (gchar *) malloc(40 * sizeof(gchar));
-				g_sprintf(msg, "windowgeometry::%sx%s", confpath, appmanager_config->window_width, appmanager_config->window_height);
-				writemsg(new_gio, msg);
+				msg = (gchar *) malloc(30 * sizeof(gchar));
+				g_debug("test 3");
+				if(msg != NULL)
+				{
+					g_snprintf(msg, 30, "windowgeometry::%dx%d", appmanager_config->window_width, appmanager_config->window_height);
+					writemsg(new_gio, msg);
+				}
 				break;;
 			}
 			g_free(msg);
@@ -294,10 +303,10 @@ gboolean listener_socket_open(GtkWidget * win)
 
 		if (listener_started == TRUE)
 		{
-			gio = g_io_channel_unix_new(sock);
+			mygio = g_io_channel_unix_new(sock);
 
 			if (!g_io_add_watch
-				(gio, G_IO_IN, handleconnection, (gpointer) & sock))
+				(mygio, G_IO_IN, handleconnection, (gpointer) & sock))
 			{
 				g_warning("Cannot add watch on GIOChannel!\n");
 				listener_started = FALSE;
@@ -329,7 +338,7 @@ gboolean listener_socket_close(GIOChannel * close_gio)
 	GError *gerror = NULL;
 	if (close_gio == NULL)
 	{
-		close_gio = gio;
+		close_gio = mygio;
 	}
 	if (close_gio == NULL)
 	{
@@ -344,9 +353,4 @@ gboolean listener_socket_close(GIOChannel * close_gio)
 	}
 
 	return TRUE;
-}
-
-void listener_socket_set_confpath(const gchar * path)
-{
-	confpath = path;
 }

@@ -27,9 +27,3 @@ gboolean listener_socket_open(GtkWidget * win);
 * \return TRUE if closing the channel succeeded. False otherwise.
 */
 gboolean listener_socket_close(GIOChannel * close_gio);
-
-/**
-* \brief sets the configuration file location so it can be send to clients asking for it.
-* \param *path string containing the absolute path to the configuration file for gappman.
-*/
-void listener_socket_set_confpath(const gchar * path);

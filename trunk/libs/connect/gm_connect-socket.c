@@ -42,6 +42,7 @@ static gchar *parse_message(gchar * msg, gchar *keyword)
     }
     i++;
   }
+	return NULL;
 }
 
 static int send_and_receive_message(GIOChannel *gio, gchar **rcv_msg, gchar *send_msg)
@@ -51,6 +52,10 @@ static int send_and_receive_message(GIOChannel *gio, gchar **rcv_msg, gchar *sen
 	int status;
 	gsize bytes_written;
 	GError *gerror = NULL;
+
+#if defined(DEBUG)
+g_debug("sending message %s", send_msg);
+#endif
 
 	status =
 		g_io_channel_write_chars(gio, (const gchar *)send_msg, -1, &bytes_written,
@@ -77,6 +82,9 @@ static int send_and_receive_message(GIOChannel *gio, gchar **rcv_msg, gchar *sen
 		rcv_msg = NULL;
 		return GM_COULD_NOT_RECEIVE_MESSAGE;
 	}
+#if defined(DEBUG)
+g_debug("received message %s", msg);
+#endif
 
 	*rcv_msg = msg;
 	
@@ -372,12 +380,14 @@ int gm_socket_set_default_resolution_for_program(int portno,
 }
 
 #if defined(DEBUG)
-int gm_socket_get_window_geometry_from_gappman(int portno, int *width, int *height)
+int gm_socket_get_window_geometry_from_gappman(int portno, const char *hostname, int *width, int *height)
 {
 	int status;
+  int i;
 	GError *gerror = NULL;
   gchar *recv_msg;
-  gchar *geom_msg;
+  gchar *geom_msg = NULL;
+  gchar **contentssplit = NULL;
 	GIOChannel *gio = NULL;
 
 	status = create_gio_channel(portno, hostname, &gio);
@@ -392,8 +402,27 @@ int gm_socket_get_window_geometry_from_gappman(int portno, int *width, int *heig
 
 	geom_msg = parse_message(recv_msg, "windowgeometry");
 
-	g_debug("geom_msg: %s", geom_msg);
-
+	if(geom_msg != NULL)
+	{
+		g_debug("geom_msg: %s", geom_msg);
+  	contentssplit = g_strsplit(geom_msg, "x", 2);
+		if((contentssplit[0] != NULL) && (contentssplit[1] != NULL))
+		{
+  		*width = atoi(contentssplit[0]);
+  		*height = atoi(contentssplit[1]);
+		}
+		else
+		{
+			*width = -1;
+			*height = -1;
+		}
+	}
+	else
+	{
+		*width = -1;
+		*height = -1;
+	}
+	
 	status = g_io_channel_shutdown(gio, TRUE, &gerror);
 	if (status == G_IO_STATUS_ERROR)
 	{

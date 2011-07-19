@@ -108,9 +108,4 @@ static gboolean update_resolution(GmAppmanager * obj, gchar * name, gint width,
  */
 gboolean listener_dbus_start_session();
 
-/**
- * \brief sets the location of gappman's config file which some clients need
- * \param path the absolute path to the configuration file for gappman
- */
-void listener_dbus_set_confpath(const gchar * path);
 #endif /* __LISTENER_DBUS_H__ */

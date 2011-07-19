@@ -119,7 +119,7 @@ int gm_set_default_resolution_for_program(int portno, const char *hostname,
 * \param height height of the window in pixels
 * \return integer value (GM_*) as defined in libs/generic/gm_generic.h
 */
-int gm_get_window_geometry_from_gappman(int portno, int *width, int *height);
+int gm_get_window_geometry_from_gappman(int portno, const char* hostname, int *width, int *height);
 #endif // DEBUG
 
 

@@ -18,8 +18,8 @@ AC_ARG_ENABLE([listener],
  [AS_HELP_STRING([--disable-listener], [disable listener support @<:@default: no@:>@])],
  [disable_listener=yes], [disable_listener=no])
 
-AC_ARG_WITH([dbus],
- [AS_HELP_STRING([--without-dbus], [disable dbus support. This will enable the socket version.])],
+AC_ARG_ENABLE([dbus],
+ [AS_HELP_STRING([--disable-dbus], [disable dbus support. This will enable the socket version.])],
  [without_dbus=yes], [without_dbus=no])
 
 # Generic options

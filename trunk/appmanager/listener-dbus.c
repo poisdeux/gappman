@@ -139,8 +139,3 @@ gboolean listener_dbus_start_session()
 
 	return TRUE;
 }
-
-void listener_dbus_set_confpath(const gchar * path)
-{
-	confpath = path;
-}

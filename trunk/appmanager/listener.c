@@ -36,13 +36,4 @@ gboolean gappman_close_listener()
 	return listener_socket_close(NULL);
 #endif // WITH_DBUS_SUPPORT
 }
-
-void gappman_set_confpath(const gchar * path)
-{
-#if defined(WITH_DBUS_SUPPORT)
-	listener_dbus_set_confpath(path);
-#else
-	listener_socket_set_confpath(path);
-#endif // WITH_DBUS_SUPPORT
-}
 #endif // NO_LISTENER

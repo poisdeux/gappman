@@ -120,14 +120,14 @@ int gm_set_default_resolution_for_program(int portno, const char *hostname,
 }
 
 #if defined(DEBUG)
-int gm_get_window_geometry_from_gappman(int portno, int *width, int *height)
+int gm_get_window_geometry_from_gappman(int portno, const char *hostname, int *width, int *height)
 {
 #ifdef NO_LISTENER
 	return GM_NET_COMM_NOT_SUPPORTED;
 #elif defined(WITH_DBUS_SUPPORT)
-	return gm_dbus_get_window_geometry_from_gappman(fontsize);
+	return gm_dbus_get_window_geometry_from_gappman(width, height);
 #else
-	return gm_socket_get_window_geometry_from_gappman(portno, hostname, fontsize);
+	return gm_socket_get_window_geometry_from_gappman(portno, hostname, width, height);
 #endif
 }
 #endif

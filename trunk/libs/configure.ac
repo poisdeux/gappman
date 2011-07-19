@@ -14,12 +14,16 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_USE_SYSTEM_EXTENSIONS
 
 # Checks for commandline options
+AC_ARG_ENABLE([debug],
+ [AS_HELP_STRING([--enable-debug], [enables debug mode @<:@default: no@:>@])],
+ [enable_debug=yes], [enable_debug=no])
+
 AC_ARG_ENABLE([listener],
  [AS_HELP_STRING([--disable-listener], [disable listener support @<:@default: no@:>@])],
  [disable_listener=yes], [disable_listener=no])
 
-AC_ARG_WITH([dbus],
- [AS_HELP_STRING([--without-dbus], [disable dbus support])],
+AC_ARG_ENABLE([dbus],
+ [AS_HELP_STRING([--disable-dbus], [disable dbus support. This will enable the socket version.])],
  [without_dbus=yes], [without_dbus=no])
 
 # Checks for libraries.
@@ -44,19 +48,8 @@ PKG_CHECK_MODULES([XRANDR],[xrandr >= 1.2.3])
 
 # Checks for header files.
 AC_PATH_X
-if test "${disable_listener}" = no; then
-	AC_CHECK_HEADERS([netdb.h netinet/in.h sys/socket.h], [], [disable_listener=yes])
-fi
-
-if test "${disable_listener}" = yes; then
-	AC_MSG_WARN([
-------------------------------------------
-Building gappman-libs without listener support.
-Some applets may not work correctly. 
-------------------------------------------
-])
-AC_DEFINE([NO_LISTENER], 1, [listener support disabled])
-fi
+AS_IF([test "x${disable_listener}" == "xno"],
+	AC_CHECK_HEADERS([netdb.h netinet/in.h sys/socket.h], [], [disable_listener=yes]))
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T
@@ -67,6 +60,24 @@ AC_FUNC_FORK
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_CHECK_FUNCS([gethostbyname localtime_r memset pow socket sqrt strndup strspn strstr])
+
+AS_IF([test "x${disable_listener}" == "xyes"],
+	AC_MSG_WARN([
+------------------------------------------
+Building gappman-libs without listener support.
+Some applets may not work correctly. 
+------------------------------------------
+])
+AC_DEFINE([NO_LISTENER], [1], [listener support disabled]))
+
+AS_IF([test "x${enable_debug}" == "xyes"],
+  AC_MSG_WARN([
+------------------------------------------
+Building debug version.
+This adds additional code.
+------------------------------------------
+])
+AC_DEFINE([DEBUG], [1], [debug code enabled]))
 
 AC_CONFIG_FILES([Makefile
                  connect/Makefile
@@ -91,6 +102,8 @@ XRANDR Includes: ${XRANDR_CFLAGS}
 
 Package features:
   listener disabled: ${disable_listener}
+  dbus support disabled: ${without_dbus}
+  debugging code enabled: ${enable_debug}
 
 Now type 'make @<:@<target>@:>@'
   where the optional <target> can be:

@@ -64,7 +64,7 @@ static int get_status(int PID)
 	gchar *status = NULL;
 	int ret_status = -1;
 
-	(void)g_sprintf(proc_string, "/proc/%d/stat", PID);
+	g_sprintf(proc_string, "/proc/%d/stat", PID);
 	if (!g_file_get_contents(proc_string, &contents, &length, &gerror))
 	{
 		// Proces is gone. Woohoo!
@@ -108,6 +108,7 @@ static int get_status(int PID)
 		}
 		g_free(contents);
 		g_strfreev(contentssplit);
+		g_free(status);
 	}
 	free(proc_string);
 	return ret_status;
@@ -201,32 +202,21 @@ static void showprocessdialog(struct menu_element * elt)
 	gtk_window_set_position(GTK_WINDOW(killdialogwin),
 							GTK_WIN_POS_CENTER_ON_PARENT);
 
-	// Make window transparent
-	// gtk_window_set_opacity (GTK_WINDOW (killdialogwin), 0.8);
-
 	// Remove border
 	gtk_window_set_decorated(GTK_WINDOW(killdialogwin), FALSE);
 
 	buttonbox = gtk_hbutton_box_new();
 
-	label = gtk_label_new("");
-	markup =
-		g_markup_printf_escaped("<span size=\"%d\">%s</span>", fontsize,
-								g_strdup_printf("Stop %s", elt->name));
-	gtk_label_set_markup(GTK_LABEL(label), markup);
-	g_free(markup);
-	button = gm_create_empty_button((void *)kill_program, elt);
-	gtk_container_add(GTK_CONTAINER(button), label);
-	gtk_widget_show(label);
+	button = gm_create_label_button(g_strdup_printf("Stop %s", elt->name), (void *)kill_program, elt);
 	gtk_container_add(GTK_CONTAINER(buttonbox), button);
 	gtk_widget_show(button);
+
 	// Needed so we can destroy the dialog when kill was succesful
 	g_object_set_data((GObject *) button, "window", killdialogwin);
 
 	button =
 		gm_create_label_button("Cancel", (void *)gm_destroy_widget,
 							   killdialogwin);
-	gtk_widget_show(label);
 	gtk_container_add(GTK_CONTAINER(buttonbox), button);
 	gtk_widget_show(button);
 
@@ -336,6 +326,13 @@ int main(int argc, char **argv)
 	screen = gdk_screen_get_default();
 	dialog_width = gdk_screen_get_width(screen) / 3;
 	dialog_height = gdk_screen_get_height(screen) / 3;
+
+#if defined(DEBUG)
+  gm_get_window_geometry_from_gappman(2103, "localhost", &dialog_width, &dialog_height);
+	dialog_width = dialog_width/3;
+	dialog_height = dialog_height/3;
+  //gm_set_window_geometry(dialog_width, dialog_height);
+#endif
 
 	programs = NULL;
 	actions = NULL;

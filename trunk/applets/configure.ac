@@ -47,15 +47,14 @@ AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_CHECK_FUNCS([gethostbyname localtime_r memset pow socket sqrt strndup strspn strstr])
 
-if test "${enable_debug}" = yes; then
+AS_IF([test "x${enable_debug}" = "xyes"],
   AC_MSG_WARN([
 ------------------------------------------
 Building debug version.
 This adds additional code.
 ------------------------------------------
 ])
-AC_DEFINE([DEBUG], 1, [debug code enabled])
-fi
+AC_DEFINE([DEBUG], 1, [debug code enabled]))
 
 AC_CONFIG_FILES([Makefile
                  changeresolution/Makefile
@@ -79,6 +78,9 @@ XML Libraries: ${LIBXML_LIBS}
 XML Includes: ${LIBXML_CFLAGS}
 DBUS Libraries: ${DBUS_LIBS}
 DBUS Includes: ${DBUS_CFLAGS}
+
+Package features:
+  debugging code enabled: ${enable_debug}
 
 Now type 'make @<:@<target>@:>@'
   where the optional <target> can be:

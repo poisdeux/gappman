@@ -207,7 +207,7 @@ int main(int argc, char **argv)
 	vbox = gtk_vbox_new(FALSE, 10);
 
 #if defined(DEBUG)
-  //gm_get_window_geometry(&width, &height);
+  gm_get_window_geometry_from_gappman(2103, "localhost", &width, &height);
   gm_set_window_geometry(width, height);
 #endif
 

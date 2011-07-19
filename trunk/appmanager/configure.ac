@@ -14,12 +14,16 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_USE_SYSTEM_EXTENSIONS
 
 # Checks for commandline options
+AC_ARG_ENABLE([debug],
+ [AS_HELP_STRING([--enable-debug], [enables debug mode @<:@default: no@:>@])],
+ [enable_debug=yes], [enable_debug=no])
+
 AC_ARG_ENABLE([listener],
  [AS_HELP_STRING([--disable-listener], [disable listener support @<:@default: no@:>@])],
  [disable_listener=yes], [disable_listener=no])
 
-AC_ARG_WITH([dbus],
- [AS_HELP_STRING([--without-dbus], [disable dbus support])],
+AC_ARG_ENABLE([dbus],
+ [AS_HELP_STRING([--disable-dbus], [disable dbus support. This will enable the socket version.])],
  [without_dbus=yes], [without_dbus=no])
 
 # Checks for programs.
@@ -52,16 +56,6 @@ if test "${disable_listener}" != yes; then
 	AC_CHECK_HEADERS([netdb.h netinet/in.h sys/socket.h], [], [disable_listener=yes])
 fi
 
-if test "${disable_listener}" = yes; then
-	AC_MSG_WARN([
-------------------------------------------
-Building gappman without listener support.
-Some applets may not work correctly. 
-------------------------------------------
-])
-AC_DEFINE([NO_LISTENER], 1, [listener support disabled])
-fi
-
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T
 AC_C_CONST
@@ -71,6 +65,24 @@ AC_FUNC_FORK
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 #AC_CHECK_FUNCS([gethostbyname localtime_r memset pow socket sqrt strndup strspn strstr])
+
+AS_IF([test "${disable_listener}" = yes],
+	AC_MSG_WARN([
+------------------------------------------
+Building gappman without listener support.
+Some applets may not work correctly. 
+------------------------------------------
+])
+AC_DEFINE([NO_LISTENER], 1, [listener support disabled]))
+
+AS_IF([test "${enable_debug}" = yes],
+  AC_MSG_WARN([
+------------------------------------------
+Building debug version.
+This adds additional code.
+------------------------------------------
+])
+AC_DEFINE([DEBUG], 1, [debug code enabled]))
 
 AC_CONFIG_FILES([Makefile
 								 introspection/Makefile])
@@ -99,6 +111,7 @@ GTHREAD Includes: ${GTHREAD_CFLAGS}
 Package features:
   listener disabled: ${disable_listener}
   dbus support disabled: ${without_dbus}
+  debugging code enabled: ${enable_debug}
 
 Now type 'make @<:@<target>@:>@'
   where the optional <target> can be:
