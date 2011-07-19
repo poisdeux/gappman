@@ -234,15 +234,13 @@ static void changeresolution(GtkWidget * widget, GdkEvent * event,
 
 	gtk_widget_show_all(confirmwin);
 
-	// We add a timer to return to the original resolution
-	// after 10 seconds
-	// g_timeout_add_seconds (10, )
+  ///< \todo Add timer to fallback to previous resolution when user does not respond
 }
 
 static GtkWidget *show_current_resolution(int width)
 {
 	GtkWidget *hbox, *label;
-	gchar *markup;
+	gchar *labeltext;
 	XRRScreenSize  size;
 
 	if ( gm_res_get_current_size(&size) != GM_SUCCES )
@@ -252,13 +250,8 @@ static GtkWidget *show_current_resolution(int width)
 
 	hbox = gtk_hbox_new(FALSE, 10);
 
-	label = gtk_label_new("");
-
-	markup =
-		g_markup_printf_escaped("<span size=\"%d\">Current: %dx%d</span>", fontsize,
-								size.width, size.height);
-	gtk_label_set_markup(GTK_LABEL(label), markup);
-	g_free(markup);
+	labeltext = g_strdup_printf("Current: %dx%d", size.width, size.height);
+	label = gm_create_label(labeltext);
 	gtk_container_add(GTK_CONTAINER(hbox), label);
 	gtk_widget_show(label);
 

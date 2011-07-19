@@ -18,31 +18,36 @@
 									// configuration files
 #endif
 
-#define GM_SUCCES 0				///< no errors detected
-#define GM_FAIL 9				///< used to represent a general error
-#define GM_NO_RANDR_EXTENSION 1	///< Xorg has no support for the XRANDR
-								// extension. This is fatal for
-								// gm_changeresolution
-#define GM_NO_SCREEN_CONFIGURATION 2	///< No screen configuration could be 
-										// retrieved. This is fatal for
-										// gm_changeresolution
-#define GM_SIZE_NOT_AVAILABLE 3	///< No screen sizes found that match a
-								// requested resolution. This should never
-								// happen and is only possible if wrong values 
-								// are passed.
-#define GM_COULD_NOT_RESOLVE_HOSTNAME 4	///< Returned by gm_connect lib when
-										// hostname could not be resolved to
-										// an ip-address
-#define GM_COULD_NOT_CONNECT 5	///< Returned by gm_connect lib when
-								// connection with gappman failed
-#define GM_COULD_NOT_SEND_MESSAGE 6	///< Returned by gm_connect lib when
-									// sending message failed
-#define GM_COULD_NOT_DISCONNECT 7	///< Returned by gm_connect lib could not 
-									// disconnect connection with gappman
-#define GM_COULD_NOT_LOAD_FILE 8	///< Could not open or read a file
-#define GM_NET_COMM_NOT_SUPPORTED 9	///< No support for
-									// network-communications
-#define GM_COULD_NOT_RECEIVE_MESSAGE 10 ///< returned by gm_connect lib when receiving message failed
+/**
+* enumeration for error/return codes
+*/
+enum returncodes {
+GM_SUCCES, ///< no errors detected
+GM_FAIL, ///< used to represent a general error
+GM_NO_RANDR_EXTENSION,	///< Xorg has no support for the XRANDR
+				// extension. This is fatal for
+				// gm_changeresolution
+GM_NO_SCREEN_CONFIGURATION,	///< No screen configuration could be 
+						// retrieved. This is fatal for
+						// gm_changeresolution
+GM_SIZE_NOT_AVAILABLE,	///< No screen sizes found that match a
+				// requested resolution. This should never
+				// happen and is only possible if wrong values 
+				// are passed.
+GM_COULD_NOT_RESOLVE_HOSTNAME,	///< Returned by gm_connect lib when
+						// hostname could not be resolved to
+						// an ip-address
+GM_COULD_NOT_CONNECT,	///< Returned by gm_connect lib when
+				// connection with gappman failed
+GM_COULD_NOT_SEND_MESSAGE,	///< Returned by gm_connect lib when
+					// sending message failed
+GM_COULD_NOT_DISCONNECT,	///< Returned by gm_connect lib could not 
+					// disconnect connection with gappman
+GM_COULD_NOT_LOAD_FILE,	///< Could not open or read a file
+GM_NET_COMM_NOT_SUPPORTED,	///< No support for
+					// network-communications
+GM_COULD_NOT_RECEIVE_MESSAGE ///< returned by gm_connect lib when receiving message failed
+};
 
 /**
 * \brief Function to initialize the module
@@ -94,9 +99,9 @@ struct length
 {
 	enum length_types type;		///< Type of the value, i.e. percentage or
 								// pixels?
-	int value;					///< Actual length value without metric
+	gint value;					///< Actual length value without metric
 								// indicator, e.g. % or px.
-	int pixels; ///< Calculated length in pixels based on type and value
+	gint pixels; ///< Calculated length in pixels based on type and value
 };
 
 
@@ -106,30 +111,30 @@ struct length
 */
 struct menu_element
 {
-	int app_width;				///< screen resolution width that should be
+	gint app_width;				///< screen resolution width that should be
 								// used when the application of this
 								// menu_element is started.
-	int app_height;				///< screen resolution height that should be
+	gint app_height;				///< screen resolution height that should be
 								// used when the application of this
 								// menu_element is started.
 	GtkWidget *widget;			///< widget associated with this
 								// menu_element. Usually a GtkButton.
-	const char *name;		///< holds the name of the program
-	const char *exec;		///< absolute path to executable
-	const char *logo;		///< absolute path to image file
-	const char *module;		///< absolute path to module for panel
-	const char *module_conffile;	///< absolute path to module
+	gchar *name;		///< holds the name of the program
+	gchar *exec;		///< absolute path to executable
+	gchar *logo;		///< absolute path to image file
+	gchar *module;		///< absolute path to module for panel
+	gchar *module_conffile;	///< absolute path to module
 									// configuration file
-	int autostart;				///< a value of 1 will start program at
+	gint autostart;				///< a value of 1 will start program at
 								// startup, 0 will not.
-	int printlabel;				///< If set to 1 the name should be printed
+	gint printlabel;				///< If set to 1 the name should be printed
 								// alongside the button. Otherwise do not
 								// print a textlabel
-	char **args;				///< array of strings containing arguments
+	gchar **args;				///< array of strings containing arguments
 								// that need to be passed to the executable
-	int numArguments;			///< will hold the total amount of elements
+	gint numArguments;			///< will hold the total amount of elements
 								// in the args array
-	int pid;					///< should hold the process ID of the
+	gint pid;					///< should hold the process ID of the
 								// process that was started by this
 								// menu_element
 	GM_MODULE_INIT gm_module_init;	///< pointer to the init function for a

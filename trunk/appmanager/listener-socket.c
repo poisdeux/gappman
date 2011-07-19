@@ -251,6 +251,14 @@ static gboolean handleconnection(GIOChannel * gio, GIOCondition cond,
 	return TRUE;
 }
 
+void restart_listener(GtkWidget *win, GdkEvent *event, gpointer data)
+{
+	if(gm_check_key(event))
+	{
+		listener_socket_open(win);	
+	}
+}
+
 gboolean listener_socket_open(GtkWidget * win)
 {
 	static int sock;
@@ -322,10 +330,9 @@ gboolean listener_socket_open(GtkWidget * win)
 	else
 	{
 		close(sock);
-		g_warning("Could not start listener");
 		gm_show_confirmation_dialog
 			("Could not start listener.\nShould I try again?",
-			 "Restart listener", listener_socket_open, win, "Cancel", NULL,
+			 "Restart listener", restart_listener, win, "Cancel", NULL,
 			 NULL, win);
 		return FALSE;
 	}

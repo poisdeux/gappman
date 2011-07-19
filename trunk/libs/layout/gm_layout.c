@@ -32,7 +32,7 @@ static int screen_height = 600;
 #define MAXCHARSINLABEL 10;		///< amount of characters we take as a
 								// maximum to determine the fontsize.
 
-gboolean check_key(GdkEvent * event)
+gboolean gm_check_key(GdkEvent * event)
 {
 	// Only start program if spacebar or mousebutton is pressed
 	if (((GdkEventKey *) event)->keyval == 32
@@ -44,16 +44,9 @@ gboolean check_key(GdkEvent * event)
 	return FALSE;
 }
 
-static void destroy_widget(GtkWidget * widget, gpointer data)
-{
-	gtk_widget_destroy(widget);
-}
-
 void gm_destroy_widget(GtkWidget * dummy, GdkEvent * event, GtkWidget * widget)
 {
-	// Only start program if spacebar or mousebutton is pressed
-	if (((GdkEventKey *) event)->keyval == 32
-		|| ((GdkEventButton *) event)->button == 1)
+	if ( gm_check_key(event) )
 	{
 		gtk_widget_destroy(widget);
 	}
@@ -62,46 +55,31 @@ void gm_destroy_widget(GtkWidget * dummy, GdkEvent * event, GtkWidget * widget)
 void gm_quit_program(GtkWidget * dummy, GdkEvent * event)
 {
 	// Only start program if spacebar or mousebutton is pressed
-	if (((GdkEventKey *) event)->keyval == 32
-		|| ((GdkEventButton *) event)->button == 1)
+  if( gm_check_key(event) )
 	{
 		gtk_main_quit();
 	}
 }
 
-void gm_show_confirmation_dialog(const gchar * message,
-								 const gchar * msg_button1, void *callback1,
-								 void *data1, const gchar * msg_button2,
+void gm_show_confirmation_dialog(gchar * message,
+								 gchar * msg_button1, void *callback1,
+								 void *data1, gchar * msg_button2,
 								 void *callback2, void *data2,
-								 GtkWidget * mainwin)
+								 GtkWidget * parent_window)
 {
 	GtkWidget *window;
 	GtkWidget *vbox;
 	GtkWidget *hbox;
 	GtkWidget *button;
 	GtkWidget *label;
-	gchar *markup;
 	GdkPixbuf *pixbuf;
 	GtkWidget *stock_image;
 
-	g_warning("%s", message);
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
-	if (mainwin != NULL)
-	{
-		gtk_window_set_transient_for(GTK_WINDOW(window), GTK_WINDOW(mainwin));
-		gtk_window_set_position(GTK_WINDOW(window),
-								GTK_WIN_POS_CENTER_ON_PARENT);
-	}
-	else
-	{
-		gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
-	}
+	gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
 
 	gtk_widget_grab_focus(window);
-
-	// Make window transparent
-	// gtk_window_set_opacity (GTK_WINDOW (window), 0.8);
 
 	// Remove border
 	gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
@@ -117,12 +95,7 @@ void gm_show_confirmation_dialog(const gchar * message,
 	gtk_box_pack_start(GTK_BOX(hbox), stock_image, FALSE, FALSE, 0);
 	gtk_widget_show(stock_image);
 
-	label = gtk_label_new("");
-	markup =
-		g_markup_printf_escaped("<span size=\"%d\">%s</span>", fontsize,
-								message);
-	gtk_label_set_markup(GTK_LABEL(label), markup);
-	g_free(markup);
+	label = gm_create_label(message);
 	gtk_misc_set_padding(GTK_MISC(label), 5, 5);
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 	gtk_widget_show(label);
@@ -131,42 +104,18 @@ void gm_show_confirmation_dialog(const gchar * message,
 	gtk_widget_show(hbox);
 
 	hbox = gtk_hbox_new(FALSE, 0);
-	label = gtk_label_new("");
-	markup =
-		g_markup_printf_escaped("<span size=\"%d\">%s</span>", fontsize,
-								msg_button1);
-	gtk_label_set_markup(GTK_LABEL(label), markup);
-	g_free(markup);
-	button = gtk_button_new();
-	gtk_container_add(GTK_CONTAINER(button), label);
-	gtk_widget_show(label);
-	if (callback1 != NULL)
-	{
-		g_signal_connect_swapped(G_OBJECT(button), "clicked",
-								 G_CALLBACK(callback1), data1);
-	}
-	g_signal_connect_swapped(G_OBJECT(button), "clicked",
-							 G_CALLBACK(destroy_widget), window);
+
+	button = gm_create_label_button(msg_button1, G_CALLBACK(callback1), data1);
+  g_signal_connect(G_OBJECT(button), "button_release_event", G_CALLBACK(gm_destroy_widget), window);
+  g_signal_connect(G_OBJECT(button), "key_release_event", G_CALLBACK(gm_destroy_widget), window);
 
 	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 
-	label = gtk_label_new("");
-	markup =
-		g_markup_printf_escaped("<span size=\"%d\">%s</span>", fontsize,
-								msg_button2);
-	gtk_label_set_markup(GTK_LABEL(label), markup);
-	g_free(markup);
-	button = gtk_button_new();
-	gtk_container_add(GTK_CONTAINER(button), label);
-	gtk_widget_show(label);
-	g_signal_connect_swapped(G_OBJECT(button), "clicked",
-							 G_CALLBACK(destroy_widget), window);
-	if (callback2 != NULL)
-	{
-		g_signal_connect_swapped(G_OBJECT(button), "clicked",
-								 G_CALLBACK(callback2), data2);
-	}
+	button = gm_create_label_button(msg_button2, G_CALLBACK(callback2), data2);
+  g_signal_connect(G_OBJECT(button), "button_release_event", G_CALLBACK(gm_destroy_widget), window);
+  g_signal_connect(G_OBJECT(button), "key_release_event", G_CALLBACK(gm_destroy_widget), window);
+
 	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
@@ -177,7 +126,7 @@ void gm_show_confirmation_dialog(const gchar * message,
 	gtk_widget_show(window);
 }
 
-void gm_show_error_dialog(const gchar * message, GtkWidget * mainwin,
+void gm_show_error_dialog(gchar * message, GtkWidget * parent_window,
 						  void *callback)
 {
 	GtkWidget *window;
@@ -185,16 +134,15 @@ void gm_show_error_dialog(const gchar * message, GtkWidget * mainwin,
 	GtkWidget *hbox;
 	GtkWidget *button;
 	GtkWidget *label;
-	gchar *markup;
 	GdkPixbuf *pixbuf;
 	GtkWidget *stock_image;
 
 	g_warning("%s", message);
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
-	if (mainwin != NULL)
+	if (parent_window != NULL)
 	{
-		gtk_window_set_transient_for(GTK_WINDOW(window), GTK_WINDOW(mainwin));
+		gtk_window_set_transient_for(GTK_WINDOW(window), GTK_WINDOW(parent_window));
 		gtk_window_set_position(GTK_WINDOW(window),
 								GTK_WIN_POS_CENTER_ON_PARENT);
 	}
@@ -220,12 +168,7 @@ void gm_show_error_dialog(const gchar * message, GtkWidget * mainwin,
 	gtk_box_pack_start(GTK_BOX(hbox), stock_image, FALSE, FALSE, 0);
 	gtk_widget_show(stock_image);
 
-	label = gtk_label_new("");
-	markup =
-		g_markup_printf_escaped("<span size=\"%d\">%s</span>", fontsize,
-								message);
-	gtk_label_set_markup(GTK_LABEL(label), markup);
-	g_free(markup);
+	label = gm_create_label(message);
 	gtk_misc_set_padding(GTK_MISC(label), 5, 5);
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 	gtk_widget_show(label);
@@ -233,24 +176,10 @@ void gm_show_error_dialog(const gchar * message, GtkWidget * mainwin,
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
 	gtk_widget_show(hbox);
 
-	label = gtk_label_new("");
-	markup =
-		g_markup_printf_escaped("<span size=\"%d\">Close</span>", fontsize);
-	gtk_label_set_markup(GTK_LABEL(label), markup);
-	g_free(markup);
-	button = gtk_button_new();
-	gtk_container_add(GTK_CONTAINER(button), label);
-	gtk_widget_show(label);
-	if (callback != NULL)
-	{
-		g_signal_connect_swapped(G_OBJECT(button), "clicked",
-								 G_CALLBACK(callback), mainwin);
-	}
-	else
-	{
-		g_signal_connect_swapped(G_OBJECT(button), "clicked",
-								 G_CALLBACK(destroy_widget), window);
-	}
+	button = gm_create_label_button("Close", G_CALLBACK(callback), parent_window);
+	g_signal_connect_swapped(G_OBJECT(button), "clicked",
+								 G_CALLBACK(gm_destroy_widget), window);
+
 	gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 
@@ -275,19 +204,25 @@ void gm_set_window_geometry(int width, int height)
 	screen_height = height;
 }
 
+GtkWidget *gm_create_label(gchar *text)
+{
+	GtkWidget *label;
+	gchar *markup;
+	label = gtk_label_new("");
+  markup = g_markup_printf_escaped("<span size=\"%d\">%s</span>", fontsize, text);
+  gtk_label_set_markup(GTK_LABEL(label), markup);
+  g_free(markup);
+
+	return label;
+}
+
 GtkWidget *gm_create_label_button(gchar * buttontext, void *callbackfunc,
 								  void *data)
 {
 	GtkWidget *button;
 	GtkWidget *label;
-	gchar *markup;
 
-	label = gtk_label_new("");
-	markup =
-		g_markup_printf_escaped("<span size=\"%d\">%s</span>", fontsize,
-								buttontext);
-	gtk_label_set_markup(GTK_LABEL(label), markup);
-	g_free(markup);
+	label = gm_create_label(buttontext);
 	button = gm_create_empty_button(callbackfunc, data);
 	gtk_container_add(GTK_CONTAINER(button), label);
 	gtk_widget_show(label);
@@ -332,8 +267,8 @@ static GdkPixbuf *scale_image(GtkWidget * image, int max_width, int max_height)
 	return gdk_pixbuf_scale_simple(pixbuf, width, height, GDK_INTERP_BILINEAR);
 }
 
-GtkWidget *gm_load_image(const char *elt_name, const char *elt_logo,
-						 const char *cacheloc, const char *programname,
+GtkWidget *gm_load_image(gchar *elt_name, gchar *elt_logo,
+						 gchar *cacheloc, gchar *programname,
 						 int max_width, int max_height)
 {
 	GtkWidget *image = NULL;
@@ -444,19 +379,13 @@ static GtkWidget *image_label_box_vert(struct menu_element * elt, int max_width,
 	GtkWidget *label = NULL;
 	GtkWidget *image;
 	GtkRequisition requisition;
-	gchar *markup;
 
 	/* Create box for image and label */
 	box = gtk_vbox_new(FALSE, 0);
 
 	if ((elt->printlabel != 0) && (elt->name != NULL))
 	{
-		label = gtk_label_new("");
-		markup =
-			g_markup_printf_escaped("<span size=\"%d\">%s</span>", fontsize,
-									elt->name);
-		gtk_label_set_markup(GTK_LABEL(label), markup);
-		g_free(markup);
+		label = gm_create_label(elt->name);
 
 		//obtain the size for label so we can account for it
 		//when determining the image size
@@ -767,7 +696,7 @@ static void switch_menu_left(GtkWidget *widget, GdkEvent *event, struct menu *di
 	if( dish->boxes->prev == NULL )
 		return;
 
-	if( ! check_key(event) )
+	if( ! gm_check_key(event) )
 		return;
 
 	//hide current box
@@ -787,7 +716,7 @@ static void switch_menu_right(GtkWidget *widget, GdkEvent *event, struct menu *d
 	if( dish->boxes->next == NULL )
 		return;
 	
-	if( ! check_key(event) )
+	if( ! gm_check_key(event) )
 		return;
 
 	//hide current box

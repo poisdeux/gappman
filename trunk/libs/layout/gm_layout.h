@@ -33,7 +33,7 @@ void gm_destroy_widget(GtkWidget * dummy, GdkEvent * event,
 * \param event pointer to the GdkEvent that was generated
 * \return TRUE if spacebar or mousebutton generated the event. FALSE otherwise
 */
-gboolean check_key(GdkEvent * event);
+gboolean gm_check_key(GdkEvent * event);
 
 /**
 * \brief quits program only if mousebutton or spacebar is pressed
@@ -53,8 +53,8 @@ void gm_quit_program(GtkWidget * dummy, GdkEvent * event);
 * \param max_height maximum height image may have
 * \return GtkWidget pointer to image
 */
-GtkWidget *gm_load_image(const char *elt_name, const char *elt_logo,
-						 const char *cacheloc, const char *programname,
+GtkWidget *gm_load_image(char *elt_name, char *elt_logo,
+						 char *cacheloc, char *programname,
 						 int max_width, int max_height);
 
 /**
@@ -68,9 +68,9 @@ GtkWidget *gm_load_image(const char *elt_name, const char *elt_logo,
 * \param data2 void pointer pointing to any data that should be passed as an argument when calling the callbackfunction callback2
 * \param mainwin pointer to parent window GtkWidget that called gm_show_confirmation_dialog. If NULL dialog is positioned in the center.
 */
-void gm_show_confirmation_dialog(const gchar * message,
-								 const gchar * msg_button1, void *callback1,
-								 void *data1, const gchar * msg_button2,
+void gm_show_confirmation_dialog(gchar * message,
+								 gchar * msg_button1, void *callback1,
+								 void *data1, gchar * msg_button2,
 								 void *callback2, void *data2,
 								 GtkWidget * mainwin);
 
@@ -80,7 +80,7 @@ void gm_show_confirmation_dialog(const gchar * message,
 * \param mainwin pointer to parent window GtkWidget that called gm_show_error_dialog. If NULL dialog is positioned in the center.
 * \param callback pointer to callback function that should be called when Close button is pressed. If NULL the default action will be taken which simply destroys this error dialog.
 */
-void gm_show_error_dialog(const gchar * message, GtkWidget * mainwin,
+void gm_show_error_dialog(gchar * message, GtkWidget * mainwin,
 						  void *callback);
 
 /**
@@ -101,6 +101,13 @@ void gm_set_fontsize(int size);
 * \param height height of the screen
 */
 void gm_set_window_geometry(int width, int height);
+
+/**
+* \brief creates a widget that will hold the specified text
+* \param text the text that should be printed on the label
+* \return GtkWidget
+*/
+GtkWidget *gm_create_label(gchar *text);
 
 /**
 * \brief creates a basic button

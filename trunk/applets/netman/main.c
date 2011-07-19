@@ -47,7 +47,7 @@ static void release_lock()
 static void destroy_widget(GtkWidget * dummy, GdkEvent * event,
 						   GtkWidget * widget)
 {
-	if (check_key(event))
+	if (gm_check_key(event))
 	{
 		gtk_widget_destroy(widget);
 	}
@@ -120,7 +120,7 @@ static gint exec_program(nm_elements * elt)
 static void exec_program_by_gtk_callback(GtkWidget * widget, GdkEvent * event,
 										 nm_elements * elt)
 {
-	if (check_key(event) == FALSE)
+	if (gm_check_key(event) == FALSE)
 	{
 		return;
 	}
@@ -130,7 +130,7 @@ static void exec_program_by_gtk_callback(GtkWidget * widget, GdkEvent * event,
 static void perform_action(GtkWidget * widget, GdkEvent * event,
 						   nm_elements * elt)
 {
-	if (check_key(event) == FALSE)
+	if (gm_check_key(event) == FALSE)
 	{
 		return;
 	}
@@ -301,8 +301,8 @@ G_MODULE_EXPORT int gm_module_init()
 
 		stati->image_fail =
 			GTK_IMAGE(gm_load_image
-					  ("gm_netman_fail", (const char *)stati->logofail,
-					   nm_get_cache_location(), (char *)stati->name,
+					  ("gm_netman_fail", (char *)stati->logofail,
+					   (char *)nm_get_cache_location(), (char *)stati->name,
 					   main_button_width, main_button_height));
 		gtk_widget_show(GTK_WIDGET(stati->image_fail));
 		g_object_ref(stati->image_fail);
