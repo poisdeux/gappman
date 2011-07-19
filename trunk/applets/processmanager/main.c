@@ -331,7 +331,7 @@ int main(int argc, char **argv)
   gm_get_window_geometry_from_gappman(2103, "localhost", &dialog_width, &dialog_height);
 	dialog_width = dialog_width/3;
 	dialog_height = dialog_height/3;
-  //gm_set_window_geometry(dialog_width, dialog_height);
+  gm_set_window_geometry(dialog_width, dialog_height);
 #endif
 
 	programs = NULL;
