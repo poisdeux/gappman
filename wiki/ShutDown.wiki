@@ -44,6 +44,3 @@ This is the configuration file that was used to create the above screenshot:
 }}} 
  
 = TODO's =
-
-   * Add support for portrait orientation. To reproduce problem run tests/rungappman.sh 100 500
-
