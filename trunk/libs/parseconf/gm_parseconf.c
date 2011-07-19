@@ -12,6 +12,7 @@
 
 #include <string.h>
 #include "gm_parseconf.h"
+#include <libxml/xmlreader.h>
 #include <gm_generic.h>
 
 static struct menu *programs = NULL;

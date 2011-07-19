@@ -17,7 +17,7 @@
 #define __GAPPMAN_LAYOUT_H__
 
 #include <gtk/gtk.h>
-#include <gm_parseconf.h>
+#include <gm_generic.h>
 
 /**
 * \brief destroys widget only if mousebutton or spacebar is pressed

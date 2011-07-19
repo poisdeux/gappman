@@ -22,7 +22,6 @@
 #include <string.h>
 #include <gm_layout.h>
 #include <gm_generic.h>
-#include <gm_parseconf.h>
 
 static int fontsize = 10 * 1024;	///< the default generic fontsize for all 
 									// elements. This usually gets updated by
@@ -383,7 +382,7 @@ GtkWidget *gm_load_image(const char *elt_name, const char *elt_logo,
 								"9", NULL);
 			}
 		}
-		free(cachedfile);
+		g_free(cachedfile);
 	}
 	else
 	{
@@ -415,7 +414,7 @@ static GtkWidget *image_label_box_hor(struct menu_element * elt, int max_width,
 	/* Now on to the image stuff */
 	image =
 		gm_load_image((char *)elt->name, (char *)elt->logo,
-					  gm_get_cache_location(), gm_get_programname(), max_width,
+					  (char *) gm_get_cache_location(), (char *) gm_get_programname(), max_width,
 					  max_height);
 	gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(image), FALSE, FALSE, 3);
 	gtk_widget_show(GTK_WIDGET(image));
@@ -464,7 +463,7 @@ static GtkWidget *image_label_box_vert(struct menu_element * elt, int max_width,
 		gtk_widget_size_request(label, &requisition);
 		image =
 			gm_load_image((char *)elt->name, (char *)elt->logo,
-						gm_get_cache_location(), gm_get_programname(), max_width,
+						(char*) gm_get_cache_location(), (char*) gm_get_programname(), max_width,
 					  max_height - requisition.height);
 
 		gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(image), TRUE, TRUE, 0);
@@ -478,7 +477,7 @@ static GtkWidget *image_label_box_vert(struct menu_element * elt, int max_width,
 	{
 		image =
 			gm_load_image((char *)elt->name, (char *)elt->logo,
-						gm_get_cache_location(), gm_get_programname(), max_width,
+						(char *)gm_get_cache_location(), (char *)gm_get_programname(), max_width,
 					  max_height);
 		gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(image), TRUE, TRUE, 0);
 		gtk_widget_show(image);
