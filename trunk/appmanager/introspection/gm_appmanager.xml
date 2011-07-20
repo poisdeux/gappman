@@ -6,6 +6,11 @@
       <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="send_fontsize"/>
       <arg type="i" name="fontsize" direction="out" />
     </method>
+    <method name="GetWindowGeometry">
+      <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="send_window_geometry"/>
+      <arg type="i" name="width" direction="out" />
+      <arg type="i" name="height" direction="out" />
+    </method>
     <method name="GetStartedProcs">
       <annotation name="org.freedesktop.DBus.GLib.CSymbol" value="send_proceslist"/>
       <arg type="as" name="proceslist" direction="out" />

@@ -9,9 +9,8 @@
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#ifndef __LISTENER_SOCKET_H__
+#define __LISTENER_SOCKET_H__
 
 #include <gtk/gtk.h>
 
@@ -27,3 +26,5 @@ gboolean listener_socket_open(GtkWidget * win);
 * \return TRUE if closing the channel succeeded. False otherwise.
 */
 gboolean listener_socket_close(GIOChannel * close_gio);
+
+#endif /* __LISTENER_SOCKET_H__ */

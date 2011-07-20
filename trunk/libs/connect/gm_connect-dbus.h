@@ -41,10 +41,10 @@ int gm_dbus_get_confpath_from_gappman(gchar ** path);
 int gm_dbus_get_fontsize_from_gappman(int *fontsize);
 
 /**
-* \brief Connects to gappman
-* \param sockfd pointer to int which will hold the socket filedescriptor
-* \return filedescriptor
+* \brief Requests for the windowgeometry object
+* \param width a value by reference which will hold the retrieved width from gappman
+* \param height a value by reference which will hold the retrieved height from gappman
 */
-int gm_dbus_connect_to_gappman(int *sockfd);
+int gm_dbus_get_window_geometry_from_gappman(int *width, int *height);
 
 #endif // __GM_CONNECT_DBUS_H__

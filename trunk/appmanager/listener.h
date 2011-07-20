@@ -9,8 +9,8 @@
  *   Martijn Brekhof <m.brekhof@gmail.com>
  */
 
-#ifndef __LISTENER_DBUS_H__
-#define __LISTENER_DBUS_H__
+#ifndef __LISTENER_H__
+#define __LISTENER_H__
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -31,10 +31,5 @@ gboolean gappman_start_listener(GtkWidget * win);
 */
 gboolean gappman_close_listener();
 
-/**
-* \brief sets the configuration file location so it can be send to clients asking for it.
-* \param *path string containing the absolute path to the configuration file for gappman.
-*/
-void gappman_set_confpath(const gchar * path);
 #endif /* NO_LISTENER */
-#endif /* __LISTENER_DBUS_H__ */
+#endif /* __LISTENER_H__ */

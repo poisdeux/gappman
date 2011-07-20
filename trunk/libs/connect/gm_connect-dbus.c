@@ -191,3 +191,30 @@ int gm_dbus_set_default_resolution_for_program(gchar * name, int width,
 
 	return GM_SUCCES;
 }
+
+int gm_dbus_get_window_geometry_from_gappman(int *width, int *height)
+{
+	GError *error = NULL;
+	DBusGProxy *proxy;
+	gboolean status;
+
+	proxy = get_proxy();
+	status = dbus_g_proxy_call_with_timeout(proxy,
+											"GetWindowGeometry", 500, &error,
+											G_TYPE_INVALID,
+											G_TYPE_INT, width,
+											G_TYPE_INT, height,
+											G_TYPE_INVALID);
+
+	if (status == FALSE)
+	{
+		g_warning("Failed to call GetWindowGeometry: %s", error->message);
+		g_error_free(error);
+		error = NULL;
+
+		return GM_FAIL;
+	}
+
+	return GM_SUCCES;
+}
+

@@ -177,8 +177,8 @@ void gm_show_error_dialog(gchar * message, GtkWidget * parent_window,
 	gtk_widget_show(hbox);
 
 	button = gm_create_label_button("Close", G_CALLBACK(callback), parent_window);
-	g_signal_connect_swapped(G_OBJECT(button), "clicked",
-								 G_CALLBACK(gm_destroy_widget), window);
+  g_signal_connect(G_OBJECT(button), "button_release_event", G_CALLBACK(gm_destroy_widget), window);
+  g_signal_connect(G_OBJECT(button), "key_release_event", G_CALLBACK(gm_destroy_widget), window);
 
 	gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);

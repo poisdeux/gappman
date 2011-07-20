@@ -194,6 +194,7 @@ static void showprocessdialog(struct menu_element * elt)
 	GtkWidget *button, *buttonbox, *label;
 	static GtkWidget *killdialogwin;
 	gchar *markup;
+	gchar *msg;
 
 	killdialogwin = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
@@ -207,9 +208,11 @@ static void showprocessdialog(struct menu_element * elt)
 
 	buttonbox = gtk_hbutton_box_new();
 
-	button = gm_create_label_button(g_strdup_printf("Stop %s", elt->name), (void *)kill_program, elt);
+	msg = g_strdup_printf("Stop %s", elt->name);
+	button = gm_create_label_button(msg, (void *)kill_program, elt);
 	gtk_container_add(GTK_CONTAINER(buttonbox), button);
 	gtk_widget_show(button);
+	g_free(msg);
 
 	// Needed so we can destroy the dialog when kill was succesful
 	g_object_set_data((GObject *) button, "window", killdialogwin);
@@ -285,16 +288,6 @@ static GtkWidget *createrow(struct menu_element * elt, int width, int height)
 }
 
 /**
-* \brief callback function to quit the program
-* \param *widget pointer to widget to destroy
-* \param data mandatory argument for callback function, may be NULL.
-*/
-static void destroy(GtkWidget * widget, gpointer data)
-{
-	gtk_main_quit();
-}
-
-/**
 * \brief main function setting up the UI
 */
 int main(int argc, char **argv)
@@ -306,6 +299,7 @@ int main(int argc, char **argv)
 	GtkWidget *separator;
 	const char *conffile = SYSCONFDIR "/processmanager.xml";
 	gchar *gappman_confpath;
+	gchar *msg;
 	int dialog_width;
 	int dialog_height;
 	int program_width;
@@ -412,30 +406,30 @@ int main(int argc, char **argv)
 		{
 		case GM_NET_COMM_NOT_SUPPORTED:
 			gm_show_error_dialog("Gappman compiled without network support",
-								 (void *)mainwin, (void *)gtk_main_quit);
+								 (void *)mainwin, (void *)gm_quit_program);
 			break;;
 		case GM_COULD_NOT_RESOLVE_HOSTNAME:
 			gm_show_error_dialog("Could not resolve hostname: localhost",
-								 (void *)mainwin, (void *)gtk_main_quit);
+								 (void *)mainwin, (void *)gm_quit_program);
 			break;;
 		case GM_COULD_NOT_CONNECT:
 			gm_show_error_dialog
 				("Could not connect to gappman.\nCheck that gappman is running.",
-				 (void *)mainwin, (void *)gtk_main_quit);
+				 (void *)mainwin, (void *)gm_quit_program);
 			break;;
 		case GM_COULD_NOT_SEND_MESSAGE:
 			gm_show_error_dialog
 				("Could not sent message to localhost.\nCheck that gappman is running",
-				 (void *)mainwin, (void *)gtk_main_quit);
+				 (void *)mainwin, (void *)gm_quit_program);
 			break;;
 		case GM_COULD_NOT_DISCONNECT:
 			gm_show_error_dialog("Could not disconnect from gappman.",
-								 (void *)mainwin, (void *)gtk_main_quit);
+								 (void *)mainwin, (void *)gm_quit_program);
 			break;;
 		default:
 			gm_show_error_dialog
 				("An undefined error occured when contacting gappman.",
-				 (void *)mainwin, (void *)gtk_main_quit);
+				 (void *)mainwin, (void *)gm_quit_program);
 			break;;
 		}
 	}
@@ -444,20 +438,21 @@ int main(int argc, char **argv)
 		if (started_procs == NULL)
 		{
 			gm_show_error_dialog("No programs started by gappman.",
-								 (void *)mainwin, (void *)gtk_main_quit);
+								 (void *)mainwin, (void *)gm_quit_program);
 		}
 		else if (gm_get_confpath_from_gappman
 				 (2103, "localhost", &gappman_confpath) != GM_SUCCES)
 		{
 			gm_show_error_dialog
 				("Could not retrieve gappman configuration file\n",
-				 (void *)mainwin, (void *)gtk_main_quit);
+				 (void *)mainwin, (void *)gm_quit_program);
 		}
     ///< \todo replace gm_load_conf with gm_get_programs_from_gappman
 		else if (gm_load_conf(gappman_confpath) != 0)
 		{
-			gm_show_error_dialog("Could not load gappman configuration file\n",
-								 (void *)mainwin, (void *)gtk_main_quit);
+			msg = g_strdup_printf("Could not load gappman configuration file:\n%s\n", gappman_confpath);
+			gm_show_error_dialog(msg, (void *)mainwin, (void *)gm_quit_program);
+			g_free(msg);
 		}
 		else
 		{
@@ -558,7 +553,7 @@ int main(int argc, char **argv)
 			else
 			{
 				gm_show_error_dialog("No programs started by gappman.",
-									 (void *)mainwin, (void *)gtk_main_quit);
+									 (void *)mainwin, (void *)gm_quit_program);
 			}
 		}
 	}

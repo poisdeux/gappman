@@ -17,6 +17,7 @@
 #include <sys/wait.h>
 #include "appmanager.h"
 #include "listener-dbus.h"
+#include <gm_listener_glue.h>
 
 G_DEFINE_TYPE(GmAppmanager, gm_appmanager, G_TYPE_OBJECT);	///< will create
 															// gm_appmanager
@@ -25,21 +26,33 @@ G_DEFINE_TYPE(GmAppmanager, gm_appmanager, G_TYPE_OBJECT);	///< will create
 
 static const gchar *confpath = "";
 
-static gboolean send_confpath(GmAppmanager * obj, gchar ** path,
+gboolean send_confpath(GmAppmanager * obj, gchar ** path,
 							  GError ** error)
 {
-	*path = g_strdup(confpath);
+	struct metadata *config;
+	config = appmanager_get_metadata();
+	*path = g_strdup(config->conffile);
 	return TRUE;
 }
 
-static gboolean send_fontsize(GmAppmanager * obj, gint * fontsize,
+gboolean send_window_geometry(GmAppmanager * obj, gint *width, gint *height,
+							  GError ** error)
+{
+	struct metadata *config;
+	config = appmanager_get_metadata();
+	*width = config->window_width;
+	*height = config->window_height;
+	return TRUE;
+}
+
+gboolean send_fontsize(GmAppmanager * obj, gint * fontsize,
 							  GError ** error)
 {
 	*fontsize = gm_get_fontsize();
 	return TRUE;
 }
 
-static gboolean send_proceslist(GmAppmanager * obj, gchar *** proceslist,
+gboolean send_proceslist(GmAppmanager * obj, gchar *** proceslist,
 								GError ** error)
 {
 	struct process_info *started_apps;
@@ -87,7 +100,7 @@ static gboolean send_proceslist(GmAppmanager * obj, gchar *** proceslist,
 	return TRUE;
 }
 
-static gboolean update_resolution(GmAppmanager * obj, gchar * name, gint width,
+gboolean update_resolution(GmAppmanager * obj, gchar * name, gint width,
 								  gint height, GError ** error)
 {
 	appmanager_update_resolution(name, width, height);
