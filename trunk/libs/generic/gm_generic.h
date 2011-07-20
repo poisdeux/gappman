@@ -18,6 +18,10 @@
 									// configuration files
 #endif
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 /**
 * enumeration for error/return codes
 */

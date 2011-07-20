@@ -25,6 +25,7 @@
 #include <gm_layout.h>
 #include <gm_connect.h>
 #include <gm_changeresolution.h>
+#include <gm_parseconf.h>
 
 static int WINDOWED = 0;
 static GtkWidget *mainwin;
@@ -258,32 +259,6 @@ static GtkWidget *show_current_resolution(int width)
 	return hbox;
 }
 
-static GtkWidget *createrow(XRRScreenSize * size, int width)
-{
-	GtkWidget *button, *hbox, *label;
-	gchar *markup;
-
-	hbox = gtk_hbox_new(FALSE, 10);
-
-	button = gm_create_empty_button((void *)changeresolution, size);
-
-	label = gtk_label_new("");
-
-	markup =
-		g_markup_printf_escaped("<span size=\"%d\">%dx%d</span>", fontsize,
-								size->width, size->height);
-	gtk_label_set_markup(GTK_LABEL(label), markup);
-	g_free(markup);
-	gtk_container_add(GTK_CONTAINER(button), label);
-	gtk_widget_show(label);
-	gtk_container_add(GTK_CONTAINER(hbox), button);
-	gtk_widget_show(button);
-	// gtk_container_add(GTK_CONTAINER(hbox), alignment);
-	// gtk_widget_show(alignment);
-
-	return hbox;
-}
-
 /**
 * \brief main function setting up the UI
 */
@@ -294,7 +269,6 @@ int main(int argc, char **argv)
 	GtkWidget *vbox;
 	GtkWidget *hbox;
 	GtkWidget *separator;
-
 	int c;
 	int nsize;
 	int ret_value;
@@ -302,11 +276,20 @@ int main(int argc, char **argv)
 	XRRScreenSize *sizes;
 	char *conffile = SYSCONFDIR "/conf.xml";
 	gchar *gappman_confpath;
+	gchar *text;
 
 	gtk_init(&argc, &argv);
 	screen = gdk_screen_get_default();
 	dialog_width = gdk_screen_get_width(screen) / 3;
 	dialog_height = gdk_screen_get_height(screen) / 3;
+
+#if defined(DEBUG)
+gm_get_window_geometry_from_gappman(2103, "localhost", &dialog_width, &dialog_height);
+dialog_width /= 3;
+dialog_height /= 3;
+#endif
+
+	gm_set_window_geometry(dialog_width, dialog_height);
 
 	mainwin = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
@@ -412,24 +395,20 @@ int main(int argc, char **argv)
 
 		for (i = 0; i < nsize; i++)
 		{
-			hbox = createrow(&sizes[i], dialog_width);
-			gtk_container_add(GTK_CONTAINER(vbox), hbox);
-			gtk_widget_show(hbox);
+			text = g_strdup_printf("%dx%d",sizes[i].width, sizes[i].height);
+			button = gm_create_label_button(text, (void *)changeresolution, &sizes[i]);
+			g_free(text);
+			gtk_container_add(GTK_CONTAINER(vbox), button);
 			separator = gtk_hseparator_new();
 			gtk_container_add(GTK_CONTAINER(vbox), separator);
-			gtk_widget_show(separator);
 		}
-		hbox = gtk_hbox_new(FALSE, 10);
 		// cancel button
 		button = gm_create_label_button("Done", destroy, NULL);
-		gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+		gtk_container_add(GTK_CONTAINER(vbox), button);
 		gtk_widget_show(button);
 
-		gtk_container_add(GTK_CONTAINER(vbox), hbox);
-		gtk_widget_show(hbox);
 		gtk_container_add(GTK_CONTAINER(mainwin), vbox);
-		gtk_widget_show(vbox);
-		gtk_widget_show(mainwin);
+		gtk_widget_show_all(mainwin);
 	}
 
 

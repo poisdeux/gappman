@@ -26,8 +26,8 @@
 static int fontsize = 10 * 1024;	///< the default generic fontsize for all 
 									// elements. This usually gets updated by
 									// menu building functions below.
-static int screen_width = 800;
-static int screen_height = 600;
+static int window_width = 800;
+static int window_height = 600;
 
 #define MAXCHARSINLABEL 10;		///< amount of characters we take as a
 								// maximum to determine the fontsize.
@@ -200,18 +200,33 @@ void gm_set_fontsize(int size)
 
 void gm_set_window_geometry(int width, int height)
 {
-	screen_width = width;
-	screen_height = height;
+	window_width = width;
+	window_height = height;
 }
 
 GtkWidget *gm_create_label(gchar *text)
 {
 	GtkWidget *label;
 	gchar *markup;
+	GtkRequisition requisition;
+	int label_width, label_height;
+
 	label = gtk_label_new("");
   markup = g_markup_printf_escaped("<span size=\"%d\">%s</span>", fontsize, text);
   gtk_label_set_markup(GTK_LABEL(label), markup);
   g_free(markup);
+
+	//make sure label is not larger then window
+	gtk_widget_size_request(label, &requisition);
+
+	label_width = ( requisition.width > window_width ) ? window_width : requisition.width;
+	label_height = ( requisition.height > window_height ) ? window_height : requisition.width;
+
+	gtk_widget_set_size_request(label, label_width, label_height);
+
+#if defined(DEBUG)
+g_debug("gm_create_label: window: %dx%d, label: %dx%d", window_width, window_height, label_width, label_height);
+#endif
 
 	return label;
 }
@@ -777,8 +792,8 @@ GtkWidget *gm_create_menu(struct menu *dish,
 	int elts_per_col, elts_per_row;
   int button_height, button_width;
 
-	box_width = gm_calculate_box_length(screen_width, &(dish->menu_width));
-	box_height = gm_calculate_box_length(screen_height, &(dish->menu_height));
+	box_width = gm_calculate_box_length(window_width, &(dish->menu_width));
+	box_height = gm_calculate_box_length(window_height, &(dish->menu_height));
 
 	elts_per_row =
 		calculateAmountOfElementsPerRow(box_width, box_height,
@@ -843,8 +858,8 @@ GtkWidget *gm_create_panel(struct menu *dish)
 		return NULL;
 	}
 
-	box_width = gm_calculate_box_length(screen_width, &(dish->menu_width));
-	box_height = gm_calculate_box_length(screen_height, &(dish->menu_height));
+	box_width = gm_calculate_box_length(window_width, &(dish->menu_width));
+	box_height = gm_calculate_box_length(window_height, &(dish->menu_height));
 
 	vbox = gtk_vbox_new(FALSE, 0);
 

@@ -27,12 +27,6 @@ int gm_load_conf(const char *filename);
 void gm_free_menu(struct menu *dish);
 
 /**
-* \brief returns the total number of menu_elements
-* \return integer
-*/
-int gm_get_number_of_elements();
-
-/**
 * \brief Get the alignment of the program menu area
 * \return String: [[top|left|bottom|right|center],...]
 */
