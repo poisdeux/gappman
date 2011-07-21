@@ -411,7 +411,6 @@ dialog_height /= 3;
 		gtk_widget_show_all(mainwin);
 	}
 
-
 	gtk_main();
 
 	return 0;
