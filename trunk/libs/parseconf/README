@@ -11,7 +11,7 @@ populate the menu_elements structures.
 
 <gappman>
   <cachelocation>DIRECTORYPATH</cachelocation>
-  <actions width="<WIDTH>" height="<HEIGHT>" align="[[top|left|bottom|right|center],...]">
+  <actions max_elts="<AMOUNT>" width="<WIDTH>" height="<HEIGHT>" align="[[top|left|bottom|right|center],...]">
     <action>
       <name>ACTIONNAME</name>
       <printlabel>0|1</printlabel>
@@ -34,7 +34,7 @@ populate the menu_elements structures.
       <arg>ARGUMENT</arg>
     </action>
   </actions>
-  <programs width="<WIDTH>" height="<HEIGHT>" align="[[top|left|bottom|right|center],...]">
+  <programs max_elts="<AMOUNT>" width="<WIDTH>" height="<HEIGHT>" align="[[top|left|bottom|right|center],...]">
     <program>
       <name>PROGRAMNAME</name>
       <printlabel>0|1</printlabel>
@@ -76,6 +76,7 @@ populate the menu_elements structures.
 
 <printlabel> is optional and defaults to FALSE. If set to true the <name> of the program or action is used as textlabel for the button.
 The attributes <width> and <height> can be specified in amount of pixels or in percentages. The latter should be followed by a % sign, for example: 50%. Percentages will be relative to the total screen width and height. Note that this does not count for the resolution element, which takes only width and height values in pixels.
+The atribute max_elts will specify the maximum amount of program or action buttons may be displayed on the screen at the same time. This will create two additional buttons. One at the left and one at the right of the buttonbox. These buttons allow you to switch to the next or previous group of buttons.
 <arg> and <resolution> are optional. If no <resolution> is given the default screen resolution will be used. 
 The <autostart> attribute can have values 0 or 1. If set to 1 the program will be started when appmanager is started.
 
