@@ -381,9 +381,6 @@ dialog_height /= 3;
 	}
 	else
 	{
-		// Make window transparent
-		// gtk_window_set_opacity (GTK_WINDOW (mainwin), 0.8);
-
 		vbox = gtk_vbox_new(FALSE, 10);
 	
 		hbox = show_current_resolution(dialog_width);

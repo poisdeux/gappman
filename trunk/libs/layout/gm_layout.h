@@ -156,4 +156,11 @@ GtkWidget *gm_create_menu(struct menu *dish,
 */
 GtkWidget *gm_create_panel(struct menu *dish);
 
+/**
+* \brief Creates a container that holds all widgets. The container will be sized with respect to the window geometry
+* as set by gm_set_window_geometry.
+* \param widgets null-terminated array of GtkWidgets.
+* \return GtkWidget pointer to the container
+GtkWidget *gm_create_box(GtkWidget **widgets);
+
 #endif

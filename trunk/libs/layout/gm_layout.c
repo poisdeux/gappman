@@ -899,3 +899,9 @@ GtkWidget *gm_create_panel(struct menu *dish)
 	else
 		return vbox;
 }
+
+/* TO BE IMPLEMENTED */
+GtkWidget *gm_create_box(GtkWidget **widgets)
+{
+	return NULL;
+}
