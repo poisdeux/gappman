@@ -53,6 +53,21 @@ static void usage()
 
 }
 
+static void destroy_widget(GtkWidget * dummy, GdkEvent * event, GtkWidget * widget)
+{
+  if ( gm_layout_check_key(event) )
+  {
+    gtk_widget_destroy(widget);
+  }
+}
+
+static void quit_program(GtkWidget * dummy, GdkEvent * event)
+{
+  if( gm_layout_check_key(event) )
+  {
+    gtk_main_quit();
+  }
+}
 
 static int get_status(int PID)
 {
@@ -209,7 +224,7 @@ static void showprocessdialog(struct menu_element * elt)
 	buttonbox = gtk_hbutton_box_new();
 
 	msg = g_strdup_printf("Stop %s", elt->name);
-	button = gm_create_label_button(msg, (void *)kill_program, elt);
+	button = gm_layout_create_label_button(msg, (void *)kill_program, elt);
 	gtk_container_add(GTK_CONTAINER(buttonbox), button);
 	gtk_widget_show(button);
 	g_free(msg);
@@ -218,7 +233,7 @@ static void showprocessdialog(struct menu_element * elt)
 	g_object_set_data((GObject *) button, "window", killdialogwin);
 
 	button =
-		gm_create_label_button("Cancel", (void *)gm_destroy_widget,
+		gm_layout_create_label_button("Cancel", (void *)destroy_widget,
 							   killdialogwin);
 	gtk_container_add(GTK_CONTAINER(buttonbox), button);
 	gtk_widget_show(button);
@@ -260,7 +275,7 @@ static GtkWidget *createrow(struct menu_element * elt, int width, int height)
 	hbox = gtk_hbox_new(FALSE, 10);
 
 	elt->widget =
-		gm_create_button(elt, width, height, process_startprogram_event);
+		gm_layout_create_button(elt, width, height, process_startprogram_event);
 
 	statuslabel = gtk_label_new("");
 	status = get_status(elt->pid);
@@ -325,7 +340,7 @@ int main(int argc, char **argv)
   gm_get_window_geometry_from_gappman(2103, "localhost", &dialog_width, &dialog_height);
 	dialog_width = dialog_width/3;
 	dialog_height = dialog_height/3;
-  gm_set_window_geometry(dialog_width, dialog_height);
+  gm_layout_set_window_geometry(dialog_width, dialog_height);
 #endif
 
 	programs = NULL;
@@ -390,12 +405,12 @@ int main(int argc, char **argv)
 	status = gm_get_fontsize_from_gappman(2103, "localhost", &fontsize);;
 	if (status == GM_SUCCES)
 	{
-		gm_set_fontsize(fontsize);
+		gm_layout_set_fontsize(fontsize);
 	}
 	else
 	{
 		// fallback on default
-		fontsize = gm_get_fontsize();
+		fontsize = gm_layout_get_fontsize();
 	}
 	status =
 		gm_get_started_procs_from_gappman(2103, "localhost", &started_procs);
@@ -405,31 +420,31 @@ int main(int argc, char **argv)
 		switch (status)
 		{
 		case GM_NET_COMM_NOT_SUPPORTED:
-			gm_show_error_dialog("Gappman compiled without network support",
-								 (void *)mainwin, (void *)gm_quit_program);
+			gm_layout_show_error_dialog("Gappman compiled without network support",
+								 (void *)mainwin, (void *)quit_program);
 			break;;
 		case GM_COULD_NOT_RESOLVE_HOSTNAME:
-			gm_show_error_dialog("Could not resolve hostname: localhost",
-								 (void *)mainwin, (void *)gm_quit_program);
+			gm_layout_show_error_dialog("Could not resolve hostname: localhost",
+								 (void *)mainwin, (void *)quit_program);
 			break;;
 		case GM_COULD_NOT_CONNECT:
-			gm_show_error_dialog
+			gm_layout_show_error_dialog
 				("Could not connect to gappman.\nCheck that gappman is running.",
-				 (void *)mainwin, (void *)gm_quit_program);
+				 (void *)mainwin, (void *)quit_program);
 			break;;
 		case GM_COULD_NOT_SEND_MESSAGE:
-			gm_show_error_dialog
+			gm_layout_show_error_dialog
 				("Could not sent message to localhost.\nCheck that gappman is running",
-				 (void *)mainwin, (void *)gm_quit_program);
+				 (void *)mainwin, (void *)quit_program);
 			break;;
 		case GM_COULD_NOT_DISCONNECT:
-			gm_show_error_dialog("Could not disconnect from gappman.",
-								 (void *)mainwin, (void *)gm_quit_program);
+			gm_layout_show_error_dialog("Could not disconnect from gappman.",
+								 (void *)mainwin, (void *)quit_program);
 			break;;
 		default:
-			gm_show_error_dialog
+			gm_layout_show_error_dialog
 				("An undefined error occured when contacting gappman.",
-				 (void *)mainwin, (void *)gm_quit_program);
+				 (void *)mainwin, (void *)quit_program);
 			break;;
 		}
 	}
@@ -437,21 +452,21 @@ int main(int argc, char **argv)
 	{
 		if (started_procs == NULL)
 		{
-			gm_show_error_dialog("No programs started by gappman.",
-								 (void *)mainwin, (void *)gm_quit_program);
+			gm_layout_show_error_dialog("No programs started by gappman.",
+								 (void *)mainwin, (void *)quit_program);
 		}
 		else if (gm_get_confpath_from_gappman
 				 (2103, "localhost", &gappman_confpath) != GM_SUCCES)
 		{
-			gm_show_error_dialog
+			gm_layout_show_error_dialog
 				("Could not retrieve gappman configuration file\n",
-				 (void *)mainwin, (void *)gm_quit_program);
+				 (void *)mainwin, (void *)quit_program);
 		}
     ///< \todo replace gm_load_conf with gm_get_programs_from_gappman
 		else if (gm_load_conf(gappman_confpath) != 0)
 		{
 			msg = g_strdup_printf("Could not load gappman configuration file:\n%s\n", gappman_confpath);
-			gm_show_error_dialog(msg, (void *)mainwin, (void *)gm_quit_program);
+			gm_layout_show_error_dialog(msg, (void *)mainwin, (void *)quit_program);
 			g_free(msg);
 		}
 		else
@@ -539,7 +554,7 @@ int main(int argc, char **argv)
 				hbox = gtk_hbox_new(FALSE, 10);
 				// cancel button
 				button =
-					gm_create_label_button("Cancel", (void *)gm_quit_program,
+					gm_layout_create_label_button("Cancel", (void *)quit_program,
 										   NULL);
 				gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 				gtk_widget_show(button);
@@ -552,8 +567,8 @@ int main(int argc, char **argv)
 			}
 			else
 			{
-				gm_show_error_dialog("No programs started by gappman.",
-									 (void *)mainwin, (void *)gm_quit_program);
+				gm_layout_show_error_dialog("No programs started by gappman.",
+									 (void *)mainwin, (void *)quit_program);
 			}
 		}
 	}

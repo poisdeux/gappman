@@ -47,7 +47,7 @@ static void release_lock()
 static void destroy_widget(GtkWidget * dummy, GdkEvent * event,
 						   GtkWidget * widget)
 {
-	if (gm_check_key(event))
+	if (gm_layout_check_key(event))
 	{
 		gtk_widget_destroy(widget);
 	}
@@ -120,7 +120,7 @@ static gint exec_program(nm_elements * elt)
 static void exec_program_by_gtk_callback(GtkWidget * widget, GdkEvent * event,
 										 nm_elements * elt)
 {
-	if (gm_check_key(event) == FALSE)
+	if (gm_layout_check_key(event) == FALSE)
 	{
 		return;
 	}
@@ -130,7 +130,7 @@ static void exec_program_by_gtk_callback(GtkWidget * widget, GdkEvent * event,
 static void perform_action(GtkWidget * widget, GdkEvent * event,
 						   nm_elements * elt)
 {
-	if (gm_check_key(event) == FALSE)
+	if (gm_layout_check_key(event) == FALSE)
 	{
 		return;
 	}
@@ -141,7 +141,7 @@ static void perform_action(GtkWidget * widget, GdkEvent * event,
 	}
 	else
 	{
-		gm_show_confirmation_dialog
+		gm_layout_show_confirmation_dialog
 			("Action already started.\nDo you want to start it anyway?",
 			 "Start action", exec_program_by_gtk_callback, elt, "Cancel", NULL,
 			 NULL, NULL);
@@ -211,7 +211,7 @@ static void show_menu()
 	{
 		markup =
 			g_markup_printf_escaped("<span size=\"%d\">%s</span>",
-									gm_get_fontsize(), stati->name);
+									gm_layout_get_fontsize(), stati->name);
 		label = gtk_label_new("");
 		gtk_label_set_markup(GTK_LABEL(label), markup);
 		g_free(markup);
@@ -248,10 +248,10 @@ static void show_menu()
 		label = gtk_label_new("");
 		markup =
 			g_markup_printf_escaped("<span size=\"%d\">%s</span>",
-									gm_get_fontsize(), actions->name);
+									gm_layout_get_fontsize(), actions->name);
 		gtk_label_set_markup(GTK_LABEL(label), markup);
 		g_free(markup);
-		button = gm_create_empty_button(perform_action, actions);
+		button = gm_layout_create_empty_button(perform_action, actions);
 		gtk_container_add(GTK_CONTAINER(button), label);
 		gtk_widget_show(label);
 		gtk_container_add(GTK_CONTAINER(vbox), button);
@@ -260,7 +260,7 @@ static void show_menu()
 		actions = actions->next;
 	}
 
-	button = gm_create_label_button("Cancel", destroy_widget, menuwin);
+	button = gm_layout_create_label_button("Cancel", destroy_widget, menuwin);
 	gtk_container_add(GTK_CONTAINER(vbox), button);
 	gtk_widget_show(button);
 	gtk_widget_show(vbox);
@@ -292,7 +292,7 @@ G_MODULE_EXPORT int gm_module_init()
 	{
 
 		stati->image_success =
-			GTK_IMAGE(gm_load_image
+			GTK_IMAGE(gm_layout_load_image
 					  ("gm_netman_success", (char *)stati->logosuccess,
 					   (char *)nm_get_cache_location(), (char *)stati->name,
 					   main_button_width, main_button_height));
@@ -300,7 +300,7 @@ G_MODULE_EXPORT int gm_module_init()
 		g_object_ref(stati->image_success);
 
 		stati->image_fail =
-			GTK_IMAGE(gm_load_image
+			GTK_IMAGE(gm_layout_load_image
 					  ("gm_netman_fail", (char *)stati->logofail,
 					   (char *)nm_get_cache_location(), (char *)stati->name,
 					   main_button_width, main_button_height));
@@ -313,7 +313,7 @@ G_MODULE_EXPORT int gm_module_init()
 	if (nm_get_filename_logounavail() != NULL)
 	{
 		image_unavail =
-			GTK_IMAGE(gm_load_image
+			GTK_IMAGE(gm_layout_load_image
 					  ("gm_netman_unavail",
 					   (char *)nm_get_filename_logounavail(),
 					   (char *)nm_get_cache_location(), "netman",

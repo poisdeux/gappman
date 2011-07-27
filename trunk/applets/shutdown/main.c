@@ -39,6 +39,15 @@ static void usage()
 
 }
 
+static void quit_program(GtkWidget * dummy, GdkEvent * event)
+{
+  // Only start program if spacebar or mousebutton is pressed
+  if( gm_layout_check_key(event) )
+  {
+    gtk_main_quit();
+  }
+}
+
 ///< \todo check if startprogram can be replaced by a generic startprograms in a lib. BTW: Appmanager also uses a startprogram function.
 static gboolean startprogram(GtkWidget * widget, struct menu_element *elt)
 {
@@ -208,13 +217,13 @@ int main(int argc, char **argv)
 
 #if defined(DEBUG)
   gm_get_window_geometry_from_gappman(2103, "localhost", &width, &height);
-  gm_set_window_geometry(width, height);
+  gm_layout_set_window_geometry(width, height);
 #endif
 
 	if (actions != NULL)
 	{
 			align =
-				gm_create_menu(actions, &process_startprogram_event);
+				gm_layout_create_menu(actions, &process_startprogram_event);
 		gtk_container_add(GTK_CONTAINER(vbox), align);
 		gtk_widget_show(align);
 	}
@@ -222,7 +231,7 @@ int main(int argc, char **argv)
 	hbox = gtk_hbox_new(FALSE, 10);
 
 	// cancel button
-	button = gm_create_label_button("Cancel", (void *)gm_quit_program, NULL);
+	button = gm_layout_create_label_button("Cancel", (void *)quit_program, NULL);
 	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 

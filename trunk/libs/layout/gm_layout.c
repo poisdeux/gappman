@@ -1,5 +1,5 @@
 /**
- * \file gm_layout.c
+ * \file gm_layout_layout.c
  * \brief Main layout functions to create the user interface
  *
  *
@@ -32,7 +32,24 @@ static int window_height = 600;
 #define MAXCHARSINLABEL 10;		///< amount of characters we take as a
 								// maximum to determine the fontsize.
 
-gboolean gm_check_key(GdkEvent * event)
+static void gm_layout_destroy_widget(GtkWidget * dummy, GdkEvent * event, GtkWidget * widget)
+{
+  if ( gm_layout_check_key(event) )
+  {
+    gtk_widget_destroy(widget);
+  }
+}
+
+static void gm_layout_quit_program(GtkWidget * dummy, GdkEvent * event)
+{
+  // Only start program if spacebar or mousebutton is pressed
+  if( gm_layout_check_key(event) )
+  {
+    gtk_main_quit();
+  }
+}
+
+gboolean gm_layout_check_key(GdkEvent * event)
 {
 	// Only start program if spacebar or mousebutton is pressed
 	if (((GdkEventKey *) event)->keyval == 32
@@ -44,24 +61,7 @@ gboolean gm_check_key(GdkEvent * event)
 	return FALSE;
 }
 
-void gm_destroy_widget(GtkWidget * dummy, GdkEvent * event, GtkWidget * widget)
-{
-	if ( gm_check_key(event) )
-	{
-		gtk_widget_destroy(widget);
-	}
-}
-
-void gm_quit_program(GtkWidget * dummy, GdkEvent * event)
-{
-	// Only start program if spacebar or mousebutton is pressed
-  if( gm_check_key(event) )
-	{
-		gtk_main_quit();
-	}
-}
-
-void gm_show_confirmation_dialog(gchar * message,
+void gm_layout_show_confirmation_dialog(gchar * message,
 								 gchar * msg_button1, void *callback1,
 								 void *data1, gchar * msg_button2,
 								 void *callback2, void *data2,
@@ -95,7 +95,7 @@ void gm_show_confirmation_dialog(gchar * message,
 	gtk_box_pack_start(GTK_BOX(hbox), stock_image, FALSE, FALSE, 0);
 	gtk_widget_show(stock_image);
 
-	label = gm_create_label(message);
+	label = gm_layout_create_label(message);
 	gtk_misc_set_padding(GTK_MISC(label), 5, 5);
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 	gtk_widget_show(label);
@@ -105,16 +105,16 @@ void gm_show_confirmation_dialog(gchar * message,
 
 	hbox = gtk_hbox_new(FALSE, 0);
 
-	button = gm_create_label_button(msg_button1, G_CALLBACK(callback1), data1);
-  g_signal_connect(G_OBJECT(button), "button_release_event", G_CALLBACK(gm_destroy_widget), window);
-  g_signal_connect(G_OBJECT(button), "key_release_event", G_CALLBACK(gm_destroy_widget), window);
+	button = gm_layout_create_label_button(msg_button1, G_CALLBACK(callback1), data1);
+  g_signal_connect(G_OBJECT(button), "button_release_event", G_CALLBACK(gm_layout_destroy_widget), window);
+  g_signal_connect(G_OBJECT(button), "key_release_event", G_CALLBACK(gm_layout_destroy_widget), window);
 
 	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
 
-	button = gm_create_label_button(msg_button2, G_CALLBACK(callback2), data2);
-  g_signal_connect(G_OBJECT(button), "button_release_event", G_CALLBACK(gm_destroy_widget), window);
-  g_signal_connect(G_OBJECT(button), "key_release_event", G_CALLBACK(gm_destroy_widget), window);
+	button = gm_layout_create_label_button(msg_button2, G_CALLBACK(callback2), data2);
+  g_signal_connect(G_OBJECT(button), "button_release_event", G_CALLBACK(gm_layout_destroy_widget), window);
+  g_signal_connect(G_OBJECT(button), "key_release_event", G_CALLBACK(gm_layout_destroy_widget), window);
 
 	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
@@ -126,7 +126,7 @@ void gm_show_confirmation_dialog(gchar * message,
 	gtk_widget_show(window);
 }
 
-void gm_show_error_dialog(gchar * message, GtkWidget * parent_window,
+void gm_layout_show_error_dialog(gchar * message, GtkWidget * parent_window,
 						  void *callback)
 {
 	GtkWidget *window;
@@ -168,7 +168,7 @@ void gm_show_error_dialog(gchar * message, GtkWidget * parent_window,
 	gtk_box_pack_start(GTK_BOX(hbox), stock_image, FALSE, FALSE, 0);
 	gtk_widget_show(stock_image);
 
-	label = gm_create_label(message);
+	label = gm_layout_create_label(message);
 	gtk_misc_set_padding(GTK_MISC(label), 5, 5);
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 	gtk_widget_show(label);
@@ -176,9 +176,9 @@ void gm_show_error_dialog(gchar * message, GtkWidget * parent_window,
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
 	gtk_widget_show(hbox);
 
-	button = gm_create_label_button("Close", G_CALLBACK(callback), parent_window);
-  g_signal_connect(G_OBJECT(button), "button_release_event", G_CALLBACK(gm_destroy_widget), window);
-  g_signal_connect(G_OBJECT(button), "key_release_event", G_CALLBACK(gm_destroy_widget), window);
+	button = gm_layout_create_label_button("Close", G_CALLBACK(callback), parent_window);
+  g_signal_connect(G_OBJECT(button), "button_release_event", G_CALLBACK(gm_layout_destroy_widget), window);
+  g_signal_connect(G_OBJECT(button), "key_release_event", G_CALLBACK(gm_layout_destroy_widget), window);
 
 	gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, FALSE, 0);
 	gtk_widget_show(button);
@@ -188,23 +188,23 @@ void gm_show_error_dialog(gchar * message, GtkWidget * parent_window,
 	gtk_widget_show(window);
 }
 
-int gm_get_fontsize()
+int gm_layout_get_fontsize()
 {
 	return fontsize;
 }
 
-void gm_set_fontsize(int size)
+void gm_layout_set_fontsize(int size)
 {
 	fontsize = size;
 }
 
-void gm_set_window_geometry(int width, int height)
+void gm_layout_set_window_geometry(int width, int height)
 {
 	window_width = width;
 	window_height = height;
 }
 
-GtkWidget *gm_create_label(gchar *text)
+GtkWidget *gm_layout_create_label(gchar *text)
 {
 	GtkWidget *label;
 	gchar *markup;
@@ -225,20 +225,20 @@ GtkWidget *gm_create_label(gchar *text)
 	gtk_widget_set_size_request(label, label_width, label_height);
 
 #if defined(DEBUG)
-g_debug("gm_create_label: window: %dx%d, label: %dx%d", window_width, window_height, label_width, label_height);
+g_debug("gm_layout_create_label: window: %dx%d, label: %dx%d", window_width, window_height, label_width, label_height);
 #endif
 
 	return label;
 }
 
-GtkWidget *gm_create_label_button(gchar * buttontext, void *callbackfunc,
+GtkWidget *gm_layout_create_label_button(gchar * buttontext, void *callbackfunc,
 								  void *data)
 {
 	GtkWidget *button;
 	GtkWidget *label;
 
-	label = gm_create_label(buttontext);
-	button = gm_create_empty_button(callbackfunc, data);
+	label = gm_layout_create_label(buttontext);
+	button = gm_layout_create_empty_button(callbackfunc, data);
 	gtk_container_add(GTK_CONTAINER(button), label);
 	gtk_widget_show(label);
 
@@ -282,7 +282,7 @@ static GdkPixbuf *scale_image(GtkWidget * image, int max_width, int max_height)
 	return gdk_pixbuf_scale_simple(pixbuf, width, height, GDK_INTERP_BILINEAR);
 }
 
-GtkWidget *gm_load_image(gchar *elt_name, gchar *elt_logo,
+GtkWidget *gm_layout_load_image(gchar *elt_name, gchar *elt_logo,
 						 gchar *cacheloc, gchar *programname,
 						 int max_width, int max_height)
 {
@@ -363,7 +363,7 @@ static GtkWidget *image_label_box_hor(struct menu_element * elt, int max_width,
 
 	/* Now on to the image stuff */
 	image =
-		gm_load_image((char *)elt->name, (char *)elt->logo,
+		gm_layout_load_image((char *)elt->name, (char *)elt->logo,
 					  (char *) gm_get_cache_location(), (char *) gm_get_programname(), max_width,
 					  max_height);
 	gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(image), FALSE, FALSE, 3);
@@ -400,13 +400,13 @@ static GtkWidget *image_label_box_vert(struct menu_element * elt, int max_width,
 
 	if ((elt->printlabel != 0) && (elt->name != NULL))
 	{
-		label = gm_create_label(elt->name);
+		label = gm_layout_create_label(elt->name);
 
 		//obtain the size for label so we can account for it
 		//when determining the image size
 		gtk_widget_size_request(label, &requisition);
 		image =
-			gm_load_image((char *)elt->name, (char *)elt->logo,
+			gm_layout_load_image((char *)elt->name, (char *)elt->logo,
 						(char*) gm_get_cache_location(), (char*) gm_get_programname(), max_width,
 					  max_height - requisition.height);
 
@@ -420,7 +420,7 @@ static GtkWidget *image_label_box_vert(struct menu_element * elt, int max_width,
 	else
 	{
 		image =
-			gm_load_image((char *)elt->name, (char *)elt->logo,
+			gm_layout_load_image((char *)elt->name, (char *)elt->logo,
 						(char *)gm_get_cache_location(), (char *)gm_get_programname(), max_width,
 					  max_height);
 		gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(image), TRUE, TRUE, 0);
@@ -436,7 +436,7 @@ static GtkWidget *image_label_box_vert(struct menu_element * elt, int max_width,
 * \param *box_length Pointer to a struct length holding the length value and type of the box
 * \return box width in amount of pixels
 */
-static int gm_calculate_box_length(int total_length, struct length *box_length)
+static int gm_layout_calculate_box_length(int total_length, struct length *box_length)
 {
 	int length;
 
@@ -523,7 +523,7 @@ static int calculateAmountOfElementsPerRow(int box_width, int box_height,
 	}
 }
 
-GtkWidget *gm_create_empty_button(void *callbackfunc, void *data)
+GtkWidget *gm_layout_create_empty_button(void *callbackfunc, void *data)
 {
 	GtkWidget *button;
 
@@ -558,14 +558,14 @@ GtkWidget *gm_create_empty_button(void *callbackfunc, void *data)
 	return button;
 }
 
-GtkWidget *gm_create_button(struct menu_element *elt, int max_width, int max_height,
+GtkWidget *gm_layout_create_button(struct menu_element *elt, int max_width, int max_height,
 							void (*processevent) (GtkWidget *, GdkEvent *,
 												  struct menu_element *))
 {
 	GtkWidget *button, *imagelabelbox;
 	GtkBorder border;
 
-	button = gm_create_empty_button(processevent, elt);
+	button = gm_layout_create_empty_button(processevent, elt);
 	gtk_widget_set_size_request(button, max_width, max_height);
 	if (elt->logo != NULL)
 	{
@@ -578,6 +578,7 @@ GtkWidget *gm_create_button(struct menu_element *elt, int max_width, int max_hei
 }
 
 /**
+* \todo move createpanelelement from gm_layout to appmanager.
 * \brief Create a single button
 * \param *elt pointer to menu_element struct that contains the logo image filename.
 * \param width button width
@@ -695,7 +696,7 @@ static GtkWidget *create_buttonbox(struct menu *dish, int elts_index,
 			gtk_container_add(GTK_CONTAINER(vbox), hbox);
 		}
 
-		button = gm_create_button(&(dish->elts[i]), button_width, button_height, processevent);
+		button = gm_layout_create_button(&(dish->elts[i]), button_width, button_height, processevent);
 		gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 0);
 		dish->elts[i].widget = button;
 	}
@@ -711,7 +712,7 @@ static void switch_menu_left(GtkWidget *widget, GdkEvent *event, struct menu *di
 	if( dish->boxes->prev == NULL )
 		return;
 
-	if( ! gm_check_key(event) )
+	if( ! gm_layout_check_key(event) )
 		return;
 
 	//hide current box
@@ -731,7 +732,7 @@ static void switch_menu_right(GtkWidget *widget, GdkEvent *event, struct menu *d
 	if( dish->boxes->next == NULL )
 		return;
 	
-	if( ! gm_check_key(event) )
+	if( ! gm_layout_check_key(event) )
 		return;
 
 	//hide current box
@@ -749,7 +750,7 @@ static void switch_menu_right(GtkWidget *widget, GdkEvent *event, struct menu *d
 * \param processevent function pointer to function which should be used as callback when a button is pressed.
 * \return GtkWidget pointer to a hbox that contains one or more hboxes
 */
-static GtkWidget *gm_create_buttonboxes(struct menu *dish, int button_width, int button_height,
+static GtkWidget *gm_layout_create_buttonboxes(struct menu *dish, int button_width, int button_height,
 									int elts_per_row,
 							   void (*processevent) (GtkWidget *, GdkEvent *,
 													 struct menu_element *))
@@ -781,7 +782,7 @@ static GtkWidget *gm_create_buttonboxes(struct menu *dish, int button_width, int
 	return hbuttonboxes;
 }
 
-GtkWidget *gm_create_menu(struct menu *dish,
+GtkWidget *gm_layout_create_menu(struct menu *dish,
 							   void (*processevent) (GtkWidget *, GdkEvent *,
 													 struct menu_element *))
 {
@@ -792,8 +793,8 @@ GtkWidget *gm_create_menu(struct menu *dish,
 	int elts_per_col, elts_per_row;
   int button_height, button_width;
 
-	box_width = gm_calculate_box_length(window_width, &(dish->menu_width));
-	box_height = gm_calculate_box_length(window_height, &(dish->menu_height));
+	box_width = gm_layout_calculate_box_length(window_width, &(dish->menu_width));
+	box_height = gm_layout_calculate_box_length(window_height, &(dish->menu_height));
 
 	elts_per_row =
 		calculateAmountOfElementsPerRow(box_width, box_height,
@@ -816,14 +817,14 @@ GtkWidget *gm_create_menu(struct menu *dish,
 	// The size metric is 1024th of a point.
 	fontsize = (1024 * button_width) / MAXCHARSINLABEL;
 
-	hbuttonbox = gm_create_buttonboxes(dish, button_width, button_height, elts_per_row, processevent);
+	hbuttonbox = gm_layout_create_buttonboxes(dish, button_width, button_height, elts_per_row, processevent);
 
 	//check if we got more than one buttonbox in the menu
 	if(dish->boxes->prev != NULL)
 	{
 		//add the left arrowbutton
 		fixed_box = gtk_fixed_new();
-		button = gm_create_empty_button(switch_menu_left, dish);
+		button = gm_layout_create_empty_button(switch_menu_left, dish);
 		gtk_widget_set_size_request(button, box_width*0.05, box_height);
 		//gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 0);
 		gtk_fixed_put(GTK_FIXED(fixed_box), button, 0, 0);
@@ -834,7 +835,7 @@ GtkWidget *gm_create_menu(struct menu *dish,
 		gtk_widget_show(hbuttonbox);
 
 		//add the right arrowbutton
-		button = gm_create_empty_button(switch_menu_right, dish);
+		button = gm_layout_create_empty_button(switch_menu_right, dish);
 		gtk_widget_set_size_request(button, box_width*0.05, box_height);
 		//gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 0);
 		gtk_fixed_put(GTK_FIXED(fixed_box), button, box_width-(box_width*0.05), 0);
@@ -847,7 +848,7 @@ GtkWidget *gm_create_menu(struct menu *dish,
 	return hbuttonbox;
 }
 
-GtkWidget *gm_create_panel(struct menu *dish)
+GtkWidget *gm_layout_create_panel(struct menu *dish)
 {
 	GtkWidget *button, *hbox, *vbox;
 	int elts_per_row, button_width, box_width, box_height;
@@ -858,8 +859,8 @@ GtkWidget *gm_create_panel(struct menu *dish)
 		return NULL;
 	}
 
-	box_width = gm_calculate_box_length(window_width, &(dish->menu_width));
-	box_height = gm_calculate_box_length(window_height, &(dish->menu_height));
+	box_width = gm_layout_calculate_box_length(window_width, &(dish->menu_width));
+	box_height = gm_layout_calculate_box_length(window_height, &(dish->menu_height));
 
 	vbox = gtk_vbox_new(FALSE, 0);
 
@@ -901,7 +902,7 @@ GtkWidget *gm_create_panel(struct menu *dish)
 }
 
 /* TO BE IMPLEMENTED */
-GtkWidget *gm_create_box(GtkWidget **widgets)
+GtkWidget *gm_layout_create_box(GtkWidget **widgets)
 {
 	return NULL;
 }

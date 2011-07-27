@@ -479,7 +479,7 @@ int main(int argc, char **argv)
 	if (config->window_height == -1)
 		config->window_height = config->screen_height;
 
-	gm_set_window_geometry(config->window_width, config->window_height);
+	gm_layout_set_window_geometry(config->window_width, config->window_height);
 
 	mainwin = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
@@ -519,7 +519,7 @@ int main(int argc, char **argv)
 	if (actions != NULL)
 	{
 		buttonbox =
-			gm_create_menu(actions, &process_startprogram_event);
+			gm_layout_create_menu(actions, &process_startprogram_event);
 		align_buttonbox(hbox_top, hbox_middle, hbox_bottom, buttonbox,
 						actions);
 		gtk_widget_show(buttonbox);
@@ -528,7 +528,7 @@ int main(int argc, char **argv)
 	if (programs != NULL)
 	{
 		buttonbox =
-			gm_create_menu(programs, &process_startprogram_event);
+			gm_layout_create_menu(programs, &process_startprogram_event);
 			align_buttonbox(hbox_top, hbox_middle, hbox_bottom, buttonbox,
 						programs);
 		gtk_widget_show(buttonbox);
@@ -536,7 +536,7 @@ int main(int argc, char **argv)
 
 	if (panel != NULL)
 	{
-		buttonbox = gm_create_panel(panel);
+		buttonbox = gm_layout_create_panel(panel);
 		if (buttonbox != NULL)
 		{
 			align_buttonbox(hbox_top, hbox_middle, hbox_bottom, buttonbox,

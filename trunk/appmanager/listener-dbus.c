@@ -48,7 +48,7 @@ gboolean send_window_geometry(GmAppmanager * obj, gint *width, gint *height,
 gboolean send_fontsize(GmAppmanager * obj, gint * fontsize,
 							  GError ** error)
 {
-	*fontsize = gm_get_fontsize();
+	*fontsize = gm_layout_get_fontsize();
 	return TRUE;
 }
 
