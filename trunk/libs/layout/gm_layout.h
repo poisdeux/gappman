@@ -134,6 +134,7 @@ GtkWidget *gm_layout_create_menu(struct menu *dish,
                            struct menu_element *));
 
 /**
+* \todo replace calls to gm_layout_create_panel with gm_layout_create_menu and move panel specific code to appmanager
 * \brief Creates the panel layout using the available screen height and width
 * \param dish pointer to menu structure that holds the panel elements
 * \return GtkWidget pointer to container holding the panel
