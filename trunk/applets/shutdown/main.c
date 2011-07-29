@@ -21,7 +21,7 @@
 #include <gm_parseconf.h>
 #include <gm_layout.h>
 #include <gm_generic.h>
-#include <gm_connect.h>
+#include <gm_network.h>
 
 static int WINDOWED = 0;
 
@@ -216,7 +216,7 @@ int main(int argc, char **argv)
 	vbox = gtk_vbox_new(FALSE, 10);
 
 #if defined(DEBUG)
-  gm_get_window_geometry_from_gappman(2103, "localhost", &width, &height);
+  gm_network_get_window_geometry_from_gappman(2103, "localhost", &width, &height);
   gm_layout_set_window_geometry(width, height);
 #endif
 

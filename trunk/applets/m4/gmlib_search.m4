@@ -31,7 +31,7 @@ fi
 if test -n "$LIBGM"
 then
         AC_SUBST([GM_INCLUDES], ["-I$LIBGM/generic -I$LIBGM/layout -I$LIBGM/parseconf -I$LIBGM/connect"])
-        AC_SUBST([GM_OBJS], ["$LIBGM/layout/libgm_layout.la $LIBGM/parseconf/libgm_parseconf.la $LIBGM/connect/libgm_connect.la"])
+        AC_SUBST([GM_OBJS], ["$LIBGM/layout/libgm_layout.la $LIBGM/parseconf/libgm_parseconf.la $LIBGM/connect/libgm_network.la"])
 else
         AC_SUBST([GM_INCLUDES], [""])
         AC_SUBST([GM_OBJS], [""])
@@ -40,11 +40,11 @@ fi
 #If LIBGM is still empty we check for installed libgm
 if test -z "$LIBGM"
 then
-        AC_CHECK_LIB([gm_connect], [gm_connect_to_gappman],
-                [AC_CHECK_HEADERS([gm_connect.h])
+        AC_CHECK_LIB([gm_network], [gm_network_get_started_procs_from_gappman],
+                [AC_CHECK_HEADERS([gm_network.h])
 		  LIBGM="-lgm_connect"
                   LIBS="$LIBGM $LIBS"],
-                [AC_MSG_ERROR([No libgm_connect found])])
+                [AC_MSG_ERROR([No libgm_network found])])
 
         AC_CHECK_LIB([gm_layout], [gm_create_button],
                 [AC_CHECK_HEADERS([gm_layout.h gm_changeresolution.h])

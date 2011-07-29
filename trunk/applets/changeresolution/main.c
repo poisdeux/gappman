@@ -23,7 +23,7 @@
 #include <signal.h>
 #include <gm_generic.h>
 #include <gm_layout.h>
-#include <gm_connect.h>
+#include <gm_network.h>
 #include <gm_changeresolution.h>
 #include <gm_parseconf.h>
 
@@ -110,7 +110,7 @@ static void set_default_res_for_program(GtkWidget * widget, GdkEvent * event,
 	{
 		if (gm_res_get_current_size(&current_size) == GM_SUCCES)
 		{
-			gm_set_default_resolution_for_program(2103, "localhost", elt->name,
+			gm_network_set_default_resolution_for_program(2103, "localhost", elt->name,
 												  current_size.width,
 												  current_size.height);
 		}
@@ -293,7 +293,7 @@ int main(int argc, char **argv)
 	dialog_height = gdk_screen_get_height(screen) / 3;
 
 #if defined(DEBUG)
-gm_get_window_geometry_from_gappman(2103, "localhost", &dialog_width, &dialog_height);
+gm_network_get_window_geometry_from_gappman(2103, "localhost", &dialog_width, &dialog_height);
 dialog_width /= 3;
 dialog_height /= 3;
 #endif
@@ -357,7 +357,7 @@ dialog_height /= 3;
 	}
 
 	// get generic fontsize from gappman
-	if (gm_get_fontsize_from_gappman(2103, "localhost", &fontsize) ==
+	if (gm_network_get_fontsize_from_gappman(2103, "localhost", &fontsize) ==
 		GM_SUCCES)
 	{
 		gm_layout_set_fontsize(fontsize);
@@ -368,7 +368,7 @@ dialog_height /= 3;
 	}
 
 	// get configuration file path from gappman
-	if (gm_get_confpath_from_gappman(2103, "localhost", &gappman_confpath) ==
+	if (gm_network_get_confpath_from_gappman(2103, "localhost", &gappman_confpath) ==
 		GM_SUCCES)
 	{
 		if (gm_load_conf(gappman_confpath) == GM_SUCCES)

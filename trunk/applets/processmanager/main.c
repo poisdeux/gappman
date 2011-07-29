@@ -23,7 +23,7 @@
 #include <gm_layout.h>
 #include <sys/types.h>
 #include <signal.h>
-#include <gm_connect.h>
+#include <gm_network.h>
 #include <gm_generic.h>
 
 static int WINDOWED = 0;
@@ -337,7 +337,7 @@ int main(int argc, char **argv)
 	dialog_height = gdk_screen_get_height(screen) / 3;
 
 #if defined(DEBUG)
-  gm_get_window_geometry_from_gappman(2103, "localhost", &dialog_width, &dialog_height);
+  gm_network_get_window_geometry_from_gappman(2103, "localhost", &dialog_width, &dialog_height);
 	dialog_width = dialog_width/3;
 	dialog_height = dialog_height/3;
   gm_layout_set_window_geometry(dialog_width, dialog_height);
@@ -402,7 +402,7 @@ int main(int argc, char **argv)
 		g_signal_connect(G_OBJECT(mainwin), "destroy",
 						 G_CALLBACK(gtk_main_quit), NULL);
 	}
-	status = gm_get_fontsize_from_gappman(2103, "localhost", &fontsize);;
+	status = gm_network_get_fontsize_from_gappman(2103, "localhost", &fontsize);;
 	if (status == GM_SUCCES)
 	{
 		gm_layout_set_fontsize(fontsize);
@@ -413,7 +413,7 @@ int main(int argc, char **argv)
 		fontsize = gm_layout_get_fontsize();
 	}
 	status =
-		gm_get_started_procs_from_gappman(2103, "localhost", &started_procs);
+		gm_network_get_started_procs_from_gappman(2103, "localhost", &started_procs);
 
 	if (status != GM_SUCCES)
 	{
@@ -455,14 +455,14 @@ int main(int argc, char **argv)
 			gm_layout_show_error_dialog("No programs started by gappman.",
 								 (void *)mainwin, (void *)quit_program);
 		}
-		else if (gm_get_confpath_from_gappman
+		else if (gm_network_get_confpath_from_gappman
 				 (2103, "localhost", &gappman_confpath) != GM_SUCCES)
 		{
 			gm_layout_show_error_dialog
 				("Could not retrieve gappman configuration file\n",
 				 (void *)mainwin, (void *)quit_program);
 		}
-    ///< \todo replace gm_load_conf with gm_get_programs_from_gappman
+    ///< \todo replace gm_load_conf with gm_network_get_programs_from_gappman
 		else if (gm_load_conf(gappman_confpath) != 0)
 		{
 			msg = g_strdup_printf("Could not load gappman configuration file:\n%s\n", gappman_confpath);
@@ -548,7 +548,7 @@ int main(int argc, char **argv)
 					}
 				}
 			}
-			gm_free_proceslist(started_procs);
+			gm_network_free_proceslist(started_procs);
 			if (no_progsacts_found == 0)
 			{
 				hbox = gtk_hbox_new(FALSE, 10);
