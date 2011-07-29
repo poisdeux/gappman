@@ -28,15 +28,15 @@
 #include <glib.h>
 #include <string.h>
 #include <gm_generic.h>
-#include "gm_connect.h"
+#include "gm_network.h"
 
 #if defined(WITH_DBUS_SUPPORT) && !defined(NO_LISTENER)
-#include "gm_connect-dbus.h"
+#include "gm_network-dbus.h"
 #elif !defined(NO_LISTENER)
-#include "gm_connect-socket.h"
+#include "gm_network-socket.h"
 #endif
 
-void gm_free_proceslist(struct proceslist *procslist)
+void gm_network_free_proceslist(struct proceslist *procslist)
 {
 	struct proceslist *tmp;
 	while (procslist != NULL)
@@ -47,7 +47,7 @@ void gm_free_proceslist(struct proceslist *procslist)
 	}
 }
 
-int gm_connect_to_gappman(int portno, const char *hostname, int *sockfd)
+int gm_network_connect_to_gappman(int portno, const char *hostname, int *sockfd)
 {
 #if defined(NO_LISTENER) || defined(WITH_DBUS_SUPPORT)
 	return GM_NET_COMM_NOT_SUPPORTED;
@@ -56,7 +56,7 @@ int gm_connect_to_gappman(int portno, const char *hostname, int *sockfd)
 #endif
 }
 
-int gm_get_started_procs_from_gappman(int portno, const char *hostname,
+int gm_network_get_started_procs_from_gappman(int portno, const char *hostname,
 									  struct proceslist **startedprocs)
 {
 #ifdef NO_LISTENER
@@ -69,7 +69,7 @@ int gm_get_started_procs_from_gappman(int portno, const char *hostname,
 #endif
 }
 
-int gm_get_confpath_from_gappman(int portno, const char *hostname,
+int gm_network_get_confpath_from_gappman(int portno, const char *hostname,
 								 gchar ** path)
 {
 #ifdef NO_LISTENER
@@ -81,7 +81,7 @@ int gm_get_confpath_from_gappman(int portno, const char *hostname,
 #endif
 }
 
-int gm_get_fontsize_from_gappman(int portno, const char *hostname,
+int gm_network_get_fontsize_from_gappman(int portno, const char *hostname,
 								 int *fontsize)
 {
 #ifdef NO_LISTENER
@@ -93,7 +93,7 @@ int gm_get_fontsize_from_gappman(int portno, const char *hostname,
 #endif
 }
 
-int gm_send_and_receive_message(int portno, const char *hostname, gchar * msg,
+int gm_network_send_and_receive_message(int portno, const char *hostname, gchar * msg,
 								void (*callbackfunc) (gchar *))
 {
 #if defined(WITH_DBUS_SUPPORT) || defined(NO_LISTENER)
@@ -104,7 +104,7 @@ int gm_send_and_receive_message(int portno, const char *hostname, gchar * msg,
 #endif
 }
 
-int gm_set_default_resolution_for_program(int portno, const char *hostname,
+int gm_network_set_default_resolution_for_program(int portno, const char *hostname,
 										  const gchar * name, int width,
 										  int height)
 {
@@ -120,7 +120,7 @@ int gm_set_default_resolution_for_program(int portno, const char *hostname,
 }
 
 #if defined(DEBUG)
-int gm_get_window_geometry_from_gappman(int portno, const char *hostname, int *width, int *height)
+int gm_network_get_window_geometry_from_gappman(int portno, const char *hostname, int *width, int *height)
 {
 #ifdef NO_LISTENER
 	return GM_NET_COMM_NOT_SUPPORTED;

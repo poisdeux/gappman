@@ -1,5 +1,5 @@
 /**
- * \file gm_connect.h
+ * \file gm_network_connect.h
  * \brief generic functions to retrieve or sent information from or to gappman
  *
  *
@@ -30,22 +30,22 @@ struct proceslist
 };
 
 #if defined(WITH_DBUS_SUPPORT)
-#include "gm_connect-dbus.h"
+#include "gm_network-dbus.h"
 #else
-#include "gm_connect-socket.h"
+#include "gm_network-socket.h"
 #endif // WITH_DBUS_SUPPORT
 
 /**
 * \brief Frees the proceslist structure
 * \param procslist pointer to the last element of the proceslist linked list
 */
-void gm_free_proceslist(struct proceslist *procslist);
+void gm_network_free_proceslist(struct proceslist *procslist);
 
 /**
 * \brief Connects to gappman and requests the proceslist
 * \param portno	portnumber gappman listens to. Note, this is actually not used when calling this function using the dbus version.
 * \param hostname servername of host that runs gappman. Note, this is actually not used when calling this function using the dbus version.
-* \param startedprocs adres of the pointer to a proceslist structure (call by reference). Needs to be freed after use with gm_free_proceslist(*startedprocs)
+* \param startedprocs adres of the pointer to a proceslist structure (call by reference). Needs to be freed after use with gm_network_free_proceslist(*startedprocs)
 * \return integer value
 *                       0: OK
 *                       1: Could not resolve hostname
@@ -53,7 +53,7 @@ void gm_free_proceslist(struct proceslist *procslist);
 *                       3: Could not send message
 *                       4: Could not shutdown channel/disconnect
 */
-int gm_get_started_procs_from_gappman(int portno, const char *hostname,
+int gm_network_get_started_procs_from_gappman(int portno, const char *hostname,
 									  struct proceslist **startedprocs);
 
 /**
@@ -61,9 +61,9 @@ int gm_get_started_procs_from_gappman(int portno, const char *hostname,
 * \param portno	portnumber gappman listens to. Note, this is actually not used when calling this function using the dbus version.
 * \param hostname servername of host that runs gappman. Note, this is actually not used when calling this function using the dbus version.
 * \param path pointer to a string holding the configuration path
-* \return integer value (GM_*) as defined in libs/generic/gm_generic.h
+* \return integer value (GM_*) as defined in libs/generic/gm_network_generic.h
 */
-int gm_get_confpath_from_gappman(int portno, const char *hostname,
+int gm_network_get_confpath_from_gappman(int portno, const char *hostname,
 								 gchar ** path);
 
 
@@ -72,29 +72,29 @@ int gm_get_confpath_from_gappman(int portno, const char *hostname,
 * \param portno	portnumber gappman listens to. Note, this is actually not used when calling this function using the dbus version.
 * \param hostname servername of host that runs gappman. Note, this is actually not used when calling this function using the dbus version.
 * \param fontsize adres of the pointer to an integer value (call by reference)
-* \return integer value (GM_*) as defined in libs/generic/gm_generic.h
+* \return integer value (GM_*) as defined in libs/generic/gm_network_generic.h
 */
-int gm_get_fontsize_from_gappman(int portno, const char *hostname,
+int gm_network_get_fontsize_from_gappman(int portno, const char *hostname,
 								 int *fontsize);
 
 /**
-* \brief Connects to gappman using gm_socket_connect_to_gappman. You only need to use this function if your program using the socket version.
+* \brief Connects to gappman. You only need to use this function if your program is using the socket version.
 * \param portno portnumber gappman listens to
 * \param hostname servername of host that runs gappman
 * \param sockfd pointer to int which will hold the socket filedescriptor
 * \return filedescriptor
 */
-int gm_connect_to_gappman(int portno, const char *hostname, int *sockfd);
+int gm_network_connect_to_gappman(int portno, const char *hostname, int *sockfd);
 
 /**
-* \brief calls gm_socket_send_and_receive_message to connect to gappman and send a message and receive one or more answers.
+* \brief calls gm_network_socket_send_and_receive_message to connect to gappman and send a message and receive one or more answers.
 * \param portno portnumber gappman listens to
 * \param hostname servername of host that runs gappman
 * \param msg the message that should be sent to gappman
 * \param callbackfunc callback function that should handle each message received from gappman. If NULL no messages will be received.
-* \return integer value as defined in libs/generic/gm_generic.h
+* \return integer value as defined in libs/generic/gm_network_generic.h
 */
-int gm_send_and_receive_message(int portno, const char *hostname, gchar * msg,
+int gm_network_send_and_receive_message(int portno, const char *hostname, gchar * msg,
 								void (*callbackfunc) (gchar *));
 
 /**
@@ -104,10 +104,10 @@ int gm_send_and_receive_message(int portno, const char *hostname, gchar * msg,
 * \param name name of the program for which the startup resolution should be changed.
 * \param width screen-width in pixels
 * \param height screen-height in pixels
-* \return integer value as defined in libs/generic/gm_generic.h
+* \return integer value as defined in libs/generic/gm_network_generic.h
 */
 
-int gm_set_default_resolution_for_program(int portno, const char *hostname,
+int gm_network_set_default_resolution_for_program(int portno, const char *hostname,
 										  const gchar * name, int width,
 										  int height);
 
@@ -117,9 +117,9 @@ int gm_set_default_resolution_for_program(int portno, const char *hostname,
 * \param portno portnumber gappman listens to. Note, this is actually not used when calling this function using the dbus version.
 * \param width width of the window in pixels
 * \param height height of the window in pixels
-* \return integer value (GM_*) as defined in libs/generic/gm_generic.h
+* \return integer value (GM_*) as defined in libs/generic/gm_network_generic.h
 */
-int gm_get_window_geometry_from_gappman(int portno, const char* hostname, int *width, int *height);
+int gm_network_get_window_geometry_from_gappman(int portno, const char* hostname, int *width, int *height);
 #endif // DEBUG
 
 

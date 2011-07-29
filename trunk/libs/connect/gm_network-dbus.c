@@ -27,8 +27,8 @@
 #include <string.h>
 #include <dbus/dbus-glib.h>
 #include <gm_generic.h>
-#include "gm_connect-generic.h"
-#include "gm_connect-dbus.h"
+#include "gm_network-generic.h"
+#include "gm_network-dbus.h"
 
 static GMutex *check_status_mutex;
 

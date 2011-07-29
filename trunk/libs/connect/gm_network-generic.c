@@ -10,7 +10,7 @@
  *
 */
 
-#include "gm_connect-generic.h"
+#include "gm_network-generic.h"
 #include <glib.h>
 
 struct proceslist *createnewproceslist(struct proceslist *procs)

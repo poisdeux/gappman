@@ -13,7 +13,7 @@
 #ifndef __GAPPMAN_CONNECT_GENERIC_H__
 #define __GAPPMAN_CONNECT_GENERIC_H__
 
-#include "gm_connect.h"
+#include "gm_network.h"
 
 /**
 * \brief creates a new proceslist struct and links it to the list procs
