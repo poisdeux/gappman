@@ -80,8 +80,8 @@ This adds additional code.
 AC_DEFINE([DEBUG], [1], [debug code enabled]))
 
 AC_CONFIG_FILES([Makefile
-                 connect/Makefile
-                 connect/libgm_connect.pc
+                 network/Makefile
+                 network/libgm_network.pc
                  generic/Makefile
                  layout/Makefile
                  parseconf/Makefile])
