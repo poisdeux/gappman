@@ -30,6 +30,9 @@ struct process_info
 	struct process_info *next;	///< Pointer to next process_info
 };
 
+/**
+* \brief Struct that holds all layout/window related information
+*/
 struct metadata
 {
 	gchar* conffile;
