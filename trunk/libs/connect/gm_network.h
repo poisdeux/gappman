@@ -1,5 +1,5 @@
 /**
- * \file gm_network_connect.h
+ * \file gm_network.h
  * \brief generic functions to retrieve or sent information from or to gappman
  *
  *

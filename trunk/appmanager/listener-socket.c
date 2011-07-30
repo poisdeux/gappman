@@ -251,7 +251,7 @@ static gboolean handleconnection(GIOChannel * gio, GIOCondition cond,
 	return TRUE;
 }
 
-void restart_listener(GtkWidget *win, GdkEvent *event, gpointer data)
+static void restart_listener(GtkWidget *win, GdkEvent *event, gpointer data)
 {
 	if(gm_check_key(event))
 	{

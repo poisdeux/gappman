@@ -89,15 +89,30 @@ struct _GmAppmanagerClass
 */
 GType gm_appmanager_get_type();
 
-// Functions supporting the introspection objects
+/// Functions supporting the introspection objects
+/**
+* \brief gets current fontsize from gappman and returns it by reference in fontsize
+*/
 gboolean send_fontsize(GmAppmanager * obj, gint * fontsize,
 							  GError ** error);
+/**
+* \brief gets current fontsize from gappman and returns it by reference in fontsize
+*/
 gboolean send_window_geometry(GmAppmanager * obj, gint * width, gint *height,
 							  GError ** error);
+/**
+* \brief gets current fontsize from gappman and returns it by reference in fontsize
+*/
 gboolean send_confpath(GmAppmanager * obj, gchar ** path,
 							  GError ** error);
+/**
+* \brief gets current fontsize from gappman and returns it by reference in fontsize
+*/
 gboolean send_proceslist(GmAppmanager * obj, gchar *** proceslist,
 								GError ** error);
+/**
+* \brief gets current fontsize from gappman and returns it by reference in fontsize
+*/
 gboolean update_resolution(GmAppmanager * obj, gchar * name, gint width,
 								  gint height, GError ** error);
 

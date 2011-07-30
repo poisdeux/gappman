@@ -1,5 +1,5 @@
 /**
- * \file gm_connect.c
+ * \file gm_network.c
  *
  *
  *

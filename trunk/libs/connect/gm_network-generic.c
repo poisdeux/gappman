@@ -1,5 +1,5 @@
 /**
- * \file gm_connect-generic.c
+ * \file gm_network-generic.c
  * \brief generic functions used by gm_connect-*.c
  *
  *

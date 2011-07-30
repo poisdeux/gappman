@@ -1,5 +1,5 @@
 /**
-* \file gm_layout_layout.h
+* \file gm_layout.h
 *
 *
 * GPL v2
@@ -28,7 +28,7 @@ gboolean gm_layout_check_key(GdkEvent * event);
 
 /**
 * \brief loads image and scales it making sure the image fits inside
-* max_width*max_height maintaining the correct aspect ratio
+* max_width x max_height maintaining the correct aspect ratio
 * \param elt_name name of the element
 * \param elt_logo filename of the logo image to load
 * \param cacheloc directory where the cached images are kept
@@ -126,7 +126,7 @@ GtkWidget *gm_layout_create_empty_button(void *callbackfunc, void *data);
 /**
 * \brief Creates the widget layout with regards to the window height and width
 * \param dish pointer to struct menu
-* \param processevent NULL or a function pointer to the function that should be used as callback when a button from the menu is pressed. The callback should be of the form \code void <functionname>(GtkWidget * widget, GdkEvent * event, struct menu_element * elt). \code The *elt will point to the menu_element that is associated with the button that was pressed.
+* \param processevent NULL or a function pointer to the function that should be used as callback when a button from the menu is pressed. The callback should be of the form \code void <functionname>(GtkWidget * widget, GdkEvent * event, struct menu_element * elt) \endcode The *elt will point to the menu_element that is associated with the button that was pressed.
 * \return GtkWidget pointer to a hbox that contains one or more hboxes 
 */
 GtkWidget *gm_layout_create_menu(struct menu *dish,
