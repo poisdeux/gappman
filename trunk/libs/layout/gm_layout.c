@@ -294,7 +294,6 @@ static GtkWidget *createpanelelement(struct menu_element * elt, int width,
 			elt->gm_module_start = NULL;
 			g_warning("Could not get function gm_module_start from %s\n%s",
 					  elt->module, g_module_error());
-			return NULL;
 		}
 
 		if (!g_module_symbol
@@ -303,7 +302,6 @@ static GtkWidget *createpanelelement(struct menu_element * elt, int width,
 			elt->gm_module_stop = NULL;
 			g_warning("Could not get function gm_module_stop from %s\n%s",
 					  elt->module, g_module_error());
-			return NULL;
 		}
 
 		if (!g_module_symbol
@@ -312,7 +310,6 @@ static GtkWidget *createpanelelement(struct menu_element * elt, int width,
 			elt->gm_module_init = NULL;
 			g_warning("Could not get function gm_module_init from %s\n%s",
 					  elt->module, g_module_error());
-			return NULL;
 		}
 		if (!g_module_symbol
 			(module, "gm_module_get_widget",
@@ -322,7 +319,6 @@ static GtkWidget *createpanelelement(struct menu_element * elt, int width,
 			g_warning
 				("Could not get function gm_module_get_widget from %s\n%s",
 				 elt->module, g_module_error());
-			return NULL;
 		}
 		if (elt->module_conffile != NULL)
 		{
@@ -855,7 +851,7 @@ GtkWidget *gm_layout_create_panel(struct menu *dish)
 {
 	GtkWidget *button, *hbox, *vbox;
 	int elts_per_row, button_width, box_width, box_height;
-	int i, count;
+	int i;
 
 	if (!g_module_supported())
 	{
@@ -877,7 +873,6 @@ GtkWidget *gm_layout_create_panel(struct menu *dish)
 
 	button_width = box_width / elts_per_row;
 	
-	count=0;
 	for(i = 0; i < dish->amount_of_elements; i++)
 	{
 		if ((i % elts_per_row) == 0)
@@ -891,17 +886,9 @@ GtkWidget *gm_layout_create_panel(struct menu *dish)
 		{
 			gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 1);
 		}
-		else
-		{
-			count++;
-		}
 	}
 
-	//check if any of the panelelements was succesfully added to the panel
-	if (count == i)
-		return NULL;
-	else
-		return vbox;
+	return vbox;
 }
 
 /* TO BE IMPLEMENTED */
