@@ -21,6 +21,25 @@ find -name '*.[ch]' -type f \
  -exec indent -bap -bli0 -i4 -l79 -ncs -npcs -npsl -fca -lc79 -fc1 -ts4 {} \; \
  -exec sed -i 's@// /<@///<@' {} \;
 
+
+When coding try to follow the below guidelines:
+
+* Avoid routines larger than 200 lines of code. Excluding comments and 
+  whitespace.
+* When using call-by-refrence, put parameters in input-modify-output order.
+  e.g. calculate_max_elts(struct menu *dish, int *max_elts)
+  Here dish is the input parameter and max_elts the output parameter
+* Use const parameters when a routine does not change the parameter value
+* When different routines use similar parameters use consistent parameter 
+  ordering
+* Status is returned by value or should be last in the parameter list
+* Put complex code in a separate routine with a self-explanatory name
+* Each public routine must be documented. Documentation should contain
+  a brief description and each parameter and the return value must be 
+  documented.
+* Encapsulate global data in a struct providing it a descriptive name
+* Provide descriptive names for routines. Use _ as word separator.
+
 -------------------------------------------------------------------------------
 2. Version number scheme
 -------------------------------------------------------------------------------
@@ -30,13 +49,12 @@ The following versioning scheme is used by gappman.
 <MAJOR>.<MINOR>[.<MAINTENANCE/UPDATE>]
 
 *  MAJOR version releases represent a complete implementation of a set of major
-   features. 
+   features. Raising this number requires magic.
 *  MINOR version releases include one or more major features, design changes, 
    and interface changes.
 *  MAINTENANCE/UPDATE releases are optional and include bugfixes, security fixes, 
    new applets.
 
-See docs/doxygen/html/index.html for the list of MAJOR and MINOR features.
 Only integers are allowed as versionnumbers.
 For example, the following versions are accepted:
 
@@ -173,30 +191,5 @@ Splint generates a lot of false positives. A better tool might be cppcheck.
 http://sourceforge.net/projects/cppcheck/
 It supposedly also works for C-code...
 
-Splint might be a nice tool to check the code for security vulnerabilities and 
-coding mistakes. It can be executed as follows:
 
-splint +charint -warnposix -paramuse -nullpass \
-    -I `pkg-config gtk+-2.0 --cflags` `pkg-config libxml-2.0 --cflags` \
-    -I./libs/connect/ -I./libs/generic/ -I./libs/layout/ -I./libs/parseconf/ \
-    <SOURCEFILE>
 
-It currently shows a lot of warnings.
-
-We use the following parameters to reduce the amount of warnings:
-
-  -paramuse         As we use callbacks for GTK there are functions which
-                    contain parameters that are not always used in the 
-                    function
-  -nullpass         Some of the gm functions use NULL as an indication that
-                    the default should be used. Example: gm_show_error_dialog
-                    where the callback may be NULL to use the default callback
-                    function that destroys the dialog upon pressing the 
-                    close-button.
-  -warnposix        the posix libs make splint barf about bugs in the posix libraries.
-                    Unless we intend to debug these libs we can ignore the posix warnings.
-  +charint          We use get_opts to parse commandline options. As we use chars in the 
-                    switch-statement to select the commandline options, we use chars in the 
-                    long_options struct, although the struct requires type int. As long as
-                    we use the same chars in the struct as in the switch-statement there is
-                    no problem. Hence, we may ignore these warnings.
