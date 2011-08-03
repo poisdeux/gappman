@@ -19,7 +19,7 @@ then
         #available in the project
         if test -d "$srcdir/../libs/layout" && \
            test -d "$srcdir/../libs/parseconf" && \
-           test -d "$srcdir/../libs/connect" && \
+           test -d "$srcdir/../libs/network" && \
            test -d "$srcdir/../libs/generic"
         then
                 LIBGM='$(top_srcdir)/../libs'
@@ -42,7 +42,7 @@ if test -z "$LIBGM"
 then
         AC_CHECK_LIB([gm_network], [gm_network_get_started_procs_from_gappman],
                 [AC_CHECK_HEADERS([gm_network.h])
-		  LIBGM="-lgm_connect"
+		  LIBGM="-lgm_network"
                   LIBS="$LIBGM $LIBS"],
                 [AC_MSG_ERROR([No libgm_network found])])
 
