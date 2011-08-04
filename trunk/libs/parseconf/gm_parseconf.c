@@ -15,9 +15,9 @@
 #include <libxml/xmlreader.h>
 #include <gm_generic.h>
 
-static struct menu *programs = NULL;
-static struct menu *actions = NULL;
-static struct menu *panel = NULL;
+static gm_menu *programs = NULL;
+static gm_menu *actions = NULL;
+static gm_menu *panel = NULL;
 static char *program_name;
 static char *cache_location;
 
@@ -47,10 +47,10 @@ static void printElements(xmlTextReaderPtr reader)
 	}
 }
 
-static struct menu *createMenu()
+static gm_menu *createMenu()
 {
-	struct menu *dish;
-	dish = (struct menu *) malloc(sizeof(struct menu));
+	gm_menu *dish;
+	dish = (gm_menu *) malloc(sizeof(gm_menu));
 
 	// Initial default values
 	dish->menu_width.value = 100;
@@ -60,7 +60,7 @@ static struct menu *createMenu()
 	dish->hor_alignment = 0.5;			// <! default center
 	dish->vert_alignment = 1;			// <! default center
 	dish->amount_of_elements = 0;
-	dish->elts = (struct menu_element*) malloc(5 * sizeof(struct menu_element));
+	dish->elts = (gm_menu_element *) malloc(5 * sizeof(gm_menu_element));
 	dish->boxes = NULL;
 	return dish;
 }
@@ -68,10 +68,10 @@ static struct menu *createMenu()
 /**
 * \brief creates and initializes a new menu_element struct
 */
-static struct menu_element createMenuElement()
+static gm_menu_element createMenuElement()
 {
-	struct menu_element *elt;
-	elt = (struct menu_element *) malloc(sizeof(struct menu_element));
+	gm_menu_element *elt;
+	elt = (gm_menu_element *) malloc(sizeof(gm_menu_element));
 	elt->numArguments = 0;
 	elt->logo = NULL;
 	elt->name = NULL;
@@ -116,7 +116,7 @@ static void parseLength(xmlChar * length, struct length *str_length)
 * \param *elt menu_element structure which should have its argument list expanded
 * \param *argument argument that should be added to *elt->args
 */
-static void addArgument(struct menu_element *elt, char *argument)
+static void addArgument(gm_menu_element *elt, char *argument)
 {
 	elt->numArguments++;
 	elt->args =
@@ -142,7 +142,7 @@ char *gm_get_programname()
 *        is reached.
 */
 static void
-processMenuElement(xmlTextReaderPtr reader, struct menu_element *elt,
+processMenuElement(xmlTextReaderPtr reader, gm_menu_element *elt,
 				   const char *element_name)
 {
 	xmlChar *name = NULL;
@@ -220,7 +220,7 @@ processMenuElement(xmlTextReaderPtr reader, struct menu_element *elt,
 }
 
 
-void gm_free_menu(struct menu *dish)
+void gm_free_menu(gm_menu *dish)
 {
 	int i,j;
 
@@ -244,17 +244,17 @@ void gm_free_menu(struct menu *dish)
 	}
 }
 
-struct menu *gm_get_programs()
+gm_menu *gm_get_programs()
 {
 	return programs;
 }
 
-struct menu *gm_get_actions()
+gm_menu *gm_get_actions()
 {
 	return actions;
 }
 
-struct menu *gm_get_panel()
+gm_menu *gm_get_panel()
 {
 	return panel;
 }
@@ -300,7 +300,7 @@ static void gm_parse_alignment(char *align, float *hor_align, int *vert_align)
 */
 static void processMenuElements(const char *element_name,
 								const char *group_element_name,
-								xmlTextReaderPtr reader, struct menu *dish)
+								xmlTextReaderPtr reader, gm_menu *dish)
 {
 	int ret = 1;
 	xmlChar *name;
@@ -321,8 +321,8 @@ static void processMenuElements(const char *element_name,
 			//check if we need to resize
 			if((dish->amount_of_elements % 5) == 0)
 			{
-				dish->elts = (struct menu_element*) realloc(dish->elts, 
-									(dish->amount_of_elements + 5) * sizeof(struct menu_element));
+				dish->elts = (gm_menu_element*) realloc(dish->elts, 
+									(dish->amount_of_elements + 5) * sizeof(gm_menu_element));
 			}
 		}
 
@@ -432,7 +432,7 @@ int gm_load_conf(const char *filename)
 }
 
 
-struct menu_element *gm_search_elt_by_name(gchar * name, struct menu *dish)
+gm_menu_element *gm_search_elt_by_name(gchar * name, gm_menu *dish)
 {
 	int i;
 	if(dish != NULL)

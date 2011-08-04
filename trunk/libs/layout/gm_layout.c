@@ -56,7 +56,7 @@ static void gm_layout_quit_program(GtkWidget * dummy, GdkEvent * event)
 * \param max_height maximum height for the box
 * \return GtkWidget pointer to the hbox containing the label
 */
-static GtkWidget *image_label_box_hor(struct menu_element * elt, int max_width,
+static GtkWidget *image_label_box_hor(gm_menu_element * elt, int max_width,
 									  int max_height)
 {
 	GtkWidget *box;
@@ -93,7 +93,7 @@ static GtkWidget *image_label_box_hor(struct menu_element * elt, int max_width,
 * \param max_height maximum height for the box
 * \return GtkWidget pointer to the hbox containing the label
 */
-static GtkWidget *image_label_box_vert(struct menu_element * elt, int max_width,
+static GtkWidget *image_label_box_vert(gm_menu_element * elt, int max_width,
 									   int max_height)
 {
 	GtkWidget *box;
@@ -273,7 +273,7 @@ static GdkPixbuf *scale_image(GtkWidget * image, int max_width, int max_height)
 * \param width button width
 * \param height button height
 */
-static GtkWidget *createpanelelement(struct menu_element * elt, int width,
+static GtkWidget *createpanelelement(gm_menu_element * elt, int width,
 									 int height)
 {
 	GModule *module;
@@ -362,10 +362,10 @@ static GtkWidget *createpanelelement(struct menu_element * elt, int width,
 	return elt->gm_module_get_widget();
 }
 
-static GtkWidget *create_buttonbox(struct menu *dish, int elts_index, 
+static GtkWidget *create_buttonbox(gm_menu *dish, int elts_index, 
 								int button_width, int button_height, int elts_per_row,
 								void (*processevent) (GtkWidget *, GdkEvent *,
-													 struct menu_element *))
+													 gm_menu_element *))
 {
 	GtkWidget *button, *hbox, *vbox;
 	int i;
@@ -389,7 +389,7 @@ static GtkWidget *create_buttonbox(struct menu *dish, int elts_index,
 	return vbox;
 }
 
-static void switch_menu_left(GtkWidget *widget, GdkEvent *event, struct menu *dish)
+static void switch_menu_left(GtkWidget *widget, GdkEvent *event, gm_menu *dish)
 {
 	int i;
 	GtkWidget *tmp;
@@ -409,7 +409,7 @@ static void switch_menu_left(GtkWidget *widget, GdkEvent *event, struct menu *di
 	gtk_widget_show_all(dish->boxes->box);
 }
 
-static void switch_menu_right(GtkWidget *widget, GdkEvent *event, struct menu *dish)
+static void switch_menu_right(GtkWidget *widget, GdkEvent *event, gm_menu *dish)
 {
 	int i;
 	GtkWidget *tmp;
@@ -435,13 +435,13 @@ static void switch_menu_right(GtkWidget *widget, GdkEvent *event, struct menu *d
 * \param processevent function pointer to function which should be used as callback when a button is pressed.
 * \return GtkWidget pointer to a hbox that contains one or more hboxes
 */
-static GtkWidget *gm_layout_create_buttonboxes(struct menu *dish, int button_width, int button_height,
+static GtkWidget *gm_layout_create_buttonboxes(gm_menu *dish, int button_width, int button_height,
 									int elts_per_row,
 							   void (*processevent) (GtkWidget *, GdkEvent *,
-													 struct menu_element *))
+													 gm_menu_element *))
 {
 	GtkWidget *buttonbox, *hbuttonboxes;
-	struct menu_box *tmp = NULL;
+	gm_menu_box *tmp = NULL;
 	int i;
 
 	hbuttonboxes = gtk_hbox_new(FALSE, 0);
@@ -451,7 +451,7 @@ static GtkWidget *gm_layout_create_buttonboxes(struct menu *dish, int button_wid
 		buttonbox = create_buttonbox(dish, i, button_width, button_height, elts_per_row, processevent);
 		tmp = dish->boxes;
 
-		dish->boxes = (struct menu_box *) malloc(sizeof(struct menu_box)); 
+		dish->boxes = (gm_menu_box *) malloc(sizeof(gm_menu_box)); 
 	  dish->boxes->box = buttonbox;
 		dish->boxes->prev = tmp; 	
 		dish->boxes->next = NULL;
@@ -761,9 +761,9 @@ GtkWidget *gm_layout_create_empty_button(void *callbackfunc, void *data)
 	return button;
 }
 
-GtkWidget *gm_layout_create_button(struct menu_element *elt, int max_width, int max_height,
+GtkWidget *gm_layout_create_button(gm_menu_element *elt, int max_width, int max_height,
 							void (*processevent) (GtkWidget *, GdkEvent *,
-												  struct menu_element *))
+												  gm_menu_element *))
 {
 	GtkWidget *button, *imagelabelbox;
 	GtkBorder border;
@@ -781,9 +781,9 @@ GtkWidget *gm_layout_create_button(struct menu_element *elt, int max_width, int 
 }
 
 
-GtkWidget *gm_layout_create_menu(struct menu *dish,
+GtkWidget *gm_layout_create_menu(gm_menu *dish,
 							   void (*processevent) (GtkWidget *, GdkEvent *,
-													 struct menu_element *))
+													 gm_menu_element *))
 {
 	GtkWidget *fixed_box;
 	GtkWidget *hbuttonbox;
@@ -847,7 +847,7 @@ GtkWidget *gm_layout_create_menu(struct menu *dish,
 	return hbuttonbox;
 }
 
-GtkWidget *gm_layout_create_panel(struct menu *dish)
+GtkWidget *gm_layout_create_panel(gm_menu *dish)
 {
 	GtkWidget *button, *hbox, *vbox;
 	int elts_per_row, button_width, box_width, box_height;

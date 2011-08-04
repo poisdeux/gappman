@@ -52,7 +52,7 @@ GtkWidget *gm_layout_load_image(char *elt_name, char *elt_logo,
 * \param data2 void pointer pointing to any data that should be passed as an argument when calling the callbackfunction callback2
 * \param mainwin pointer to parent window GtkWidget that called gm_layout_show_confirmation_dialog. If NULL dialog is positioned in the center.
 */
-void gm_layout_show_confirmation_dialog(gchar * message,
+void gm_layout_show_question_dialog(gchar * message,
 								 gchar * msg_button1, void *callback1,
 								 void *data1, gchar * msg_button2,
 								 void *callback2, void *data2,
@@ -111,9 +111,9 @@ GtkWidget *gm_layout_create_label_button(gchar * buttontext, void *callbackfunc,
 * \param processevent callback function that will be called when button is pressed
 * \return GtkWidget pointer to the new button
 */
-GtkWidget *gm_layout_create_button(struct menu_element *elt, int max_width, int max_height,
+GtkWidget *gm_layout_create_button(gm_menu_element *elt, int max_width, int max_height,
 							void (*processevent) (GtkWidget *, GdkEvent *,
-												  struct menu_element *));
+												  gm_menu_element *));
 
 /**
 * \brief Create a single empty button
@@ -126,12 +126,12 @@ GtkWidget *gm_layout_create_empty_button(void *callbackfunc, void *data);
 /**
 * \brief Creates the widget layout with regards to the window height and width
 * \param dish pointer to struct menu
-* \param processevent NULL or a function pointer to the function that should be used as callback when a button from the menu is pressed. The callback should be of the form \code void <functionname>(GtkWidget * widget, GdkEvent * event, struct menu_element * elt) \endcode The *elt will point to the menu_element that is associated with the button that was pressed.
+* \param processevent NULL or a function pointer to the function that should be used as callback when a button from the menu is pressed. The callback should be of the form \code void <functionname>(GtkWidget * widget, GdkEvent * event, gm_menu_element * elt) \endcode The *elt will point to the menu_element that is associated with the button that was pressed.
 * \return GtkWidget pointer to a hbox that contains one or more hboxes 
 */
-GtkWidget *gm_layout_create_menu(struct menu *dish,
+GtkWidget *gm_layout_create_menu(gm_menu *dish,
                  void (*processevent) (GtkWidget *, GdkEvent *,
-                           struct menu_element *));
+                           gm_menu_element *));
 
 /**
 * \todo replace calls to gm_layout_create_panel with gm_layout_create_menu and move panel specific code to appmanager
@@ -139,7 +139,7 @@ GtkWidget *gm_layout_create_menu(struct menu *dish,
 * \param dish pointer to menu structure that holds the panel elements
 * \return GtkWidget pointer to container holding the panel
 */
-GtkWidget *gm_layout_create_panel(struct menu *dish);
+GtkWidget *gm_layout_create_panel(gm_menu *dish);
 
 /**
 * \brief Creates a container that holds all widgets. The container will be sized with respect to the window geometry

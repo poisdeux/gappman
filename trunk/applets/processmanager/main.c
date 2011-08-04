@@ -19,12 +19,11 @@
 #include <sys/wait.h>
 #include <getopt.h>
 #include <string.h>
-#include <gm_parseconf.h>
-#include <gm_layout.h>
 #include <sys/types.h>
 #include <signal.h>
 #include <gm_network.h>
-#include <gm_generic.h>
+#include <gm_parseconf.h>
+#include <gm_layout.h>
 
 static int WINDOWED = 0;
 static GtkWidget *mainwin;
@@ -32,8 +31,8 @@ static char *color[4] = { "green", "orange", "red", "yellow" };
 static char *statusarray[6] =
 	{ "running", "sleeping", "stopped", "waiting", "zombie", "paging" };
 static int fontsize;
-static struct menu *programs;
-static struct menu *actions;
+static gm_menu *programs;
+static gm_menu *actions;
 
 static void usage()
 {
@@ -130,7 +129,7 @@ static int get_status(int PID)
 }
 
 static int kill_program(GtkWidget * widget, GdkEvent * event,
-						struct menu_element * elt)
+						gm_menu_element * elt)
 {
 	int status;
 	int count = 0;
@@ -204,7 +203,7 @@ static int kill_program(GtkWidget * widget, GdkEvent * event,
 * \brief creates a popup dialog window that allows the user to stop a program
 * \param *elt pointer to menu_element structure that contains the program to be stopped
 */
-static void showprocessdialog(struct menu_element * elt)
+static void showprocessdialog(gm_menu_element * elt)
 {
 	GtkWidget *button, *buttonbox, *label;
 	static GtkWidget *killdialogwin;
@@ -251,7 +250,7 @@ static void showprocessdialog(struct menu_element * elt)
 * \param *elt menu_element structure containing the filename and arguments of the program that should be started
 */
 static void process_startprogram_event(GtkWidget * widget, GdkEvent * event,
-									   struct menu_element * elt)
+									   gm_menu_element * elt)
 {
 
 	// Only start program if spacebar or mousebutton is pressed
@@ -265,7 +264,7 @@ static void process_startprogram_event(GtkWidget * widget, GdkEvent * event,
 }
 
 
-static GtkWidget *createrow(struct menu_element * elt, int width, int height)
+static GtkWidget *createrow(gm_menu_element * elt, int width, int height)
 {
 	GtkWidget *hbox, *statuslabel;
 	gchar *markup;

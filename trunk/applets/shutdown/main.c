@@ -20,7 +20,6 @@
 #include <string.h>
 #include <gm_parseconf.h>
 #include <gm_layout.h>
-#include <gm_generic.h>
 #include <gm_network.h>
 
 static int WINDOWED = 0;
@@ -49,7 +48,7 @@ static void quit_program(GtkWidget * dummy, GdkEvent * event)
 }
 
 ///< \todo check if startprogram can be replaced by a generic startprograms in a lib. BTW: Appmanager also uses a startprogram function.
-static gboolean startprogram(GtkWidget * widget, struct menu_element *elt)
+static gboolean startprogram(GtkWidget * widget, gm_menu_element *elt)
 {
 	char **args;
 	int i;
@@ -107,7 +106,7 @@ static gboolean startprogram(GtkWidget * widget, struct menu_element *elt)
 * \param *elt menu_element structure containing the filename and arguments of the program that should be started
 */
 static void process_startprogram_event(GtkWidget * widget, GdkEvent * event,
-									   struct menu_element * elt)
+									   gm_menu_element * elt)
 {
 
 
@@ -142,7 +141,7 @@ int main(int argc, char **argv)
 	GtkWidget *hbox;
 	GtkWidget *align;
 	GtkWidget *mainwin;
-	struct menu *actions;
+	gm_menu *actions;
 	const char *conffile = SYSCONFDIR "/shutdown.xml";
 	int c;
 #if defined(DEBUG)

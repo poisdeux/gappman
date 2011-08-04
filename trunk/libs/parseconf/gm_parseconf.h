@@ -24,7 +24,7 @@ int gm_load_conf(const char *filename);
 * \brief relinguishes the memory occupied by a menu structure
 * \param dish menu structure
 */
-void gm_free_menu(struct menu *dish);
+void gm_free_menu(gm_menu *dish);
 
 /**
 * \brief Get the alignment of the program menu area
@@ -48,19 +48,19 @@ char *gm_get_programname();
 * \brief returns the menu_elements structure that contains the programs
 * \return pointer to menu_elements structure
 */
-struct menu *gm_get_programs();
+gm_menu *gm_get_programs();
 
 /**
 * \brief returns the menu_elements structure that contains the actions
 * \return pointer to menu_elements structure
 */
-struct menu *gm_get_actions();
+gm_menu *gm_get_actions();
 
 /**
 * \brief returns the menu_elements structure that contains the panel elements
 * \return pointer to menu_elements structure
 */
-struct menu *gm_get_panel();
+gm_menu *gm_get_panel();
 
 /**
 * \brief returns the menu element with the given name
@@ -68,6 +68,6 @@ struct menu *gm_get_panel();
 * \param programs list of menu_element structs holding the programs managed by gappman
 * \return pointer to the menu element structure
 */
-struct menu_element *gm_search_elt_by_name(gchar *name, struct menu *programs);
+gm_menu_element *gm_search_elt_by_name(gchar *name, gm_menu *programs);
 
 #endif

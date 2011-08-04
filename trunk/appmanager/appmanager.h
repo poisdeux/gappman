@@ -24,7 +24,7 @@ struct process_info
 	int status;					///< Process status which can be either
 								// running, sleeping, waiting, stopped, or
 								// zombie
-	struct menu_element *menu_elt;	///< Pointer to menu_element structure of 
+	gm_menu_element *menu_elt;	///< Pointer to menu_element structure of 
 									// started application
 	struct process_info *prev;	///< Pointer to previous process_info
 	struct process_info *next;	///< Pointer to next process_info

@@ -27,13 +27,11 @@
 #include <sys/socket.h>
 #include <string.h>
 #include <gm_changeresolution.h>
-#include <gm_parseconf.h>
 #include <gm_layout.h>
-#include <gm_generic.h>
 #include "listener.h"
 
 struct process_info *started_apps;	///< holds the currently started apps
-struct menu *programs;		///< list of all programs gappman manages.
+gm_menu *programs;		///< list of all programs gappman manages.
 								// Currently only programs need to be global
 								// as only programs have meta-info that can be 
 								// updated. E.g. resolution updates for a
@@ -48,7 +46,7 @@ struct metadata *appmanager_get_metadata()
 
 void appmanager_update_resolution(gchar * programname, int width, int height)
 {
-	struct menu_element *elt = NULL;
+	gm_menu_element *elt = NULL;
 	if (programname != NULL)
 	{
 		elt = gm_search_elt_by_name(programname, programs);
@@ -78,7 +76,7 @@ struct process_info *appmanager_get_started_apps()
 static gint check_app_status(struct process_info *local_appw)
 {
 	struct process_info *tmp;
-	struct menu_element *elt;
+	gm_menu_element *elt;
 
 	waitpid(local_appw->PID, &(local_appw->status), WNOHANG);
 
@@ -154,7 +152,7 @@ static gint check_app_status(struct process_info *local_appw)
 * \param widget pointer to the GtkWidget which belongs to the button of the application
 * \param *elt menu_element of the application the new process_info must be created for 
 */
-static void create_new_process_info_struct(int PID, struct menu_element *elt)
+static void create_new_process_info_struct(int PID, gm_menu_element *elt)
 {
 	struct process_info *tmp;
 	tmp = (struct process_info *)malloc(sizeof(struct process_info));
@@ -180,7 +178,7 @@ static void create_new_process_info_struct(int PID, struct menu_element *elt)
 * \param elt pointer to the menu_element structure for the application that needs to be started
 * \return gboolean FALSE if the fork failed or the program's executable could not be found. TRUE if fork succeeded and program was found.
 */
-static gboolean startprogram(struct menu_element *elt)
+static gboolean startprogram(gm_menu_element *elt)
 {
 	char **args;
 	int i;
@@ -253,7 +251,7 @@ static gboolean startprogram(struct menu_element *elt)
 * \param *elt menu_element structure containing the filename and arguments of the program that should be started
 */
 static void process_startprogram_event(GtkWidget * widget, GdkEvent * event,
-									   struct menu_element *elt)
+									   gm_menu_element *elt)
 {
 
 	// Only start program if spacebar or mousebutton is pressed
@@ -286,7 +284,7 @@ static void usage()
 * \brief Check all elements in elts if the integer autostart is set to 1 and start the
 *  corresponding program
 */
-static void autostartprograms(struct menu *dish)
+static void autostartprograms(gm_menu *dish)
 {
 	int i;
 	for(i = 0; i < dish->amount_of_elements; i++)
@@ -312,7 +310,7 @@ static void destroy(GtkWidget * widget, gpointer data)
 *	\brief stops the elements in the panel
 * \param *panel pointer to the menu_elements structures holding the panel elementts
 */
-static void stop_panel(struct menu *panel)
+static void stop_panel(gm_menu *panel)
 {
 	int i;
 	for(i = 0; i < panel->amount_of_elements; i++)
@@ -329,7 +327,7 @@ static void stop_panel(struct menu *panel)
 *	\brief starts the elements in the panel
 * \param *panel pointer to the menu_elements structures holding the panel elementts
 */
-static void start_panel(struct menu *panel)
+static void start_panel(gm_menu *panel)
 {
 	GThread *thread;
 	int i;
@@ -351,7 +349,7 @@ static void start_panel(struct menu *panel)
 
 static void align_buttonbox(GtkWidget * hbox_top, GtkWidget * hbox_middle,
 							GtkWidget * hbox_bottom, GtkWidget * buttonbox,
-							struct menu *dish)
+							gm_menu *dish)
 {
 	GtkWidget *hor_align;
 
@@ -388,8 +386,8 @@ int main(int argc, char **argv)
 	GtkWidget *hbox_middle;
 	GtkWidget *hbox_bottom;
 	GtkWidget *vbox;
-	struct menu *actions;
-	struct menu *panel;
+	gm_menu *actions;
+	gm_menu *panel;
 	int c;
 
 	// Needs to be called before any another glib function

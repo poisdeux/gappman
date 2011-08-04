@@ -21,7 +21,6 @@
 #include <string.h>
 #include <sys/types.h>
 #include <signal.h>
-#include <gm_generic.h>
 #include <gm_layout.h>
 #include <gm_network.h>
 #include <gm_changeresolution.h>
@@ -30,7 +29,7 @@
 static int WINDOWED = 0;
 static GtkWidget *mainwin;
 static int fontsize;
-static struct menu *programs = NULL;
+static gm_menu *programs = NULL;
 static int dialog_width;
 static int dialog_height;
 
@@ -101,7 +100,7 @@ static void revert_to_old_res(GtkWidget * widget, GdkEvent * event,
 * \param *elt menu_element pointer to the program for which the resolution must be updated
 */
 static void set_default_res_for_program(GtkWidget * widget, GdkEvent * event,
-										struct menu_element * elt)
+										gm_menu_element * elt)
 {
 	XRRScreenSize current_size;
 	// Check if spacebar or mousebutton is pressed

@@ -23,35 +23,19 @@
 #endif
 
 /**
-* enumeration for error/return codes
+* \brief menu for layout functions
 */
-enum returncodes {
-GM_SUCCES, ///< no errors detected
-GM_FAIL, ///< used to represent a general error
-GM_NO_RANDR_EXTENSION,	///< Xorg has no support for the XRANDR
-				// extension. This is fatal for
-				// gm_changeresolution
-GM_NO_SCREEN_CONFIGURATION,	///< No screen configuration could be 
-						// retrieved. This is fatal for
-						// gm_changeresolution
-GM_SIZE_NOT_AVAILABLE,	///< No screen sizes found that match a
-				// requested resolution. This should never
-				// happen and is only possible if wrong values 
-				// are passed.
-GM_COULD_NOT_RESOLVE_HOSTNAME,	///< Returned by gm_connect lib when
-						// hostname could not be resolved to
-						// an ip-address
-GM_COULD_NOT_CONNECT,	///< Returned by gm_connect lib when
-				// connection with gappman failed
-GM_COULD_NOT_SEND_MESSAGE,	///< Returned by gm_connect lib when
-					// sending message failed
-GM_COULD_NOT_DISCONNECT,	///< Returned by gm_connect lib could not 
-					// disconnect connection with gappman
-GM_COULD_NOT_LOAD_FILE,	///< Could not open or read a file
-GM_NET_COMM_NOT_SUPPORTED,	///< No support for
-					// network-communications
-GM_COULD_NOT_RECEIVE_MESSAGE ///< returned by gm_connect lib when receiving message failed
-};
+typedef struct _menu gm_menu;
+
+/**
+* \brief single element from a menu
+*/
+typedef struct _menu_element gm_menu_element;
+
+/**
+* \brief single element from a menu
+*/
+typedef struct _menu_box gm_menu_box;
 
 /**
 * \brief Function to initialize the module
@@ -85,6 +69,25 @@ typedef void *(*GM_MODULE_START) (void);
 */
 typedef int (*GM_MODULE_STOP) (void);	
 
+
+/**
+* enumeration for error/return codes
+*/
+enum returncodes {
+GM_SUCCES, ///< no errors detected
+GM_FAIL, ///< used to represent a general error
+GM_NO_RANDR_EXTENSION,	///< Xorg has no support for the XRANDR extension. This is fatal for gm_changeresolution
+GM_NO_SCREEN_CONFIGURATION,	///< No screen configuration could be retrieved. This is fatal for gm_changeresolution
+GM_SIZE_NOT_AVAILABLE,	///< No screen sizes found that match a requested resolution. This should never happen and is only possible if wrong values are passed.
+GM_COULD_NOT_RESOLVE_HOSTNAME,	///< Returned by gm_connect lib when hostname could not be resolved to an ip-address
+GM_COULD_NOT_CONNECT,	///< Returned by gm_connect lib when connection with gappman failed
+GM_COULD_NOT_SEND_MESSAGE,	///< Returned by gm_connect lib when sending message failed
+GM_COULD_NOT_DISCONNECT,	///< Returned by gm_connect lib could not disconnect connection with gappman
+GM_COULD_NOT_LOAD_FILE,	///< Could not open or read a file
+GM_NET_COMM_NOT_SUPPORTED,	///< No support for network-communications
+GM_COULD_NOT_RECEIVE_MESSAGE ///< returned by gm_connect lib when receiving message failed
+};
+
 /**
 * Enumeration for length types.
 * Currently supported types are: PERCENTAGE and PIXELS
@@ -110,10 +113,9 @@ struct length
 
 
 /**
-* \struct menu_element
 * \brief structure to hold the attributes to create the button to start a program
 */
-struct menu_element
+struct _menu_element
 {
 	gint app_width;				///< screen resolution width that should be
 								// used when the application of this
@@ -160,25 +162,23 @@ struct menu_element
 };
 
 /**
-* \struct menu_box
 * \brief forms a linked list to all boxes in a specific menu
 */
-struct menu_box
+struct _menu_box
 {
 	GtkWidget *box; ///< pointer to a buttonbox
-	struct menu_box *next; ///< pointer to next menu_box in the linked list;
-	struct menu_box *prev; ///< pointer to previous menu_box in the linked list;
+	gm_menu_box *next; ///< pointer to next menu_box in the linked list;
+	gm_menu_box *prev; ///< pointer to previous menu_box in the linked list;
 };
 
 /**
-* \struct menu
 * \brief structure which holds a list of menu elements and all meta-information regarding the menu
 */
-struct menu
+struct _menu
 {
 	int amount_of_elements;	///< total number of elements
 	int max_elts_in_single_box; ///< maximum number of elements allowed in one box.
-	struct menu_box *boxes; ///< list of menu boxes
+	gm_menu_box *boxes; ///< list of menu boxes
 	struct length menu_width;	///< holds the width of the menu this element 
 								// is a part of. Note that all elements in the 
 								// same menu should point to the same length
@@ -191,6 +191,6 @@ struct menu
 								// 0.0 = left, 0.5 = center, 1.0 = right
 	int vert_alignment;		///< vertical alignment of menu
 								// 0 = top, 1 = center, 2 = bottom
-	struct menu_element *elts; ///< list of menu elements that are part of this menu
+	gm_menu_element *elts; ///< list of menu elements that are part of this menu
 };
 #endif

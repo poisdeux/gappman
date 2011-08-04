@@ -17,10 +17,9 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <gm_layout.h>
-#include <gm_generic.h>
 #include <dbus/dbus-glib.h>
 #include <string.h>
+#include <gm_layout.h>
 #include "parseconf.h"
 
 static GtkButton *main_button = NULL;
