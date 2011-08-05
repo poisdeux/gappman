@@ -194,3 +194,4 @@ struct _menu
 	gm_menu_element *elts; ///< list of menu elements that are part of this menu
 };
 #endif
+

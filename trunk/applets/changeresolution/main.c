@@ -35,18 +35,14 @@ static int dialog_height;
 
 static void usage()
 {
-	char *conffile = SYSCONFDIR "/conf.xml";
 	printf
-		("usage: changeresolution [--help] [--screenwidth <WIDTHINPIXELS>] [--screenheight <HEIGHTINPIXELS>] [--gmconffile <FILENAME>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
+		("usage: changeresolution [--help] [--screenwidth <WIDTHINPIXELS>] [--screenheight <HEIGHTINPIXELS>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
 	printf("\n");
 	printf("--help:\t\tshows this help text\n");
 	printf
 		("--screenwidth <WIDTHINPIXELS>:\t\twidth of the main (gappman) window (default: screen width / 3)\n");
 	printf
 		("--screenheight <HEIGHTINPIXELS:\t\theight of the main (gappman) window (default: screen height / 3)\n");
-	printf
-		("--gmconffile <FILENAME>:\t\t configuration file specifying the program and actions (default: %s)\n",
-		 conffile);
 	printf
 		("--gtkrc <GTKRCFILENAME>:\t\t gtk configuration file which can be used for themeing\n");
 	printf("--windowed:\t\t creates a border around the window\n");
@@ -70,8 +66,7 @@ static void destroy_widget(GtkWidget * dummy, GdkEvent * event)
 */
 static void quit_program(GtkWidget * widget, GdkEvent * event)
 {
-	if (((GdkEventKey *) event)->keyval == 32
-		|| ((GdkEventButton *) event)->button == 1)
+	if( gm_layout_check_key(event) )
 	{
 		gm_res_free();
 		gtk_main_quit();
@@ -82,8 +77,7 @@ static void revert_to_old_res(GtkWidget * widget, GdkEvent * event,
 							  XRRScreenSize * size)
 {
 	// Check if spacebar or mousebutton is pressed
-	if (((GdkEventKey *) event)->keyval == 32
-		|| ((GdkEventButton *) event)->button == 1)
+	if( gm_layout_check_key(event) )
 	{
 		if (gm_res_changeresolution(size->width, size->height) ==
 			GM_SIZE_NOT_AVAILABLE)
@@ -104,8 +98,7 @@ static void set_default_res_for_program(GtkWidget * widget, GdkEvent * event,
 {
 	XRRScreenSize current_size;
 	// Check if spacebar or mousebutton is pressed
-	if (((GdkEventKey *) event)->keyval == 32
-		|| ((GdkEventButton *) event)->button == 1)
+	if( gm_layout_check_key(event) )
 	{
 		if (gm_res_get_current_size(&current_size) == GM_SUCCES)
 		{
@@ -127,15 +120,15 @@ static void set_default_res_for_program(GtkWidget * widget, GdkEvent * event,
 */
 static void make_default_for_program(GtkWidget * widget, GdkEvent * event)
 {
-	GtkWidget *button;
 	GtkWidget *chooseprogramwin;
-	GtkWidget *vbox;
-	int button_height;
-	int i;
+	GtkWidget *buttonbox;
+	gint button_height;
+	gint i;
+	gint amount_of_elements;
+	gm_menu_element elt;
 
 	// only show menu if spacebar or mousebutton were pressed
-	if (((GdkEventKey *) event)->keyval != 32
-		&& ((GdkEventButton *) event)->button != 1)
+	if( ! gm_layout_check_key(event) )
 		return;
 
 	chooseprogramwin = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -152,20 +145,11 @@ static void make_default_for_program(GtkWidget * widget, GdkEvent * event)
 
 	if (programs != NULL)
 	{
-		vbox = gtk_vbox_new(FALSE, 10);
-		button_height = dialog_height / (programs->amount_of_elements);
-		for(i = 0; i < programs->amount_of_elements; i++)
-		{
-			button =
-				gm_layout_create_button(&(programs->elts[i]), dialog_width, button_height,
-								 set_default_res_for_program);
-			gtk_container_add(GTK_CONTAINER(vbox), button);
-		}
-		button =
-			gm_layout_create_label_button("Done", (void *)destroy_widget,
-								   chooseprogramwin);
-		gtk_container_add(GTK_CONTAINER(vbox), button);
-		gtk_container_add(GTK_CONTAINER(chooseprogramwin), vbox);
+		g_debug("make_default_for_program: creating program list");
+		button_height = dialog_height / gm_layout_get_amount_of_elements(programs);
+		gm_layout_set_window_geometry(dialog_width, button_height);
+		buttonbox = gm_layout_create_menu(programs, &set_default_res_for_program);
+		gtk_container_add(GTK_CONTAINER(chooseprogramwin), buttonbox);
 		gtk_widget_show_all(chooseprogramwin);
 	}
 	else
@@ -191,8 +175,7 @@ static void changeresolution(GtkWidget * widget, GdkEvent * event,
 	static XRRScreenSize oldsize;
 
 	// only show menu if spacebar or mousebutton were pressed
-	if (((GdkEventKey *) event)->keyval != 32
-		&& ((GdkEventButton *) event)->button != 1)
+	if( ! gm_layout_check_key(event) )
 		return;
 
 	if (gm_res_get_current_size(&oldsize) != GM_SUCCES)
@@ -282,8 +265,7 @@ int main(int argc, char **argv)
 	int ret_value;
 	int i;
 	XRRScreenSize *sizes;
-	char *conffile = SYSCONFDIR "/conf.xml";
-	gchar *gappman_confpath;
+	gchar *gappman_confpath = SYSCONFDIR "/conf.xml";
 	gchar *text;
 
 	gtk_init(&argc, &argv);
@@ -307,13 +289,12 @@ dialog_height /= 3;
 		static struct option long_options[] = {
 			{"width", 1, 0, 'w'},
 			{"height", 1, 0, 'h'},
-			{"conffile", 1, 0, 'c'},
 			{"help", 0, 0, 'i'},
 			{"gtkrc", 1, 0, 'r'},
 			{"windowed", 0, 0, 'j'},
 			{0, 0, 0, 0}
 		};
-		c = getopt_long(argc, argv, "w:h:c:r:ij", long_options, &option_index);
+		c = getopt_long(argc, argv, "w:h:r:ij", long_options, &option_index);
 		if (c == -1)
 			break;
 
@@ -324,9 +305,6 @@ dialog_height /= 3;
 			break;
 		case 'h':
 			dialog_height = atoi(optarg);
-			break;
-		case 'c':
-			conffile = (char *)optarg;
 			break;
 		case 'r':
 			gtk_rc_parse(optarg);
@@ -371,9 +349,9 @@ dialog_height /= 3;
 		GM_SUCCES)
 	{
 		if (gm_load_conf(gappman_confpath) == GM_SUCCES)
-	{
+		{
 			programs = gm_get_programs();
-	}
+		}
 	}
 
 	gm_res_init();

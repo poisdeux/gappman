@@ -386,16 +386,25 @@ int gm_load_conf(const char *filename)
 			if (strcmp((char *)name, "programs") == 0
 				&& xmlTextReaderNodeType(reader) == 1)
 			{
+#ifdef DEBUG
+g_debug("gm_load_conf: processing %s", name);
+#endif
 				processMenuElements("program", "programs", reader, programs);
 			}
 			else if (strcmp((char *)name, "actions") == 0
 					 && xmlTextReaderNodeType(reader) == 1)
 			{
+#ifdef DEBUG
+g_debug("gm_load_conf: processing %s", name);
+#endif
 				processMenuElements("action", "actions", reader, actions);
 			}
 			else if (strcmp((char *)name, "panel") == 0
 					 && xmlTextReaderNodeType(reader) == 1)
 			{
+#ifdef DEBUG
+g_debug("gm_load_conf: processing %s", name);
+#endif
 				processMenuElements("applet", "panel", reader, panel);
 			}
 			if (strcmp((char *)name, "cachelocation") == 0
@@ -403,6 +412,9 @@ int gm_load_conf(const char *filename)
 			{
 				ret = xmlTextReaderRead(reader);
 				cache_location = (char *)xmlTextReaderValue(reader);
+#ifdef DEBUG
+g_debug("gm_load_conf: cache_location=%s", cache_location);
+#endif
 			}
 			else
 			{

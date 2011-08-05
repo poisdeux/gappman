@@ -142,10 +142,13 @@ static GtkWidget *image_label_box_vert(gm_menu_element * elt, int max_width,
 * \param *box_length Pointer to a struct length holding the length value and type of the box
 * \return box width in amount of pixels
 */
-static int gm_layout_calculate_box_length(int total_length, struct length *box_length)
+static int calculate_box_length(gint total_length, struct length *box_length)
 {
 	int length;
 
+#ifdef DEBUG
+g_debug("calculate_box_length: total_length=%d, box_length->value=%d", total_length, box_length->value);
+#endif
 	if (box_length->type == PERCENTAGE)
 	{
 		length =
@@ -159,7 +162,7 @@ static int gm_layout_calculate_box_length(int total_length, struct length *box_l
 	if (length > total_length)
 	{
 		g_warning
-			("Box length exceeds total length. This might indicate a configuration error.");
+			("Box length exceeds total length. Check your configuration file.");
 	}
 
 	return length;
@@ -435,7 +438,7 @@ static void switch_menu_right(GtkWidget *widget, GdkEvent *event, gm_menu *dish)
 * \param processevent function pointer to function which should be used as callback when a button is pressed.
 * \return GtkWidget pointer to a hbox that contains one or more hboxes
 */
-static GtkWidget *gm_layout_create_buttonboxes(gm_menu *dish, int button_width, int button_height,
+static GtkWidget *create_buttonboxes(gm_menu *dish, int button_width, int button_height,
 									int elts_per_row,
 							   void (*processevent) (GtkWidget *, GdkEvent *,
 													 gm_menu_element *))
@@ -445,6 +448,8 @@ static GtkWidget *gm_layout_create_buttonboxes(gm_menu *dish, int button_width, 
 	int i;
 
 	hbuttonboxes = gtk_hbox_new(FALSE, 0);
+
+g_debug("create_buttonboxes: amount_of_elements=%d, max_elts_in_single_box=%d", dish->amount_of_elements, dish->max_elts_in_single_box);
 
 	for(i=0;i<dish->amount_of_elements;i+=dish->max_elts_in_single_box)
 	{
@@ -768,6 +773,12 @@ GtkWidget *gm_layout_create_button(gm_menu_element *elt, int max_width, int max_
 	GtkWidget *button, *imagelabelbox;
 	GtkBorder border;
 
+#ifdef DEBUG
+g_debug("gm_layout_create_button: elt->name=%s, max_width=%d, max_height=%d", elt->name, max_width, max_height);
+g_assert(max_width <= window_width);
+g_assert(max_height <= window_height);
+#endif
+
 	button = gm_layout_create_empty_button(processevent, elt);
 	gtk_widget_set_size_request(button, max_width, max_height);
 	if (elt->logo != NULL)
@@ -792,8 +803,8 @@ GtkWidget *gm_layout_create_menu(gm_menu *dish,
 	int elts_per_col, elts_per_row;
   int button_height, button_width;
 
-	box_width = gm_layout_calculate_box_length(window_width, &(dish->menu_width));
-	box_height = gm_layout_calculate_box_length(window_height, &(dish->menu_height));
+	box_width = calculate_box_length(window_width, &(dish->menu_width));
+	box_height = calculate_box_length(window_height, &(dish->menu_height));
 
 	elts_per_row =
 		calculateAmountOfElementsPerRow(box_width, box_height,
@@ -816,7 +827,12 @@ GtkWidget *gm_layout_create_menu(gm_menu *dish,
 	// The size metric is 1024th of a point.
 	fontsize = (1024 * button_width) / MAXCHARSINLABEL;
 
-	hbuttonbox = gm_layout_create_buttonboxes(dish, button_width, button_height, elts_per_row, processevent);
+#ifdef DEBUG
+g_debug("gm_layout_create_menu: elts_per_row=%d, elts_per_col=%d, button_height=%d, button_width=%d, fontsize=%d", elts_per_row, elts_per_col, button_height, button_width, fontsize);
+#endif
+
+
+	hbuttonbox = create_buttonboxes(dish, button_width, button_height, elts_per_row, processevent);
 
 	//check if we got more than one buttonbox in the menu
 	if(dish->boxes->prev != NULL)
@@ -858,8 +874,8 @@ GtkWidget *gm_layout_create_panel(gm_menu *dish)
 		return NULL;
 	}
 
-	box_width = gm_layout_calculate_box_length(window_width, &(dish->menu_width));
-	box_height = gm_layout_calculate_box_length(window_height, &(dish->menu_height));
+	box_width = calculate_box_length(window_width, &(dish->menu_width));
+	box_height = calculate_box_length(window_height, &(dish->menu_height));
 
 	vbox = gtk_vbox_new(FALSE, 0);
 
@@ -895,4 +911,9 @@ GtkWidget *gm_layout_create_panel(gm_menu *dish)
 GtkWidget *gm_layout_create_box(GtkWidget **widgets)
 {
 	return NULL;
+}
+
+gint gm_layout_get_amount_of_elements(gm_menu *dish)
+{
+	return dish->amount_of_elements;
 }

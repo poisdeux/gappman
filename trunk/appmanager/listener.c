@@ -7,6 +7,7 @@
  *
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
+ * \bug relative confpath is not translated to absolute path. This makes some applets fail when not running under the same CWD.
  */
 
 #if !defined(NO_LISTENER)

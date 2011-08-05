@@ -149,4 +149,10 @@ GtkWidget *gm_layout_create_panel(gm_menu *dish);
 */
 GtkWidget *gm_layout_create_box(GtkWidget **widgets);
 
+/**
+* \brief returns the amount of menu elements in the menu
+* \param dish pointer to a gm_menu type
+* \return int amount of elements in dish
+*/
+gint gm_layout_get_amount_of_elements(gm_menu *dish);
 #endif
