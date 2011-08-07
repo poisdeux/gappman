@@ -50,12 +50,12 @@ static void usage()
 	exit(1);
 }
 
-static void destroy_widget(GtkWidget * dummy, GdkEvent * event)
+static void destroy_widget(GtkWidget *dummy, GdkEvent * event, GtkWidget *widget)
 {
   // Only start program if spacebar or mousebutton is pressed
   if( gm_layout_check_key(event) )
   {
-    gtk_main_quit();
+    gtk_widget_destroy(widget);
   }
 }
 
@@ -122,34 +122,34 @@ static void make_default_for_program(GtkWidget * widget, GdkEvent * event)
 {
 	GtkWidget *chooseprogramwin;
 	GtkWidget *buttonbox;
-	gint button_height;
-	gint i;
-	gint amount_of_elements;
-	gm_menu_element elt;
+	GtkWidget *button;
+	GtkWidget *vbox;
 
 	// only show menu if spacebar or mousebutton were pressed
 	if( ! gm_layout_check_key(event) )
 		return;
 
-	chooseprogramwin = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+		if (programs != NULL)
+	{
+		chooseprogramwin = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
-	gtk_window_set_transient_for(GTK_WINDOW(chooseprogramwin),
+		gtk_window_set_transient_for(GTK_WINDOW(chooseprogramwin),
 								 GTK_WINDOW(mainwin));
-	gtk_window_set_position(GTK_WINDOW(chooseprogramwin),
+		gtk_window_set_position(GTK_WINDOW(chooseprogramwin),
 							GTK_WIN_POS_CENTER_ON_PARENT);
 
-	gtk_widget_grab_focus(chooseprogramwin);
+		gtk_widget_grab_focus(chooseprogramwin);
 
-	// Remove border
-	gtk_window_set_decorated(GTK_WINDOW(chooseprogramwin), FALSE);
+		// Remove border
+		gtk_window_set_decorated(GTK_WINDOW(chooseprogramwin), FALSE);
 
-	if (programs != NULL)
-	{
-		g_debug("make_default_for_program: creating program list");
-		button_height = dialog_height / gm_menu_get_amount_of_elements(programs);
-		gm_layout_set_window_geometry(dialog_width, button_height);
+		vbox = gtk_vbox_new(FALSE, 10);
+		gm_layout_set_window_geometry(dialog_width, 0.9*dialog_height);
 		buttonbox = gm_layout_create_menu(programs, &set_default_res_for_program);
-		gtk_container_add(GTK_CONTAINER(chooseprogramwin), buttonbox);
+		gtk_container_add(GTK_CONTAINER(vbox), buttonbox);
+		button = gm_layout_create_label_button("Cancel", destroy_widget, chooseprogramwin);
+		gtk_container_add(GTK_CONTAINER(vbox), button);
+		gtk_container_add(GTK_CONTAINER(chooseprogramwin), vbox);
 		gtk_widget_show_all(chooseprogramwin);
 	}
 	else
@@ -270,13 +270,11 @@ int main(int argc, char **argv)
 
 	gtk_init(&argc, &argv);
 	screen = gdk_screen_get_default();
-	dialog_width = gdk_screen_get_width(screen) / 3;
-	dialog_height = gdk_screen_get_height(screen) / 3;
+	dialog_width = gdk_screen_get_width(screen);
+	dialog_height = gdk_screen_get_height(screen);
 
 #if defined(DEBUG)
 gm_network_get_window_geometry_from_gappman(2103, "localhost", &dialog_width, &dialog_height);
-dialog_width /= 3;
-dialog_height /= 3;
 #endif
 
 	gm_layout_set_window_geometry(dialog_width, dialog_height);
