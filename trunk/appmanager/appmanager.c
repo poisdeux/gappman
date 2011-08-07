@@ -28,6 +28,7 @@
 #include <string.h>
 #include <gm_changeresolution.h>
 #include <gm_layout.h>
+#include <gm_generic.h>
 #include "listener.h"
 
 struct process_info *started_apps;	///< holds the currently started apps
@@ -49,7 +50,7 @@ void appmanager_update_resolution(gchar * programname, int width, int height)
 	gm_menu_element *elt = NULL;
 	if (programname != NULL)
 	{
-		elt = gm_search_elt_by_name(programname, programs);
+		elt = gm_menu_search_elt_by_name(programname, programs);
 		if (elt != NULL)
 		{
 			elt->app_width = width;
@@ -577,9 +578,9 @@ int main(int argc, char **argv)
 #endif
 	
 	g_free(config);
-	gm_free_menu(programs);
-	gm_free_menu(actions);
-	gm_free_menu(panel);
+	gm_menu_free(programs);
+	gm_menu_free(actions);
+	gm_menu_free(panel);
 
 	g_message("Goodbye.");
 	return 0;

@@ -21,30 +21,6 @@
 int gm_load_conf(const char *filename);
 
 /**
-* \brief relinguishes the memory occupied by a menu structure
-* \param dish menu structure
-*/
-void gm_free_menu(gm_menu *dish);
-
-/**
-* \brief Get the alignment of the program menu area
-* \return String: [[top|left|bottom|right|center],...]
-*/
-char *gm_get_alignment();
-
-/**
-* \brief Get the path of the cache location on disk
-* \return string
-*/
-char *gm_get_cache_location();
-
-/**
-* \brief Get the name of the program as specified in the configuration file
-* \return string
-*/
-char *gm_get_programname();
-
-/**
 * \brief returns the menu_elements structure that contains the programs
 * \return pointer to menu_elements structure
 */
@@ -63,11 +39,15 @@ gm_menu *gm_get_actions();
 gm_menu *gm_get_panel();
 
 /**
-* \brief returns the menu element with the given name
-* \param name the programname of the menu element
-* \param programs list of menu_element structs holding the programs managed by gappman
-* \return pointer to the menu element structure
+* \brief Get the path of the cache location on disk
+* \return string
 */
-gm_menu_element *gm_search_elt_by_name(gchar *name, gm_menu *programs);
+gchar *gm_parseconf_get_cache_location();
+
+/**
+* \brief Get the name of the program as specified in the configuration file
+* \return string
+*/
+gchar *gm_parseconf_get_programname();
 
 #endif

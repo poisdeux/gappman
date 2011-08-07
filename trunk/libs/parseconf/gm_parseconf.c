@@ -124,16 +124,6 @@ static void addArgument(gm_menu_element *elt, char *argument)
 	elt->args[elt->numArguments - 1] = (char *)argument;
 }
 
-char *gm_get_cache_location()
-{
-	return cache_location;
-}
-
-char *gm_get_programname()
-{
-	return program_name;
-}
-
 /**
 * \brief process a program element from the XML configuration file.
 * \param reader the XMLtext reader pointing to the configuration file.
@@ -217,46 +207,6 @@ processMenuElement(xmlTextReaderPtr reader, gm_menu_element *elt,
 			ret = xmlTextReaderRead(reader);
 		}
 	}
-}
-
-
-void gm_free_menu(gm_menu *dish)
-{
-	int i,j;
-
-	if (dish != NULL)
-	{
-		for(i = 0; i < dish->amount_of_elements; i++)
-		{
-			free((xmlChar *) (dish->elts[i]).name);
-			free((xmlChar *) (dish->elts[i]).exec);
-			free((xmlChar *) (dish->elts[i]).module);
-			free((xmlChar *) (dish->elts[i]).module_conffile);
-			free((xmlChar *) (dish->elts[i]).logo);
-
-			for (j = 0; j < (dish->elts[i]).numArguments; j++)
-			{
-				free((dish->elts[i]).args[j]);
-			}
-			free((dish->elts[i]).args);
-		}
-		free(dish->elts);
-	}
-}
-
-gm_menu *gm_get_programs()
-{
-	return programs;
-}
-
-gm_menu *gm_get_actions()
-{
-	return actions;
-}
-
-gm_menu *gm_get_panel()
-{
-	return panel;
 }
 
 static void gm_parse_alignment(char *align, float *hor_align, int *vert_align)
@@ -359,6 +309,31 @@ static void processMenuElements(const char *element_name,
 	}
 }
 
+gchar *gm_parseconf_get_cache_location()
+{
+	return cache_location;
+}
+
+gchar *gm_parseconf_get_programname()
+{
+	return program_name;
+}
+
+gm_menu *gm_get_programs()
+{
+	return programs;
+}
+
+gm_menu *gm_get_actions()
+{
+	return actions;
+}
+
+gm_menu *gm_get_panel()
+{
+	return panel;
+}
+
 int gm_load_conf(const char *filename)
 {
 	xmlTextReaderPtr reader;
@@ -443,19 +418,3 @@ g_debug("gm_load_conf: cache_location=%s", cache_location);
 	return GM_SUCCES;
 }
 
-
-gm_menu_element *gm_search_elt_by_name(gchar * name, gm_menu *dish)
-{
-	int i;
-	if(dish != NULL)
-	{
-		for(i=0;i<dish->amount_of_elements;i++)
-		{	
-			if (g_strcmp0(name, (const char *)(dish->elts[i]).name) == 0)
-			{
-				return &(dish->elts[i]);
-			}
-		}
-	}
-	return NULL;
-}

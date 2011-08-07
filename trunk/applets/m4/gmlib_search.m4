@@ -31,7 +31,7 @@ fi
 if test -n "$LIBGM"
 then
         AC_SUBST([GM_INCLUDES], ["-I$LIBGM/generic -I$LIBGM/layout -I$LIBGM/parseconf -I$LIBGM/network"])
-        AC_SUBST([GM_OBJS], ["$LIBGM/layout/libgm_layout.la $LIBGM/parseconf/libgm_parseconf.la $LIBGM/network/libgm_network.la"])
+        AC_SUBST([GM_OBJS], ["$LIBGM/generic/libgm_generic.la $LIBGM/layout/libgm_layout.la $LIBGM/parseconf/libgm_parseconf.la $LIBGM/network/libgm_network.la"])
 else
         AC_SUBST([GM_INCLUDES], [""])
         AC_SUBST([GM_OBJS], [""])
@@ -40,9 +40,15 @@ fi
 #If LIBGM is still empty we check for installed libgm
 if test -z "$LIBGM"
 then
+        AC_CHECK_LIB([gm_generic], [gm_menu_free],
+                [AC_CHECK_HEADERS([gm_generic.h])
+                  LIBGM="-lgm_generic"
+                  LIBS="$LIBGM $LIBS"],
+                [AC_MSG_ERROR([No libgm_generic found])])
+
         AC_CHECK_LIB([gm_network], [gm_network_get_started_procs_from_gappman],
                 [AC_CHECK_HEADERS([gm_network.h])
-		  LIBGM="-lgm_network"
+                  LIBGM="-lgm_network"
                   LIBS="$LIBGM $LIBS"],
                 [AC_MSG_ERROR([No libgm_network found])])
 

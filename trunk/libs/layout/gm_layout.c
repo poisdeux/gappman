@@ -70,7 +70,7 @@ static GtkWidget *image_label_box_hor(gm_menu_element * elt, int max_width,
 	/* Now on to the image stuff */
 	image =
 		gm_layout_load_image((char *)elt->name, (char *)elt->logo,
-					  (char *) gm_get_cache_location(), (char *) gm_get_programname(), max_width,
+					  (char *) gm_parseconf_get_cache_location(), (char *) gm_parseconf_get_programname(), max_width,
 					  max_height);
 	gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(image), FALSE, FALSE, 3);
 	gtk_widget_show(GTK_WIDGET(image));
@@ -113,7 +113,7 @@ static GtkWidget *image_label_box_vert(gm_menu_element * elt, int max_width,
 		gtk_widget_size_request(label, &requisition);
 		image =
 			gm_layout_load_image((char *)elt->name, (char *)elt->logo,
-						(char*) gm_get_cache_location(), (char*) gm_get_programname(), max_width,
+						(char*) gm_parseconf_get_cache_location(), (char*) gm_parseconf_get_programname(), max_width,
 					  max_height - requisition.height);
 
 		gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(image), TRUE, TRUE, 0);
@@ -127,7 +127,7 @@ static GtkWidget *image_label_box_vert(gm_menu_element * elt, int max_width,
 	{
 		image =
 			gm_layout_load_image((char *)elt->name, (char *)elt->logo,
-						(char *)gm_get_cache_location(), (char *)gm_get_programname(), max_width,
+						(char *)gm_parseconf_get_cache_location(), (char *)gm_parseconf_get_programname(), max_width,
 					  max_height);
 		gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(image), TRUE, TRUE, 0);
 		gtk_widget_show(image);
@@ -913,7 +913,4 @@ GtkWidget *gm_layout_create_box(GtkWidget **widgets)
 	return NULL;
 }
 
-gint gm_layout_get_amount_of_elements(gm_menu *dish)
-{
-	return dish->amount_of_elements;
-}
+

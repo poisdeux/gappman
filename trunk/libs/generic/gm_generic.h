@@ -193,5 +193,35 @@ struct _menu
 								// 0 = top, 1 = center, 2 = bottom
 	gm_menu_element *elts; ///< list of menu elements that are part of this menu
 };
+
+/**
+* \brief relinguishes the memory occupied by a menu structure
+* \param dish menu structure
+*/
+void gm_menu_free(gm_menu *dish);
+
+/**
+* \brief returns the menu element with the given name
+* \param name the programname of the menu element
+* \param programs list of menu_element structs holding the programs managed by gappman
+* \return pointer to the menu element structure
+*/
+gm_menu_element *gm_menu_search_elt_by_name(gchar *name, gm_menu *programs);
+
+/**
+* \brief returns the amount of menu elements in the menu
+* \param dish pointer to a gm_menu type
+* \return int amount of elements in dish
+*/
+gint gm_menu_get_amount_of_elements(gm_menu *dish);
+
+/**
+* \brief returns name for menu element
+* \param elt gm_menu_element
+* \return gchar pointer
+*/
+gchar *gm_menu_element_get_name(gm_menu_element *elt);
+
+
 #endif
 

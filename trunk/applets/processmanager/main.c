@@ -573,7 +573,7 @@ int main(int argc, char **argv)
 	}
 	gtk_main();
 
-	gm_free_menu(programs);
-	gm_free_menu(actions);
+	gm_menu_free(programs);
+	gm_menu_free(actions);
 	return 0;
 }

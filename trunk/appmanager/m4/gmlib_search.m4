@@ -29,7 +29,7 @@ fi
 if test -n "$LIBGM"
 then
         AC_SUBST([GM_INCLUDES], ["-I$LIBGM/generic -I$LIBGM/layout -I$LIBGM/parseconf"])
-        AC_SUBST([GM_OBJS], ["$LIBGM/layout/libgm_layout.la $LIBGM/parseconf/libgm_parseconf.la"])
+        AC_SUBST([GM_OBJS], ["$LIBGM/generic/libgm_generic.la $LIBGM/layout/libgm_layout.la $LIBGM/parseconf/libgm_parseconf.la"])
 else
         AC_SUBST([GM_INCLUDES], [""])
         AC_SUBST([GM_OBJS], [""])

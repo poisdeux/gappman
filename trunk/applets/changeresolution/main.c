@@ -102,7 +102,7 @@ static void set_default_res_for_program(GtkWidget * widget, GdkEvent * event,
 	{
 		if (gm_res_get_current_size(&current_size) == GM_SUCCES)
 		{
-			gm_network_set_default_resolution_for_program(2103, "localhost", elt->name,
+			gm_network_set_default_resolution_for_program(2103, "localhost", gm_menu_element_get_name(elt),
 												  current_size.width,
 												  current_size.height);
 		}
@@ -146,7 +146,7 @@ static void make_default_for_program(GtkWidget * widget, GdkEvent * event)
 	if (programs != NULL)
 	{
 		g_debug("make_default_for_program: creating program list");
-		button_height = dialog_height / gm_layout_get_amount_of_elements(programs);
+		button_height = dialog_height / gm_menu_get_amount_of_elements(programs);
 		gm_layout_set_window_geometry(dialog_width, button_height);
 		buttonbox = gm_layout_create_menu(programs, &set_default_res_for_program);
 		gtk_container_add(GTK_CONTAINER(chooseprogramwin), buttonbox);
