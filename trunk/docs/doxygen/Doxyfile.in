@@ -578,6 +578,8 @@ INPUT                  = @top_srcdir@/libs/layout/gm_layout.c \
                          @top_srcdir@/libs/layout/gm_layout.h \
                          @top_srcdir@/libs/layout/gm_changeresolution.h \
                          @top_srcdir@/libs/layout/gm_changeresolution.c \
+                         @top_srcdir@/libs/generic/gm_generic.h \
+                         @top_srcdir@/libs/generic/gm_generic.c \
                          @top_srcdir@/libs/network/gm_network.c \
                          @top_srcdir@/libs/network/gm_network.h \
                          @top_srcdir@/libs/parseconf/gm_parseconf.h \

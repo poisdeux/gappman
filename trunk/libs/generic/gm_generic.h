@@ -195,10 +195,16 @@ struct _menu
 };
 
 /**
-* \brief relinguishes the memory occupied by a menu structure
+* \brief relinguishes the memory occupied by a menu
 * \param dish menu structure
 */
 void gm_menu_free(gm_menu *dish);
+
+/**
+* \brief relinguishes the memory occupied by a menu_element
+* \param dish menu structure
+*/
+void gm_menu_element_free(gm_menu_element *elt);
 
 /**
 * \brief returns the menu element with the given name
@@ -222,6 +228,25 @@ gint gm_menu_get_amount_of_elements(gm_menu *dish);
 */
 gchar *gm_menu_element_get_name(gm_menu_element *elt);
 
+/**
+* \brief creates a gm_menu with default initialization
+* \return gm_menu reference which should be freed with gm_menu_free
+*/
+gm_menu *gm_menu_create();
+
+/**
+* \brief adds a gm_menu_element to a gm_menu
+* \param elt pointer to gm_menu_element that must be added to dish
+* \param dish pointer to gm_menu that should be enlarged with elt
+* \return true is succesfull, false otherwise
+*/
+gboolean gm_menu_add_menu_elt(gm_menu_element *elt, gm_menu *dish);
+
+/**
+* \brief creates a gm_menu with default initialization
+* \return gm_menu reference which should be freed with gm_menu_free
+*/
+gm_menu_element *gm_menu_element_create(); 
 
 #endif
 

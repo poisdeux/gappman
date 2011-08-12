@@ -1,28 +1,48 @@
+/**
+ * \file gm_generic.c
+ * \brief generic stuff that is generally used by all gappman code
+ *
+ *
+ * GPL v2
+ *
+ * Authors:
+ *   Martijn Brekhof <m.brekhof@gmail.com>
+ */
+
 #include <stdlib.h>
 #include "gm_generic.h"
 
+void gm_menu_element_free(gm_menu_element *elt)
+{
+	int i;
+
+	if (elt == NULL)
+		return;
+	
+	free(elt->name);
+  free(elt->exec);
+  free(elt->module);
+  free(elt->module_conffile);
+  free(elt->logo);
+  for (i = 0; i < elt->numArguments; i++)
+  {
+    free(elt->args[i]);
+  }
+  free(elt->args);
+}
+
 void gm_menu_free(gm_menu *dish)
 {
-  int i,j;
+  int i;
 
-  if (dish != NULL)
+  if (dish == NULL)
+		return;
+    
+  for(i = 0; i < dish->amount_of_elements; i++)
   {
-    for(i = 0; i < dish->amount_of_elements; i++)
-    {
-      free((dish->elts[i]).name);
-      free((dish->elts[i]).exec);
-      free((dish->elts[i]).module);
-      free((dish->elts[i]).module_conffile);
-      free((dish->elts[i]).logo);
-
-      for (j = 0; j < (dish->elts[i]).numArguments; j++)
-      {
-        free((dish->elts[i]).args[j]);
-      }
-      free((dish->elts[i]).args);
-    }
-    free(dish->elts);
+    gm_menu_element_free(&(dish->elts[i]));
   }
+  free(dish->elts);
 }
 
 gm_menu_element *gm_menu_search_elt_by_name(gchar * name, gm_menu *dish)
@@ -49,5 +69,20 @@ gint gm_menu_get_amount_of_elements(gm_menu *dish)
 gchar *gm_menu_element_get_name(gm_menu_element *elt)
 {
   return elt->name;
+}
+
+gm_menu *gm_menu_create()
+{
+	return NULL;
+}
+
+gboolean gm_menu_add_menu_elt(gm_menu_element *elt, gm_menu *dish)
+{
+	return FALSE;
+}
+
+gm_menu_element *gm_menu_element_create()
+{
+	return NULL;
 }
 

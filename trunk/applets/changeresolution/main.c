@@ -26,12 +26,10 @@
 #include <gm_changeresolution.h>
 #include <gm_parseconf.h>
 
-static int WINDOWED = 0;
 static GtkWidget *mainwin;
-static int fontsize;
 static gm_menu *programs = NULL;
-static int dialog_width;
-static int dialog_height;
+static int window_width;
+static int window_height;
 
 static void usage()
 {
@@ -124,6 +122,7 @@ static void make_default_for_program(GtkWidget * widget, GdkEvent * event)
 	GtkWidget *buttonbox;
 	GtkWidget *button;
 	GtkWidget *vbox;
+	int window_width, window_height;
 
 	// only show menu if spacebar or mousebutton were pressed
 	if( ! gm_layout_check_key(event) )
@@ -143,12 +142,18 @@ static void make_default_for_program(GtkWidget * widget, GdkEvent * event)
 		// Remove border
 		gtk_window_set_decorated(GTK_WINDOW(chooseprogramwin), FALSE);
 
-		vbox = gtk_vbox_new(FALSE, 10);
-		gm_layout_set_window_geometry(dialog_width, 0.9*dialog_height);
+		//we need to reduce dialog height to make room for the cancel button
+		gm_layout_get_window_geometry(&window_width, &window_height);
+		gm_layout_set_window_geometry(window_width, 0.9*window_height);
+
 		buttonbox = gm_layout_create_menu(programs, &set_default_res_for_program);
+
+		vbox = gtk_vbox_new(FALSE, 10);
 		gtk_container_add(GTK_CONTAINER(vbox), buttonbox);
+
 		button = gm_layout_create_label_button("Cancel", destroy_widget, chooseprogramwin);
 		gtk_container_add(GTK_CONTAINER(vbox), button);
+
 		gtk_container_add(GTK_CONTAINER(chooseprogramwin), vbox);
 		gtk_widget_show_all(chooseprogramwin);
 	}
@@ -229,7 +234,7 @@ static void changeresolution(GtkWidget * widget, GdkEvent * event,
   ///< \todo Add timer to fallback to previous resolution when user does not respond
 }
 
-static GtkWidget *show_current_resolution(int width)
+static GtkWidget *show_current_resolution()
 {
 	GtkWidget *hbox, *label;
 	gchar *labeltext;
@@ -260,24 +265,26 @@ int main(int argc, char **argv)
 	GtkWidget *vbox;
 	GtkWidget *hbox;
 	GtkWidget *separator;
-	int c;
-	int nsize;
-	int ret_value;
-	int i;
+	gint c;
+	gint nsize;
+	gint ret_value;
+	gint i;
+  gint fontsize;
 	XRRScreenSize *sizes;
 	gchar *gappman_confpath = SYSCONFDIR "/conf.xml";
 	gchar *text;
+	int window_width, window_height;
 
 	gtk_init(&argc, &argv);
 	screen = gdk_screen_get_default();
-	dialog_width = gdk_screen_get_width(screen);
-	dialog_height = gdk_screen_get_height(screen);
+	window_width = gdk_screen_get_width(screen);
+	window_height = gdk_screen_get_height(screen);
 
 #if defined(DEBUG)
-gm_network_get_window_geometry_from_gappman(2103, "localhost", &dialog_width, &dialog_height);
+gm_network_get_window_geometry_from_gappman(2103, "localhost", &window_width, &window_height);
 #endif
 
-	gm_layout_set_window_geometry(dialog_width, dialog_height);
+	gm_layout_set_window_geometry(window_width, window_height);
 
 	mainwin = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
@@ -285,30 +292,18 @@ gm_network_get_window_geometry_from_gappman(2103, "localhost", &dialog_width, &d
 	{
 		int option_index = 0;
 		static struct option long_options[] = {
-			{"width", 1, 0, 'w'},
-			{"height", 1, 0, 'h'},
 			{"help", 0, 0, 'i'},
 			{"gtkrc", 1, 0, 'r'},
-			{"windowed", 0, 0, 'j'},
 			{0, 0, 0, 0}
 		};
-		c = getopt_long(argc, argv, "w:h:r:ij", long_options, &option_index);
+		c = getopt_long(argc, argv, "h:r:", long_options, &option_index);
 		if (c == -1)
 			break;
 
 		switch (c)
 		{
-		case 'w':
-			dialog_width = atoi(optarg);
-			break;
-		case 'h':
-			dialog_height = atoi(optarg);
-			break;
 		case 'r':
 			gtk_rc_parse(optarg);
-			break;
-		case 'j':
-			WINDOWED = 1;
 			break;
 		default:
 			usage();
@@ -318,28 +313,13 @@ gm_network_get_window_geometry_from_gappman(2103, "localhost", &dialog_width, &d
 
 	gtk_window_set_position(GTK_WINDOW(mainwin), GTK_WIN_POS_CENTER);
 	// Remove border
-	if (WINDOWED == 0)
-	{
-		gtk_window_set_decorated(GTK_WINDOW(mainwin), FALSE);
-	}
-	else
-	{
-		gtk_window_set_decorated(GTK_WINDOW(mainwin), TRUE);
-		(void)g_signal_connect(G_OBJECT(mainwin), "delete_event",
-							   G_CALLBACK(quit_program), sizes);
-		(void)g_signal_connect(G_OBJECT(mainwin), "destroy",
-							   G_CALLBACK(quit_program), sizes);
-	}
+	gtk_window_set_decorated(GTK_WINDOW(mainwin), FALSE);
 
 	// get generic fontsize from gappman
 	if (gm_network_get_fontsize_from_gappman(2103, "localhost", &fontsize) ==
 		GM_SUCCES)
 	{
 		gm_layout_set_fontsize(fontsize);
-	}
-	else
-	{
-		fontsize = gm_layout_get_fontsize();
 	}
 
 	// get configuration file path from gappman
@@ -367,7 +347,7 @@ gm_network_get_window_geometry_from_gappman(2103, "localhost", &dialog_width, &d
 	{
 		vbox = gtk_vbox_new(FALSE, 10);
 	
-		hbox = show_current_resolution(dialog_width);
+		hbox = show_current_resolution();
 		gtk_container_add(GTK_CONTAINER(vbox), hbox);
 		gtk_widget_show(hbox);
 		separator = gtk_hseparator_new();

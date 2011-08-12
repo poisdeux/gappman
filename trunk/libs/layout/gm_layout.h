@@ -80,6 +80,13 @@ int gm_layout_get_fontsize();
 void gm_layout_set_fontsize(int size);
 
 /**
+* \brief gets the window width and height that is used by the layout manager to calculate the layout
+* \param width reference to integer containing the window width 
+* \param height reference to integer containing the window height
+*/
+void gm_layout_get_window_geometry(gint *width, gint *height);
+
+/**
 * \brief sets the window width and height that should be used by the layout manager to calculate the layout
 * \param width width of the screen
 * \param height height of the screen
