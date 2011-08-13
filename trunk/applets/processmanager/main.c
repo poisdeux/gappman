@@ -493,14 +493,14 @@ int main(int argc, char **argv)
 				while (started_procs_tmp != NULL)
 				{
 					if ((g_strcmp0
-						 ((const gchar *)programs->elts[i].name,
+						 ((const gchar *)programs->elts[i]->name,
 						  started_procs_tmp->name) == 0)
 						&& (started_procs_tmp->pid != mypid))
 					{
 						no_progsacts_found = 0;
-						programs->elts[i].pid = started_procs_tmp->pid;
+						programs->elts[i]->pid = started_procs_tmp->pid;
 						hbox =
-							createrow(&(programs->elts[i]), program_width, row_height);
+							createrow(programs->elts[i], program_width, row_height);
 						gtk_container_add(GTK_CONTAINER(vbox), hbox);
 						gtk_widget_show(hbox);
 						separator = gtk_hseparator_new();
@@ -523,15 +523,15 @@ int main(int argc, char **argv)
 				while (started_procs_tmp != NULL)
 				{
 					if ((g_strcmp0
-						 ((const gchar *)actions->elts[i].name,
+						 ((const gchar *)actions->elts[i]->name,
 						  (const gchar *)started_procs_tmp->name) == 0)
 						&& (started_procs_tmp->pid != mypid))
 					{
 						no_progsacts_found = 0;
-						actions->elts[i].pid = started_procs_tmp->pid;
+						actions->elts[i]->pid = started_procs_tmp->pid;
 
 						hbox =
-							createrow(&(actions->elts[i]), program_width, row_height);
+							createrow(actions->elts[i], program_width, row_height);
 						gtk_container_add(GTK_CONTAINER(vbox), hbox);
 						gtk_widget_show(hbox);
 						separator = gtk_hseparator_new();

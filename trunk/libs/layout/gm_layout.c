@@ -385,9 +385,9 @@ static GtkWidget *create_buttonbox(gm_menu *dish, int elts_index,
 			gtk_container_add(GTK_CONTAINER(vbox), hbox);
 		}
 
-		button = gm_layout_create_button(&(dish->elts[i]), button_width, button_height, processevent);
+		button = gm_layout_create_button(dish->elts[i], button_width, button_height, processevent);
 		gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 0);
-		dish->elts[i].widget = button;
+		dish->elts[i]->widget = button;
 	}
 
 	return vbox;
@@ -904,7 +904,7 @@ GtkWidget *gm_layout_create_panel(gm_menu *dish)
 
 			gtk_container_add(GTK_CONTAINER(vbox), hbox);
 		}
-		button = createpanelelement(&(dish->elts[i]), button_width, box_height);
+		button = createpanelelement(dish->elts[i], button_width, box_height);
 		if (button != NULL)
 		{
 			gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 1);

@@ -47,46 +47,6 @@ static void printElements(xmlTextReaderPtr reader)
 	}
 }
 
-static gm_menu *createMenu()
-{
-	gm_menu *dish;
-	dish = (gm_menu *) malloc(sizeof(gm_menu));
-
-	// Initial default values
-	dish->menu_width.value = 100;
-	dish->menu_width.type = PERCENTAGE;
-	dish->menu_height.value = 100;
-	dish->menu_height.type = PERCENTAGE;
-	dish->hor_alignment = 0.5;			// <! default center
-	dish->vert_alignment = 1;			// <! default center
-	dish->amount_of_elements = 0;
-	dish->elts = (gm_menu_element *) malloc(5 * sizeof(gm_menu_element));
-	dish->boxes = NULL;
-	return dish;
-}
-
-/**
-* \brief creates and initializes a new menu_element struct
-*/
-static gm_menu_element createMenuElement()
-{
-	gm_menu_element *elt;
-	elt = (gm_menu_element *) malloc(sizeof(gm_menu_element));
-	elt->numArguments = 0;
-	elt->logo = NULL;
-	elt->name = NULL;
-	elt->exec = NULL;
-	elt->args = NULL;
-	elt->module = NULL;
-	elt->module_conffile = NULL;
-	elt->autostart = 0;
-	elt->printlabel = 0;
-	elt->app_height = -1;
-	elt->app_width = -1;
-	elt->pid = -1;
-	return *elt;
-}
-
 /**
 * \brief parse the length string to determine the used metric and fill the length struct.
 * \param *length string containing length value
@@ -112,19 +72,6 @@ static void parseLength(xmlChar * length, struct length *str_length)
 }
 
 /**
-* \brief add an argument to the argument list for elt
-* \param *elt menu_element structure which should have its argument list expanded
-* \param *argument argument that should be added to *elt->args
-*/
-static void addArgument(gm_menu_element *elt, char *argument)
-{
-	elt->numArguments++;
-	elt->args =
-		(char **)realloc(elt->args, ((elt->numArguments) * sizeof(char *)));
-	elt->args[elt->numArguments - 1] = (char *)argument;
-}
-
-/**
 * \brief process a program element from the XML configuration file.
 * \param reader the XMLtext reader pointing to the configuration file.
 * \param *elt menu_element structure that will contain the program configuration values
@@ -138,6 +85,7 @@ processMenuElement(xmlTextReaderPtr reader, gm_menu_element *elt,
 	xmlChar *name = NULL;
 	xmlChar *value = NULL;
 	int ret = 1;
+
 
 	name = BAD_CAST "--";
 
@@ -170,7 +118,9 @@ processMenuElement(xmlTextReaderPtr reader, gm_menu_element *elt,
 			}
 			else if (strcmp((char *)name, "arg") == 0)
 			{
-				addArgument(elt, (char *)value);
+				// \todo if gm_menu_element_add_argument fails we should remove the element from the menu
+        // to prevent executing a program with incorrect parameters
+				gm_menu_element_add_argument(value, elt);
 			}
 			else if (strcmp((char *)name, "autostart") == 0)
 			{
@@ -250,11 +200,12 @@ static void gm_parse_alignment(char *align, float *hor_align, int *vert_align)
 */
 static void processMenuElements(const char *element_name,
 								const char *group_element_name,
-								xmlTextReaderPtr reader, gm_menu *dish)
+								xmlTextReaderPtr reader, gm_menu *menu)
 {
 	int ret = 1;
 	xmlChar *name;
 	xmlChar *attr;
+  gm_menu_element *elt;
 
 	while (ret)
 	{
@@ -265,14 +216,17 @@ static void processMenuElements(const char *element_name,
 		if (strcmp((char *)name, element_name) == 0
 			&& xmlTextReaderNodeType(reader) == 1)
 		{
-			dish->elts[dish->amount_of_elements] = createMenuElement();
-			processMenuElement(reader, &(dish->elts[dish->amount_of_elements]), element_name);
-			dish->amount_of_elements++;
-			//check if we need to resize
-			if((dish->amount_of_elements % 5) == 0)
+			elt = gm_menu_element_create();
+			if ( elt == NULL )
+			{	
+				g_warning("processMenuElements: failed to create menu_element");
+				continue;
+			}
+			processMenuElement(reader, elt, element_name);
+
+			if ( ! gm_menu_add_menu_element(elt, menu) )
 			{
-				dish->elts = (gm_menu_element*) realloc(dish->elts, 
-									(dish->amount_of_elements + 5) * sizeof(gm_menu_element));
+				g_warning("processMenuElements: failed to add menu_element to menu");
 			}
 		}
 
@@ -283,24 +237,24 @@ static void processMenuElements(const char *element_name,
 			if (xmlTextReaderHasAttributes(reader))
 			{
 				parseLength(xmlTextReaderGetAttribute
-							(reader, (const xmlChar *)"width"), &(dish->menu_width));
+							(reader, (const xmlChar *)"width"), &(menu->menu_width));
 				parseLength(xmlTextReaderGetAttribute
-							(reader, (const xmlChar *)"height"), &(dish->menu_height));
+							(reader, (const xmlChar *)"height"), &(menu->menu_height));
 				gm_parse_alignment((char *)xmlTextReaderGetAttribute(reader,
 																	 (const
 																	  xmlChar
 																	  *)"align"),
-								   &(dish->hor_alignment), &(dish->vert_alignment));
+								   &(menu->hor_alignment), &(menu->vert_alignment));
 				attr = xmlTextReaderGetAttribute(reader, (const xmlChar *)"max_elts");
 				if ( attr != NULL )
 				{
-					dish->max_elts_in_single_box = atoi(attr);		
+					menu->max_elts_in_single_box = atoi(attr);		
 				}	
 				else
 				{
 					// set to maximum to disable creation of multiple boxes
 					// in gm_create_buttonboxes
-					dish->max_elts_in_single_box = dish->amount_of_elements;
+					menu->max_elts_in_single_box = menu->amount_of_elements;
 				}
 			}
 			// this should end parsing this group of elements
@@ -341,9 +295,9 @@ int gm_load_conf(const char *filename)
 	xmlChar *name;
 
 	// Initialize
-	programs = createMenu();
-	actions = createMenu();
-	panel = createMenu();
+	programs = gm_menu_create();
+	actions = gm_menu_create();
+	panel = gm_menu_create();
 	cache_location = NULL;
 	program_name = NULL;
 

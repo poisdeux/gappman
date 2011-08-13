@@ -191,7 +191,7 @@ struct _menu
 								// 0.0 = left, 0.5 = center, 1.0 = right
 	int vert_alignment;		///< vertical alignment of menu
 								// 0 = top, 1 = center, 2 = bottom
-	gm_menu_element *elts; ///< list of menu elements that are part of this menu
+	gm_menu_element **elts; ///< list of menu elements that are part of this menu
 };
 
 /**
@@ -247,6 +247,13 @@ gboolean gm_menu_add_menu_elt(gm_menu_element *elt, gm_menu *dish);
 * \return gm_menu reference which should be freed with gm_menu_free
 */
 gm_menu_element *gm_menu_element_create(); 
+
+/**
+* \brief add an argument to the argument list for a gm_menu_element
+* \param *elt gm_menu_element which should have its argument list expanded
+* \param *arg argument that should be added
+*/
+gboolean gm_menu_element_add_argument(gchar *arg, gm_menu_element *elt);
 
 #endif
 

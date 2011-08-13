@@ -290,9 +290,9 @@ static void autostartprograms(gm_menu *dish)
 	int i;
 	for(i = 0; i < dish->amount_of_elements; i++)
 	{
-		if (dish->elts[i].autostart == 1)
+		if (dish->elts[i]->autostart == 1)
 		{
-			startprogram(&(dish->elts[i]));
+			startprogram(dish->elts[i]);
 		}
 	}
 }
@@ -316,9 +316,9 @@ static void stop_panel(gm_menu *panel)
 	int i;
 	for(i = 0; i < panel->amount_of_elements; i++)
 	{
-		if (panel->elts[i].gm_module_stop != NULL)
+		if (panel->elts[i]->gm_module_stop != NULL)
 		{
-			panel->elts[i].gm_module_stop();
+			panel->elts[i]->gm_module_stop();
 		}
 	}
 }
@@ -335,10 +335,10 @@ static void start_panel(gm_menu *panel)
 	
 	for(i = 0; i < panel->amount_of_elements; i++)
 	{
-		if (panel->elts[i].gm_module_start != NULL)
+		if (panel->elts[i]->gm_module_start != NULL)
 		{
 			thread =
-				g_thread_create((GThreadFunc) panel->elts[i].gm_module_start, NULL,
+				g_thread_create((GThreadFunc) panel->elts[i]->gm_module_start, NULL,
 								TRUE, NULL);
 			if (!thread)
 			{
