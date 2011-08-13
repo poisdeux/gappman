@@ -1,3 +1,0 @@
-To get the list of todo's you will need to generate the Doxygen docs in 
-docs/doxygen. If generated the TODO-list will be in 
-docs/doxygen/html/todo.html
