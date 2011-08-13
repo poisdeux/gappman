@@ -1,9 +1,0 @@
-#summary List of todo's
-
-   * Add a Weather applet.
-   * Add a News applet.
-   * Add a System health applet.
-   * Add dynamic fontsize recalculation when menu gets too big. Now fontsize is calculated based on programs buttonbox. This fontsize might be too big for instance for changeresolution applet to show for all possible screen resolutions.
-   * Add support for scrollbars when menu is too big for layout.
-   * (Unit-)testing with http://klee.llvm.org/ and/or glib testing http://developer.gnome.org/glib/unstable/glib-Testing.html and/or http://gcc.gnu.org/onlinedocs/gcc/Gcov.html
-   * Add support for directfb.
