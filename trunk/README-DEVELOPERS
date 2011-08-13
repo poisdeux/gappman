@@ -15,14 +15,8 @@ To get your code pretty-printed in the Allman style you can use the program
 
 NOTE: above automatic pretty-printing may cause doxygen comments like ///< 
 to be rewritten as // /< which causes doxygen to fail.
-The following command will pretty-print the code and fix the doxygen comments:
 
-find -name '*.[ch]' -type f \ 
- -exec indent -bap -bli0 -i4 -l79 -ncs -npcs -npsl -fca -lc79 -fc1 -ts4 {} \; \
- -exec sed -i 's@// /<@///<@' {} \;
-
-
-When coding try to follow the below guidelines:
+When coding try to follow the following guidelines:
 
 * Avoid routines larger than 200 lines of code. Excluding comments and 
   whitespace.
@@ -73,28 +67,32 @@ bottom.
 
 1. Make a branch to test and debug the release
 
-  svn copy https://gappman.googlecode.com/svn/trunk/ \
-    https://gappman.googlecode.com/svn/branches/<MAJOR>.<MINOR>
+   git branch <VERSION>-alpha
+	 git checkout <VERSION>-alpha
 
 2. Edit the Changelog and raise the version number in configure.ac
 
 3. Check the libs/ versions and change if necessary. See libs/README-DEVELOPERS 
    for details.
 
-4. Commit the changes on the branch
+4. After testing and debugging commit the changes, if any. 
 
-  svn commit -m "New branch <MAJOR>.<MINOR>"
+   git commit
 
-5. After testing and debugging commit the changes, if any. 
+5. Do a final release test. See section "5. Testing ..."
 
 6. Make a release version
 
-  svn copy https://gappman.googlecode.com/svn/branches/<MAJOR>.<MINOR> \
-    https://gappman.googlecode.com/svn/tags/release-<MAJOR>.<MINOR>
+   git tag release-<VERSION>
 
-7. Commit the new release
+7. Merge changes back to master
 
-  svn commit -m "New release <MAJOR>.<MINOR>"
+   git checkout master
+   git merge <VERSION>-alpha
+
+8. Delete branch
+
+   git branch -d <VERSION>-alpha
 
 -----------------------------------------------------------------------------
 4. Creating a maintenance release
@@ -103,33 +101,50 @@ bottom.
 Maintenance/update releases should be tested on the branch and result in a 
 <MAJOR>.<MINOR>.<MAINTENANCE/UPDATE> version.
 
-1. Merge wanted/needed changes from trunk to branch.
-     NOTE: svn has a problem merging repos where dirs or files are moved or 
-         deleted. ALWAYS CHECK!!!
+1. Make a branch of the release you want to update
 
-    cd gappman/branch/<MAJOR>.<MINOR>
-  svn merge --reintegrate https://gappman.googlecode.com/svn/trunk  
+   git checkout -b release-<MAINTENANCE-VERSION>-alpha release-<VERSION>
+	 
+2. Edit the Changelog and raise the version number in configure.ac
 
-2. Fix conflicts and commit the merge
+3. After testing and debugging commit the changes, if any. 
 
-    svn commit -m "Merge from trunk for upcoming release"
+   git commit
 
-3. Test the merge and fix any issues on the branch
+4. Do a final release test. See section "5. Testing ..."
 
-  autoreconf -i
-  ./configure
-  make
-  ./tests/rungappman.sh
+5. Make a release version
 
-4. Create a new clean checkout and build and test the new release. Fix any
+   git tag release-<VERSION>
+
+6. Merge changes back to master
+
+   git checkout master
+   git merge <VERSION>-alpha
+
+
+7. Delete branch
+
+   git branch -d <VERSION>-alpha
+
+
+-----------------------------------------------------------------------------
+5. Testing to ensure essential stuff is in git repo
+-----------------------------------------------------------------------------
+
+1. Create a new clean checkout and build and test the new release. Fix any
      issues on the branch (ofcourse)
 
     TMPDIR=$(mktemp -d)
     pushd ${TMPDIR}
-    svn checkout http://gappman.googlecode.com/svn/branches/<MAJOR>.<MINOR> \
-        gappman-read-only
+    git clone https://code.google.com/p/gappman/
 
-    pushd gappman-read-only
+    pushd gappman
+		git checkout release-<VERSION>-alpha
+    libtoolize
+    pushd libs
+    libtoolize
+    popd
     autoreconf -vif
     ./configure
     make
@@ -138,30 +153,25 @@ Maintenance/update releases should be tested on the branch and result in a
     popd
     rm -rf ${TMPDIR}
  
-5. Edit the Changelog. Raise the version number in configure.ac
-
-6. Commit the changes on the branch
-
-  svn commit -m "New maintenance version <MAJOR>.<MINOR>.<MAINTENANCE/UPDATE>"
-
-7. Make a maintenance release version
- 
-  svn copy https://gappman.googlecode.com/svn/branches/RELEASEVERSION \
-    https://gappman.googlecode.com/svn/tags/release-RELEASEVERSION.x
-
 
 -----------------------------------------------------------------------------
 5. Create a downloadable version of the release
 -----------------------------------------------------------------------------
 
-1. Go to the release version
+1. Create a new branch
 
-  cd tags/release-RELEASEVERSION
+   git checkout -b package release-<VERSION>
 
 2. Create the makefiles
 
+  cd package
+  libtoolize
+  pushd libs
+  libtoolize
+  popd
   autoreconf -vif
   ./configure
+
 
 3. Create the tarball as follows 
    (make sure all dependencies are installed, e.g. doxygen):
