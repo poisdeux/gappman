@@ -94,6 +94,11 @@ bottom.
 
    git branch -d <VERSION>-alpha
 
+9. Push changes to remote
+
+   git push 
+   git push --tags
+ 
 -----------------------------------------------------------------------------
 4. Creating a maintenance release
 -----------------------------------------------------------------------------
@@ -122,12 +127,15 @@ Maintenance/update releases should be tested on the branch and result in a
    git checkout master
    git merge <VERSION>-alpha
 
-
 7. Delete branch
 
    git branch -d <VERSION>-alpha
 
+8. Push changes to remote
 
+   git push 
+   git push --tags
+ 
 -----------------------------------------------------------------------------
 5. Testing to ensure essential stuff is in git repo
 -----------------------------------------------------------------------------
