@@ -138,7 +138,7 @@ struct _menu_element
 								// print a textlabel
 	gchar **args;				///< array of strings containing arguments
 								// that need to be passed to the executable
-	gint numArguments;			///< will hold the total amount of elements
+	gint amount_of_args;			///< will hold the total amount of elements
 								// in the args array
 	gint pid;					///< should hold the process ID of the
 								// process that was started by this
@@ -238,7 +238,7 @@ gm_menu *gm_menu_create();
 * \brief adds a gm_menu_element to a gm_menu
 * \param elt pointer to gm_menu_element that must be added to dish
 * \param dish pointer to gm_menu that should be enlarged with elt
-* \return true is succesfull, false otherwise
+* \return TRUE on success, FALSE on failure
 */
 gboolean gm_menu_add_menu_elt(gm_menu_element *elt, gm_menu *dish);
 
@@ -252,8 +252,17 @@ gm_menu_element *gm_menu_element_create();
 * \brief add an argument to the argument list for a gm_menu_element
 * \param *elt gm_menu_element which should have its argument list expanded
 * \param *arg argument that should be added
+* \return TRUE on success, FALSE on failure
 */
 gboolean gm_menu_element_add_argument(gchar *arg, gm_menu_element *elt);
+
+
+/**
+* \brief returns the number of arguments for the menu element
+* \param *elt gm_menu_element
+* \return positive integer
+*/
+gint gm_menu_elements_get_amount_of_arguments(gm_menu_element *elt);
 
 #endif
 

@@ -182,6 +182,7 @@ static void create_new_process_info_struct(int PID, gm_menu_element *elt)
 static gboolean startprogram(gm_menu_element *elt)
 {
 	char **args;
+	gint number_of_arguments;
 	int i;
 	__pid_t childpid;
 	FILE *fp;
@@ -191,9 +192,10 @@ static gboolean startprogram(gm_menu_element *elt)
       of the executable and last element needs to be NULL.
       see man exec for more details
     */
-	args = (char **)malloc((elt->numArguments + 2) * sizeof(char *));
+	number_of_arguments = gm_menu_element_get_amount_of_arguments(elt);
+	args = (char **)malloc((number_of_arguments + 2) * sizeof(char *));
 	args[0] = (char *)elt->exec;
-	for (i = 0; i < elt->numArguments; i++)
+	for (i = 0; i < number_of_arguments; i++)
 	{
 		args[i + 1] = elt->args[i];
 	}

@@ -26,7 +26,7 @@ void gm_menu_element_free(gm_menu_element *elt)
   free(elt->module);
   free(elt->module_conffile);
   free(elt->logo);
-  for (i = 0; i < elt->numArguments; i++)
+  for (i = 0; i < (gm_menu_element_get_amount_of_arguments(elt)); i++)
   {
     free(elt->args[i]);
   }
@@ -40,7 +40,7 @@ void gm_menu_free(gm_menu *dish)
   if (dish == NULL)
 		return;
     
-  for(i = 0; i < dish->amount_of_elements; i++)
+  for(i = 0; i < gm_menu_get_amount_of_elements(dish); i++)
   {
     gm_menu_element_free(dish->elts[i]);
   }
@@ -52,7 +52,7 @@ gm_menu_element *gm_menu_search_elt_by_name(gchar * name, gm_menu *dish)
   int i;
   if(dish != NULL)
   {
-    for(i=0;i<dish->amount_of_elements;i++)
+    for(i=0; i < gm_menu_get_amount_of_elements(dish); i++)
     {
       if (g_strcmp0(name, (const char *)(dish->elts[i]->name)) == 0) 
       {
@@ -89,7 +89,7 @@ gm_menu *gm_menu_create()
   menu->hor_alignment = 0.5;      // <! default center
   menu->vert_alignment = 1;     // <! default center
   menu->amount_of_elements = 0;
-  menu->elts = (gm_menu_element **) malloc(MENU_ELTS_ARRAY_INCREMENT * sizeof(gm_menu_element*));
+  menu->elts = NULL;
   menu->boxes = NULL;
   return menu;
 }
@@ -102,7 +102,7 @@ gm_menu_element *gm_menu_element_create()
 	if ( elt == NULL )
 		return NULL;
 
-  elt->numArguments = 0;
+  elt->amount_of_args = 0;
   elt->logo = NULL;
   elt->name = NULL;
   elt->exec = NULL;
@@ -124,11 +124,12 @@ gboolean gm_menu_add_menu_element(gm_menu_element *elt, gm_menu *menu)
 		return FALSE;
 
 	//Check if we need to resize the menu->elts array
-	if ( ( menu->amount_of_elements % 5 ) == 0 )
+	if ( ( menu->amount_of_elements % MENU_ELTS_ARRAY_INCREMENT ) == 0 )
 		menu->elts = (gm_menu_element **) g_try_realloc(menu->elts, ( menu->amount_of_elements + MENU_ELTS_ARRAY_INCREMENT ) * sizeof(gm_menu_element *));
 	
 	if ( ( menu->elts == NULL )	|| ( elt == NULL ) )
 		return FALSE;
+
 
 	menu->elts[menu->amount_of_elements++] = elt;
 	
@@ -140,13 +141,18 @@ gboolean gm_menu_element_add_argument(gchar *arg, gm_menu_element *elt)
 	if ( ( elt == NULL ) || ( arg == NULL ) )
 		return FALSE;
 
-	elt->numArguments++;
   elt->args =
-    (gchar **)g_try_realloc(elt->args, (elt->numArguments) * sizeof(gchar *));
+    (gchar **)g_try_realloc(elt->args, (elt->amount_of_args + 1) * sizeof(gchar *));
 	if ( elt->args == NULL )
 		return FALSE;
 
-  elt->args[elt->numArguments - 1] = arg;
+  elt->args[elt->amount_of_args++] = arg;
 
 	return TRUE;
 }
+
+gint gm_menu_element_get_amount_of_arguments(gm_menu_element *elt)
+{
+	return elt->amount_of_args;
+}
+
