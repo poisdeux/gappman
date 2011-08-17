@@ -26,7 +26,7 @@ static GtkWidget *main_button = NULL;
 static int main_button_width = 50;
 static int main_button_height = 50;
 static const char *conffile = SYSCONFDIR "/netman.xml";
-static gboolean KEEP_RUNNING;
+static gboolean RUNNING;
 static GMutex *check_status_mutex;
 static GtkImage *image_unavail;
 
@@ -352,23 +352,23 @@ G_MODULE_EXPORT void gm_module_set_conffile(const char *filename)
 
 /**
 * \brief Starts the applet checking network status
-* Uses global KEEP_RUNNING to determine if it should keep
-* checking the network status. If KEEP_RUNNING becomes FALSE
+* Uses global RUNNING to determine if it should keep
+* checking the network status. If RUNNING becomes FALSE
 * it will stop.
 */
 G_MODULE_EXPORT void gm_module_start()
 {
 	nm_elements *elts;
 	int sleep_left = 0;
-	if (KEEP_RUNNING == TRUE)
+	if (RUNNING == TRUE)
 	{
 		g_warning("gm_netman applet already started");
 		return;
 	}
 
-	KEEP_RUNNING = TRUE;
+	RUNNING = TRUE;
 
-	while (KEEP_RUNNING)
+	while (RUNNING)
 	{
 		get_lock();
 		elts = nm_get_stati();
@@ -383,6 +383,11 @@ G_MODULE_EXPORT void gm_module_start()
 		}
 		update_button();
 		release_lock();
+
+		//we try to sleep for 10 seconds
+    //if the sleep gets interrupted by
+    //a signal we continue to sleep untill
+    //all 10 seconds have passed
 		sleep_left = sleep(10);
 		while (sleep_left != 0)
 		{
@@ -393,20 +398,20 @@ G_MODULE_EXPORT void gm_module_start()
 
 /**
 * \brief Stops the applet
-* Sets KEEP_RUNNING to FALSE and frees the stati 
+* Sets RUNNING to FALSE and frees the stati 
 * list of status structs.
 */
 G_MODULE_EXPORT int gm_module_stop()
 {
 	nm_elements *elts, *tmp;
 
-	if (KEEP_RUNNING == FALSE)
+	if (RUNNING == FALSE)
 	{
 		g_warning("gm_netman applet not running");
 		return;
 	}
 
-	KEEP_RUNNING = FALSE;
+	RUNNING = FALSE;
 
 	// prevents freeing elements while
 	// we are still in a run checking
