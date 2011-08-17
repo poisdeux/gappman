@@ -22,7 +22,7 @@
 #include <gm_layout.h>
 #include "parseconf.h"
 
-static GtkButton *main_button = NULL;
+static GtkWidget *main_button = NULL;
 static int main_button_width = 50;
 static int main_button_height = 50;
 static const char *conffile = SYSCONFDIR "/netman.xml";
@@ -162,7 +162,7 @@ static void update_button()
 		if ((elts->status == -1) || (elts->status != elts->success))
 		{
 			gdk_threads_enter();
-			gtk_button_set_image(main_button,
+			gtk_button_set_image(GTK_BUTTON(main_button),
 								 GTK_WIDGET(elts->image_fail));
 			gdk_threads_leave();
 
@@ -175,45 +175,25 @@ static void update_button()
 
 	elts = nm_get_stati();
 	gdk_threads_enter();
-	gtk_button_set_image(main_button, GTK_WIDGET(elts->image_success));
+	gtk_button_set_image(GTK_BUTTON(main_button), GTK_WIDGET(elts->image_success));
 	gdk_threads_leave();
 }
 
-static void show_menu()
+static GtkWidget* display_status_overview()
 {
-	nm_elements *actions;
-	GtkWidget *vbox;
-	GtkWidget *table;
-	GtkWidget *button;
-	GtkWidget *menuwin;
-	GtkWidget *label;
-	GdkPixbuf *pixbuf;
-	GtkWidget *stock_image;
-	gchar *markup;
-	nm_elements *stati;
-	int elt_nr = 0;
-
-	menuwin = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_position(GTK_WINDOW(menuwin), GTK_WIN_POS_CENTER);
-	gtk_window_set_decorated(GTK_WINDOW(menuwin), FALSE);
-	gtk_widget_grab_focus(menuwin);
-
-	gtk_widget_set_name(menuwin, "gm_applet");
-	vbox = gtk_vbox_new(FALSE, 10);
+	nm_elements *stati = NULL;
+	GtkWidget *table = NULL;
+	GtkWidget *label = NULL;
+	GdkPixbuf *pixbuf = NULL;
+	GtkWidget *stock_image = NULL;
+	int elt_nr;
 
 	stati = nm_get_stati();
-
-	actions = nm_get_actions();
-
 	table = gtk_table_new(2, *stati->amount_of_elements, TRUE);
+	elt_nr = 0;
 	while (stati != NULL)
 	{
-		markup =
-			g_markup_printf_escaped("<span size=\"%d\">%s</span>",
-									gm_layout_get_fontsize(), stati->name);
-		label = gtk_label_new("");
-		gtk_label_set_markup(GTK_LABEL(label), markup);
-		g_free(markup);
+		label = gm_layout_create_label((gchar*) stati->name);
 		gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, elt_nr,
 								  elt_nr + 1);
 		gtk_widget_show(label);
@@ -233,23 +213,43 @@ static void show_menu()
 		stock_image = gtk_image_new_from_pixbuf(pixbuf);
 		gtk_table_attach_defaults(GTK_TABLE(table), stock_image, 1, 2, elt_nr,
 								  elt_nr + 1);
-
 		gtk_widget_show(stock_image);
 
 		stati = stati->next;
 		elt_nr++;
 	}
-	gtk_container_add(GTK_CONTAINER(vbox), table);
-	gtk_widget_show(table);
 
+	return table;
+}
+
+static void show_menu(GtkWidget * dummy, GdkEvent * event,
+						   GtkWidget * widget)
+{
+	nm_elements *actions;
+	GtkWidget *vbox;
+	GtkWidget *status_overview;
+	GtkWidget *button;
+	GtkWidget *menuwin;
+	GtkWidget *label;
+	gchar *markup;
+
+  if ( ! gm_layout_check_key(event))
+		return;
+
+	menuwin = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_position(GTK_WINDOW(menuwin), GTK_WIN_POS_CENTER);
+	gtk_window_set_decorated(GTK_WINDOW(menuwin), FALSE);
+	gtk_widget_grab_focus(menuwin);
+	vbox = gtk_vbox_new(FALSE, 10);
+
+	status_overview = display_status_overview();
+	gtk_container_add(GTK_CONTAINER(vbox), status_overview);
+	gtk_widget_show(status_overview);
+
+	actions = nm_get_actions();
 	while (actions != NULL)
 	{
-		label = gtk_label_new("");
-		markup =
-			g_markup_printf_escaped("<span size=\"%d\">%s</span>",
-									gm_layout_get_fontsize(), actions->name);
-		gtk_label_set_markup(GTK_LABEL(label), markup);
-		g_free(markup);
+		label = gm_layout_create_label((gchar*) actions->name);
 		button = gm_layout_create_empty_button(perform_action, actions);
 		gtk_container_add(GTK_CONTAINER(button), label);
 		gtk_widget_show(label);
@@ -267,26 +267,11 @@ static void show_menu()
 	gtk_widget_show(menuwin);
 }
 
-/**
-* \brief Initializes the module. Loads the configuration and starts the applet in failed mode.
-* \return int 
-*  - GM_SUCCES if initialization was succesful. 
-*  - GM_COULD_NOT_LOAD_FILE if the configuration file could not be loaded.
-*/
-G_MODULE_EXPORT int gm_module_init()
+static GmReturnCode load_images()
 {
 	nm_elements *stati;
 
-	if (nm_load_conf(conffile) != 0)
-		return GM_COULD_NOT_LOAD_FILE;
-
 	stati = nm_get_stati();
-
-	main_button = GTK_BUTTON(gtk_button_new());
-	gtk_widget_set_size_request(GTK_WIDGET(main_button), main_button_width, main_button_height);
-	g_signal_connect(G_OBJECT(main_button),
-					 "clicked", G_CALLBACK(show_menu), NULL);
-
 	while (stati != NULL)
 	{
 
@@ -330,7 +315,26 @@ G_MODULE_EXPORT int gm_module_init()
 		gtk_container_add(GTK_CONTAINER(main_button),
 						  GTK_WIDGET(stati->image_fail));
 	}
-	gtk_widget_show(GTK_WIDGET(main_button));
+
+	return GM_SUCCES;
+}
+
+/**
+* \brief Initializes the module. Loads the configuration and starts the applet in failed mode.
+* \return int 
+*  - GM_SUCCES if initialization was succesful. 
+*  - GM_COULD_NOT_LOAD_FILE if the configuration file could not be loaded.
+*/
+G_MODULE_EXPORT GmReturnCode gm_module_init()
+{
+	if (nm_load_conf(conffile) != GM_SUCCES)
+		return GM_COULD_NOT_LOAD_FILE;
+
+	main_button = gm_layout_create_empty_button(G_CALLBACK(show_menu), NULL);
+
+	load_images();
+
+	gtk_widget_show(main_button);
 
 	check_status_mutex = g_mutex_new();
 
@@ -443,5 +447,5 @@ G_MODULE_EXPORT void gm_module_set_icon_size(int width, int height)
 */
 G_MODULE_EXPORT GtkWidget *gm_module_get_widget()
 {
-	return GTK_WIDGET(main_button);
+	return main_button;
 }

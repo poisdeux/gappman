@@ -73,7 +73,7 @@ typedef int (*GM_MODULE_STOP) (void);
 /**
 * enumeration for error/return codes
 */
-enum returncodes {
+typedef enum returncodes {
 GM_SUCCES, ///< no errors detected
 GM_FAIL, ///< used to represent a general error
 GM_NO_RANDR_EXTENSION,	///< Xorg has no support for the XRANDR extension. This is fatal for gm_changeresolution
@@ -86,7 +86,7 @@ GM_COULD_NOT_DISCONNECT,	///< Returned by gm_connect lib could not disconnect co
 GM_COULD_NOT_LOAD_FILE,	///< Could not open or read a file
 GM_NET_COMM_NOT_SUPPORTED,	///< No support for network-communications
 GM_COULD_NOT_RECEIVE_MESSAGE ///< returned by gm_connect lib when receiving message failed
-};
+} GmReturnCode;
 
 /**
 * Enumeration for length types.
