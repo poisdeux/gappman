@@ -68,6 +68,12 @@ void gm_layout_show_error_dialog(gchar * message, GtkWidget * mainwin,
 						  void *callback);
 
 /**
+* \brief shows an error dialog corresponding to the GmReturnCode
+* \param code the GmReturnCode that should be displayed
+*/
+void gm_layout_show_error(GmReturnCode code);
+
+/**
 * \brief returns the fontsize used by the layout manager 
 * \return int the fontsize
 */

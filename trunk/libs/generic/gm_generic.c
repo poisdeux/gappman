@@ -156,3 +156,7 @@ gint gm_menu_element_get_amount_of_arguments(gm_menu_element *elt)
 	return elt->amount_of_args;
 }
 
+void gm_menu_element_set_pid(gint pid, gm_menu_element *elt)
+{
+	elt->pid = pid;
+}

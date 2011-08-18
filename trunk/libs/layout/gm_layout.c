@@ -612,6 +612,40 @@ void gm_layout_show_error_dialog(gchar * message, GtkWidget * parent_window,
 	gtk_widget_show(window);
 }
 
+void gm_layout_show_error(GmReturnCode code)
+{
+  switch (code)
+  {
+  case GM_NET_COMM_NOT_SUPPORTED:
+    gm_layout_show_error_dialog("Gappman compiled without network support",
+               NULL, NULL);
+    break;;
+  case GM_COULD_NOT_RESOLVE_HOSTNAME:
+    gm_layout_show_error_dialog("Could not resolve hostname.",
+               NULL, NULL);
+    break;;
+  case GM_COULD_NOT_CONNECT:
+    gm_layout_show_error_dialog
+      ("Could not connect to gappman.\nCheck that gappman is running.",
+               NULL, NULL);
+    break;;
+  case GM_COULD_NOT_SEND_MESSAGE:
+    gm_layout_show_error_dialog
+      ("Could not sent message to localhost.\nCheck that gappman is running",
+               NULL, NULL);
+    break;;
+  case GM_COULD_NOT_DISCONNECT:
+    gm_layout_show_error_dialog("Could not disconnect from gappman.",
+               NULL, NULL);
+    break;;
+  default:
+    gm_layout_show_error_dialog
+      ("An undefined error occured when contacting gappman.",
+               NULL, NULL);
+    break;;
+  }
+}
+
 int gm_layout_get_fontsize()
 {
 	return fontsize;

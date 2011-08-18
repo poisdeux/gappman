@@ -95,7 +95,7 @@ process_nm_element(xmlTextReaderPtr reader, nm_elements * elt,
 
 	name = NULL;
 
-	while (ret == 1)
+	while( TRUE )
 	{
 		if (name == NULL)
 			name = BAD_CAST "--";
@@ -136,13 +136,10 @@ process_nm_element(xmlTextReaderPtr reader, nm_elements * elt,
 		if (strcmp((char *)xmlTextReaderName(reader), element_name) == 0
 			&& xmlTextReaderNodeType(reader) == 15)
 		{
-			ret = 0;
-
+			break;	
 		}
-		else
-		{
-			ret = xmlTextReaderRead(reader);
-		}
+		
+		ret = xmlTextReaderRead(reader);
 	}
 }
 
@@ -166,7 +163,7 @@ void nm_free_elements(nm_elements * elt)
 			free((xmlChar *) elt->logosuccess);
 			free((xmlChar *) elt->logofail);
 
-			for (i = 0; elt->args[i] != NULL; i++)
+			for (i = 0; i < elt->numArguments; i++)
 			{
 				free(elt->args[i]);
 			}
@@ -208,14 +205,13 @@ static void process_nm_elements(const char *element_name,
 								const char *group_element_name,
 								xmlTextReaderPtr reader, nm_elements ** elts)
 {
-	int ret = 1;
 	xmlChar *name;
 	nm_elements *prev;
 	prev = NULL;
 
-	while (ret)
+	while ( TRUE )
 	{
-		ret = xmlTextReaderRead(reader);
+		xmlTextReaderRead(reader);
 		if (xmlTextReaderNodeType(reader) == 1)
 		{
 			name = xmlTextReaderName(reader);
@@ -240,7 +236,7 @@ static void process_nm_elements(const char *element_name,
 			name = xmlTextReaderName(reader);
 			if (strcmp((const char *)name, group_element_name) == 0)
 			{
-				ret = 0;
+				break;
 			}
 		}
 	}
@@ -259,50 +255,40 @@ int nm_load_conf(const char *filename)
 	logounavail = NULL;
 
 	reader = xmlReaderForFile(filename, NULL, 0);
-	if (reader != NULL)
-	{
-		ret = xmlTextReaderRead(reader);
-		while (ret == 1)
-		{
-			if (xmlTextReaderNodeType(reader) == 1)
-			{
-				name = xmlTextReaderName(reader);
-				if (strcmp((char *)name, "stati") == 0)
-				{
-					process_nm_elements("status", "stati", reader, &stati);
-				}
-				else if (strcmp((char *)name, "actions") == 0)
-				{
-					process_nm_elements("action", "actions", reader, &actions);
-				}
-			}
-			else if (xmlTextReaderNodeType(reader) == 3)
-			{
-				if (strcmp((const char *)name, "cachelocation") == 0)
-				{
-					cache_location = (const char *)xmlTextReaderValue(reader);
-				}
-			}
-			ret = xmlTextReaderRead(reader);
-		}
-
-		/**
-         * Free up the reader
-        */
-		xmlFreeTextReader(reader);
-		if (ret != 0)
-		{
-			g_warning("failed to parse file %s\n", filename);
-		}
-	}
-	else
+	if (reader == NULL)
 	{
 		g_warning("Unable to open %s\n", filename);
 		return 1;
 	}
-	/**
-    * Cleanup function for the XML library.
-    */
+	
+	while ( TRUE )
+	{
+		ret = xmlTextReaderRead(reader);
+		if( ret != 1 )
+			break;
+
+		if (xmlTextReaderNodeType(reader) == 1)
+		{
+			name = xmlTextReaderName(reader);
+			if (strcmp((char *)name, "stati") == 0)
+			{
+				process_nm_elements("status", "stati", reader, &stati);
+			}
+			else if (strcmp((char *)name, "actions") == 0)
+			{
+				process_nm_elements("action", "actions", reader, &actions);
+			}
+		}
+		else if (xmlTextReaderNodeType(reader) == 3)
+		{
+			if (strcmp((const char *)name, "cachelocation") == 0)
+			{
+				cache_location = (const char *)xmlTextReaderValue(reader);
+			}
+		}
+	}
+
+	xmlFreeTextReader(reader);
 	xmlCleanupParser();
 	return 0;
 }

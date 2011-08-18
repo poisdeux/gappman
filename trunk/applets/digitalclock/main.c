@@ -316,14 +316,12 @@ static gboolean update_time(gpointer data)
 
 		minutes.time = cur_time.tm_min;
 	
-		//TODO: invalidate minute window
 		region = gdk_drawable_get_clip_region (minute_window->window);
  		gdk_window_invalidate_region (minute_window->window, region, TRUE);
  		gdk_window_process_updates (minute_window->window, TRUE);
  		gdk_region_destroy (region);
 	}
 
-	//TODO: invalidate colon window	
 	region = gdk_drawable_get_clip_region (colon_window->window);
  	gdk_window_invalidate_region (colon_window->window, region, TRUE);
  	gdk_window_process_updates (colon_window->window, TRUE);

@@ -264,5 +264,12 @@ gboolean gm_menu_element_add_argument(gchar *arg, gm_menu_element *elt);
 */
 gint gm_menu_elements_get_amount_of_arguments(gm_menu_element *elt);
 
+/**
+* \brief set the pid in a gm_menu_element
+* \param pid Process ID of the program in gm_menu_element
+* \param elt gm_menu_element that should be updated
+*/
+void gm_menu_element_set_pid(gint pid, gm_menu_element *elt);
+
 #endif
 
