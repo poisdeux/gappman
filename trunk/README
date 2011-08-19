@@ -41,11 +41,11 @@ The tarball version can be build as follows:
 When you want to build the SVN version you will first need to create
 the configure script:
 
-	libtoolize --copy
-	cd libs
-	libtoolize
+  libtoolize
+  cd libs
+  libtoolize
   cd ..
-	autoreconf -vif
+  autoreconf -vif
 
 Now you should be able to build appmanager as usual:
 
