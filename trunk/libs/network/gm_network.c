@@ -27,7 +27,6 @@
 
 #include <glib.h>
 #include <string.h>
-#include <gm_generic.h>
 #include "gm_network.h"
 
 #if defined(WITH_DBUS_SUPPORT) && !defined(NO_LISTENER)
@@ -69,7 +68,7 @@ int gm_network_get_started_procs_from_gappman(int portno, const char *hostname,
 #endif
 }
 
-int gm_network_get_confpath_from_gappman(int portno, const char *hostname,
+GmReturnCode gm_network_get_confpath_from_gappman(int portno, const char *hostname,
 								 gchar ** path)
 {
 #ifdef NO_LISTENER

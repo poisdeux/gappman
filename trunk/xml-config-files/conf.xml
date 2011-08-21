@@ -13,8 +13,6 @@
     <action>
       <name>Processmanager</name>
       <exec>./applets/processmanager/gmprocessmanager</exec>
-      <arg>-c</arg>
-      <arg>xml-config-files/conf.xml</arg>
       <arg>-r</arg>
       <arg>gtk-config/gtkrc</arg>
       <logo>./applets/processmanager/logos/clanbomber.png</logo>

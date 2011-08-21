@@ -48,15 +48,13 @@ NONE
 static void usage()
 {
 	printf
-		("usage: processmanager [--help] [--width <WIDTHINPIXELS>] [--height <HEIGHTINPIXELS>] [--conffile <FILENAME>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
+		("usage: processmanager [--help] [--width <WIDTHINPIXELS>] [--height <HEIGHTINPIXELS>] [--gtkrc <GTKRCFILENAME>] [--windowed]\n");
 	printf("\n");
 	printf("--help:\t\tshows this help text\n");
 	printf
 		("--width <WIDTHINPIXELS>:\t\twidth of the main window (default: screen width / 9)\n");
 	printf
 		("--height <HEIGHTINPIXELS:\t\theight of the main window (default: screen height / 9)\n");
-	printf
-		("--conffile <FILENAME>:\t\t configuration file specifying the program and actions (default: /etc/gappman/processmanager.xml)\n");
 	printf
 		("--gtkrc <GTKRCFILENAME>:\t\t gtk configuration file which can be used for themeing\n");
 	printf("--windowed:\t\t creates a border around the window\n");
@@ -317,16 +315,106 @@ static void add_row(gm_menu_element * elt, gint width, gint height, GtkWidget *v
 	gtk_widget_show(separator);
 }
 
+gint calculate_row_height( gint dialog_height)
+{
+	gint accumulated_amount = 0;
+	gm_menu *programs;
+	gm_menu *actions;
+
+	programs = gm_get_programs();
+  if (programs != NULL)
+	{
+		accumulated_amount += programs->amount_of_elements;
+	}
+
+	actions = gm_get_actions();
+	if (actions != NULL)
+	{
+		accumulated_amount += actions->amount_of_elements;
+	}
+
+	return (dialog_height / accumulated_amount);
+}
+
+GtkWidget *create_menu(gint width, gint height, struct proceslist *started_procs)
+{
+	gm_menu *programs;
+	gm_menu *actions;
+	gm_menu_element *elt;
+	struct proceslist *started_procs_tmp;
+	GtkWidget *vbox;
+	GtkWidget *hbox;
+	GtkWidget *button;
+	gint no_progsacts_found;
+	gint mypid;
+	
+
+	vbox = gtk_vbox_new(FALSE, 10);
+
+	programs = gm_get_programs();
+	actions = gm_get_actions();
+
+	started_procs_tmp = started_procs;
+	mypid = getpid();
+	no_progsacts_found = 1;
+
+	while (started_procs != NULL)
+	{
+		if( started_procs->pid == mypid )
+		{
+			started_procs = started_procs->prev;
+			continue;
+		}
+
+		elt = gm_menu_search_elt_by_name(started_procs->name, programs);
+		if( elt != NULL )
+		{
+			no_progsacts_found = 0;
+			gm_menu_element_set_pid(started_procs->pid, elt);
+			add_row(elt, width, height, vbox);
+		}
+
+		elt = gm_menu_search_elt_by_name(started_procs->name, actions);
+		if( elt != NULL )
+		{
+			no_progsacts_found = 0;
+			gm_menu_element_set_pid(started_procs->pid, elt);
+			add_row(elt, width, height, vbox);
+		}
+
+		started_procs = started_procs->prev;
+	}
+
+	gm_network_free_proceslist(started_procs);
+
+	if (! no_progsacts_found)
+	{
+		hbox = gtk_hbox_new(FALSE, 10);
+		// cancel button
+		button =
+			gm_layout_create_label_button("Cancel", (void *)quit_program_callback,
+								   NULL);
+		gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+		gtk_widget_show(button);
+	
+		gtk_container_add(GTK_CONTAINER(vbox), hbox);
+		gtk_widget_show(hbox);
+		return vbox;
+	}
+	else
+	{
+		gm_layout_show_error_dialog("Programs or actions started by Gappman.\nBut could not find the corresponding programs or actions.", NULL, quit_program_callback);
+		return NULL;
+	}
+}
+
 /**
 * \brief main function setting up the UI
 */
 int main(int argc, char **argv)
 {
 	GdkScreen *screen;
-	GtkWidget *button;
 	GtkWidget *vbox;
-	GtkWidget *hbox;
-	const char *conffile = SYSCONFDIR "/processmanager.xml";
 	gchar *gappman_confpath;
 	gchar *msg;
 	int dialog_width;
@@ -334,22 +422,14 @@ int main(int argc, char **argv)
 	int program_width;
 	int no_progsacts_found;	//< used to determine if any progs were started by gappman. If this program (processmanager) was started using gappman.
 	int row_height;
-	int total_amount_of_elements;
 	GmReturnCode status;
 	int c;
-	int i;
-	int mypid;
-	gm_menu_element *elt;
 	struct proceslist *started_procs;
-	struct proceslist *started_procs_tmp;
 
-	mypid = getpid();
 	gtk_init(&argc, &argv);
 	screen = gdk_screen_get_default();
 	dialog_width = gdk_screen_get_width(screen) / 3;
 	dialog_height = gdk_screen_get_height(screen) / 3;
-	programs = NULL;
-	actions = NULL;
 	mainwin = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
 #if defined(DEBUG)
@@ -367,13 +447,12 @@ int main(int argc, char **argv)
 		static struct option long_options[] = {
 			{"width", 1, 0, 'w'},
 			{"height", 1, 0, 'h'},
-			{"conffile", 1, 0, 'c'},
 			{"help", 0, 0, 'i'},
 			{"gtkrc", 1, 0, 'r'},
 			{"windowed", 0, 0, 'j'},
 			{0, 0, 0, 0}
 		};
-		c = getopt_long(argc, argv, "w:h:c:d:r:ij",
+		c = getopt_long(argc, argv, "w:h:d:r:ij",
 						long_options, &option_index);
 		if (c == -1)
 			break;
@@ -385,9 +464,6 @@ int main(int argc, char **argv)
 			break;
 		case 'h':
 			dialog_height = atoi(optarg);
-			break;
-		case 'c':
-			conffile = optarg;
 			break;
 		case 'r':
 			gtk_rc_parse(optarg);
@@ -434,107 +510,42 @@ int main(int argc, char **argv)
 	if (status != GM_SUCCES)
 	{
 		gm_layout_show_error(status);
-		quit_program();
 	}
-
-	if (started_procs == NULL)
+	else if (started_procs == NULL)
 	{
 		gm_layout_show_error_dialog("No programs started by gappman.",
-							 NULL, NULL);
-		quit_program();
+							 NULL, quit_program_callback);
 	}
 
 	status = gm_network_get_confpath_from_gappman(2103, "localhost", &gappman_confpath);
-	if (status != GM_SUCCES)
+	if (status == GM_SUCCES)
 	{
-		gm_layout_show_error_dialog
-			("Could not retrieve gappman configuration file\n",
-			 NULL, NULL);
-		quit_program();
-	}
- 
-  ///< \todo replace gm_load_conf with gm_network_get_programs_from_gappman
-  if (gm_load_conf(gappman_confpath) != GM_SUCCES)
-	{
-		msg = g_strdup_printf("Could not load gappman configuration file:\n%s\n", gappman_confpath);
-		gm_layout_show_error_dialog(msg, NULL, NULL);
-		g_free(msg);
-		quit_program();
-	}
-
-	// max column width is 50% of dialog width
-	program_width = dialog_width / 2;
-	vbox = gtk_vbox_new(FALSE, 10);
-
-	total_amount_of_elements = 0;
-	programs = gm_get_programs();
-	if (programs != NULL)
-	{
-		total_amount_of_elements += programs->amount_of_elements;
-	}
-
-	actions = gm_get_actions();
-	if (actions != NULL)
-	{
-		total_amount_of_elements += actions->amount_of_elements;
-	}
-
-	row_height = dialog_height / total_amount_of_elements;
-
-	started_procs_tmp = started_procs;
-	no_progsacts_found = 1;
-	while (started_procs != NULL)
-	{
-		g_debug("Processing %s", started_procs->name);
-		if( started_procs->pid == mypid )
+ 		///< \todo replace gm_load_conf with gm_network_get_programs_from_gappman
+  	if (gm_load_conf(gappman_confpath) != GM_SUCCES)
 		{
-			started_procs = started_procs->prev;
-			continue;
+			msg = g_strdup_printf("Could not load gappman configuration file:\n%s\n", gappman_confpath);
+			gm_layout_show_error_dialog(msg, NULL, quit_program_callback);
+			g_free(msg);
 		}
-
-		elt = gm_menu_search_elt_by_name(started_procs->name, programs);
-		if( elt != NULL )
-		{
-			no_progsacts_found = 0;
-			gm_menu_element_set_pid(started_procs->pid, elt);
-			add_row(elt, program_width, row_height, vbox);
-		}
-
-		elt = gm_menu_search_elt_by_name(started_procs->name, actions);
-		if( elt != NULL )
-		{
-			no_progsacts_found = 0;
-			gm_menu_element_set_pid(started_procs->pid, elt);
-			add_row(elt, program_width, row_height, vbox);
-		}
-
-		started_procs = started_procs->prev;
-	}
-
-	gm_network_free_proceslist(started_procs);
-
-	if (! no_progsacts_found)
-	{
-		hbox = gtk_hbox_new(FALSE, 10);
-		// cancel button
-		button =
-			gm_layout_create_label_button("Cancel", (void *)quit_program_callback,
-								   NULL);
-		gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
-		gtk_widget_show(button);
-	
-		gtk_container_add(GTK_CONTAINER(vbox), hbox);
-		gtk_widget_show(hbox);
-		gtk_container_add(GTK_CONTAINER(mainwin), vbox);
-		gtk_widget_show(vbox);
-		gtk_widget_show(mainwin);
 	}
 	else
 	{
-		gm_layout_show_error_dialog("Programs or actions started by Gappman.\nBut could not find the corresponding programs or actions.", NULL, quit_program_callback);
+		gm_layout_show_error_dialog
+			("Could not retrieve gappman configuration file\n",
+			 NULL, quit_program_callback);
 	}
+ 
+	// max column width is 50% of dialog width
+	program_width = dialog_width / 2;
+	row_height = calculate_row_height(dialog_height);
+	
+	vbox = create_menu(program_width, row_height, started_procs);
+	gtk_container_add(GTK_CONTAINER(mainwin), vbox);
+	gtk_widget_show(vbox);
+	gtk_widget_show(mainwin);
 
 	gtk_main();
+
 	quit_program();
 
 	return 0;

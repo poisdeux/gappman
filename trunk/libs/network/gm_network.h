@@ -18,6 +18,7 @@
 #endif
 
 #include <glib.h>
+#include <gm_generic.h>
 
 /**
 * \brief struct to hold the process ID and program name retrieved from Gappman
@@ -63,7 +64,7 @@ int gm_network_get_started_procs_from_gappman(int portno, const char *hostname,
 * \param path pointer to a string holding the configuration path
 * \return integer value (GM_*) as defined in libs/generic/gm_network_generic.h
 */
-int gm_network_get_confpath_from_gappman(int portno, const char *hostname,
+GmReturnCode gm_network_get_confpath_from_gappman(int portno, const char *hostname,
 								 gchar ** path);
 
 

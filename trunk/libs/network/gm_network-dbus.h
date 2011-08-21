@@ -13,6 +13,8 @@
 #ifndef __GM_CONNECT_DBUS_H__
 #define __GM_CONNECT_DBUS_H__
 
+#include <gm_generic.h>
+
 /**
 * \brief Connects to gappman and requests the proceslist
 * \param startedprocs adres of the pointer to a proceslist structure (call by reference). Needs to be freed after use with gm_free_proceslist(*startedprocs)
@@ -30,7 +32,7 @@ int gm_dbus_get_started_procs_from_gappman(struct proceslist **startedprocs);
 * \param path pointer to a string holding the configuration path
 * \return integer value (GM_*) as defined in libs/generic/gm_generic.h
 */
-int gm_dbus_get_confpath_from_gappman(gchar ** path);
+GmReturnCode gm_dbus_get_confpath_from_gappman(gchar ** path);
 
 
 /**

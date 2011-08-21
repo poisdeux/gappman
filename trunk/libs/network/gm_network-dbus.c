@@ -26,7 +26,6 @@
 #include <glib.h>
 #include <string.h>
 #include <dbus/dbus-glib.h>
-#include <gm_generic.h>
 #include "gm_network-generic.h"
 #include "gm_network-dbus.h"
 
@@ -116,7 +115,7 @@ int gm_dbus_get_started_procs_from_gappman(struct proceslist **startedprocs)
 	return GM_SUCCES;
 }
 
-gint gm_dbus_get_confpath_from_gappman(gchar ** path)
+GmReturnCode gm_dbus_get_confpath_from_gappman(gchar ** path)
 {
 	GError *error = NULL;
 	DBusGProxy *proxy;

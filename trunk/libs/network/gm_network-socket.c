@@ -25,7 +25,6 @@
 
 #include <glib.h>
 #include <string.h>
-#include <gm_generic.h>
 #include "gm_connect-generic.h"
 #include "gm_connect-socket.h"
 
@@ -221,7 +220,7 @@ int gm_socket_get_started_procs_from_gappman(int portno, const char *hostname,
 	return GM_SUCCES;
 }
 
-int gm_socket_get_confpath_from_gappman(int portno, const char *hostname,
+GmReturnCode gm_socket_get_confpath_from_gappman(int portno, const char *hostname,
 										gchar ** path)
 {
 	int status;
