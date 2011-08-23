@@ -33,6 +33,8 @@ When coding try to follow the following guidelines:
   documented.
 * Encapsulate global data in a struct providing it a descriptive name
 * Provide descriptive names for routines. Use _ as word separator.
+* Put constants on the left side of comparisons (i.e. if ( MAX_ITEMS == i ) )
+  to let the compiler warn for errors like: if ( MAX_ITEMS = i ).
 
 -------------------------------------------------------------------------------
 2. Version number scheme
