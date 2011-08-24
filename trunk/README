@@ -49,8 +49,12 @@ the configure script:
 
 Now you should be able to build appmanager as usual:
 
-	./configure make && make install
+  ./configure 
+  make
 
+Installing gappman is done as follows:
+
+  make install
 
 -----------------------------------------------------------------------------
 3. Running the application

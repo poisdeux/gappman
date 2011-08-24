@@ -53,11 +53,14 @@ AM_CONDITIONAL([BUILD_APPLETS], [test "x$building_applets" == "xyes"])
 AM_COND_IF([BUILD_APPLETS], AC_CONFIG_SUBDIRS([applets]))
 
 # Check for programs if doxygen docs should be build
+
 AS_IF([test "x$doxygen_docs" == "xyes"],
   [AC_PATH_PROG(DOXYGEN, doxygen)
+   AC_PATH_PROG(GRAPHVIZ, dot)
     AS_IF([test -z "$DOXYGEN"], AC_MSG_WARN(Doxygen not found. Doxygen documentation will not be built))
-    AM_CONDITIONAL([HAVE_DOXYGEN], [test -n "$DOXYGEN"])
-    AM_COND_IF([HAVE_DOXYGEN], 
+    AS_IF([test -z "$GRAPHVIZ"], AC_MSG_WARN(Graphviz not found. Doxygen documentation will not be built))
+    AM_CONDITIONAL([BUILD_DOCS], [test -n "$DOXYGEN" -a -n "$GRAPHVIZ"])
+    AM_COND_IF([BUILD_DOCS], 
       AC_CONFIG_FILES([docs/doxygen/Makefile docs/doxygen/Doxyfile]))])
 
 AC_CONFIG_FILES([Makefile])

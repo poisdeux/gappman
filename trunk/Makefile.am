@@ -1,7 +1,7 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
 ACLOCAL_AMFLAGS = -I m4
 
-if HAVE_DOXYGEN
+if BUILD_DOCS
 DOXYDIR = docs/doxygen	
 endif
 
