@@ -14,6 +14,7 @@
  * \todo Add support for clutter (www.clutter-project.org) so we can have a fancy animated menu
  * \bug font calculation is now based on program menu size. This fails when only one program is in the menu and results in extremely large fontsize. Better to take screen/window-width as source for font calculation.
  * \todo make gm_layout_create_menu generic for widgets and create a gm_layout_create_buttons that takes a menu struct and creates a list of GtkWidgets that can be passed to gm_layout_create_menu to create the menu.
+ * \todo add support for i18n.
  */
 
 
