@@ -367,8 +367,19 @@ static GtkWidget *createpanelelement(gm_menu_element * elt, int width,
 	return elt->gm_module_get_widget();
 }
 
+/**
+* \brief creates a single menu page starting with menu elements from page_number. 
+* The menu page will not hold more than menu->max_elts_in_single_box elements.
+* \param menu pointer to gm_menu that holds the menu for which to create a page
+* \param page_number when gm_menu holds more elements than menu->max_elts_in_single_box page_number specifies which page to create
+* \param widget_width preferred width for the widgets to include in the menu page
+* \param widget_height preferred height for the widgets to include in the menu page
+* \param elts_per_row maximum amount of menu elements in a single row
+* \param processevent callback function that will handle events from the menu elements
+* \return GtkWidget pointer to a vbox
+*/
 static GtkWidget *create_menu_page_layout(gm_menu *menu, gint page_number, 
-								gint button_width, gint button_height, gint elts_per_row,
+								gint widget_width, gint widget_height, gint elts_per_row,
 								void (*processevent) (GtkWidget *, GdkEvent *,
 													 gm_menu_element *))
 {
@@ -406,7 +417,7 @@ static GtkWidget *create_menu_page_layout(gm_menu *menu, gint page_number,
 			gtk_container_add(GTK_CONTAINER(vbox), hbox);
 		}
 
-		button = gm_layout_create_button(menu->elts[menu_element_index], button_width, button_height, processevent);
+		button = gm_layout_create_button(menu->elts[menu_element_index], widget_width, widget_height, processevent);
 		gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 0);
 		menu->elts[menu_element_index]->widget = button;
 

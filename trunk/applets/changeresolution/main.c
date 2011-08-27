@@ -260,13 +260,13 @@ static GtkWidget *show_possible_resolutions()
 	GtkWidget *vbox;
 	GtkWidget *separator;
 	GtkWidget *button;
+	gm_menu *menu;
+	gm_menu_element *menu_elt;
 	XRRScreenSize *sizes;
 	gint nsize;
 	gint ret_value;
 	gint i;
 	gchar *text;
-	
-	vbox = gtk_vbox_new(FALSE, 10);
 
 	ret_value = gm_res_getpossibleresolutions(&sizes, &nsize);
 	if (ret_value != GM_SUCCESS)
@@ -279,15 +279,26 @@ static GtkWidget *show_possible_resolutions()
 		return NULL;
 	}
 
+	menu = gm_menu_create();
+
+	gm_menu_set_width(PERCENTAGE, 80, menu);
+	gm_menu_set_height(PERCENTAGE, 80, menu);
+	gm_menu_set_max_elts_in_single_box(12, menu);
+	
+	//vbox = gtk_vbox_new(FALSE, 10);
+
 	for (i = 0; i < nsize; i++)
 	{
 		text = g_strdup_printf("%dx%d",sizes[i].width, sizes[i].height);
 		button = gm_layout_create_label_button(text, (void *)changeresolution, &sizes[i]);
 		g_free(text);
-		gtk_container_add(GTK_CONTAINER(vbox), button);
-		separator = gtk_hseparator_new();
-		gtk_container_add(GTK_CONTAINER(vbox), separator);
+		
+		menu_elt = gm_menu_element_create();
+		gm_menu_element_set_widget(button, menu_elt);
+		gm_menu_add_menu_element(menu_elt, menu);
 	}
+
+	vbox = gm_layout_create_menu(menu_elt, NULL);
 
 	return vbox;
 }

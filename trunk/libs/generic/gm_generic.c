@@ -120,6 +120,32 @@ GmReturnCode gm_menu_add_page(gm_menu_page *page, gm_menu *menu)
 	return GM_SUCCESS;
 }
 
+void gm_menu_set_width(GmLengthType length_type, gint width, gm_menu *menu)
+{
+	if ( width < 0 )
+		return;
+
+	menu->menu_width.value = width;
+	menu->menu_width.type = length_type;	
+}
+
+void gm_menu_set_height(GmLengthType length_type, gint height, gm_menu *menu)
+{
+	if ( height < 0 )
+		return;
+
+	menu->menu_width.value = height;
+	menu->menu_width.type = length_type;	
+}
+
+void gm_menu_set_max_elts_in_single_box(gint amount, gm_menu *menu)
+{
+	if( amount < 0 )
+		return;
+
+	menu->max_elts_in_single_box = amount;
+}
+
 gm_menu_element *gm_menu_element_create()
 {
   gm_menu_element *elt;
@@ -176,6 +202,11 @@ gboolean gm_menu_element_add_argument(gchar *arg, gm_menu_element *elt)
   elt->args[elt->amount_of_args++] = arg;
 
 	return TRUE;
+}
+
+void gm_menu_element_set_widget(GtkWidget *widget, gm_menu_element *elt)
+{
+	elt->widget = widget;
 }
 
 gint gm_menu_element_get_amount_of_arguments(gm_menu_element *elt)

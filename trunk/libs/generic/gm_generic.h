@@ -92,11 +92,11 @@ GM_COULD_NOT_RECEIVE_MESSAGE ///< returned by gm_connect lib when receiving mess
 * Enumeration for length types.
 * Currently supported types are: PERCENTAGE and PIXELS
 */
-enum length_types
+typedef enum length_types
 {
 	PERCENTAGE,
 	PIXELS
-};
+} GmLengthType;
 
 /**
 * \struct length
@@ -104,10 +104,8 @@ enum length_types
 */
 struct length
 {
-	enum length_types type;		///< Type of the value, i.e. percentage or
-								// pixels?
-	gint value;					///< Actual length value without metric
-								// indicator, e.g. % or px.
+	GmLengthType type;		///< Type of the value, i.e. percentage or pixels?
+	gint value;					///< Actual length value without metric indicator, e.g. % or px.
 	gint pixels; ///< Calculated length in pixels based on type and value
 };
 
@@ -240,7 +238,7 @@ gm_menu *gm_menu_create();
 * \param menu pointer to gm_menu that should be enlarged with elt
 * \return TRUE on success, FALSE on failure
 */
-gboolean gm_menu_add_menu_elt(gm_menu_element *elt, gm_menu *menu);
+gboolean gm_menu_add_menu_element(gm_menu_element *elt, gm_menu *menu);
 
 /**
 * \brief adds a gm_menu_page to a gm_menu
@@ -249,6 +247,29 @@ gboolean gm_menu_add_menu_elt(gm_menu_element *elt, gm_menu *menu);
 * \return GM_SUCCESS on success, GM_FALSE on failure
 */
 GmReturnCode gm_menu_add_page(gm_menu_page *page, gm_menu *menu);
+
+/**
+* \brief sets the preferred width for the menu
+* \param length_type this can be PERCENTAGE or PIXELS
+* \param width positive integer number. Note that percentages are counted from 0 to 100.
+* \param menu pointer to the gm_menu that should be changed
+*/
+void gm_menu_set_width(GmLengthType length_type, gint width, gm_menu *menu);
+
+/**
+* \brief sets the preferred height for the menu
+* \param length_type this can be PERCENTAGE or PIXELS
+* \param width positive integer number. Note that percentages are counted from 0 to 100.
+* \param menu pointer to the gm_menu that should be changed
+*/
+void gm_menu_set_height(GmLengthType length_type, gint height, gm_menu *menu);
+
+/**
+* \brief sets the maximum amount of elements allowed in a single menu page
+* \param amount positive integer number
+* \param menu the gm_menu that should be changed
+*/
+void gm_menu_set_max_elts_in_single_box(gint amount, gm_menu *menu);
 
 /**
 * \brief creates a gm_menu with default initialization
@@ -286,8 +307,17 @@ void gm_menu_element_set_pid(gint pid, gm_menu_element *elt);
 */
 gm_menu_page *gm_menu_page_create(GtkWidget *box);
 
-void gm_menu_page_free();
+/**
+* \brief relinguishes the memory occupied by a menu_page
+* \param page pointer to gm_menu_page
+*/
+void gm_menu_page_free(gm_menu_page *page);
 
+/**
+* \brief returns the next gm_menu_page from the given gm_menu_page page
+* \param page pointer to gm_menu_page
+* \return gm_menu_page pointer
+*/
 gm_menu_page *gm_menu_page_next(gm_menu_page* page);
 
 #endif
