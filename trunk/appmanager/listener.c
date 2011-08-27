@@ -32,7 +32,7 @@ gboolean gappman_start_listener(GtkWidget * win)
 gboolean gappman_close_listener()
 {
 #if defined(WITH_DBUS_SUPPORT)
-	return GM_SUCCES;
+	return GM_SUCCESS;
 #else
 	return listener_socket_close(NULL);
 #endif // WITH_DBUS_SUPPORT

@@ -375,7 +375,7 @@ static gboolean calculate_offsets(GtkWidget *widget, GdkEventConfigure *event, g
 
 /**
 * \brief initializes the digital clock
-* \return GM_SUCCES
+* \return GM_SUCCESS
 */
 G_MODULE_EXPORT int gm_module_init()
 {
@@ -410,7 +410,7 @@ G_MODULE_EXPORT int gm_module_init()
 	minutes.first_digit = cur_time.tm_min / 10;
 	minutes.second_digit = cur_time.tm_min % 10;
 
-	return GM_SUCCES;
+	return GM_SUCCESS;
 }
 
 /**

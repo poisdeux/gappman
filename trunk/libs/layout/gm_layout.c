@@ -357,7 +357,7 @@ static GtkWidget *createpanelelement(gm_menu_element * elt, int width,
 			elt->gm_module_set_icon_size(width, height);
 		}
 
-		if (elt->gm_module_init() != GM_SUCCES)
+		if (elt->gm_module_init() != GM_SUCCESS)
 		{
 			g_warning("Failed to initialize module %s", elt->module);
 			return NULL;
@@ -367,111 +367,93 @@ static GtkWidget *createpanelelement(gm_menu_element * elt, int width,
 	return elt->gm_module_get_widget();
 }
 
-static GtkWidget *create_buttonbox(gm_menu *dish, int elts_index, 
-								int button_width, int button_height, int elts_per_row,
+static GtkWidget *create_menu_page_layout(gm_menu *menu, gint page_number, 
+								gint button_width, gint button_height, gint elts_per_row,
 								void (*processevent) (GtkWidget *, GdkEvent *,
 													 gm_menu_element *))
 {
 	GtkWidget *button, *hbox, *vbox;
-	int i;
+	gint menu_element_index;
+  gint box_upper_limit;
 
 	vbox = gtk_vbox_new(FALSE, 0);
 
-	for(i = elts_index; ((i - elts_index) < dish->max_elts_in_single_box) && (i < dish->amount_of_elements); i++)
+	//calculate starting point in menu->elts array for the requested
+  //page number
+	menu_element_index = menu->max_elts_in_single_box * page_number;
+
+	if( menu_element_index > menu->amount_of_elements )
 	{
-		if (((i - elts_index) % elts_per_row) == 0)
+		g_warning("create_menu_page: no elements available to create page number: %d", page_number);
+		return NULL;
+	}
+
+	if( ( menu_element_index + menu->max_elts_in_single_box ) < menu->amount_of_elements )
+	{
+		box_upper_limit = menu_element_index + menu->max_elts_in_single_box;
+	}
+	else
+	{
+		box_upper_limit = menu->amount_of_elements;
+	}
+
+	while(menu_element_index < box_upper_limit)
+	{
+		if (((menu_element_index) % elts_per_row) == 0)
 		{
 			hbox = gtk_hbox_new(FALSE, 0);
 
 			gtk_container_add(GTK_CONTAINER(vbox), hbox);
 		}
 
-		button = gm_layout_create_button(dish->elts[i], button_width, button_height, processevent);
+		button = gm_layout_create_button(menu->elts[menu_element_index], button_width, button_height, processevent);
 		gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 0);
-		dish->elts[i]->widget = button;
+		menu->elts[menu_element_index]->widget = button;
+
+		menu_element_index++;
 	}
 
 	return vbox;
 }
 
-static void switch_menu_left(GtkWidget *widget, GdkEvent *event, gm_menu *dish)
+static void switch_menu_left(GtkWidget *widget, GdkEvent *event, gm_menu *menu)
 {
 	int i;
 	GtkWidget *tmp;
 
-	if( dish->boxes->prev == NULL )
+	if( menu->pages->prev == NULL )
 		return;
 
 	if( ! gm_layout_check_key(event) )
 		return;
 
 	//hide current box
-	gtk_widget_hide(dish->boxes->box);
+	gtk_widget_hide(menu->pages->box);
 
-	//always make sure dish->boxes points to current
+	//always make sure menu->pages points to current
   //shown box
-	dish->boxes = dish->boxes->prev;
-	gtk_widget_show_all(dish->boxes->box);
+	menu->pages = menu->pages->prev;
+	gtk_widget_show_all(menu->pages->box);
 }
 
-static void switch_menu_right(GtkWidget *widget, GdkEvent *event, gm_menu *dish)
+static void switch_menu_right(GtkWidget *widget, GdkEvent *event, gm_menu *menu)
 {
 	int i;
 	GtkWidget *tmp;
 
-	if( dish->boxes->next == NULL )
+	if( menu->pages->next == NULL )
 		return;
 	
 	if( ! gm_layout_check_key(event) )
 		return;
 
 	//hide current box
-	gtk_widget_hide(dish->boxes->box);
+	gtk_widget_hide(menu->pages->box);
 
-	//always make sure dish->boxes points to current
+	//always make sure menu->pages points to current
   //shown box
-	dish->boxes = dish->boxes->next;
-	gtk_widget_show_all(dish->boxes->box);
-}
-
-/**
-* \brief Creates the button layout using the available screen height and width
-* \param elts pointer to first menu_elements structure
-* \param processevent function pointer to function which should be used as callback when a button is pressed.
-* \return GtkWidget pointer to a hbox that contains one or more hboxes
-*/
-static GtkWidget *create_buttonboxes(gm_menu *dish, int button_width, int button_height,
-									int elts_per_row,
-							   void (*processevent) (GtkWidget *, GdkEvent *,
-													 gm_menu_element *))
-{
-	GtkWidget *buttonbox, *hbuttonboxes;
-	gm_menu_box *tmp = NULL;
-	int i;
-
-	hbuttonboxes = gtk_hbox_new(FALSE, 0);
-
-g_debug("create_buttonboxes: amount_of_elements=%d, max_elts_in_single_box=%d", dish->amount_of_elements, dish->max_elts_in_single_box);
-
-	for(i=0;i<dish->amount_of_elements;i+=dish->max_elts_in_single_box)
-	{
-		buttonbox = create_buttonbox(dish, i, button_width, button_height, elts_per_row, processevent);
-		tmp = dish->boxes;
-
-		dish->boxes = (gm_menu_box *) malloc(sizeof(gm_menu_box)); 
-	  dish->boxes->box = buttonbox;
-		dish->boxes->prev = tmp; 	
-		dish->boxes->next = NULL;
-	
-		if ( tmp != NULL )
-		{
-			tmp->next = dish->boxes;
-		}
-
-		gtk_widget_hide_all(buttonbox);
-		gtk_container_add(GTK_CONTAINER(hbuttonboxes), buttonbox);
-	}
-	return hbuttonboxes;
+	menu->pages = menu->pages->next;
+	gtk_widget_show_all(menu->pages->box);
 }
 
 gboolean gm_layout_check_key(GdkEvent * event)
@@ -834,37 +816,51 @@ g_assert(max_height <= window_height);
 }
 
 
-GtkWidget *gm_layout_create_menu(gm_menu *dish,
+GtkWidget *gm_layout_create_menu(gm_menu *menu,
 							   void (*processevent) (GtkWidget *, GdkEvent *,
 													 gm_menu_element *))
 {
 	GtkWidget *fixed_box;
-	GtkWidget *hbuttonbox;
+	GtkWidget *buttonbox;
+	GtkWidget *hbox;
 	GtkWidget *button;
+	GtkWidget *tmp;
+	gm_menu_page *page;
 	gint box_width, box_height;
-	int elts_per_col, elts_per_row;
-  int button_height, button_width;
+	gint elts_per_col, elts_per_row;
+  gint button_height, button_width;
+  gint number_of_pages;
+	gint i;
 
-	box_width = calculate_box_length(window_width, &(dish->menu_width));
-	box_height = calculate_box_length(window_height, &(dish->menu_height));
+	box_width = calculate_box_length(window_width, &(menu->menu_width));
+	box_height = calculate_box_length(window_height, &(menu->menu_height));
 
 	elts_per_row =
 		calculateAmountOfElementsPerRow(box_width, box_height,
-										   dish->max_elts_in_single_box);
+										   menu->max_elts_in_single_box);
 	if (elts_per_row < 1)
 	{
 		elts_per_row = 1;
 	}
 
-	elts_per_col = dish->max_elts_in_single_box / elts_per_row;
+	elts_per_col = menu->max_elts_in_single_box / elts_per_row;
 
 	if (elts_per_col < 1)
 	{
 		elts_per_col = 1;
 	}
 
+	//calculate button geometry
 	button_height = box_height / elts_per_col;
-	button_width = (box_width*0.9) / elts_per_row;
+	if( menu->max_elts_in_single_box > menu->amount_of_elements )
+	{
+		//add room for page switchers
+		button_width = (box_width*0.9) / elts_per_row;
+	}
+	else
+	{
+		button_width = box_width / elts_per_row;
+	}
 
 	// The size metric is 1024th of a point.
 	fontsize = (1024 * button_width) / MAXCHARSINLABEL;
@@ -873,39 +869,57 @@ GtkWidget *gm_layout_create_menu(gm_menu *dish,
 g_debug("gm_layout_create_menu: elts_per_row=%d, elts_per_col=%d, button_height=%d, button_width=%d, fontsize=%d", elts_per_row, elts_per_col, button_height, button_width, fontsize);
 #endif
 
+  hbox = gtk_hbox_new(FALSE, 0);
 
-	hbuttonbox = create_buttonboxes(dish, button_width, button_height, elts_per_row, processevent);
+	//calculate needed pages rounding a double to its smallest integer value that is not less
+  //than its double value
+	number_of_pages = ceil(menu->amount_of_elements / (double) menu->max_elts_in_single_box);
+
+  for(i = 0;i < number_of_pages; i++)
+  {
+		g_debug("1");
+    buttonbox = create_menu_page_layout(menu, i, button_width, button_height, elts_per_row, processevent);
+		g_debug("2");
+		page = gm_menu_page_create(buttonbox);
+		g_debug("3");
+		if( gm_menu_add_page(page, menu) == GM_FAIL )
+			g_warning("gm_layout_create_menu: failed to add page");
+		g_debug("4");
+
+    gtk_widget_hide_all(buttonbox);
+  }
 
 	//check if we got more than one buttonbox in the menu
-	if(dish->boxes->prev != NULL)
+	//if so we add arrow keys to switch pages
+	if(menu->pages->prev != NULL)
 	{
 		//add the left arrowbutton
 		fixed_box = gtk_fixed_new();
-		button = gm_layout_create_empty_button(switch_menu_left, dish);
+		button = gm_layout_create_empty_button(switch_menu_left, menu);
 		gtk_widget_set_size_request(button, box_width*0.05, box_height);
-		//gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 0);
 		gtk_fixed_put(GTK_FIXED(fixed_box), button, 0, 0);
 		gtk_widget_show(button);
 
-		//gtk_container_add(GTK_CONTAINER(hbox), hbuttonbox);
-		gtk_fixed_put(GTK_FIXED(fixed_box), hbuttonbox, box_width*0.05, 0);
-		gtk_widget_show(hbuttonbox);
+		gtk_fixed_put(GTK_FIXED(fixed_box), buttonbox, box_width*0.05, 0);
+		gtk_widget_show(buttonbox);
 
 		//add the right arrowbutton
-		button = gm_layout_create_empty_button(switch_menu_right, dish);
+		button = gm_layout_create_empty_button(switch_menu_right, menu);
 		gtk_widget_set_size_request(button, box_width*0.05, box_height);
 		//gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 0);
 		gtk_fixed_put(GTK_FIXED(fixed_box), button, box_width-(box_width*0.05), 0);
 		gtk_widget_show(button);
-		gtk_widget_show_all(dish->boxes->box);
-		return fixed_box;
+	}
+	else
+	{
+		gtk_container_add(GTK_CONTAINER(hbox), buttonbox);
 	}
 
-	gtk_widget_show_all(dish->boxes->box);
-	return hbuttonbox;
+	gtk_widget_show_all(menu->pages->box);
+	return hbox;
 }
 
-GtkWidget *gm_layout_create_panel(gm_menu *dish)
+GtkWidget *gm_layout_create_panel(gm_menu *menu)
 {
 	GtkWidget *button, *hbox, *vbox;
 	int elts_per_row, button_width, box_width, box_height;
@@ -916,14 +930,14 @@ GtkWidget *gm_layout_create_panel(gm_menu *dish)
 		return NULL;
 	}
 
-	box_width = calculate_box_length(window_width, &(dish->menu_width));
-	box_height = calculate_box_length(window_height, &(dish->menu_height));
+	box_width = calculate_box_length(window_width, &(menu->menu_width));
+	box_height = calculate_box_length(window_height, &(menu->menu_height));
 
 	vbox = gtk_vbox_new(FALSE, 0);
 
 	elts_per_row =
 		calculateAmountOfElementsPerRow(box_width, box_height,
-										   dish->amount_of_elements);
+										   menu->amount_of_elements);
 	if (elts_per_row < 1)
 	{
 		elts_per_row = 1;
@@ -931,7 +945,7 @@ GtkWidget *gm_layout_create_panel(gm_menu *dish)
 
 	button_width = box_width / elts_per_row;
 	
-	for(i = 0; i < dish->amount_of_elements; i++)
+	for(i = 0; i < menu->amount_of_elements; i++)
 	{
 		if ((i % elts_per_row) == 0)
 		{
@@ -939,7 +953,7 @@ GtkWidget *gm_layout_create_panel(gm_menu *dish)
 
 			gtk_container_add(GTK_CONTAINER(vbox), hbox);
 		}
-		button = createpanelelement(dish->elts[i], button_width, box_height);
+		button = createpanelelement(menu->elts[i], button_width, box_height);
 		if (button != NULL)
 		{
 			gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 1);

@@ -493,7 +493,7 @@ int main(int argc, char **argv)
 	}
 
 	status = gm_network_get_fontsize_from_gappman(2103, "localhost", &fontsize);;
-	if (status == GM_SUCCES)
+	if (status == GM_SUCCESS)
 	{
 		gm_layout_set_fontsize(fontsize);
 	}
@@ -507,7 +507,7 @@ int main(int argc, char **argv)
 	status =
 		gm_network_get_started_procs_from_gappman(2103, "localhost", &started_procs);
 
-	if (status != GM_SUCCES)
+	if (status != GM_SUCCESS)
 	{
 		gm_layout_show_error(status);
 	}
@@ -518,10 +518,10 @@ int main(int argc, char **argv)
 	}
 
 	status = gm_network_get_confpath_from_gappman(2103, "localhost", &gappman_confpath);
-	if (status == GM_SUCCES)
+	if (status == GM_SUCCESS)
 	{
  		///< \todo replace gm_load_conf with gm_network_get_programs_from_gappman
-  	if (gm_load_conf(gappman_confpath) != GM_SUCCES)
+  	if (gm_load_conf(gappman_confpath) != GM_SUCCESS)
 		{
 			msg = g_strdup_printf("Could not load gappman configuration file:\n%s\n", gappman_confpath);
 			gm_layout_show_error_dialog(msg, NULL, quit_program_callback);

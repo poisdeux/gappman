@@ -33,7 +33,7 @@ int gm_res_init()
 	{
 		sc = XRRGetScreenInfo(GDK_DISPLAY_XDISPLAY(gdk_dpy),
 							  GDK_ROOT_WINDOW());
-		return GM_SUCCES;
+		return GM_SUCCESS;
 	}
 	else
 	{
@@ -50,7 +50,7 @@ int gm_res_getpossibleresolutions(XRRScreenSize ** sizes, int *nsize)
 	}
 	*sizes = XRRConfigSizes(sc, nsize);
 
-	return GM_SUCCES;
+	return GM_SUCCESS;
 }
 
 static int get_nearest_rate(XRRScreenConfiguration * sc, int size, short *rate)
@@ -86,7 +86,7 @@ static int get_nearest_rate(XRRScreenConfiguration * sc, int size, short *rate)
 		*rate = current_rate;
 	}
 
-	return GM_SUCCES;
+	return GM_SUCCESS;
 }
 
 static int get_nearest_size(XRRScreenConfiguration * sc, int *size, int width,
@@ -135,7 +135,7 @@ static int get_nearest_size(XRRScreenConfiguration * sc, int *size, int width,
 	}
 
 
-	return GM_SUCCES;
+	return GM_SUCCESS;
 }
 
 int gm_res_changeresolution(int width, int height)
@@ -155,7 +155,7 @@ int gm_res_changeresolution(int width, int height)
 	current_size = XRRConfigCurrentConfiguration(sc, &current_rotation);
 
 	ret_status = get_nearest_size(sc, &size, width, height);
-	if (ret_status != GM_SUCCES)
+	if (ret_status != GM_SUCCESS)
 	{
 		return ret_status;
 	}
@@ -178,7 +178,7 @@ int gm_res_changeresolution(int width, int height)
 	}
 
 
-	return GM_SUCCES;
+	return GM_SUCCESS;
 }
 
 int gm_res_get_current_size(XRRScreenSize * size)
@@ -202,5 +202,5 @@ int gm_res_get_current_size(XRRScreenSize * size)
 
 	*size = sizes[size_id];
 
-	return GM_SUCCES;
+	return GM_SUCCESS;
 }

@@ -138,21 +138,21 @@ GtkWidget *gm_layout_create_empty_button(void *callbackfunc, void *data);
 
 /**
 * \brief Creates the widget layout with regards to the window height and width
-* \param dish pointer to struct menu
+* \param menu pointer to struct menu
 * \param processevent NULL or a function pointer to the function that should be used as callback when a button from the menu is pressed. The callback should be of the form \code void <functionname>(GtkWidget * widget, GdkEvent * event, gm_menu_element * elt) \endcode The *elt will point to the menu_element that is associated with the button that was pressed.
 * \return GtkWidget pointer to a hbox that contains one or more hboxes 
 */
-GtkWidget *gm_layout_create_menu(gm_menu *dish,
+GtkWidget *gm_layout_create_menu(gm_menu *menu,
                  void (*processevent) (GtkWidget *, GdkEvent *,
                            gm_menu_element *));
 
 /**
 * \todo replace calls to gm_layout_create_panel with gm_layout_create_menu and move panel specific code to appmanager
 * \brief Creates the panel layout using the available screen height and width
-* \param dish pointer to menu structure that holds the panel elements
+* \param menu pointer to menu structure that holds the panel elements
 * \return GtkWidget pointer to container holding the panel
 */
-GtkWidget *gm_layout_create_panel(gm_menu *dish);
+GtkWidget *gm_layout_create_panel(gm_menu *menu);
 
 /**
 * \brief Creates a container that holds all widgets. The container will be sized with respect to the window geometry

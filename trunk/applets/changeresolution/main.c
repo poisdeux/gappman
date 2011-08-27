@@ -98,7 +98,7 @@ static void set_default_res_for_program(GtkWidget * widget, GdkEvent * event,
 	// Check if spacebar or mousebutton is pressed
 	if( gm_layout_check_key(event) )
 	{
-		if (gm_res_get_current_size(&current_size) == GM_SUCCES)
+		if (gm_res_get_current_size(&current_size) == GM_SUCCESS)
 		{
 			gm_network_set_default_resolution_for_program(2103, "localhost", gm_menu_element_get_name(elt),
 												  current_size.width,
@@ -183,12 +183,12 @@ static void changeresolution(GtkWidget * widget, GdkEvent * event,
 	if( ! gm_layout_check_key(event) )
 		return;
 
-	if (gm_res_get_current_size(&oldsize) != GM_SUCCES)
+	if (gm_res_get_current_size(&oldsize) != GM_SUCCESS)
 	{
 		g_warning("Could not get current screen resolution");
 	}
 
-	if (gm_res_changeresolution(size[0].width, size[0].height) != GM_SUCCES)
+	if (gm_res_changeresolution(size[0].width, size[0].height) != GM_SUCCESS)
 	{
 		gm_layout_show_error_dialog("Could not change screen resolution", NULL, NULL);
 		return;
@@ -240,7 +240,7 @@ static GtkWidget *show_current_resolution()
 	gchar *labeltext;
 	XRRScreenSize  size;
 
-	if ( gm_res_get_current_size(&size) != GM_SUCCES )
+	if ( gm_res_get_current_size(&size) != GM_SUCCESS )
 	{
 		return NULL;
 	}
@@ -255,6 +255,43 @@ static GtkWidget *show_current_resolution()
 	return hbox;
 }
 
+static GtkWidget *show_possible_resolutions()
+{
+	GtkWidget *vbox;
+	GtkWidget *separator;
+	GtkWidget *button;
+	XRRScreenSize *sizes;
+	gint nsize;
+	gint ret_value;
+	gint i;
+	gchar *text;
+	
+	vbox = gtk_vbox_new(FALSE, 10);
+
+	ret_value = gm_res_getpossibleresolutions(&sizes, &nsize);
+	if (ret_value != GM_SUCCESS)
+	{
+		g_warning
+			("Error could not get possible resolutions (error_type: %d)\n",
+			 ret_value);
+		gm_layout_show_error_dialog("Changing screen resolution is not supported.",
+							 NULL, (void *)quit_program);
+		return NULL;
+	}
+
+	for (i = 0; i < nsize; i++)
+	{
+		text = g_strdup_printf("%dx%d",sizes[i].width, sizes[i].height);
+		button = gm_layout_create_label_button(text, (void *)changeresolution, &sizes[i]);
+		g_free(text);
+		gtk_container_add(GTK_CONTAINER(vbox), button);
+		separator = gtk_hseparator_new();
+		gtk_container_add(GTK_CONTAINER(vbox), separator);
+	}
+
+	return vbox;
+}
+
 /**
 * \brief main function setting up the UI
 */
@@ -266,11 +303,9 @@ int main(int argc, char **argv)
 	GtkWidget *hbox;
 	GtkWidget *separator;
 	gint c;
-	gint nsize;
 	gint ret_value;
 	gint i;
   gint fontsize;
-	XRRScreenSize *sizes;
 	gchar *gappman_confpath = SYSCONFDIR "/conf.xml";
 	gchar *text;
 	int window_width, window_height;
@@ -317,16 +352,16 @@ gm_network_get_window_geometry_from_gappman(2103, "localhost", &window_width, &w
 
 	// get generic fontsize from gappman
 	if (gm_network_get_fontsize_from_gappman(2103, "localhost", &fontsize) ==
-		GM_SUCCES)
+		GM_SUCCESS)
 	{
 		gm_layout_set_fontsize(fontsize);
 	}
 
 	// get configuration file path from gappman
 	if (gm_network_get_confpath_from_gappman(2103, "localhost", &gappman_confpath) ==
-		GM_SUCCES)
+		GM_SUCCESS)
 	{
-		if (gm_load_conf(gappman_confpath) == GM_SUCCES)
+		if (gm_load_conf(gappman_confpath) == GM_SUCCESS)
 		{
 			programs = gm_get_programs();
 		}
@@ -334,43 +369,29 @@ gm_network_get_window_geometry_from_gappman(2103, "localhost", &window_width, &w
 
 	gm_res_init();
 
-	ret_value = gm_res_getpossibleresolutions(&sizes, &nsize);
-	if (ret_value != GM_SUCCES)
-	{
-		g_warning
-			("Error could not get possible resolutions (error_type: %d)\n",
-			 ret_value);
-		gm_layout_show_error_dialog("Changing screen resolution is not supported.",
-							 NULL, (void *)quit_program);
-	}
-	else
-	{
-		vbox = gtk_vbox_new(FALSE, 10);
-	
-		hbox = show_current_resolution();
-		gtk_container_add(GTK_CONTAINER(vbox), hbox);
-		gtk_widget_show(hbox);
-		separator = gtk_hseparator_new();
-		gtk_container_add(GTK_CONTAINER(vbox), separator);
-		gtk_widget_show(separator);
+	vbox = gtk_vbox_new(FALSE, 10);
 
-		for (i = 0; i < nsize; i++)
-		{
-			text = g_strdup_printf("%dx%d",sizes[i].width, sizes[i].height);
-			button = gm_layout_create_label_button(text, (void *)changeresolution, &sizes[i]);
-			g_free(text);
-			gtk_container_add(GTK_CONTAINER(vbox), button);
-			separator = gtk_hseparator_new();
-			gtk_container_add(GTK_CONTAINER(vbox), separator);
-		}
-		// cancel button
-		button = gm_layout_create_label_button("Done", quit_program, NULL);
-		gtk_container_add(GTK_CONTAINER(vbox), button);
-		gtk_widget_show(button);
+	hbox = show_current_resolution();
+	gtk_container_add(GTK_CONTAINER(vbox), hbox);
+	gtk_widget_show(hbox);
+	separator = gtk_hseparator_new();
+	gtk_container_add(GTK_CONTAINER(vbox), separator);
+	gtk_widget_show(separator);
 
-		gtk_container_add(GTK_CONTAINER(mainwin), vbox);
-		gtk_widget_show_all(mainwin);
-	}
+	hbox = show_possible_resolutions();
+	gtk_container_add(GTK_CONTAINER(vbox), hbox);
+	gtk_widget_show(hbox);
+	separator = gtk_hseparator_new();
+	gtk_container_add(GTK_CONTAINER(vbox), separator);
+	gtk_widget_show(separator);
+ 
+  // cancel button
+	button = gm_layout_create_label_button("Done", quit_program, NULL);
+	gtk_container_add(GTK_CONTAINER(vbox), button);
+	gtk_widget_show(button);
+
+	gtk_container_add(GTK_CONTAINER(mainwin), vbox);
+	gtk_widget_show_all(mainwin);
 
 	gtk_main();
 

@@ -369,6 +369,6 @@ g_debug("gm_load_conf: cache_location=%s", cache_location);
     * Cleanup function for the XML library.
     */
 	xmlCleanupParser();
-	return GM_SUCCES;
+	return GM_SUCCESS;
 }
 

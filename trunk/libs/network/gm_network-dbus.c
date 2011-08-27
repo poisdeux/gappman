@@ -112,7 +112,7 @@ int gm_dbus_get_started_procs_from_gappman(struct proceslist **startedprocs)
 			}
 		}
 	}
-	return GM_SUCCES;
+	return GM_SUCCESS;
 }
 
 GmReturnCode gm_dbus_get_confpath_from_gappman(gchar ** path)
@@ -137,7 +137,7 @@ GmReturnCode gm_dbus_get_confpath_from_gappman(gchar ** path)
 		return GM_FAIL;
 	}
 
-	return GM_SUCCES;
+	return GM_SUCCESS;
 }
 
 gint gm_dbus_get_fontsize_from_gappman(gint * fontsize)
@@ -162,7 +162,7 @@ gint gm_dbus_get_fontsize_from_gappman(gint * fontsize)
 		return GM_FAIL;
 	}
 
-	return GM_SUCCES;
+	return GM_SUCCESS;
 }
 
 int gm_dbus_set_default_resolution_for_program(gchar * name, int width,
@@ -188,7 +188,7 @@ int gm_dbus_set_default_resolution_for_program(gchar * name, int width,
 		return GM_FAIL;
 	}
 
-	return GM_SUCCES;
+	return GM_SUCCESS;
 }
 
 int gm_dbus_get_window_geometry_from_gappman(int *width, int *height)
@@ -214,6 +214,6 @@ int gm_dbus_get_window_geometry_from_gappman(int *width, int *height)
 		return GM_FAIL;
 	}
 
-	return GM_SUCCES;
+	return GM_SUCCESS;
 }
 

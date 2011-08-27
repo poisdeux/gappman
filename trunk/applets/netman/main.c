@@ -316,18 +316,18 @@ static GmReturnCode load_images()
 						  GTK_WIDGET(stati->image_fail));
 	}
 
-	return GM_SUCCES;
+	return GM_SUCCESS;
 }
 
 /**
 * \brief Initializes the module. Loads the configuration and starts the applet in failed mode.
 * \return int 
-*  - GM_SUCCES if initialization was succesful. 
+*  - GM_SUCCESS if initialization was succesful. 
 *  - GM_COULD_NOT_LOAD_FILE if the configuration file could not be loaded.
 */
 G_MODULE_EXPORT GmReturnCode gm_module_init()
 {
-	if (nm_load_conf(conffile) != GM_SUCCES)
+	if (nm_load_conf(conffile) != GM_SUCCESS)
 		return GM_COULD_NOT_LOAD_FILE;
 
 	main_button = gm_layout_create_empty_button(G_CALLBACK(show_menu), NULL);
@@ -338,7 +338,7 @@ G_MODULE_EXPORT GmReturnCode gm_module_init()
 
 	check_status_mutex = g_mutex_new();
 
-	return GM_SUCCES;
+	return GM_SUCCESS;
 }
 
 /**
@@ -432,7 +432,7 @@ G_MODULE_EXPORT int gm_module_stop()
 
 	release_lock();
 
-	return GM_SUCCES;
+	return GM_SUCCESS;
 }
 
 /**

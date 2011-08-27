@@ -14,58 +14,48 @@
 
 #define MENU_ELTS_ARRAY_INCREMENT 5
 
-void gm_menu_element_free(gm_menu_element *elt)
-{
-	int i;
-
-	if (elt == NULL)
-		return;
-	
-	free(elt->name);
-  free(elt->exec);
-  free(elt->module);
-  free(elt->module_conffile);
-  free(elt->logo);
-  for (i = 0; i < (gm_menu_element_get_amount_of_arguments(elt)); i++)
-  {
-    free(elt->args[i]);
-  }
-  free(elt->args);
-}
-
-void gm_menu_free(gm_menu *dish)
+void gm_menu_free(gm_menu *menu)
 {
   int i;
+	gm_menu_page *page;
 
-  if (dish == NULL)
+  if (menu == NULL)
 		return;
     
-  for(i = 0; i < gm_menu_get_amount_of_elements(dish); i++)
+  for(i = 0; i < gm_menu_get_amount_of_elements(menu); i++)
   {
-    gm_menu_element_free(dish->elts[i]);
+    gm_menu_element_free(menu->elts[i]);
   }
-  free(dish->elts);
+  free(menu->elts);
+
+	page = menu->pages;
+	while( page != NULL )
+	{
+		gm_menu_page_free(page);
+		menu->pages = gm_menu_page_next(menu->pages);
+		page = menu->pages;
+	}
 }
 
-gm_menu_element *gm_menu_search_elt_by_name(gchar * name, gm_menu *dish)
+gm_menu_element *gm_menu_search_elt_by_name(gchar * name, gm_menu *menu)
 {
   int i;
-  if(dish != NULL)
+  if(menu != NULL)
   {
-    for(i=0; i < gm_menu_get_amount_of_elements(dish); i++)
+    for(i=0; i < gm_menu_get_amount_of_elements(menu); i++)
     {
-      if (g_strcmp0(name, (const char *)(dish->elts[i]->name)) == 0) 
+      if (g_strcmp0(name, (const char *)(menu->elts[i]->name)) == 0) 
       {
-        return dish->elts[i];
+        return menu->elts[i];
       }
     }
   }
   return NULL;
 }
 
-gint gm_menu_get_amount_of_elements(gm_menu *dish)
+gint gm_menu_get_amount_of_elements(gm_menu *menu)
 {
-  return dish->amount_of_elements;
+  return menu->amount_of_elements;
 }
 
 gchar *gm_menu_element_get_name(gm_menu_element *elt)
@@ -90,8 +80,44 @@ gm_menu *gm_menu_create()
   menu->vert_alignment = 1;     // <! default center
   menu->amount_of_elements = 0;
   menu->elts = NULL;
-  menu->boxes = NULL;
+  menu->pages = NULL;
   return menu;
+}
+
+gboolean gm_menu_add_menu_element(gm_menu_element *elt, gm_menu *menu)
+{
+	if( menu == NULL )
+		return FALSE;
+
+	//Check if we need to resize the menu->elts array
+	if ( ( menu->amount_of_elements % MENU_ELTS_ARRAY_INCREMENT ) == 0 )
+		menu->elts = (gm_menu_element **) g_try_realloc(menu->elts, ( menu->amount_of_elements + MENU_ELTS_ARRAY_INCREMENT ) * sizeof(gm_menu_element *));
+	
+	if ( ( menu->elts == NULL )	|| ( elt == NULL ) )
+		return FALSE;
+
+
+	menu->elts[menu->amount_of_elements++] = elt;
+	
+	return TRUE;
+}
+
+GmReturnCode gm_menu_add_page(gm_menu_page *page, gm_menu *menu)
+{
+	if( ( menu == NULL ) || ( page == NULL ) )
+    return GM_FAIL;
+
+	if( menu->pages == NULL )
+	{
+		menu->pages = page;	
+	}
+	else
+	{
+  	menu->pages->next = page;
+		page->prev = menu->pages;
+	}
+
+	return GM_SUCCESS;
 }
 
 gm_menu_element *gm_menu_element_create()
@@ -118,22 +144,23 @@ gm_menu_element *gm_menu_element_create()
   return elt;
 }
 
-gboolean gm_menu_add_menu_element(gm_menu_element *elt, gm_menu *menu)
+void gm_menu_element_free(gm_menu_element *elt)
 {
-	if( menu == NULL )
-		return FALSE;
+	int i;
 
-	//Check if we need to resize the menu->elts array
-	if ( ( menu->amount_of_elements % MENU_ELTS_ARRAY_INCREMENT ) == 0 )
-		menu->elts = (gm_menu_element **) g_try_realloc(menu->elts, ( menu->amount_of_elements + MENU_ELTS_ARRAY_INCREMENT ) * sizeof(gm_menu_element *));
+	if (elt == NULL)
+		return;
 	
-	if ( ( menu->elts == NULL )	|| ( elt == NULL ) )
-		return FALSE;
-
-
-	menu->elts[menu->amount_of_elements++] = elt;
-	
-	return TRUE;
+	free(elt->name);
+  free(elt->exec);
+  free(elt->module);
+  free(elt->module_conffile);
+  free(elt->logo);
+  for (i = 0; i < (gm_menu_element_get_amount_of_arguments(elt)); i++)
+  {
+    free(elt->args[i]);
+  }
+  free(elt->args);
 }
 
 gboolean gm_menu_element_add_argument(gchar *arg, gm_menu_element *elt)
@@ -160,3 +187,36 @@ void gm_menu_element_set_pid(gint pid, gm_menu_element *elt)
 {
 	elt->pid = pid;
 }
+
+gm_menu_page *gm_menu_page_create(GtkWidget *box)
+{
+	gm_menu_page* new_page;
+
+  new_page = (gm_menu_page *) malloc(sizeof(gm_menu_page));
+  if ( new_page == NULL )
+  {
+    g_warning("gm_menu_page_create: could not allocate memory for new page");
+    return NULL;
+  }
+
+  new_page->box = box;
+  new_page->prev = NULL;
+  new_page->next = NULL;
+	
+	return new_page;
+}
+
+void gm_menu_page_free(gm_menu_page *page)
+{
+	if( page != NULL )
+		free(page);
+}
+
+gm_menu_page *gm_menu_page_next(gm_menu_page *page)
+{
+	if ( page == NULL )
+		return NULL;
+
+	return page->next;
+}
+ 

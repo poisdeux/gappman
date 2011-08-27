@@ -35,7 +35,7 @@ typedef struct _menu_element gm_menu_element;
 /**
 * \brief single element from a menu
 */
-typedef struct _menu_box gm_menu_box;
+typedef struct _menu_page gm_menu_page;
 
 /**
 * \brief Function to initialize the module
@@ -74,7 +74,7 @@ typedef int (*GM_MODULE_STOP) (void);
 * enumeration for error/return codes
 */
 typedef enum returncodes {
-GM_SUCCES, ///< no errors detected
+GM_SUCCESS, ///< no errors detected
 GM_FAIL, ///< used to represent a general error
 GM_NO_RANDR_EXTENSION,	///< Xorg has no support for the XRANDR extension. This is fatal for gm_changeresolution
 GM_NO_SCREEN_CONFIGURATION,	///< No screen configuration could be retrieved. This is fatal for gm_changeresolution
@@ -164,11 +164,11 @@ struct _menu_element
 /**
 * \brief forms a linked list to all boxes in a specific menu
 */
-struct _menu_box
+struct _menu_page
 {
 	GtkWidget *box; ///< pointer to a buttonbox
-	gm_menu_box *next; ///< pointer to next menu_box in the linked list;
-	gm_menu_box *prev; ///< pointer to previous menu_box in the linked list;
+	gm_menu_page *next; ///< pointer to next menu_page in the linked list;
+	gm_menu_page *prev; ///< pointer to previous menu_page in the linked list;
 };
 
 /**
@@ -178,7 +178,7 @@ struct _menu
 {
 	int amount_of_elements;	///< total number of elements
 	int max_elts_in_single_box; ///< maximum number of elements allowed in one box.
-	gm_menu_box *boxes; ///< list of menu boxes
+	gm_menu_page *pages; ///< list of menu boxes
 	struct length menu_width;	///< holds the width of the menu this element 
 								// is a part of. Note that all elements in the 
 								// same menu should point to the same length
@@ -196,13 +196,13 @@ struct _menu
 
 /**
 * \brief relinguishes the memory occupied by a menu
-* \param dish menu structure
+* \param menu menu structure
 */
-void gm_menu_free(gm_menu *dish);
+void gm_menu_free(gm_menu *menu);
 
 /**
 * \brief relinguishes the memory occupied by a menu_element
-* \param dish menu structure
+* \param menu menu structure
 */
 void gm_menu_element_free(gm_menu_element *elt);
 
@@ -216,10 +216,10 @@ gm_menu_element *gm_menu_search_elt_by_name(gchar *name, gm_menu *programs);
 
 /**
 * \brief returns the amount of menu elements in the menu
-* \param dish pointer to a gm_menu type
-* \return int amount of elements in dish
+* \param menu pointer to a gm_menu type
+* \return int amount of elements in menu
 */
-gint gm_menu_get_amount_of_elements(gm_menu *dish);
+gint gm_menu_get_amount_of_elements(gm_menu *menu);
 
 /**
 * \brief returns name for menu element
@@ -236,11 +236,19 @@ gm_menu *gm_menu_create();
 
 /**
 * \brief adds a gm_menu_element to a gm_menu
-* \param elt pointer to gm_menu_element that must be added to dish
-* \param dish pointer to gm_menu that should be enlarged with elt
+* \param elt pointer to gm_menu_element that must be added to menu
+* \param menu pointer to gm_menu that should be enlarged with elt
 * \return TRUE on success, FALSE on failure
 */
-gboolean gm_menu_add_menu_elt(gm_menu_element *elt, gm_menu *dish);
+gboolean gm_menu_add_menu_elt(gm_menu_element *elt, gm_menu *menu);
+
+/**
+* \brief adds a gm_menu_page to a gm_menu
+* \param elt pointer to gm_menu_page that must be added
+* \param menu pointer to gm_menu that should be enlarged with elt
+* \return GM_SUCCESS on success, GM_FALSE on failure
+*/
+GmReturnCode gm_menu_add_page(gm_menu_page *page, gm_menu *menu);
 
 /**
 * \brief creates a gm_menu with default initialization
@@ -270,6 +278,17 @@ gint gm_menu_elements_get_amount_of_arguments(gm_menu_element *elt);
 * \param elt gm_menu_element that should be updated
 */
 void gm_menu_element_set_pid(gint pid, gm_menu_element *elt);
+
+/**
+* \brief Creates a new gm_menu_page and adds box as the content of the page
+* \param box pointer to a GtkWidget that belongs to this page. Note that only one GtkWidget can be added to a single page. Because of this the widget will usually be a container
+* \return gm_menu_page pointer
+*/
+gm_menu_page *gm_menu_page_create(GtkWidget *box);
+
+void gm_menu_page_free();
+
+gm_menu_page *gm_menu_page_next(gm_menu_page* page);
 
 #endif
 
