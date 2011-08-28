@@ -204,6 +204,23 @@ gboolean gm_menu_element_add_argument(gchar *arg, gm_menu_element *elt)
 	return TRUE;
 }
 
+void gm_menu_element_set_name(gchar *name, gm_menu_element *elt)
+{
+	elt->name = name;
+}
+
+void gm_menu_element_printlabel(gboolean bool, gm_menu_element *elt)
+{
+	if( bool == TRUE )
+	{
+		elt->printlabel = 1;
+	}
+	else
+	{
+		elt->printlabel = 0;
+	}
+}
+
 void gm_menu_element_set_widget(GtkWidget *widget, gm_menu_element *elt)
 {
 	elt->widget = widget;

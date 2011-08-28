@@ -294,6 +294,20 @@ gboolean gm_menu_element_add_argument(gchar *arg, gm_menu_element *elt);
 gint gm_menu_elements_get_amount_of_arguments(gm_menu_element *elt);
 
 /**
+* \brief sets the name of the menu_element which will be displayed if printlabel is TRUE
+* \param name string holding the name. Note that gm_menu_element_set_name will not allocate memory for the string. You will need to do this yourself. Memory is freed when calling gm_menu_element_free.
+* \param *elt gm_menu_element which should be changed
+*/
+void gm_menu_element_set_name(gchar *name, gm_menu_element *elt);
+
+/**
+* \brief specifies if the name should be displayed or not
+* \param bool boolean value indicating if the name should be displayed
+* \param *elt gm_menu_element which should be changed
+*/
+void gm_menu_element_printlabel(gboolean bool, gm_menu_element *elt);
+
+/**
 * \brief set the pid in a gm_menu_element
 * \param pid Process ID of the program in gm_menu_element
 * \param elt gm_menu_element that should be updated

@@ -290,16 +290,18 @@ static GtkWidget *show_possible_resolutions()
 	for (i = 0; i < nsize; i++)
 	{
 		text = g_strdup_printf("%dx%d",sizes[i].width, sizes[i].height);
-		button = gm_layout_create_label_button(text, (void *)changeresolution, &sizes[i]);
-		g_free(text);
+		//button = gm_layout_create_label_button(text, (void *)changeresolution, &sizes[i]);
+		//g_free(text);
 		
 		menu_elt = gm_menu_element_create();
+		gm_menu_element_set_name(text, menu_elt);
+		gm_menu_element_printlabel(TRUE, menu_elt);
 		gm_menu_element_set_widget(button, menu_elt);
 		gm_menu_add_menu_element(menu_elt, menu);
 	}
 
-	vbox = gm_layout_create_menu(menu_elt, NULL);
-
+	vbox = gm_layout_create_menu(menu, NULL);
+	gtk_widget_show_all(vbox);
 	return vbox;
 }
 

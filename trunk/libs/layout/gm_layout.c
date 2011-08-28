@@ -695,6 +695,10 @@ GtkWidget *gm_layout_create_label_button(gchar * buttontext, void *callbackfunc,
 	GtkWidget *button;
 	GtkWidget *label;
 
+#if defined(DEBUG)
+g_debug("gm_layout_create_label_button: buttontext=%s", buttontext);
+#endif
+
 	label = gm_layout_create_label(buttontext);
 	button = gm_layout_create_empty_button(callbackfunc, data);
 	gtk_container_add(GTK_CONTAINER(button), label);
@@ -715,6 +719,9 @@ GtkWidget *gm_layout_load_image(gchar *elt_name, gchar *elt_logo,
 	gchar *stock_id;
 	GtkIconSize stock_size;
 
+
+	if( elt_logo == NULL )
+		return NULL;
 
 	// Paths can be of arbitrary length.
 	// Filenames can not be longer than 255 chars
@@ -814,14 +821,38 @@ g_assert(max_width <= window_width);
 g_assert(max_height <= window_height);
 #endif
 
-	button = gm_layout_create_empty_button(processevent, elt);
-	gtk_widget_set_size_request(button, max_width, max_height);
-	if (elt->logo != NULL)
+	/**
+	* Layout manager knows of three possible buttons:
+  * 1. Logo + Label
+  * 2. Label
+  * 3. Logo
+	*/
+
+  //Check if none of the above is possible
+	if( (elt->logo == NULL) && (elt->name == NULL) )
+		return NULL;
+
+	button = NULL;
+
+	//Situation 1 + 3
+	//image_label_box_vert determines if label should be included or not
+	if( elt->logo != NULL )
 	{
+		button = gm_layout_create_empty_button(processevent, elt);
 		imagelabelbox = image_label_box_vert(elt, max_width, max_height);
-		gtk_container_add(GTK_CONTAINER(button), imagelabelbox);
-		gtk_widget_show(imagelabelbox);
+    gtk_container_add(GTK_CONTAINER(button), imagelabelbox);
+    gtk_widget_show(imagelabelbox);
 	}
+	//Situation 2
+	else if( elt->name != NULL )
+	{
+		button = gm_layout_create_label_button(elt->name, processevent, elt);
+	}
+
+	gtk_widget_set_size_request(button, max_width, max_height);
+
+	if( GTK_IS_WIDGET(button) )
+		g_debug("Yeah button is a widget");
 
 	return button;
 }
@@ -888,14 +919,10 @@ g_debug("gm_layout_create_menu: elts_per_row=%d, elts_per_col=%d, button_height=
 
   for(i = 0;i < number_of_pages; i++)
   {
-		g_debug("1");
     buttonbox = create_menu_page_layout(menu, i, button_width, button_height, elts_per_row, processevent);
-		g_debug("2");
 		page = gm_menu_page_create(buttonbox);
-		g_debug("3");
 		if( gm_menu_add_page(page, menu) == GM_FAIL )
 			g_warning("gm_layout_create_menu: failed to add page");
-		g_debug("4");
 
     gtk_widget_hide_all(buttonbox);
   }
