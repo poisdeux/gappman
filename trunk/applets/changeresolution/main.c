@@ -172,12 +172,14 @@ static void make_default_for_program(GtkWidget * widget, GdkEvent * event)
 * \param *size pointer to a XRRScreenSize struct that holds the new resolution
 */
 static void changeresolution(GtkWidget * widget, GdkEvent * event,
-							 XRRScreenSize * size)
+							 gm_menu_element *elt)
 {
 	GtkWidget *button;
 	GtkWidget *vbox;
 	GtkWidget *confirmwin;
-	static XRRScreenSize oldsize;
+	XRRScreenSize oldsize;
+	XRRScreenSize *requested_size;
+
 
 	// only show menu if spacebar or mousebutton were pressed
 	if( ! gm_layout_check_key(event) )
@@ -188,7 +190,8 @@ static void changeresolution(GtkWidget * widget, GdkEvent * event,
 		g_warning("Could not get current screen resolution");
 	}
 
-	if (gm_res_changeresolution(size[0].width, size[0].height) != GM_SUCCESS)
+	requested_size = (XRRScreenSize *) elt->data;
+	if (gm_res_changeresolution(requested_size->width, requested_size->height) != GM_SUCCESS)
 	{
 		gm_layout_show_error_dialog("Could not change screen resolution", NULL, NULL);
 		return;
@@ -290,17 +293,16 @@ static GtkWidget *show_possible_resolutions()
 	for (i = 0; i < nsize; i++)
 	{
 		text = g_strdup_printf("%dx%d",sizes[i].width, sizes[i].height);
-		//button = gm_layout_create_label_button(text, (void *)changeresolution, &sizes[i]);
-		//g_free(text);
 		
 		menu_elt = gm_menu_element_create();
 		gm_menu_element_set_name(text, menu_elt);
 		gm_menu_element_printlabel(TRUE, menu_elt);
 		gm_menu_element_set_widget(button, menu_elt);
+		gm_menu_element_set_data((gpointer) &sizes[i], menu_elt);
 		gm_menu_add_menu_element(menu_elt, menu);
 	}
 
-	vbox = gm_layout_create_menu(menu, NULL);
+	vbox = gm_layout_create_menu(menu, (void *) changeresolution);
 	gtk_widget_show_all(vbox);
 	return vbox;
 }

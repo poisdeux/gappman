@@ -851,9 +851,6 @@ g_assert(max_height <= window_height);
 
 	gtk_widget_set_size_request(button, max_width, max_height);
 
-	if( GTK_IS_WIDGET(button) )
-		g_debug("Yeah button is a widget");
-
 	return button;
 }
 

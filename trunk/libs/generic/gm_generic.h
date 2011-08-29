@@ -132,31 +132,16 @@ struct _menu_element
 	gint autostart;				///< a value of 1 will start program at
 								// startup, 0 will not.
 	gint printlabel;				///< If set to 1 the name should be printed
-								// alongside the button. Otherwise do not
-								// print a textlabel
-	gchar **args;				///< array of strings containing arguments
-								// that need to be passed to the executable
-	gint amount_of_args;			///< will hold the total amount of elements
-								// in the args array
-	gint pid;					///< should hold the process ID of the
-								// process that was started by this
-								// menu_element
-	GM_MODULE_INIT gm_module_init;	///< pointer to the init function for a
-									// panel module
-	GM_MODULE_START gm_module_start;	///< pointer to the start function
-										// for a panel module
-	GM_MODULE_STOP gm_module_stop;	///< pointer to the stop function for a
-									// panel module
-	GM_MODULE_SET_ICON_SIZE gm_module_set_icon_size;	///< pointer to the
-														// set icon size
-														// function for a
-														// panel module
-	GM_MODULE_SET_CONFFILE gm_module_set_conffile;	///< pointer to the set
-													// configuration file
-													// function for a panel
-													// module
-	GM_MODULE_WIDGET gm_module_get_widget;	///< pointer to the get widget
-											// function for a panel module
+	gchar **args;				///< arguments that need to be passed to the executable
+	gint amount_of_args;			///< total amount of elements in the args array
+	gint pid;					///< process ID of the process that was started by this menu_element
+	gpointer data; ///< used to hold arbitrary data for callback functions
+	GM_MODULE_INIT gm_module_init;	///< init function for a panel module
+	GM_MODULE_START gm_module_start;	///< start function for a panel module
+	GM_MODULE_STOP gm_module_stop;	///< stop function for a panel module
+	GM_MODULE_SET_ICON_SIZE gm_module_set_icon_size;	///< sets icon size for a panel module
+	GM_MODULE_SET_CONFFILE gm_module_set_conffile;	///< sets configuration file function for a panel module
+	GM_MODULE_WIDGET gm_module_get_widget;	///< used by gappman to get the widget from a panel module
 };
 
 /**
@@ -313,6 +298,14 @@ void gm_menu_element_printlabel(gboolean bool, gm_menu_element *elt);
 * \param elt gm_menu_element that should be updated
 */
 void gm_menu_element_set_pid(gint pid, gm_menu_element *elt);
+
+/**
+* \brief sets the data pointer in a gm_menu_element. Most useful to pass arbitrary data to 
+* a callback function
+* \param data pointer to arbitrary data
+* \param elt gm_menu_element that should be updated
+*/
+void gm_menu_element_set_data(gpointer data, gm_menu_element *elt);
 
 /**
 * \brief Creates a new gm_menu_page and adds box as the content of the page

@@ -236,6 +236,11 @@ void gm_menu_element_set_pid(gint pid, gm_menu_element *elt)
 	elt->pid = pid;
 }
 
+void gm_menu_element_set_data(gpointer data, gm_menu_element *elt)
+{
+	elt->data = data;
+}
+
 gm_menu_page *gm_menu_page_create(GtkWidget *box)
 {
 	gm_menu_page* new_page;
