@@ -315,7 +315,8 @@ int main(int argc, char **argv)
 	GdkScreen *screen;
 	GtkWidget *button;
 	GtkWidget *vbox;
-	GtkWidget *hbox;
+	GtkWidget *hbox_possible_resolutions;
+	GtkWidget *hbox_current_resolution;
 	GtkWidget *separator;
 	gint c;
 	gint ret_value;
@@ -386,25 +387,20 @@ gm_network_get_window_geometry_from_gappman(2103, "localhost", &window_width, &w
 
 	vbox = gtk_vbox_new(FALSE, 10);
 
-	hbox = show_current_resolution();
-	gtk_container_add(GTK_CONTAINER(vbox), hbox);
-	gtk_widget_show(hbox);
-	separator = gtk_hseparator_new();
-	gtk_container_add(GTK_CONTAINER(vbox), separator);
-	gtk_widget_show(separator);
-
-	hbox = show_possible_resolutions();
-	gtk_container_add(GTK_CONTAINER(vbox), hbox);
-	gtk_widget_show(hbox);
-	separator = gtk_hseparator_new();
-	gtk_container_add(GTK_CONTAINER(vbox), separator);
-	gtk_widget_show(separator);
- 
-  // cancel button
+	//first create possible resolution box as this will determine
+  //required fontsize
+	hbox_possible_resolutions = show_possible_resolutions();
+	hbox_current_resolution = show_current_resolution();
 	button = gm_layout_create_label_button("Done", quit_program, NULL);
-	gtk_container_add(GTK_CONTAINER(vbox), button);
-	gtk_widget_show(button);
 
+	//build up UI
+	gtk_container_add(GTK_CONTAINER(vbox), hbox_current_resolution);
+	separator = gtk_hseparator_new();
+	gtk_container_add(GTK_CONTAINER(vbox), separator);
+	gtk_container_add(GTK_CONTAINER(vbox), hbox_possible_resolutions);
+	separator = gtk_hseparator_new();
+	gtk_container_add(GTK_CONTAINER(vbox), separator);
+	gtk_container_add(GTK_CONTAINER(vbox), button);
 	gtk_container_add(GTK_CONTAINER(mainwin), vbox);
 	gtk_widget_show_all(mainwin);
 

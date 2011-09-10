@@ -109,6 +109,7 @@ static gint exec_program(nm_elements * elt)
 	}
 
 	elt->pid = childpid;
+	elt->running = TRUE;
 
 	elt->g_source_tag =
 		g_child_watch_add(childpid, (GChildWatchFunc) check_status, elt);

@@ -25,14 +25,17 @@
 #include <gm_generic.h>
 #include <gm_layout.h>
 
-static int fontsize = 10 * 1024;	///< the default generic fontsize for all 
-									// elements. This usually gets updated by
-									// menu building functions below.
+#define MAXCHARSINLABEL 10		///< amount of characters we take as a
+								// maximum to determine the fontsize.
+
+#define FONTMETRIC 1024 ///< font metric is 1024th of a point.
+
 static int window_width = 800;
 static int window_height = 600;
 
-#define MAXCHARSINLABEL 10;		///< amount of characters we take as a
-								// maximum to determine the fontsize.
+static int g_fontsize = 10 * FONTMETRIC;	///< the default generic fontsize for all 
+									// elements. This usually gets updated by
+									// menu building functions below.
 
 static void gm_layout_destroy_widget(GtkWidget * dummy, GdkEvent * event, GtkWidget * widget)
 {
@@ -467,6 +470,25 @@ static void switch_menu_right(GtkWidget *widget, GdkEvent *event, gm_menu *menu)
 	gtk_widget_show_all(menu->pages->box);
 }
 
+static gint calculate_fontsize(gchar *message)
+{
+	gint length;
+	gint fontsize;
+
+	length = strlen(message);
+
+	fontsize = ( FONTMETRIC * window_width ) / length;
+
+	//Set fontsize to default 10pt if calculated 
+  //size is smaller than 10pt.	
+	if ( fontsize < (FONTMETRIC * 10) )
+	{ 
+		fontsize = FONTMETRIC * 10;
+	}
+
+	return fontsize;
+}
+
 gboolean gm_layout_check_key(GdkEvent * event)
 {
 	// Only start program if spacebar or mousebutton is pressed
@@ -492,6 +514,7 @@ void gm_layout_show_confirmation_dialog(gchar * message,
 	GtkWidget *label;
 	GdkPixbuf *pixbuf;
 	GtkWidget *stock_image;
+	gint fontsize;
 
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
@@ -512,6 +535,9 @@ void gm_layout_show_confirmation_dialog(gchar * message,
 	stock_image = gtk_image_new_from_pixbuf(pixbuf);
 	gtk_box_pack_start(GTK_BOX(hbox), stock_image, FALSE, FALSE, 0);
 	gtk_widget_show(stock_image);
+
+	fontsize = calculate_fontsize(message);
+	gm_layout_set_fontsize(fontsize);	
 
 	label = gm_layout_create_label(message);
 	gtk_misc_set_padding(GTK_MISC(label), 5, 5);
@@ -554,10 +580,13 @@ void gm_layout_show_error_dialog(gchar * message, GtkWidget * parent_window,
 	GtkWidget *label;
 	GdkPixbuf *pixbuf;
 	GtkWidget *stock_image;
+	gint fontsize;
 
 	g_warning("%s", message);
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
+	//Check if caller wants dialog positioned 
+  //relative to the parent window
 	if (parent_window != NULL)
 	{
 		gtk_window_set_transient_for(GTK_WINDOW(window), GTK_WINDOW(parent_window));
@@ -568,9 +597,6 @@ void gm_layout_show_error_dialog(gchar * message, GtkWidget * parent_window,
 	{
 		gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
 	}
-
-	// Make window transparent
-	// gtk_window_set_opacity (GTK_WINDOW (window), 0.8);
 
 	// Remove border
 	gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
@@ -583,27 +609,27 @@ void gm_layout_show_error_dialog(gchar * message, GtkWidget * parent_window,
 		gtk_widget_render_icon(window, GTK_STOCK_DIALOG_ERROR,
 							   GTK_ICON_SIZE_DIALOG, NULL);
 	stock_image = gtk_image_new_from_pixbuf(pixbuf);
-	gtk_box_pack_start(GTK_BOX(hbox), stock_image, FALSE, FALSE, 0);
-	gtk_widget_show(stock_image);
+	gtk_container_add(GTK_CONTAINER(hbox), stock_image);
+
+	fontsize = calculate_fontsize(message);
+	gm_layout_set_fontsize(fontsize);	
 
 	label = gm_layout_create_label(message);
 	gtk_misc_set_padding(GTK_MISC(label), 5, 5);
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
-	gtk_widget_show(label);
+	gtk_container_add(GTK_CONTAINER(hbox), label);
 
-	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
-	gtk_widget_show(hbox);
+	gtk_container_add(GTK_CONTAINER(vbox), hbox);
 
 	button = gm_layout_create_label_button("Close", G_CALLBACK(callback), parent_window);
   g_signal_connect(G_OBJECT(button), "button_release_event", G_CALLBACK(gm_layout_destroy_widget), window);
   g_signal_connect(G_OBJECT(button), "key_release_event", G_CALLBACK(gm_layout_destroy_widget), window);
 
-	gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, FALSE, 0);
-	gtk_widget_show(button);
+	gtk_container_add(GTK_CONTAINER(vbox), button);
+	//gtk_widget_set_size_request(vbox, window_width, window_height);
 
 	gtk_container_add(GTK_CONTAINER(window), vbox);
-	gtk_widget_show(vbox);
-	gtk_widget_show(window);
+	//gtk_widget_set_size_request(window, window_width, window_height);
+	gtk_widget_show_all(window);
 }
 
 void gm_layout_show_error(GmReturnCode code)
@@ -642,12 +668,12 @@ void gm_layout_show_error(GmReturnCode code)
 
 int gm_layout_get_fontsize()
 {
-	return fontsize;
+	return g_fontsize;
 }
 
 void gm_layout_set_fontsize(gint size)
 {
-	fontsize = size;
+	g_fontsize = size;
 }
 
 void gm_layout_get_window_geometry(gint *width, gint *height)
@@ -670,15 +696,16 @@ GtkWidget *gm_layout_create_label(gchar *text)
 	int label_width, label_height;
 
 	label = gtk_label_new("");
-  markup = g_markup_printf_escaped("<span size=\"%d\">%s</span>", fontsize, text);
+  markup = g_markup_printf_escaped("<span size=\"%d\">%s</span>", g_fontsize, text);
   gtk_label_set_markup(GTK_LABEL(label), markup);
   g_free(markup);
+	gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
 
 	//make sure label is not larger then window
 	gtk_widget_size_request(label, &requisition);
 
 	label_width = ( requisition.width > window_width ) ? window_width : requisition.width;
-	label_height = ( requisition.height > window_height ) ? window_height : requisition.width;
+	label_height = ( requisition.height > window_height ) ? window_height : requisition.height;
 
 	gtk_widget_set_size_request(label, label_width, label_height);
 
@@ -902,10 +929,10 @@ GtkWidget *gm_layout_create_menu(gm_menu *menu,
 	}
 
 	// The size metric is 1024th of a point.
-	fontsize = (1024 * button_width) / MAXCHARSINLABEL;
+	g_fontsize = (1024 * button_width) / MAXCHARSINLABEL;
 
 #ifdef DEBUG
-g_debug("gm_layout_create_menu: elts_per_row=%d, elts_per_col=%d, button_height=%d, button_width=%d, fontsize=%d", elts_per_row, elts_per_col, button_height, button_width, fontsize);
+g_debug("gm_layout_create_menu: elts_per_row=%d, elts_per_col=%d, button_height=%d, button_width=%d, g_fontsize=%d", elts_per_row, elts_per_col, button_height, button_width, g_fontsize);
 #endif
 
   hbox = gtk_hbox_new(FALSE, 0);

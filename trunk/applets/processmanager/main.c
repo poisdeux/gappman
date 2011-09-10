@@ -387,7 +387,12 @@ GtkWidget *create_menu(gint width, gint height, struct proceslist *started_procs
 
 	gm_network_free_proceslist(started_procs);
 
-	if (! no_progsacts_found)
+	if ( no_progsacts_found )
+	{
+		gm_layout_show_error_dialog("No programs or actions started.", NULL, quit_program_callback);
+		return NULL;
+	}
+	else
 	{
 		hbox = gtk_hbox_new(FALSE, 10);
 		// cancel button
@@ -400,11 +405,6 @@ GtkWidget *create_menu(gint width, gint height, struct proceslist *started_procs
 		gtk_container_add(GTK_CONTAINER(vbox), hbox);
 		gtk_widget_show(hbox);
 		return vbox;
-	}
-	else
-	{
-		gm_layout_show_error_dialog("Programs or actions started by Gappman.\nBut could not find the corresponding programs or actions.", NULL, quit_program_callback);
-		return NULL;
 	}
 }
 
@@ -540,9 +540,12 @@ int main(int argc, char **argv)
 	row_height = calculate_row_height(dialog_height);
 	
 	vbox = create_menu(program_width, row_height, started_procs);
-	gtk_container_add(GTK_CONTAINER(mainwin), vbox);
-	gtk_widget_show(vbox);
-	gtk_widget_show(mainwin);
+	if ( vbox != NULL )
+	{
+		gtk_container_add(GTK_CONTAINER(mainwin), vbox);
+		gtk_widget_show(vbox);
+		gtk_widget_show(mainwin);
+	}
 
 	gtk_main();
 
