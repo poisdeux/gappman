@@ -25,6 +25,8 @@
 #include <gm_parseconf.h>
 #include <gm_layout.h>
 
+#define WINDOW_PERCENTAGE 0.5
+
 static int WINDOWED = 0;
 static GtkWidget *mainwin;
 static char *color[4] = { "green", "orange", "red", "yellow" };
@@ -428,14 +430,14 @@ int main(int argc, char **argv)
 
 	gtk_init(&argc, &argv);
 	screen = gdk_screen_get_default();
-	dialog_width = gdk_screen_get_width(screen) / 3;
-	dialog_height = gdk_screen_get_height(screen) / 3;
+	dialog_width = gdk_screen_get_width(screen) * WINDOW_PERCENTAGE;
+	dialog_height = gdk_screen_get_height(screen) * WINDOW_PERCENTAGE;
 	mainwin = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
 #if defined(DEBUG)
   gm_network_get_window_geometry_from_gappman(2103, "localhost", &dialog_width, &dialog_height);
-	dialog_width = dialog_width/3;
-	dialog_height = dialog_height/3;
+	dialog_width = dialog_width * WINDOW_PERCENTAGE;
+	dialog_height = dialog_height * WINDOW_PERCENTAGE;
   gm_layout_set_window_geometry(dialog_width, dialog_height);
 #endif
 
