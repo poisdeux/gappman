@@ -30,15 +30,17 @@
 #include <gm_layout.h>
 #include <gm_generic.h>
 #include "listener.h"
+#include "appmanager_panel.h"
+#include "appmanager_buttonmenu.h"
 
-struct process_info *started_apps;	///< holds the currently started apps
-gm_menu *programs;		///< list of all programs gappman manages.
+static struct process_info *started_apps;	///< holds the currently started apps
+static gm_menu *programs;		///< list of all programs gappman manages.
 								// Currently only programs need to be global
 								// as only programs have meta-info that can be 
 								// updated. E.g. resolution updates for a
 								// specific program. 
 
-struct metadata *config; ///< holds the configuration data used by gappman
+static struct metadata *config; ///< holds the configuration data used by gappman
 
 struct metadata *appmanager_get_metadata()
 {
@@ -309,47 +311,6 @@ static void destroy(GtkWidget * widget, gpointer data)
 	gtk_main_quit();
 }
 
-/**
-*	\brief stops the elements in the panel
-* \param *panel pointer to the menu_elements structures holding the panel elementts
-*/
-static void stop_panel(gm_menu *panel)
-{
-	int i;
-	for(i = 0; i < panel->amount_of_elements; i++)
-	{
-		if (panel->elts[i]->gm_module_stop != NULL)
-		{
-			panel->elts[i]->gm_module_stop();
-		}
-	}
-}
-
-
-/**
-*	\brief starts the elements in the panel
-* \param *panel pointer to the menu_elements structures holding the panel elementts
-*/
-static void start_panel(gm_menu *panel)
-{
-	GThread *thread;
-	int i;
-	
-	for(i = 0; i < panel->amount_of_elements; i++)
-	{
-		if (panel->elts[i]->gm_module_start != NULL)
-		{
-			thread =
-				g_thread_create((GThreadFunc) panel->elts[i]->gm_module_start, NULL,
-								TRUE, NULL);
-			if (!thread)
-			{
-				g_warning("Failed to create thread");
-			}
-		}
-	}
-}
-
 static void align_buttonbox(GtkWidget * hbox_top, GtkWidget * hbox_middle,
 							GtkWidget * hbox_bottom, GtkWidget * buttonbox,
 							gm_menu *dish)
@@ -391,7 +352,8 @@ int main(int argc, char **argv)
 	GtkWidget *vbox;
 	gm_menu *actions;
 	gm_menu *panel;
-	int c;
+	gint c;
+	gint fontsize;
 
 	// Needs to be called before any another glib function
 	if (!g_thread_supported())
@@ -511,16 +473,17 @@ int main(int argc, char **argv)
 	gtk_window_set_default_size(GTK_WINDOW(mainwin), config->window_width,
 								config->window_height);
 
-	vbox = gtk_vbox_new(FALSE, 0);
+	fontsize = gm_layout_calculate_fontsize(NULL);
+	gm_layout_set_fontsize(fontsize);
 
+	vbox = gtk_vbox_new(FALSE, 0);
 	hbox_top = gtk_hbox_new(FALSE, 0);
 	hbox_middle = gtk_hbox_new(FALSE, 0);
 	hbox_bottom = gtk_hbox_new(FALSE, 0);
 
 	if (actions != NULL)
 	{
-		buttonbox =
-			gm_layout_create_menu(actions, &process_startprogram_event);
+		buttonbox = appmanager_buttonmenu_create(actions, &process_startprogram_event);
 		align_buttonbox(hbox_top, hbox_middle, hbox_bottom, buttonbox,
 						actions);
 		gtk_widget_show(buttonbox);
@@ -528,8 +491,7 @@ int main(int argc, char **argv)
 
 	if (programs != NULL)
 	{
-		buttonbox =
-			gm_layout_create_menu(programs, &process_startprogram_event);
+		buttonbox = appmanager_buttonmenu_create(programs, &process_startprogram_event);
 			align_buttonbox(hbox_top, hbox_middle, hbox_bottom, buttonbox,
 						programs);
 		gtk_widget_show(buttonbox);
@@ -537,13 +499,13 @@ int main(int argc, char **argv)
 
 	if (panel != NULL)
 	{
-		buttonbox = gm_layout_create_panel(panel);
+		buttonbox = appmanager_panel_create(panel);
 		if (buttonbox != NULL)
 		{
 			align_buttonbox(hbox_top, hbox_middle, hbox_bottom, buttonbox,
 							panel);
 			gtk_widget_show_all(buttonbox);
-			start_panel(panel);
+			appmanager_start_panel(panel);
 		}
 		else
 		{
@@ -574,7 +536,7 @@ int main(int argc, char **argv)
 	gdk_threads_leave();
 
 	g_message("Closing up.");
-	stop_panel(panel);
+	appmanager_stop_panel(panel);
 #if !defined(NO_LISTENER)
 	gappman_close_listener();
 #endif
