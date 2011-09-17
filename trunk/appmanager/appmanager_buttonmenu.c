@@ -8,6 +8,7 @@ GtkWidget* appmanager_buttonmenu_create(gm_menu *menu,
 	gint width;
 	gint height;
 	GtkWidget *button;
+	GtkWidget *buttonbox;
 
 	gm_layout_calculate_sizes(menu);
 
@@ -20,5 +21,8 @@ GtkWidget* appmanager_buttonmenu_create(gm_menu *menu,
 												height, processevent);		
 		gm_menu_element_set_widget(button, menu->elts[i]);
 	}
-	gm_layout_create_menu(menu, processevent);
+
+	buttonbox = gm_layout_create_menu(menu, processevent);
+
+	return buttonbox;
 }
