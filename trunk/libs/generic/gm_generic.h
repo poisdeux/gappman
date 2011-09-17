@@ -170,6 +170,11 @@ struct _menu
 								// elements is a part of. Note that all
 								// elements in the same menu should point to
 								// the same length struct for menu_width.
+	gint widget_width; ///< width of an individual widget in the menu
+	gint widget_height; ///< height of an individual widget in the menu
+	gint box_width;	///< width of one box (page) for this menu
+	gint box_height;	///< height of one box (page) for this menu
+	gint elts_per_row; ///< maximum number of elements in a single row
 	float hor_alignment;		///< horizontal alignment of menu 
 								// 0.0 = left, 0.5 = center, 1.0 = right
 	int vert_alignment;		///< vertical alignment of menu
@@ -306,6 +311,13 @@ void gm_menu_element_set_pid(gint pid, gm_menu_element *elt);
 * \param elt gm_menu_element that should be updated
 */
 void gm_menu_element_set_data(gpointer data, gm_menu_element *elt);
+
+/**
+* \brief sets the widget pointer in a menu_element
+* \param widget pointer to the widget that should be included in menu_element
+* \param elt pointer to the gm_menu_element whose widget should be changed
+*/
+void gm_menu_element_set_widget(GtkWidget *widget, gm_menu_element *elt);
 
 /**
 * \brief Creates a new gm_menu_page and adds box as the content of the page

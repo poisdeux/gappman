@@ -12,7 +12,6 @@
  * \todo support larger sized framed buttons. Now the buttons are calculated using the image width and height. Some images occupy the complete button which makes it hard to see if they are highlighted.
  * \todo add support for different backgrounds in the menu's. This would make it possible to visually divide the UI.
  * \todo Add support for clutter (www.clutter-project.org) so we can have a fancy animated menu
- * \bug font calculation is now based on program menu size. This fails when only one program is in the menu and results in extremely large fontsize. Better to take screen/window-width as source for font calculation.
  * \todo make gm_layout_create_menu generic for widgets and create a gm_layout_create_buttons that takes a menu struct and creates a list of GtkWidgets that can be passed to gm_layout_create_menu to create the menu.
  * \todo add support for i18n.
  */
@@ -275,102 +274,6 @@ static GdkPixbuf *scale_image(GtkWidget * image, int max_width, int max_height)
 }
 
 /**
-* \todo move createpanelelement from gm_layout to appmanager.
-* \brief Create a single button
-* \param *elt pointer to menu_element struct that contains the logo image filename.
-* \param width button width
-* \param height button height
-*/
-static GtkWidget *createpanelelement(gm_menu_element * elt, int width,
-									 int height)
-{
-	GModule *module;
-
-	module = g_module_open((const gchar *)elt->module, G_MODULE_BIND_LAZY);
-
-	if (!module)
-	{
-		g_warning("Could not load module %s\n%s", elt->module,
-				  g_module_error());
-		return NULL;
-	}
-	else
-	{
-		if (!g_module_symbol
-			(module, "gm_module_start", (gpointer *) & (elt->gm_module_start)))
-		{
-			elt->gm_module_start = NULL;
-			g_warning("Could not get function gm_module_start from %s\n%s",
-					  elt->module, g_module_error());
-		}
-
-		if (!g_module_symbol
-			(module, "gm_module_stop", (gpointer *) & (elt->gm_module_stop)))
-		{
-			elt->gm_module_stop = NULL;
-			g_warning("Could not get function gm_module_stop from %s\n%s",
-					  elt->module, g_module_error());
-		}
-
-		if (!g_module_symbol
-			(module, "gm_module_init", (gpointer *) & (elt->gm_module_init)))
-		{
-			elt->gm_module_init = NULL;
-			g_warning("Could not get function gm_module_init from %s\n%s",
-					  elt->module, g_module_error());
-		}
-		if (!g_module_symbol
-			(module, "gm_module_get_widget",
-			 (gpointer *) & (elt->gm_module_get_widget)))
-		{
-			elt->gm_module_get_widget = NULL;
-			g_warning
-				("Could not get function gm_module_get_widget from %s\n%s",
-				 elt->module, g_module_error());
-		}
-		if (elt->module_conffile != NULL)
-		{
-			if (!g_module_symbol
-				(module, "gm_module_set_conffile",
-				 (gpointer *) & (elt->gm_module_set_conffile)))
-			{
-				elt->gm_module_set_conffile = NULL;
-				g_warning
-					("Could not get function gm_module_set_conffile from %s\n%s",
-					 elt->module, g_module_error());
-			}
-			else
-			{
-				elt->
-					gm_module_set_conffile((const gchar *)
-										   elt->module_conffile);
-			}
-		}
-		if (!g_module_symbol
-			(module, "gm_module_set_icon_size",
-			 (gpointer *) & (elt->gm_module_set_icon_size)))
-		{
-			elt->gm_module_set_icon_size = NULL;
-			g_warning
-				("Could not get function gm_module_set_icon_size from %s\n%s",
-				 elt->module, g_module_error());
-		}
-		else
-		{
-			elt->gm_module_set_icon_size(width, height);
-		}
-
-		if (elt->gm_module_init() != GM_SUCCESS)
-		{
-			g_warning("Failed to initialize module %s", elt->module);
-			return NULL;
-		}
-	}
-
-	return elt->gm_module_get_widget();
-}
-
-/**
 * \brief creates a single menu page starting with menu elements from page_number. 
 * The menu page will not hold more than menu->max_elts_in_single_box elements.
 * \param menu pointer to gm_menu that holds the menu for which to create a page
@@ -382,13 +285,14 @@ static GtkWidget *createpanelelement(gm_menu_element * elt, int width,
 * \return GtkWidget pointer to a vbox
 */
 static GtkWidget *create_menu_page_layout(gm_menu *menu, gint page_number, 
-								gint widget_width, gint widget_height, gint elts_per_row,
+								gint elts_per_row,
 								void (*processevent) (GtkWidget *, GdkEvent *,
 													 gm_menu_element *))
 {
 	GtkWidget *button, *hbox, *vbox;
 	gint menu_element_index;
   gint box_upper_limit;
+	gm_menu_element *elt;
 
 	vbox = gtk_vbox_new(FALSE, 0);
 
@@ -413,6 +317,7 @@ static GtkWidget *create_menu_page_layout(gm_menu *menu, gint page_number,
 
 	while(menu_element_index < box_upper_limit)
 	{
+		elt = menu->elts[menu_element_index];
 		if (((menu_element_index) % elts_per_row) == 0)
 		{
 			hbox = gtk_hbox_new(FALSE, 0);
@@ -420,9 +325,11 @@ static GtkWidget *create_menu_page_layout(gm_menu *menu, gint page_number,
 			gtk_container_add(GTK_CONTAINER(vbox), hbox);
 		}
 
-		button = gm_layout_create_button(menu->elts[menu_element_index], widget_width, widget_height, processevent);
-		gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 0);
-		menu->elts[menu_element_index]->widget = button;
+		if(elt->widget != NULL)
+		{
+			gtk_box_pack_start(GTK_BOX(hbox), elt->widget, TRUE, TRUE, 0);
+			gtk_widget_set_size_request(button, menu->widget_width, menu->widget_height);
+		}
 
 		menu_element_index++;
 	}
@@ -470,23 +377,36 @@ static void switch_menu_right(GtkWidget *widget, GdkEvent *event, gm_menu *menu)
 	gtk_widget_show_all(menu->pages->box);
 }
 
-static gint calculate_fontsize(gchar *message)
+gint gm_layout_calculate_fontsize(gchar *message)
 {
 	gint length;
 	gint fontsize;
 
-	length = strlen(message);
+	//Use window width and height to calculate fontsize
+  //is no message is provided
+	if( message == NULL )
+	{
+    //Dividing by 50 gives 20pt font
+    //for 1024 width. Empirically determined that
+		//this provides a nice fontsize
+		fontsize = round((double) window_width / (double) 50);	
+	}
+	else
+	{
+		length = strlen(message);
 
-	fontsize = ( FONTMETRIC * window_width ) / length;
+		//calculate fontsize so message fits in window_width	
+		fontsize = window_width / (double) length;
 
-	//Set fontsize to default 10pt if calculated 
-  //size is smaller than 10pt.	
-	if ( fontsize < (FONTMETRIC * 10) )
-	{ 
-		fontsize = FONTMETRIC * 10;
+		//Set fontsize to default 4pt if calculated 
+  	//size is smaller than 4pt.	
+		if ( fontsize < 4 )
+		{ 
+			fontsize = 4;
+		}
 	}
 
-	return fontsize;
+	return fontsize * FONTMETRIC;
 }
 
 gboolean gm_layout_check_key(GdkEvent * event)
@@ -536,7 +456,7 @@ void gm_layout_show_confirmation_dialog(gchar * message,
 	gtk_box_pack_start(GTK_BOX(hbox), stock_image, FALSE, FALSE, 0);
 	gtk_widget_show(stock_image);
 
-	fontsize = calculate_fontsize(message);
+	fontsize = gm_layout_calculate_fontsize(message);
 	gm_layout_set_fontsize(fontsize);	
 
 	label = gm_layout_create_label(message);
@@ -611,7 +531,7 @@ void gm_layout_show_error_dialog(gchar * message, GtkWidget * parent_window,
 	stock_image = gtk_image_new_from_pixbuf(pixbuf);
 	gtk_container_add(GTK_CONTAINER(hbox), stock_image);
 
-	fontsize = calculate_fontsize(message);
+	fontsize = gm_layout_calculate_fontsize(message);
 	gm_layout_set_fontsize(fontsize);	
 
 	label = gm_layout_create_label(message);
@@ -876,27 +796,16 @@ g_assert(max_height <= window_height);
 		button = gm_layout_create_label_button(elt->name, processevent, elt);
 	}
 
-	gtk_widget_set_size_request(button, max_width, max_height);
 
 	return button;
 }
 
-
-GtkWidget *gm_layout_create_menu(gm_menu *menu,
-							   void (*processevent) (GtkWidget *, GdkEvent *,
-													 gm_menu_element *))
+void gm_layout_calculate_sizes(gm_menu *menu)
 {
-	GtkWidget *fixed_box;
-	GtkWidget *buttonbox;
-	GtkWidget *hbox;
-	GtkWidget *button;
-	GtkWidget *tmp;
-	gm_menu_page *page;
-	gint box_width, box_height;
-	gint elts_per_col, elts_per_row;
-  gint button_height, button_width;
-  gint number_of_pages;
-	gint i;
+	gint box_width;	
+	gint box_height;	
+	gint elts_per_row;
+	gint elts_per_col;
 
 	box_width = calculate_box_length(window_width, &(menu->menu_width));
 	box_height = calculate_box_length(window_height, &(menu->menu_height));
@@ -917,22 +826,41 @@ GtkWidget *gm_layout_create_menu(gm_menu *menu,
 	}
 
 	//calculate button geometry
-	button_height = box_height / elts_per_col;
+	menu->widget_height = box_height / elts_per_col;
 	if( menu->max_elts_in_single_box > menu->amount_of_elements )
 	{
 		//add room for page switchers
-		button_width = (box_width*0.9) / elts_per_row;
+		menu->widget_width = (box_width*0.9) / elts_per_row;
 	}
 	else
 	{
-		button_width = box_width / elts_per_row;
+		menu->widget_width = box_width / elts_per_row;
 	}
 
-	// The size metric is 1024th of a point.
-	g_fontsize = (1024 * button_width) / MAXCHARSINLABEL;
+	menu->elts_per_row = elts_per_row;
+	menu->box_width = box_width;
+	menu->box_height = box_height;
+}
+
+GtkWidget *gm_layout_create_menu(gm_menu *menu,
+							   void (*processevent) (GtkWidget *, GdkEvent *,
+													 gm_menu_element *))
+{
+	GtkWidget *fixed_box;
+	GtkWidget *buttonbox;
+	GtkWidget *hbox;
+	GtkWidget *button;
+	GtkWidget *tmp;
+	gm_menu_page *page;
+	gint box_width, box_height;
+	gint elts_per_col;
+	gint elts_per_row;
+  gint button_height, button_width;
+  gint number_of_pages;
+	gint i;
 
 #ifdef DEBUG
-g_debug("gm_layout_create_menu: elts_per_row=%d, elts_per_col=%d, button_height=%d, button_width=%d, g_fontsize=%d", elts_per_row, elts_per_col, button_height, button_width, g_fontsize);
+g_debug("gm_layout_create_menu: elts_per_row=%d, button_height=%d, button_width=%d, g_fontsize=%d", menu->elts_per_row, menu->widget_height, menu->widget_width, g_fontsize);
 #endif
 
   hbox = gtk_hbox_new(FALSE, 0);
@@ -941,15 +869,20 @@ g_debug("gm_layout_create_menu: elts_per_row=%d, elts_per_col=%d, button_height=
   //than its double value
 	number_of_pages = ceil(menu->amount_of_elements / (double) menu->max_elts_in_single_box);
 
+	elts_per_row = menu->elts_per_row;
+
   for(i = 0;i < number_of_pages; i++)
   {
-    buttonbox = create_menu_page_layout(menu, i, button_width, button_height, elts_per_row, processevent);
+    buttonbox = create_menu_page_layout(menu, i, elts_per_row, processevent);
 		page = gm_menu_page_create(buttonbox);
 		if( gm_menu_add_page(page, menu) == GM_FAIL )
 			g_warning("gm_layout_create_menu: failed to add page");
 
     gtk_widget_hide_all(buttonbox);
   }
+
+	box_width = menu->box_width;
+	box_height = menu->box_height;
 
 	//check if we got more than one buttonbox in the menu
 	//if so we add arrow keys to switch pages
@@ -968,7 +901,6 @@ g_debug("gm_layout_create_menu: elts_per_row=%d, elts_per_col=%d, button_height=
 		//add the right arrowbutton
 		button = gm_layout_create_empty_button(switch_menu_right, menu);
 		gtk_widget_set_size_request(button, box_width*0.05, box_height);
-		//gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 0);
 		gtk_fixed_put(GTK_FIXED(fixed_box), button, box_width-(box_width*0.05), 0);
 		gtk_widget_show(button);
 	}
@@ -979,50 +911,6 @@ g_debug("gm_layout_create_menu: elts_per_row=%d, elts_per_col=%d, button_height=
 
 	gtk_widget_show_all(menu->pages->box);
 	return hbox;
-}
-
-GtkWidget *gm_layout_create_panel(gm_menu *menu)
-{
-	GtkWidget *button, *hbox, *vbox;
-	int elts_per_row, button_width, box_width, box_height;
-	int i;
-
-	if (!g_module_supported())
-	{
-		return NULL;
-	}
-
-	box_width = calculate_box_length(window_width, &(menu->menu_width));
-	box_height = calculate_box_length(window_height, &(menu->menu_height));
-
-	vbox = gtk_vbox_new(FALSE, 0);
-
-	elts_per_row =
-		calculateAmountOfElementsPerRow(box_width, box_height,
-										   menu->amount_of_elements);
-	if (elts_per_row < 1)
-	{
-		elts_per_row = 1;
-	}
-
-	button_width = box_width / elts_per_row;
-	
-	for(i = 0; i < menu->amount_of_elements; i++)
-	{
-		if ((i % elts_per_row) == 0)
-		{
-			hbox = gtk_hbox_new(FALSE, 0);
-
-			gtk_container_add(GTK_CONTAINER(vbox), hbox);
-		}
-		button = createpanelelement(menu->elts[i], button_width, box_height);
-		if (button != NULL)
-		{
-			gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 1);
-		}
-	}
-
-	return vbox;
 }
 
 /* TO BE IMPLEMENTED */

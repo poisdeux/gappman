@@ -81,6 +81,11 @@ gm_menu *gm_menu_create()
   menu->amount_of_elements = 0;
   menu->elts = NULL;
   menu->pages = NULL;
+	menu->widget_width = 0;
+	menu->widget_height = 0;
+	menu->box_width = 0;
+	menu->box_height = 0;
+	menu->elts_per_row = 0;
   return menu;
 }
 
@@ -166,6 +171,7 @@ gm_menu_element *gm_menu_element_create()
   elt->app_height = -1;
   elt->app_width = -1;
   elt->pid = -1;
+	elt->widget = NULL;
 
   return elt;
 }

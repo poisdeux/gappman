@@ -137,6 +137,12 @@ GtkWidget *gm_layout_create_button(gm_menu_element *elt, int max_width, int max_
 GtkWidget *gm_layout_create_empty_button(void *callbackfunc, void *data);
 
 /**
+* \brief Calculates the sizes needed to correctly draw a menu
+* \menu pointer to gm_menu for which the sizes should be calculated
+*/
+void gm_layout_calculate_sizes(gm_menu *menu);
+
+/**
 * \brief Creates the widget layout with regards to the window height and width
 * \param menu pointer to struct menu
 * \param processevent NULL or a function pointer to the function that should be used as callback when a button from the menu is pressed. The callback should be of the form \code void <functionname>(GtkWidget * widget, GdkEvent * event, gm_menu_element * elt) \endcode The *elt will point to the menu_element that is associated with the button that was pressed.
@@ -147,19 +153,20 @@ GtkWidget *gm_layout_create_menu(gm_menu *menu,
                            gm_menu_element *));
 
 /**
-* \todo replace calls to gm_layout_create_panel with gm_layout_create_menu and move panel specific code to appmanager
-* \brief Creates the panel layout using the available screen height and width
-* \param menu pointer to menu structure that holds the panel elements
-* \return GtkWidget pointer to container holding the panel
-*/
-GtkWidget *gm_layout_create_panel(gm_menu *menu);
-
-/**
 * \brief Creates a container that holds all widgets. The container will be sized with respect to the window geometry
 * as set by gm_layout_set_window_geometry.
 * \param widgets null-terminated array of GtkWidgets.
 * \return GtkWidget pointer to the container
 */
 GtkWidget *gm_layout_create_box(GtkWidget **widgets);
+
+/**
+* \brief Calculates fontsize based on either window width or a message
+* \param message string holding the message for which the fontsize must be calculated.
+*        It uses the window width to determine the correct fontsize. If NULL only the
+*        window_width will be used to calculate the fontsize.
+* \return gint fontsize in points multiplied by 1024.
+*/
+gint gm_layout_calculate_fontsize(gchar *message);
 
 #endif
