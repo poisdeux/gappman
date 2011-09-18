@@ -71,6 +71,31 @@ static void quit_program(GtkWidget * widget, GdkEvent * event)
 	}
 }
 
+static GtkWidget *create_menu(gm_menu *menu, void (*processevent) (GtkWidget *, GdkEvent *,
+                    gm_menu_element *))
+{
+  gint i;
+  gint width;
+  gint height;
+  GtkWidget *button;
+  GtkWidget *buttonbox;
+
+  gm_layout_calculate_sizes(menu);
+
+  width = menu->widget_width;
+  height = menu->widget_height;
+
+  for(i = 0; i < menu->amount_of_elements; i++)
+  {
+    button = gm_layout_create_button(menu->elts[i], width, height, processevent);
+    gm_menu_element_set_widget(button, menu->elts[i]);
+  }
+
+  buttonbox = gm_layout_create_menu(menu);
+
+  return buttonbox;
+}
+
 static void revert_to_old_res(GtkWidget * widget, GdkEvent * event,
 							  XRRScreenSize * size)
 {
@@ -111,6 +136,9 @@ static void set_default_res_for_program(GtkWidget * widget, GdkEvent * event,
 	}
 }
 
+
+
+
 /**
 * \brief creates a popup dialog window that allows the user to set the new resolution as default for a program
 * \param *widget that called this function (usually through a callback construction)
@@ -146,7 +174,7 @@ static void make_default_for_program(GtkWidget * widget, GdkEvent * event)
 		gm_layout_get_window_geometry(&window_width, &window_height);
 		gm_layout_set_window_geometry(window_width, 0.9*window_height);
 
-		buttonbox = gm_layout_create_menu(programs, &set_default_res_for_program);
+		buttonbox = create_menu(programs, set_default_res_for_program);
 
 		vbox = gtk_vbox_new(FALSE, 10);
 		gtk_container_add(GTK_CONTAINER(vbox), buttonbox);
@@ -302,7 +330,7 @@ static GtkWidget *show_possible_resolutions()
 		gm_menu_add_menu_element(menu_elt, menu);
 	}
 
-	vbox = gm_layout_create_menu(menu, (void *) changeresolution);
+	vbox = create_menu(menu, (void *) changeresolution);
 	gtk_widget_show_all(vbox);
 	return vbox;
 }

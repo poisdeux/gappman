@@ -137,7 +137,8 @@ GtkWidget *appmanager_panel_create(gm_menu *panel)
 		gm_menu_element_set_widget(widget, panel->elts[i]);
 	}
 
-	buttonbox = gm_layout_create_menu(panel, NULL);	
+	gm_layout_calculate_sizes(panel);
+	buttonbox = gm_layout_create_menu(panel);	
 
 	//gm_layout_create_menu determined widget size so we can now
   //let all widgets know the required size

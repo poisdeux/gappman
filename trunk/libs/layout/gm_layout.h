@@ -145,12 +145,9 @@ void gm_layout_calculate_sizes(gm_menu *menu);
 /**
 * \brief Creates the widget layout with regards to the window height and width
 * \param menu pointer to struct menu
-* \param processevent NULL or a function pointer to the function that should be used as callback when a button from the menu is pressed. The callback should be of the form \code void <functionname>(GtkWidget * widget, GdkEvent * event, gm_menu_element * elt) \endcode The *elt will point to the menu_element that is associated with the button that was pressed.
 * \return GtkWidget pointer to a hbox that contains one or more hboxes 
 */
-GtkWidget *gm_layout_create_menu(gm_menu *menu,
-                 void (*processevent) (GtkWidget *, GdkEvent *,
-                           gm_menu_element *));
+GtkWidget *gm_layout_create_menu(gm_menu *menu);
 
 /**
 * \brief Creates a container that holds all widgets. The container will be sized with respect to the window geometry

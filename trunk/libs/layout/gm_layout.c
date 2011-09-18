@@ -220,9 +220,18 @@ static int calculateAmountOfElementsPerRow(int box_width, int box_height,
 {
 	double elts;
 	double ratio;
-	ratio =
-		(double)MAX(box_height, box_width) / (double)MIN(box_height,
+	
+	if(box_height != 0 && box_width != 0)
+	{
+		ratio =
+			(double)MAX(box_height, box_width) / (double)MIN(box_height,
 														 box_width);
+	}
+	else
+	{
+		ratio = 1;
+	}
+
 	elts = sqrt(amount_of_elements / ratio);
 
 	// Check orientation and adjust accordingly
@@ -247,6 +256,11 @@ static GdkPixbuf *scale_image(GtkWidget * image, int max_width, int max_height)
 	GdkPixbuf *pixbuf;
 	int width, height;
 	gdouble ratio;
+
+	if( max_width < 1 && max_height < 1 )
+	{
+		return NULL;
+	}
 
 	pixbuf = gtk_image_get_pixbuf(GTK_IMAGE(image));
 	width = gdk_pixbuf_get_width(pixbuf);
@@ -277,22 +291,25 @@ static GdkPixbuf *scale_image(GtkWidget * image, int max_width, int max_height)
 * \brief creates a single menu page starting with menu elements from page_number. 
 * The menu page will not hold more than menu->max_elts_in_single_box elements.
 * \param menu pointer to gm_menu that holds the menu for which to create a page
-* \param page_number when gm_menu holds more elements than menu->max_elts_in_single_box page_number specifies which page to create
+* \param page_number when gm_menu holds more elements than menu->max_elts_in_single_box page_number specifies which page to create. Page count starts at 0. So for page 1 page_number should be equal to 0.
 * \param widget_width preferred width for the widgets to include in the menu page
 * \param widget_height preferred height for the widgets to include in the menu page
 * \param elts_per_row maximum amount of menu elements in a single row
-* \param processevent callback function that will handle events from the menu elements
 * \return GtkWidget pointer to a vbox
 */
 static GtkWidget *create_menu_page_layout(gm_menu *menu, gint page_number, 
-								gint elts_per_row,
-								void (*processevent) (GtkWidget *, GdkEvent *,
-													 gm_menu_element *))
+								gint elts_per_row)
 {
 	GtkWidget *button, *hbox, *vbox;
 	gint menu_element_index;
   gint box_upper_limit;
 	gm_menu_element *elt;
+
+	if( ( elts_per_row < 1 ) || ( page_number < 0 ) )
+	{
+		g_warning("Cannot create menu with %d elements per row for page %d\n", elts_per_row, page_number);
+		return NULL;
+	}
 
 	vbox = gtk_vbox_new(FALSE, 0);
 
@@ -394,6 +411,11 @@ gint gm_layout_calculate_fontsize(gchar *message)
 	else
 	{
 		length = strlen(message);
+
+		if( length == 0 )
+		{
+			return 0;
+		}	
 
 		//calculate fontsize so message fits in window_width	
 		fontsize = window_width / (double) length;
@@ -842,9 +864,7 @@ void gm_layout_calculate_sizes(gm_menu *menu)
 	menu->box_height = box_height;
 }
 
-GtkWidget *gm_layout_create_menu(gm_menu *menu,
-							   void (*processevent) (GtkWidget *, GdkEvent *,
-													 gm_menu_element *))
+GtkWidget *gm_layout_create_menu(gm_menu *menu)
 {
 	GtkWidget *fixed_box;
 	GtkWidget *buttonbox;
@@ -867,13 +887,20 @@ g_debug("gm_layout_create_menu: elts_per_row=%d, button_height=%d, button_width=
 
 	//calculate needed pages rounding a double to its smallest integer value that is not less
   //than its double value
-	number_of_pages = ceil(menu->amount_of_elements / (double) menu->max_elts_in_single_box);
+	if( menu->max_elts_in_single_box > 0 )
+	{
+		number_of_pages = ceil(menu->amount_of_elements / (double) menu->max_elts_in_single_box);
+	}
+	else
+	{
+		number_of_pages = 1;
+	}
 
 	elts_per_row = menu->elts_per_row;
 
   for(i = 0;i < number_of_pages; i++)
   {
-    buttonbox = create_menu_page_layout(menu, i, elts_per_row, processevent);
+    buttonbox = create_menu_page_layout(menu, i, elts_per_row);
 		page = gm_menu_page_create(buttonbox);
 		if( gm_menu_add_page(page, menu) == GM_FAIL )
 			g_warning("gm_layout_create_menu: failed to add page");

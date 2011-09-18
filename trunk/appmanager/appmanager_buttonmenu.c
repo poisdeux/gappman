@@ -1,4 +1,5 @@
 #include <appmanager_buttonmenu.h>
+#include <gm_layout.h>
 
 GtkWidget* appmanager_buttonmenu_create(gm_menu *menu, 
 						void (*processevent) (GtkWidget *, GdkEvent *, 
@@ -17,12 +18,11 @@ GtkWidget* appmanager_buttonmenu_create(gm_menu *menu,
 
 	for(i = 0; i < menu->amount_of_elements; i++)
 	{
-		button = gm_layout_create_button(menu->elts[i], width, 
-												height, processevent);		
+		button = gm_layout_create_button(menu->elts[i], width, height, processevent);		
 		gm_menu_element_set_widget(button, menu->elts[i]);
 	}
 
-	buttonbox = gm_layout_create_menu(menu, processevent);
+	buttonbox = gm_layout_create_menu(menu);
 
 	return buttonbox;
 }

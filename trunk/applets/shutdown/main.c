@@ -131,6 +131,29 @@ static void destroy(GtkWidget * widget, gpointer data)
 	gtk_main_quit();
 }
 
+GtkWidget *menu_create(gm_menu *menu)
+{
+  gint i;
+  gint width;
+  gint height;
+  GtkWidget *button;
+  GtkWidget *buttonbox;
+
+  gm_layout_calculate_sizes(menu);
+
+  width = menu->widget_width;
+  height = menu->widget_height;
+
+  for(i = 0; i < menu->amount_of_elements; i++)
+  {
+    button = gm_layout_create_button(menu->elts[i], width, height, process_startprogram_event);
+    gm_menu_element_set_widget(button, menu->elts[i]);
+  }
+
+  buttonbox = gm_layout_create_menu(menu);
+
+  return buttonbox;
+}
 
 /**
 * \brief main function setting up the UI
@@ -223,8 +246,7 @@ int main(int argc, char **argv)
 
 	if (actions != NULL)
 	{
-			align =
-				gm_layout_create_menu(actions, &process_startprogram_event);
+		align = menu_create(actions);
 		gtk_container_add(GTK_CONTAINER(vbox), align);
 		gtk_widget_show(align);
 	}
