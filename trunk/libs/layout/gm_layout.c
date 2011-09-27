@@ -420,12 +420,14 @@ gint gm_layout_calculate_fontsize(gchar *message)
 		//calculate fontsize so message fits in window_width	
 		fontsize = window_width / (double) length;
 
-		//Set fontsize to default 4pt if calculated 
-  	//size is smaller than 4pt.	
-		if ( fontsize < 4 )
-		{ 
-			fontsize = 4;
-		}
+		
+	}
+
+	//Set fontsize to default 6pt if calculated 
+ 	//size is smaller than 6pt.	
+	if ( fontsize < 6 )
+	{ 
+		fontsize = 6;
 	}
 
 	return fontsize * FONTMETRIC;
