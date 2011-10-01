@@ -86,6 +86,7 @@ gm_menu *gm_menu_create()
 	menu->box_width = 0;
 	menu->box_height = 0;
 	menu->elts_per_row = 0;
+	menu->max_elts_in_single_box = 0;
   return menu;
 }
 
@@ -101,10 +102,17 @@ gboolean gm_menu_add_menu_element(gm_menu_element *elt, gm_menu *menu)
 	if ( ( menu->elts == NULL )	|| ( elt == NULL ) )
 		return FALSE;
 
-
 	menu->elts[menu->amount_of_elements++] = elt;
-	
+
 	return TRUE;
+}
+
+gm_menu_element* gm_menu_get_menu_element(int index, gm_menu *menu)
+{
+	if ( index > menu->amount_of_elements )
+		return NULL;
+
+	return menu->elts[index];
 }
 
 GmReturnCode gm_menu_add_page(gm_menu_page *page, gm_menu *menu)

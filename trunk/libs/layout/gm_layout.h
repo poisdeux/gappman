@@ -137,13 +137,13 @@ GtkWidget *gm_layout_create_button(gm_menu_element *elt, int max_width, int max_
 GtkWidget *gm_layout_create_empty_button(void *callbackfunc, void *data);
 
 /**
-* \brief Calculates the sizes needed to correctly draw a menu
-* \menu pointer to gm_menu for which the sizes should be calculated
+* \brief Calculates the sizes needed to correctly draw a menu. Note that if maximum elements in a single box has not been explicitly set using gm_menu_set_max_elts_in_single_box it will be set equal to the amount of elements in the menu. 
+* \param menu pointer to gm_menu for which the sizes should be calculated
 */
 void gm_layout_calculate_sizes(gm_menu *menu);
 
 /**
-* \brief Creates the widget layout with regards to the window height and width
+* \brief Creates the widget layout with regards to the window height and width. Note that if maximum elements in a single box has not been explicitly set using gm_menu_set_max_elts_in_single_box it will be set equal to the amount of elements in the menu.
 * \param menu pointer to struct menu
 * \return GtkWidget pointer to a hbox that contains one or more hboxes 
 */

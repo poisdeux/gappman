@@ -183,20 +183,24 @@ static void update_button()
 static GtkWidget* display_status_overview()
 {
 	nm_elements *stati = NULL;
-	GtkWidget *table = NULL;
+	gm_menu *menu = NULL;
+	gm_menu_element *menu_elt = NULL;	
+	GtkWidget *hbox = NULL;
 	GtkWidget *label = NULL;
 	GdkPixbuf *pixbuf = NULL;
 	GtkWidget *stock_image = NULL;
-	int elt_nr;
+
+	menu = gm_menu_create();
+
+//	gm_layout_get_window_geometry();
+//	gm_menu_set_width();
 
 	stati = nm_get_stati();
-	table = gtk_table_new(2, *stati->amount_of_elements, TRUE);
-	elt_nr = 0;
 	while (stati != NULL)
 	{
+		hbox = gtk_hbox_new(FALSE, 0);
 		label = gm_layout_create_label((gchar*) stati->name);
-		gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, elt_nr,
-								  elt_nr + 1);
+		gtk_container_add(GTK_CONTAINER(hbox), label);
 		gtk_widget_show(label);
 
 		if (stati->status == stati->success)
@@ -212,15 +216,18 @@ static GtkWidget* display_status_overview()
 									   GTK_ICON_SIZE_BUTTON, NULL);
 		}
 		stock_image = gtk_image_new_from_pixbuf(pixbuf);
-		gtk_table_attach_defaults(GTK_TABLE(table), stock_image, 1, 2, elt_nr,
-								  elt_nr + 1);
+		gtk_container_add(GTK_CONTAINER(hbox), stock_image);
 		gtk_widget_show(stock_image);
 
+		menu_elt = gm_menu_element_create();
+		gm_menu_element_set_widget(hbox, menu_elt);
+		gm_menu_add_menu_element(menu_elt, menu);
+
 		stati = stati->next;
-		elt_nr++;
 	}
 
-	return table;
+	gm_layout_calculate_sizes(menu);
+	return gm_layout_create_menu(menu);
 }
 
 static void show_menu(GtkWidget * dummy, GdkEvent * event,

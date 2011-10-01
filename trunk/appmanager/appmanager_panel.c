@@ -40,88 +40,83 @@ void appmanager_stop_panel(gm_menu *panel)
 * \param width button width
 * \param height button height
 */
-static GtkWidget *create_panel_element(gm_menu_element * elt)
+static GmReturnCode setup_panel_element(gm_menu_element *menu_elt)
 {
   GModule *module;
 
-  module = g_module_open((const gchar *)elt->module, G_MODULE_BIND_LAZY);
+  module = g_module_open((const gchar *)menu_elt->module, G_MODULE_BIND_LAZY);
 
   if (!module)
   {
-    g_warning("Could not load module %s\n%s", elt->module,
+    g_warning("Could not load module %s\n%s", menu_elt->module,
           g_module_error());
-    return NULL;
+    return GM_FAIL;
   }
   else
   {
     if (!g_module_symbol
-      (module, "gm_module_start", (gpointer *) & (elt->gm_module_start)))
+      (module, "gm_module_start", (gpointer *) & (menu_elt->gm_module_start)))
     {
-      elt->gm_module_start = NULL;
+      menu_elt->gm_module_start = NULL;
       g_warning("Could not get function gm_module_start from %s\n%s",
-            elt->module, g_module_error());
+            menu_elt->module, g_module_error());
     }
 
     if (!g_module_symbol
-      (module, "gm_module_stop", (gpointer *) & (elt->gm_module_stop)))
+      (module, "gm_module_stop", (gpointer *) & (menu_elt->gm_module_stop)))
     {
-      elt->gm_module_stop = NULL;
+      menu_elt->gm_module_stop = NULL;
       g_warning("Could not get function gm_module_stop from %s\n%s",
-            elt->module, g_module_error());
+            menu_elt->module, g_module_error());
     }
 
     if (!g_module_symbol
-      (module, "gm_module_init", (gpointer *) & (elt->gm_module_init)))
+      (module, "gm_module_init", (gpointer *) & (menu_elt->gm_module_init)))
     {
-      elt->gm_module_init = NULL;
+      menu_elt->gm_module_init = NULL;
       g_warning("Could not get function gm_module_init from %s\n%s",
-            elt->module, g_module_error());
+            menu_elt->module, g_module_error());
     }
     if (!g_module_symbol
       (module, "gm_module_get_widget",
-       (gpointer *) & (elt->gm_module_get_widget)))
+       (gpointer *) & (menu_elt->gm_module_get_widget)))
     {
-      elt->gm_module_get_widget = NULL;
+      menu_elt->gm_module_get_widget = NULL;
       g_warning
         ("Could not get function gm_module_get_widget from %s\n%s",
-         elt->module, g_module_error());
+         menu_elt->module, g_module_error());
     }
-    if (elt->module_conffile != NULL)
+    if (menu_elt->module_conffile != NULL)
     {
       if (!g_module_symbol
         (module, "gm_module_set_conffile",
-         (gpointer *) & (elt->gm_module_set_conffile)))
+         (gpointer *) & (menu_elt->gm_module_set_conffile)))
       {
-        elt->gm_module_set_conffile = NULL;
+        menu_elt->gm_module_set_conffile = NULL;
         g_warning
           ("Could not get function gm_module_set_conffile from %s\n%s",
-           elt->module, g_module_error());
+           menu_elt->module, g_module_error());
       }
       else
       {
-        elt->
+        menu_elt->
           gm_module_set_conffile((const gchar *)
-                       elt->module_conffile);
+                       menu_elt->module_conffile);
       }
     }
     if (!g_module_symbol
       (module, "gm_module_set_icon_size",
-       (gpointer *) & (elt->gm_module_set_icon_size)))
+       (gpointer *) & (menu_elt->gm_module_set_icon_size)))
     {
-      elt->gm_module_set_icon_size = NULL;
+      menu_elt->gm_module_set_icon_size = NULL;
       g_warning
         ("Could not get function gm_module_set_icon_size from %s\n%s",
-         elt->module, g_module_error());
+         menu_elt->module, g_module_error());
     }
 
-    if (elt->gm_module_init() != GM_SUCCESS)
-    {
-      g_warning("Failed to initialize module %s", elt->module);
-      return NULL;
-    }
   }
 
-  return elt->gm_module_get_widget();
+  return GM_SUCCESS;
 }
 
 
@@ -130,24 +125,32 @@ GtkWidget *appmanager_panel_create(gm_menu *panel)
 	int i;
 	GtkWidget *widget;
 	GtkWidget *buttonbox;
-
-	for( i = 0; i < panel->amount_of_elements; i++ )
-	{
-		widget = create_panel_element(panel->elts[i]); 
-		gm_menu_element_set_widget(widget, panel->elts[i]);
-	}
+	gm_menu_element *menu_elt;
 
 	gm_layout_calculate_sizes(panel);
-	buttonbox = gm_layout_create_menu(panel);	
-
-	//gm_layout_create_menu determined widget size so we can now
-  //let all widgets know the required size
 	for( i = 0; i < panel->amount_of_elements; i++ )
-  {
-		if(panel->elts[i]->gm_module_set_icon_size != NULL)
+	{
+		menu_elt = gm_menu_get_menu_element(i, panel);
+		if( setup_panel_element(menu_elt) != GM_SUCCESS )
+			continue;
+
+		if ( (menu_elt->gm_module_init != NULL ) && (menu_elt->gm_module_init() == GM_SUCCESS) )
 		{
-			panel->elts[i]->gm_module_set_icon_size(panel->widget_width, panel->widget_height);
+			gm_menu_element_set_widget(menu_elt->gm_module_get_widget(), menu_elt);
+
+			if(menu_elt->gm_module_set_icon_size != NULL)
+			{
+				menu_elt->gm_module_set_icon_size(panel->widget_width, panel->widget_height);
+			}
 		}
+		else
+    {
+			///< \todo we should remove the panel element if the init function fails
+      g_warning("Failed to initialize module %s", menu_elt->module);
+    }
+
 	}
+
+	buttonbox = gm_layout_create_menu(panel);	
 	return buttonbox;
 }

@@ -169,6 +169,10 @@ g_debug("calculate_box_length: total_length=%d, box_length->value=%d", total_len
 			("Box length exceeds total length. Check your configuration file.");
 	}
 
+#ifdef DEBUG
+g_debug("calculate_box_length: total_length=%d, box_length->value=%d, length=%d", total_length, box_length->value, length);
+#endif
+
 	return length;
 }
 
@@ -834,6 +838,9 @@ void gm_layout_calculate_sizes(gm_menu *menu)
 	box_width = calculate_box_length(window_width, &(menu->menu_width));
 	box_height = calculate_box_length(window_height, &(menu->menu_height));
 
+	if ( menu->max_elts_in_single_box == 0 )
+		menu->max_elts_in_single_box = menu->amount_of_elements;
+
 	elts_per_row =
 		calculateAmountOfElementsPerRow(box_width, box_height,
 										   menu->max_elts_in_single_box);
@@ -864,6 +871,10 @@ void gm_layout_calculate_sizes(gm_menu *menu)
 	menu->elts_per_row = elts_per_row;
 	menu->box_width = box_width;
 	menu->box_height = box_height;
+
+#ifdef DEBUG
+g_debug("calculate_sizes: menu->elts_per_row=%d, menu->box_width=%d, menu->box_height=%d, menu->widget_width=%d, menu->widget_height=%d, menu->max_elts_in_single_box=%d, menu->amount_of_elements=%d", menu->elts_per_row, menu->box_width, menu->box_height, menu->widget_width, menu->widget_height, menu->max_elts_in_single_box, menu->amount_of_elements);
+#endif
 }
 
 GtkWidget *gm_layout_create_menu(gm_menu *menu)
@@ -887,16 +898,14 @@ g_debug("gm_layout_create_menu: elts_per_row=%d, button_height=%d, button_width=
 
   hbox = gtk_hbox_new(FALSE, 0);
 
+	if( menu->max_elts_in_single_box == 0 )
+	{
+		menu->max_elts_in_single_box = menu->amount_of_elements;
+	}
+
 	//calculate needed pages rounding a double to its smallest integer value that is not less
   //than its double value
-	if( menu->max_elts_in_single_box > 0 )
-	{
-		number_of_pages = ceil(menu->amount_of_elements / (double) menu->max_elts_in_single_box);
-	}
-	else
-	{
-		number_of_pages = 1;
-	}
+	number_of_pages = ceil(menu->amount_of_elements / (double) menu->max_elts_in_single_box);
 
 	elts_per_row = menu->elts_per_row;
 

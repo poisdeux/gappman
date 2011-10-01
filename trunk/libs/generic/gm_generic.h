@@ -217,7 +217,8 @@ gint gm_menu_get_amount_of_elements(gm_menu *menu);
 gchar *gm_menu_element_get_name(gm_menu_element *elt);
 
 /**
-* \brief creates a gm_menu with default initialization
+* \brief creates a gm_menu with default initialization.
+* max elements in a single box is set to 1. You can change this using gm_menu_set_max_elts_in_single_box
 * \return gm_menu reference which should be freed with gm_menu_free
 */
 gm_menu *gm_menu_create();
@@ -229,6 +230,14 @@ gm_menu *gm_menu_create();
 * \return TRUE on success, FALSE on failure
 */
 gboolean gm_menu_add_menu_element(gm_menu_element *elt, gm_menu *menu);
+
+/**
+* \brief returns pointer to the gm_menu_element at index
+* \param index the number of the gm_menu_element to return
+* \param menu pointer to the gm_menu from which the gm_menu_element should be retrieved
+* \return pointer to gm_menu_element
+*/
+gm_menu_element* gm_menu_get_menu_element(int index, gm_menu *menu);
 
 /**
 * \brief adds a gm_menu_page to a gm_menu
