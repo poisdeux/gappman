@@ -107,6 +107,45 @@ gboolean gm_menu_add_menu_element(gm_menu_element *elt, gm_menu *menu)
 	return TRUE;
 }
 
+GmReturnCode gm_menu_delete_menu_element(gm_menu_element *elt, gm_menu *menu)
+{
+	int amount_of_elements;
+	int index;
+	int i;
+
+	if(menu == NULL)
+ 		return GM_FAIL; 
+	
+	index = -1;
+	amount_of_elements = gm_menu_get_amount_of_elements(menu);
+
+	//search for index of element elt in menu->elts
+	for(i=0; i < amount_of_elements; i++)
+  {
+    if ( elt == menu->elts[i] )
+		{
+			index = i;
+		}
+  }
+
+	//Aaah, we did not find elt in menu->elts
+	if( index == -1 )
+		return GM_FAIL;
+
+	//shift menu->elts one element to the left from index
+	for(i = index + 1; i < amount_of_elements; i++)
+	{
+		menu->elts[i - 1] = menu->elts[i];
+	}
+
+	//remove last element
+	menu->elts[amount_of_elements] = NULL;
+	menu->amount_of_elements--;
+	gm_menu_element_free(elt);
+
+	return GM_SUCCESS;
+}
+
 gm_menu_element* gm_menu_get_menu_element(int index, gm_menu *menu)
 {
 	if ( index > menu->amount_of_elements )

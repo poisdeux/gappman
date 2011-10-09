@@ -232,6 +232,14 @@ gm_menu *gm_menu_create();
 gboolean gm_menu_add_menu_element(gm_menu_element *elt, gm_menu *menu);
 
 /**
+* \brief deletes a gm_menu_element from a gm_menu. Note that elt will be freed using gm_menu_element_free().
+* \param elt pointer to the gm_menu_element that should be removed
+* \param menu pointer to the gm_menu from which the elt should be removed
+* \return GmReturnCode GM_FAIL if element was not removed. GM_SUCCESS if removal succeed.
+*/
+GmReturnCode gm_menu_delete_menu_element(gm_menu_element *elt, gm_menu *menu);
+
+/**
 * \brief returns pointer to the gm_menu_element at index
 * \param index the number of the gm_menu_element to return
 * \param menu pointer to the gm_menu from which the gm_menu_element should be retrieved

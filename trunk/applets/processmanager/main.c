@@ -29,12 +29,13 @@
 
 static int WINDOWED = 0;
 static GtkWidget *mainwin;
-static char *color[4] = { "green", "orange", "red", "yellow" };
+static char *color[6] = { "green", "green", "red", "orange", "blue", "yellow" };
 static char *statusarray[6] =
 	{ "running", "sleeping", "stopped", "waiting", "zombie", "paging" };
 static int fontsize;
 static gm_menu *programs;
 static gm_menu *actions;
+static gm_menu *menu;
 
 enum pid_status 
 {
@@ -75,6 +76,7 @@ static void quit_program()
 {
 	gm_menu_free(programs);
 	gm_menu_free(actions);
+	gm_menu_free(menu);
   gtk_main_quit();
 }
 
@@ -216,7 +218,6 @@ static void showprocessdialog(gm_menu_element * elt)
 {
 	GtkWidget *button, *buttonbox, *label;
 	static GtkWidget *killdialogwin;
-	gchar *markup;
 	gchar *msg;
 
 	killdialogwin = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -273,11 +274,10 @@ static void process_startprogram_event(GtkWidget * widget, GdkEvent * event,
 }
 
 
-static void add_row(gm_menu_element * elt, gint width, gint height, GtkWidget *vbox)
+static GtkWidget* create_row(gm_menu_element * elt, gint width, gint height)
 {
 	GtkWidget *hbox;
 	GtkWidget *statuslabel;
-	GtkWidget *separator;
 	gchar *markup;
 	GtkWidget *alignment;
 	int status;
@@ -308,20 +308,14 @@ static void add_row(gm_menu_element * elt, gint width, gint height, GtkWidget *v
 	gtk_widget_show(elt->widget);
 	gtk_container_add(GTK_CONTAINER(hbox), alignment);
 	gtk_widget_show(alignment);
-
-	gtk_container_add(GTK_CONTAINER(vbox), hbox);
 	gtk_widget_show(hbox);
 
-	separator = gtk_hseparator_new();
-	gtk_container_add(GTK_CONTAINER(vbox), separator);
-	gtk_widget_show(separator);
+	return hbox;	
 }
 
 gint calculate_row_height( gint dialog_height)
 {
 	gint accumulated_amount = 0;
-	gm_menu *programs;
-	gm_menu *actions;
 
 	programs = gm_get_programs();
   if (programs != NULL)
@@ -340,21 +334,18 @@ gint calculate_row_height( gint dialog_height)
 
 GtkWidget *create_menu(gint width, gint height, struct proceslist *started_procs)
 {
-	gm_menu *programs;
-	gm_menu *actions;
-	gm_menu_element *elt;
+	gm_menu_element *menu_elt;
+	gm_menu_element *new_elt;
 	struct proceslist *started_procs_tmp;
-	GtkWidget *vbox;
+	GtkWidget *row;
 	GtkWidget *hbox;
 	GtkWidget *button;
 	gint no_progsacts_found;
 	gint mypid;
 	
-
-	vbox = gtk_vbox_new(FALSE, 10);
-
 	programs = gm_get_programs();
 	actions = gm_get_actions();
+	menu = gm_menu_create();
 
 	started_procs_tmp = started_procs;
 	mypid = getpid();
@@ -368,20 +359,26 @@ GtkWidget *create_menu(gint width, gint height, struct proceslist *started_procs
 			continue;
 		}
 
-		elt = gm_menu_search_elt_by_name(started_procs->name, programs);
-		if( elt != NULL )
+		menu_elt = gm_menu_search_elt_by_name(started_procs->name, programs);
+		if( menu_elt != NULL )
 		{
 			no_progsacts_found = 0;
-			gm_menu_element_set_pid(started_procs->pid, elt);
-			add_row(elt, width, height, vbox);
+			new_elt = gm_menu_element_create();
+			gm_menu_element_set_pid(started_procs->pid, new_elt);			
+			row = create_row(menu_elt, width, height);
+			gm_menu_element_set_widget(row, new_elt);
+			gm_menu_add_menu_element(new_elt, menu);
 		}
 
-		elt = gm_menu_search_elt_by_name(started_procs->name, actions);
-		if( elt != NULL )
+		menu_elt = gm_menu_search_elt_by_name(started_procs->name, actions);
+		if( menu_elt != NULL )
 		{
 			no_progsacts_found = 0;
-			gm_menu_element_set_pid(started_procs->pid, elt);
-			add_row(elt, width, height, vbox);
+			new_elt = gm_menu_element_create();
+			gm_menu_element_set_pid(started_procs->pid, new_elt);
+			row = create_row(menu_elt, width, height);
+			gm_menu_element_set_widget(row, new_elt);
+			gm_menu_add_menu_element(new_elt, menu);
 		}
 
 		started_procs = started_procs->prev;
@@ -394,20 +391,19 @@ GtkWidget *create_menu(gint width, gint height, struct proceslist *started_procs
 		gm_layout_show_error_dialog("No programs or actions started.", NULL, quit_program_callback);
 		return NULL;
 	}
-	else
-	{
-		hbox = gtk_hbox_new(FALSE, 10);
-		// cancel button
-		button =
-			gm_layout_create_label_button("Cancel", (void *)quit_program_callback,
-								   NULL);
-		gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
-		gtk_widget_show(button);
+
+	button =
+		gm_layout_create_label_button("Cancel", (void *)quit_program_callback,
+							   NULL);
+	gtk_widget_show(button);
+
+	new_elt = gm_menu_element_create();
+	gm_menu_element_set_widget(button, new_elt);
 	
-		gtk_container_add(GTK_CONTAINER(vbox), hbox);
-		gtk_widget_show(hbox);
-		return vbox;
-	}
+	gm_menu_add_menu_element(new_elt, menu);
+
+	gm_layout_calculate_sizes(menu);
+ 	return gm_layout_create_menu(menu);
 }
 
 /**
