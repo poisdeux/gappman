@@ -53,14 +53,44 @@ gm_menu_element *gm_menu_search_elt_by_name(gchar * name, gm_menu *menu)
   return NULL;
 }
 
+void gm_menu_set_amount_of_elements(gint amount, gm_menu *menu)
+{
+	menu->amount_of_elements = amount;
+}
+
 gint gm_menu_get_amount_of_elements(gm_menu *menu)
 {
   return menu->amount_of_elements;
 }
 
+void gm_menu_element_set_logo(gchar* filename, gm_menu_element *elt)
+{
+	elt->logo = filename;
+}
+
+gchar* gm_menu_element_get_logo(gm_menu_element *elt)
+{
+	return elt->logo;
+}
+
 gchar *gm_menu_element_get_name(gm_menu_element *elt)
 {
   return elt->name;
+}
+
+void gm_menu_element_set_name(gchar* name, gm_menu_element *elt)
+{
+	elt->name = name;
+}
+
+void gm_menu_element_set_print_label(gboolean printlabel, gm_menu_element *elt)
+{
+	elt->printlabel = printlabel;
+}
+
+gboolean gm_menu_element_get_print_label(gm_menu_element *elt)
+{
+	return elt->printlabel;
 }
 
 gm_menu *gm_menu_create()
@@ -257,11 +287,6 @@ gboolean gm_menu_element_add_argument(gchar *arg, gm_menu_element *elt)
 	return TRUE;
 }
 
-void gm_menu_element_set_name(gchar *name, gm_menu_element *elt)
-{
-	elt->name = name;
-}
-
 void gm_menu_element_printlabel(gboolean bool, gm_menu_element *elt)
 {
 	if( bool == TRUE )
@@ -287,6 +312,11 @@ gint gm_menu_element_get_amount_of_arguments(gm_menu_element *elt)
 void gm_menu_element_set_pid(gint pid, gm_menu_element *elt)
 {
 	elt->pid = pid;
+}
+
+gint gm_menu_element_get_pid(gm_menu_element *elt)
+{
+	return elt->pid;
 }
 
 void gm_menu_element_set_data(gpointer data, gm_menu_element *elt)

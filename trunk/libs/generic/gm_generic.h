@@ -210,11 +210,53 @@ gm_menu_element *gm_menu_search_elt_by_name(gchar *name, gm_menu *programs);
 gint gm_menu_get_amount_of_elements(gm_menu *menu);
 
 /**
+* \brief sets the amount of elements in the menu
+* \param amount the amount of elements to set in gm_menu menu
+* \param menu pointer to a gm_menu type
+*/
+void gm_menu_set_amount_of_elements(gint amount, gm_menu *menu);
+
+/**
+* \brief returns the filename that was set as logo in the gm_menu_element
+* \param elt pointer to a gm_menu_element type
+* \return gchar string containing the filename of the logo
+*/
+gchar* gm_menu_element_get_logo(gm_menu_element *elt);
+
+/**
+* \brief sets the filename as logo in gm_menu_element elt
+* \param filename string holding the filename
+* \param elt pointer to a gm_menu_element type
+*/
+void gm_menu_element_set_logo(gchar* filename, gm_menu_element *elt);
+
+/**
 * \brief returns name for menu element
 * \param elt gm_menu_element
 * \return gchar pointer
 */
 gchar *gm_menu_element_get_name(gm_menu_element *elt);
+
+/**
+* \brief sets the name of the gm_menu_element elt that is used for instance to set the label that will be displayed when printlabel is true
+* \param gchar string holding the labelname
+* \param elt gm_menu_element
+*/
+void gm_menu_element_set_name(gchar* name, gm_menu_element *elt);
+
+/**
+* \brief use this to specify if you want the name (label) to be shown in the user interface or not.
+* \param gboolean true if you want the label to be shown, false otherwise
+* \param elt gm_menu_element
+*/
+void gm_menu_element_set_print_label(gboolean printlabel, gm_menu_element *elt);
+
+/**
+* \brief returns if this gm_menu_element should have its label shown in the user interface or not.
+* \param elt gm_menu_element
+* \return gboolean true if label should be shown, false otherwise.
+*/
+gboolean gm_menu_element_get_print_label(gm_menu_element *elt);
 
 /**
 * \brief creates a gm_menu with default initialization.
@@ -301,25 +343,19 @@ gboolean gm_menu_element_add_argument(gchar *arg, gm_menu_element *elt);
 gint gm_menu_elements_get_amount_of_arguments(gm_menu_element *elt);
 
 /**
-* \brief sets the name of the menu_element which will be displayed if printlabel is TRUE
-* \param name string holding the name. Note that gm_menu_element_set_name will not allocate memory for the string. You will need to do this yourself. Memory is freed when calling gm_menu_element_free.
-* \param *elt gm_menu_element which should be changed
-*/
-void gm_menu_element_set_name(gchar *name, gm_menu_element *elt);
-
-/**
-* \brief specifies if the name should be displayed or not
-* \param bool boolean value indicating if the name should be displayed
-* \param *elt gm_menu_element which should be changed
-*/
-void gm_menu_element_printlabel(gboolean bool, gm_menu_element *elt);
-
-/**
 * \brief set the pid in a gm_menu_element
 * \param pid Process ID of the program in gm_menu_element
 * \param elt gm_menu_element that should be updated
 */
 void gm_menu_element_set_pid(gint pid, gm_menu_element *elt);
+
+/**
+* \brief returns the process ID of the program started using elt
+* \param elt gm_menu_element that should contain the PID
+* \return int proces identifier
+*/
+gint gm_menu_element_get_pid(gm_menu_element *elt);
+
 
 /**
 * \brief sets the data pointer in a gm_menu_element. Most useful to pass arbitrary data to 
