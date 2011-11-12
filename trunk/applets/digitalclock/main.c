@@ -63,7 +63,6 @@ static struct _offsets {
 	gdouble y_6; ///< vertical offset calculated from the top left corner of the digit to draw the bar at position 6
 } offsets;
 
-//DOES THIS REALLY NEED TO BE GLOBAL?
 ///< double array to specify which bars should be drawn to display a specific number
 static gint bars_on_off[10][7] = {
 	{1, 1, 1, 0, 1, 1, 1},
