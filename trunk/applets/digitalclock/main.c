@@ -7,7 +7,7 @@
  *
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
- *
+ * \bug hor_bar_length != vert_bar_length. Shouldn't we make these equal?
  */
 
 #include <gtk/gtk.h>

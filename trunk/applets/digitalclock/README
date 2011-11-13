@@ -4,6 +4,8 @@ We calculate every second the digits for hours and minutes.
 Is this expensive? Should we only do this when the digit 
 actually changes? Is an if-statement cheaper?
 
+Add support for images to use as bars instead of drawing them.
+
 == Drawing Digits ==
 
 A digit consists of the following 7 elements:
@@ -27,5 +29,23 @@ turned off.
 7: 0, 2, 5
 8: 0, 1, 2, 3, 4, 5, 6
 9: 0, 1, 2, 3, 5, 6
+
+== Drawing date ==
+
+The date drawing is performed using the same digits.
+
+We will need to support drawing letters as well
+as we would like to show dates as follows:
+
+zo 13 nov 2011
+
+All letters will be uppercase.
+
+The letters A - J, L, N - P, S, U, Z can be represented by a single digit.
+The digits will need to be extended to include diagonal bars
+as well to support the letters K, M, Q, R.
+K, Q, and R will require a single digit.
+M, T, V, W, X, Y will require two digits.
+
 
 
