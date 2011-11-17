@@ -87,6 +87,61 @@ static void measure_time(int *prev_microseconds)
 	*prev_microseconds = (int) time_tv.tv_usec;
 }
 
+static gboolean draw_diagonal_bar_left(cairo_t *cr, gdouble x, gdouble y)
+{
+	//draw left triangle
+	cairo_move_to(cr, x, y);
+
+	//draw left vertical line
+	cairo_rel_line_to(cr, 0, sizes.triangle_side_length);
+
+	//draw bottom line rectangle
+	cairo_rel_line_to (cr, -0.37 * sizes.linewidth, -0.37 * sizes.linewidth);
+
+  //draw bottom horizontal line
+	cairo_rel_line_to(cr, sizes.triangle_side_length, 0);
+
+	//draw right vertical line
+	cairo_rel_line_to(cr, 0, -sizes.triangle_side_length);
+
+	//draw top line rectangle
+	cairo_rel_line_to (cr, -0.37 * sizes.linewidth, -0.37 * sizes.linewidth);
+
+	//draw top horizontal line
+	cairo_rel_line_to(cr, -sizes.triangle_side_length, 0);
+
+	cairo_close_path(cr);
+	cairo_set_line_join (cr, CAIRO_LINE_JOIN_ROUND);
+	cairo_fill(cr);
+}
+
+static gboolean draw_diagonal_bar_left(cairo_t *cr, gdouble x, gdouble y)
+{
+	//draw left triangle
+	cairo_move_to(cr, x, y);
+
+	cairo_rel_line_to(cr, 0, sizes.triangle_side_length);
+
+	//draw bottom line rectangle
+	cairo_rel_line_to (cr, -0.37 * sizes.linewidth, -0.37 * sizes.linewidth);
+
+	//draw bottom horizontal line
+	cairo_rel_line_to(cr, -sizes.triangle_side_length, 0);
+
+	//draw right vertical line
+	cairo_rel_line_to(cr, 0, sizes.triangle_side_length);
+
+	//draw top line rectangle
+	cairo_rel_line_to (cr, 0.37 * sizes.linewidth, 0.37 * sizes.linewidth);
+
+	//draw top horizontal line
+	cairo_rel_line_to(cr, sizes.triangle_side_length, 0);
+
+	cairo_close_path(cr);
+
+	cairo_set_line_join (cr, CAIRO_LINE_JOIN_ROUND);
+	cairo_fill(cr);
+}
 
 static gboolean draw_horizontal_bar(cairo_t *cr, gdouble x, gdouble y)
 {
@@ -170,6 +225,24 @@ bar positions:
 			draw_vertical_bar(cr, x + offsets.x_2_5, y + offsets.y_4_5);
 			break;
 		case 6:
+			draw_horizontal_bar(cr, x + offsets.x_0_3_6, y + offsets.y_6);
+			break;
+		case 7:
+			draw_horizontal_bar(cr, x + offsets.x_0_3_6, y + offsets.y_6);
+			break;
+		case 8:
+			draw_horizontal_bar(cr, x + offsets.x_0_3_6, y + offsets.y_6);
+			break;
+		case 9:
+			draw_horizontal_bar(cr, x + offsets.x_0_3_6, y + offsets.y_6);
+			break;
+		case 10:
+			draw_horizontal_bar(cr, x + offsets.x_0_3_6, y + offsets.y_6);
+			break;
+		case 11:
+			draw_horizontal_bar(cr, x + offsets.x_0_3_6, y + offsets.y_6);
+			break;
+		case 12:
 			draw_horizontal_bar(cr, x + offsets.x_0_3_6, y + offsets.y_6);
 			break;
 		default:
@@ -351,15 +424,17 @@ static gboolean calculate_offsets(GtkWidget *widget, GdkEventConfigure *event, g
 	//compensate for triangles at endpoints of the
   //digit-bars (see draw_horizontal_bar or draw_vertical_bar)
 	sizes.bar_length =  2.5 * sizes.linewidth;
+	sizes.triangle_side_length = sqrt((0.25 * sizes.linewidth * sizes.linewidth) + (0.25 * sizes.linewidth * sizes.linewidth));
 
 	offsets.x_delta = 5.5*sizes.linewidth;
 	offsets.x_0_3_6 = 1.25*sizes.linewidth;
 	offsets.x_2_5 = 4*sizes.linewidth;
+	offsets.x_7_9_11_offset = offsets.x_2_5 + offsets.x_0_3_6;
+	offsets.x_8_10_offset = 2 * offsets.x_2_5;
 	offsets.y_0 = -offsets.x_0_3_6;
 	offsets.y_3 = 0.25*sizes.linewidth + sizes.bar_length;
 	offsets.y_4_5 = offsets.y_3 + 1.25*sizes.linewidth;
 	offsets.y_6 = offsets.y_4_5 + offsets.y_3;
-
 	return TRUE;
 }
 
