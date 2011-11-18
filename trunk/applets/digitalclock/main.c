@@ -13,6 +13,7 @@
 #include <gtk/gtk.h>
 #include <gm_generic.h>
 #include <sys/time.h>
+#include <math.h>
 
 static GtkWidget *main_window = NULL;
 static GtkWidget *hour_window = NULL;
@@ -43,20 +44,27 @@ static struct _sizes {
 	gdouble w_height; ///< height of the window in which the clock will be drawn
 	gdouble linewidth; ///< default sizes.linewidth for horizontal and vertical bars
 	gdouble bar_length; ///< length of the bar excluding the top and bottom of the bar
+	gdouble triangle_side_length; ///< length of the left and right sides of the triangles at the ends of the bar
 } sizes;
 
 /**
  * \struct _offsets
- * \brief holds all offsets for drawing horizontal and vertical bars in a digit
+ * \brief holds all offsets for drawing horizontal and vertical bars in a digit. See diagrams calendar-diagram.dia and digits-diagram.dia for explanation
  */
 static struct _offsets {
-  gdouble x_delta; ///< the amount of space we should move horizontally to start drawing the next digit
-	gdouble x_0_3_6; ///< horizontal offset calculated from the top left corner of the digit to draw the bars at positions 0, 3, and 6
-	gdouble x_2_5; ///< horizontal offset calculated from the top left corner of the digit to draw the bars at positions 2 and 5
-	gdouble y_0; ///< vertical offset calculated from the top left corner of the digit to draw the bar at positions 0
-	gdouble y_3; ///< vertical offset calculated from the top left corner of the digit to draw the bar at position 3
-	gdouble y_4_5; ///< vertical offset calculated from the top left corner of the digit to draw the bars at positions 4 and 5
-	gdouble y_6; ///< vertical offset calculated from the top left corner of the digit to draw the bar at position 6
+  gdouble x_delta;
+	gdouble x_0_3_6;
+	gdouble x_2_5;
+	gdouble x_7_9_11;
+	gdouble x_8_10;
+	gdouble x_14_18;
+	gdouble x_13_17;
+	gdouble x_15_19;
+	gdouble y_0;
+	gdouble y_3; 
+	gdouble y_4_5; 
+	gdouble y_6; 
+	gdouble y_14_15_22_23;
 } offsets;
 
 ///< double array to specify which bars should be drawn to display a specific number
@@ -96,7 +104,7 @@ static gboolean draw_diagonal_bar_left(cairo_t *cr, gdouble x, gdouble y)
 	cairo_rel_line_to(cr, 0, sizes.triangle_side_length);
 
 	//draw bottom line rectangle
-	cairo_rel_line_to (cr, -0.37 * sizes.linewidth, -0.37 * sizes.linewidth);
+	cairo_rel_line_to (cr, 0.37 * sizes.linewidth, 0.37 * sizes.linewidth);
 
   //draw bottom horizontal line
 	cairo_rel_line_to(cr, sizes.triangle_side_length, 0);
@@ -115,7 +123,7 @@ static gboolean draw_diagonal_bar_left(cairo_t *cr, gdouble x, gdouble y)
 	cairo_fill(cr);
 }
 
-static gboolean draw_diagonal_bar_left(cairo_t *cr, gdouble x, gdouble y)
+static gboolean draw_diagonal_bar_right(cairo_t *cr, gdouble x, gdouble y)
 {
 	//draw left triangle
 	cairo_move_to(cr, x, y);
@@ -123,16 +131,16 @@ static gboolean draw_diagonal_bar_left(cairo_t *cr, gdouble x, gdouble y)
 	cairo_rel_line_to(cr, 0, sizes.triangle_side_length);
 
 	//draw bottom line rectangle
-	cairo_rel_line_to (cr, -0.37 * sizes.linewidth, -0.37 * sizes.linewidth);
+	cairo_rel_line_to (cr, -0.37 * sizes.linewidth, 0.37 * sizes.linewidth);
 
 	//draw bottom horizontal line
 	cairo_rel_line_to(cr, -sizes.triangle_side_length, 0);
 
 	//draw right vertical line
-	cairo_rel_line_to(cr, 0, sizes.triangle_side_length);
+	cairo_rel_line_to(cr, 0, -sizes.triangle_side_length);
 
 	//draw top line rectangle
-	cairo_rel_line_to (cr, 0.37 * sizes.linewidth, 0.37 * sizes.linewidth);
+	cairo_rel_line_to (cr, 0.37 * sizes.linewidth, -0.37 * sizes.linewidth);
 
 	//draw top horizontal line
 	cairo_rel_line_to(cr, sizes.triangle_side_length, 0);
@@ -203,6 +211,11 @@ bar positions:
 4 5
  6 
 */
+
+	draw_diagonal_bar_left(cr, x + offsets.x_0_3_6, y);
+	draw_diagonal_bar_right(cr, x + offsets.x_13_17, y);
+	draw_diagonal_bar_right(cr, x + offsets.x_14_18, y + offsets.y_14_15_22_23);
+	draw_diagonal_bar_left(cr, x + offsets.x_15_19, y + offsets.y_14_15_22_23);
 
 	switch(bar)
 	{
@@ -429,12 +442,16 @@ static gboolean calculate_offsets(GtkWidget *widget, GdkEventConfigure *event, g
 	offsets.x_delta = 5.5*sizes.linewidth;
 	offsets.x_0_3_6 = 1.25*sizes.linewidth;
 	offsets.x_2_5 = 4*sizes.linewidth;
-	offsets.x_7_9_11_offset = offsets.x_2_5 + offsets.x_0_3_6;
-	offsets.x_8_10_offset = 2 * offsets.x_2_5;
+	offsets.x_7_9_11 = offsets.x_2_5 + offsets.x_0_3_6;
+	offsets.x_8_10 = 2 * offsets.x_2_5;
+	offsets.x_14_18 = (offsets.x_2_5 - sizes.linewidth)/2 + 0.875*sizes.linewidth;
+	offsets.x_15_19 = offsets.x_14_18 + (0.25 * sizes.linewidth);
+	offsets.x_13_17 = offsets.x_2_5 - (0.25 *  sizes.linewidth); 
 	offsets.y_0 = -offsets.x_0_3_6;
 	offsets.y_3 = 0.25*sizes.linewidth + sizes.bar_length;
 	offsets.y_4_5 = offsets.y_3 + 1.25*sizes.linewidth;
 	offsets.y_6 = offsets.y_4_5 + offsets.y_3;
+	offsets.y_14_15_22_23 = offsets.x_15_19 - sizes.linewidth;
 	return TRUE;
 }
 
