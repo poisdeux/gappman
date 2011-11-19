@@ -19,6 +19,7 @@ static GtkWidget *main_window = NULL;
 static GtkWidget *hour_window = NULL;
 static GtkWidget *minute_window = NULL;
 static GtkWidget *colon_window = NULL;
+static GtkWidget *date_window = NULL;
 
 static gint timeout_source_id = -1;
 
@@ -34,6 +35,20 @@ struct digit_time {
 
 static struct digit_time hours;  ///< represents the current clock value for hours
 static struct digit_time minutes; ///< represents the current clock value for minutes
+
+struct _date {
+	gchar day_first_letter;
+	gchar day_second_letter;
+	gint day_of_month_first_digit;
+	gint day_of_month_second_digit;
+	gchar month_first_letter;	
+	gchar month_second_letter;
+	gchar month_third_letter;
+	gint year_first_digit;
+	gint year_second_digit;
+	gint year_third_digit;
+	gint year_fourth_digit;
+} date;
 
 /**
  * \struct _sizes
@@ -65,22 +80,52 @@ static struct _offsets {
 	gdouble y_4_5; 
 	gdouble y_6; 
 	gdouble y_14_15_22_23;
+	gdouble y_18_19_26_27;
 } offsets;
 
 ///< double array to specify which bars should be drawn to display a specific number
-static gint bars_on_off[10][7] = {
-	{1, 1, 1, 0, 1, 1, 1},
-	{0, 0, 1, 0, 0, 1, 0},
-	{1, 0, 1, 1, 1, 0, 1},
-	{1, 0, 1, 1, 0, 1, 1},
-	{0, 1, 1, 1, 0, 1, 0},
-	{1, 1, 0, 1, 0, 1, 1},
-	{1, 1, 0, 1, 1, 1, 1},
-	{1, 0, 1, 0, 0, 1, 0},
-	{1, 1, 1, 1, 1, 1, 1},
-	{1, 1, 1, 1, 0, 1, 1} 
+static gint digits_bars_on_off[10][7] = {
+	{1, 1, 1, 0, 1, 1, 1}, // 0
+	{0, 0, 1, 0, 0, 1, 0}, // 1 
+	{1, 0, 1, 1, 1, 0, 1}, // 2
+	{1, 0, 1, 1, 0, 1, 1}, // 3
+	{0, 1, 1, 1, 0, 1, 0}, // 4
+	{1, 1, 0, 1, 0, 1, 1}, // 5
+	{1, 1, 0, 1, 1, 1, 1}, // 6
+	{1, 0, 1, 0, 0, 1, 0}, // 7
+	{1, 1, 1, 1, 1, 1, 1}, // 8
+	{1, 1, 1, 1, 0, 1, 1}  // 9
 };
 
+///< double array to specify which bars should be drawm to display a letter
+static gint letters_bars_on_off[26][26] = {
+	{0, 2, 3, 4, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //a
+	{1, 3, 4, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //b
+	{0, 1, 4, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //c
+	{2, 3, 4, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //d
+	{0, 1, 2, 3, 4, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //e
+	{0, 1, 3, 4, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //f
+	{0, 1, 2, 3, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //g
+	{1, 3, 4, 5, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //h
+	{1, 4, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //i
+	{2, 4, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //j
+	{1, 4, 13, 14, 16, 19, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //k
+	{1, 4, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //l
+	{0, 1, 4, 2, 7, 8, 10, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //m
+	{0, 1, 2, 4, 5, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //n
+	{1, 1, 2, 4, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //o
+	{0, 1, 2, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //p
+	{0, 1, 2, 3, 5, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //q
+	{0, 1, 4, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //r
+	{0, 1, 3, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //s
+	{1, 3, 4, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //t
+	{1, 2, 4, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //u
+	{1, 8, 16, 19, 25, 26, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //v
+	{1, 4, 5, 6, 8, 10, 11, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //w
+	{12, 15, 17, 18, 21, 22, 24, 27, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //x
+	{1, 2, 3, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //y
+	{0, 2, 3, 4, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //z
+};
 static void measure_time(int *prev_microseconds)
 {
 	struct timeval time_tv;
@@ -212,10 +257,6 @@ bar positions:
  6 
 */
 
-	draw_diagonal_bar_left(cr, x + offsets.x_0_3_6, y);
-	draw_diagonal_bar_right(cr, x + offsets.x_13_17, y);
-	draw_diagonal_bar_right(cr, x + offsets.x_14_18, y + offsets.y_14_15_22_23);
-	draw_diagonal_bar_left(cr, x + offsets.x_15_19, y + offsets.y_14_15_22_23);
 
 	switch(bar)
 	{
@@ -241,24 +282,69 @@ bar positions:
 			draw_horizontal_bar(cr, x + offsets.x_0_3_6, y + offsets.y_6);
 			break;
 		case 7:
-			draw_horizontal_bar(cr, x + offsets.x_0_3_6, y + offsets.y_6);
+			draw_horizontal_bar(cr, x + offsets.x_0_3_6 + offsets.x_2_5, y + offsets.y_6);
 			break;
 		case 8:
-			draw_horizontal_bar(cr, x + offsets.x_0_3_6, y + offsets.y_6);
+			draw_horizontal_bar(cr, x + offsets.x_0_3_6 + offsets.x_2_5, y + offsets.y_6);
 			break;
 		case 9:
-			draw_horizontal_bar(cr, x + offsets.x_0_3_6, y + offsets.y_6);
+			draw_horizontal_bar(cr, x + offsets.x_0_3_6 + offsets.x_2_5, y + offsets.y_6);
 			break;
 		case 10:
-			draw_horizontal_bar(cr, x + offsets.x_0_3_6, y + offsets.y_6);
+			draw_horizontal_bar(cr, x + offsets.x_0_3_6 + offsets.x_2_5, y + offsets.y_6);
 			break;
 		case 11:
-			draw_horizontal_bar(cr, x + offsets.x_0_3_6, y + offsets.y_6);
+			draw_horizontal_bar(cr, x + offsets.x_0_3_6 + offsets.x_2_5, y + offsets.y_6);
 			break;
 		case 12:
-			draw_horizontal_bar(cr, x + offsets.x_0_3_6, y + offsets.y_6);
+			draw_diagonal_bar_left(cr, x + offsets.x_0_3_6, y);
 			break;
-		default:
+		case 13:
+			draw_diagonal_bar_right(cr, x + offsets.x_13_17, y);
+			break;
+		case 14:
+			draw_diagonal_bar_right(cr, x + offsets.x_14_18, y + offsets.y_14_15_22_23);
+			break;
+		case 15:
+			draw_diagonal_bar_left(cr, x + offsets.x_15_19, y + offsets.y_14_15_22_23);
+			break;
+		case 16:
+			draw_diagonal_bar_left(cr, x + offsets.x_0_3_6, y + offsets.y_4_5);
+			break;
+		case 17:
+			draw_diagonal_bar_right(cr, x + offsets.x_13_17, y + offsets.y_4_5);
+			break;
+		case 18:
+			draw_diagonal_bar_right(cr, x + offsets.x_14_18, y + offsets.y_18_19_26_27);
+			break;
+		case 19:
+			draw_diagonal_bar_left(cr, x + offsets.x_15_19, y + offsets.y_18_19_26_27);
+			break;
+		case 20:
+			draw_diagonal_bar_left(cr, x + offsets.x_0_3_6 + offsets.x_2_5, y);
+			break;
+		case 21:
+			draw_diagonal_bar_right(cr, x + offsets.x_13_17 + offsets.x_2_5, y);
+			break;
+		case 22:
+			draw_diagonal_bar_right(cr, x + offsets.x_14_18 + offsets.x_2_5, y + offsets.y_14_15_22_23);
+			break;
+		case 23:
+			draw_diagonal_bar_left(cr, x + offsets.x_15_19 + offsets.x_2_5, y + offsets.y_14_15_22_23);
+			break;
+		case 24:
+			draw_diagonal_bar_left(cr, x + offsets.x_0_3_6 + offsets.x_2_5, y + offsets.y_4_5);
+			break;
+		case 25:
+			draw_diagonal_bar_right(cr, x + offsets.x_13_17 + offsets.x_2_5, y + offsets.y_4_5);
+			break;
+		case 26:
+			draw_diagonal_bar_right(cr, x + offsets.x_14_18 + offsets.x_2_5, y + offsets.y_18_19_26_27);
+			break;
+		case 27:
+			draw_diagonal_bar_left(cr, x + offsets.x_15_19 + offsets.x_2_5, y + offsets.y_18_19_26_27);
+			break;
+	default:
 			g_warning("Sorry sir, but I have no knowledge of bar number %d", bar);
 			break;
 	}
@@ -267,15 +353,29 @@ bar positions:
 static draw_digit(cairo_t *cr, int digit, gdouble x_offset, gdouble y_offset)
 {
 	int i;
-	gint time_passed = 0;
 
 	for(i = 0; i < 7; i++)
 	{
-		if( bars_on_off[digit][i] == 1 )
+		if( digits_bars_on_off[digit][i] == 1 )
 		{
 			draw_bar(cr, i, x_offset, y_offset);
 		}
 	}  
+}
+
+static draw_letter(cairo_t *cr, int letter, gdouble x_offset, gdouble y_offset)
+{
+	gint i;
+	gint bar;
+	for(i = 0; i < 26; i++)
+	{
+		bar = digits_bars_on_off[letter][i];
+		if( bar == -1 )
+		{
+			break;
+		}
+		draw_letter(cr, bar, x_offset, y_offset);
+	}
 }
 
 static gboolean hour_on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data)
@@ -451,8 +551,22 @@ static gboolean calculate_offsets(GtkWidget *widget, GdkEventConfigure *event, g
 	offsets.y_3 = 0.25*sizes.linewidth + sizes.bar_length;
 	offsets.y_4_5 = offsets.y_3 + 1.25*sizes.linewidth;
 	offsets.y_6 = offsets.y_4_5 + offsets.y_3;
-	offsets.y_14_15_22_23 = offsets.x_15_19 - sizes.linewidth;
+	offsets.y_14_15_22_23 = offsets.x_15_19 - 1.25 * sizes.linewidth;
+	offsets.y_18_19_26_27 = offsets.y_4_5 + offsets.y_14_15_22_23;
 	return TRUE;
+}
+
+/**
+* \brief converts a character to the correct arraynumber in letter_bars array
+* \return gint
+*/
+gint convert_to_letterbars_number(gchar c)
+{
+	int number = (int) c - 'a';
+	if (number < 0 && number > 26)
+		return 0;
+	
+	return number;
 }
 
 /**
@@ -463,6 +577,7 @@ G_MODULE_EXPORT int gm_module_init()
 {
 	time_t time_secs;
 	struct tm cur_time;
+	gchar *datestring;
 
 	main_window = gtk_hbox_new(FALSE, 0);
 
@@ -491,6 +606,20 @@ G_MODULE_EXPORT int gm_module_init()
 	minutes.time = cur_time.tm_min;
 	minutes.first_digit = cur_time.tm_min / 10;
 	minutes.second_digit = cur_time.tm_min % 10;
+
+	datestring = ctime(&time_secs);
+	g_debug("Date: %s\n", datestring);
+	date.day_first_letter = convert_to_letterbars_number(tolower(datestring[0]));
+	date.day_second_letter = convert_to_letterbars_number(datestring[1]);
+	date.month_first_letter = convert_to_letterbars_number(tolower(datestring[4]));
+	date.month_second_letter = convert_to_letterbars_number(datestring[5]);
+	date.month_third_letter = convert_to_letterbars_number(datestring[6]);
+
+	// we assume this software will not last 7989 years
+	date.year_first_digit = cur_time.tm_year / 1000;
+	date.year_second_digit = cur_time.tm_year % 1000 / 100;
+	date.year_third_digit = cur_time.tm_year % 100 / 10;
+	date.year_fourth_digit = cur_time.tm_year % 10;
 
 	return GM_SUCCESS;
 }
