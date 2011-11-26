@@ -37,13 +37,13 @@ static struct digit_time hours;  ///< represents the current clock value for hou
 static struct digit_time minutes; ///< represents the current clock value for minutes
 
 struct _date {
-	gchar day_first_letter;
-	gchar day_second_letter;
+	gint day_first_letter;
+	gint day_second_letter;
 	gint day_of_month_first_digit;
 	gint day_of_month_second_digit;
-	gchar month_first_letter;	
-	gchar month_second_letter;
-	gchar month_third_letter;
+	gint month_first_letter;	
+	gint month_second_letter;
+	gint month_third_letter;
 	gint year_first_digit;
 	gint year_second_digit;
 	gint year_third_digit;
@@ -99,27 +99,27 @@ static gint digits_bars_on_off[10][7] = {
 
 ///< double array to specify which bars should be drawm to display a letter
 static gint letters_bars_on_off[26][26] = {
-	{0, 2, 3, 4, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //a
-	{1, 3, 4, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //b
-	{0, 1, 4, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //c
-	{2, 3, 4, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //d
-	{0, 1, 2, 3, 4, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //e
-	{0, 1, 3, 4, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //f
-	{0, 1, 2, 3, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //g
-	{1, 3, 4, 5, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //h
-	{1, 4, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //i
-	{2, 4, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //j
-	{1, 4, 13, 14, 16, 19, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //k
-	{1, 4, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //l
-	{0, 1, 4, 2, 7, 8, 10, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //m
-	{0, 1, 2, 4, 5, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //n
-	{1, 1, 2, 4, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //o
-	{0, 1, 2, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //p
-	{0, 1, 2, 3, 5, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //q
-	{0, 1, 4, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //r
-	{0, 1, 3, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //s
-	{1, 3, 4, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //t
-	{1, 2, 4, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //u
+	{0, 2, 3, 4, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //1 a
+	{1, 3, 4, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //2 b
+	{0, 1, 4, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //3 c
+	{2, 3, 4, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //4 d
+	{0, 1, 2, 3, 4, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //5 e
+	{0, 1, 3, 4, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //6 f
+	{0, 1, 2, 3, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //7 g
+	{1, 3, 4, 5, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //8 h
+	{1, 4, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //9 i
+	{2, 4, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //10 j
+	{1, 4, 13, 14, 16, 19, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //11 k
+	{1, 4, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //12 l
+	{0, 1, 4, 2, 7, 8, 10, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //13 m
+	{0, 1, 2, 4, 5, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //14 n
+	{1, 1, 2, 4, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //15 o
+	{0, 1, 2, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //16 p
+	{0, 1, 2, 3, 5, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //17 q
+	{0, 1, 4, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //18 r
+	{0, 1, 3, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //19 s
+	{1, 3, 4, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //20 t
+	{1, 2, 4, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //21 u
 	{1, 8, 16, 19, 25, 26, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //v
 	{1, 4, 5, 6, 8, 10, 11, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //w
 	{12, 15, 17, 18, 21, 22, 24, 27, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //x
@@ -138,6 +138,100 @@ static void measure_time(int *prev_microseconds)
 	}	
 	gettimeofday( &time_tv, NULL );
 	*prev_microseconds = (int) time_tv.tv_usec;
+}
+
+static gboolean calculate_offsets_calendar(GtkWidget *widget, GdkEventConfigure *event, gpointer data)
+{
+	gint time_passed = 0;
+	gfloat digit_width;
+	gfloat digit_height;
+	gfloat colon_width;
+
+	//see calendar-diagram.dia to make sense out of these numbers
+
+	//width is 4 * x_delta + columnwidth = 23.5 * linewidth
+  //as we only get the width from gappman we calculate from
+  //that the required linewidth.
+	sizes.linewidth = sizes.w_width/23.5;
+
+	colon_width = 1.5*sizes.linewidth;
+
+	digit_width = (sizes.w_width - colon_width)/4;
+  digit_height = sizes.w_height * 0.7;
+	
+	gtk_widget_set_size_request (hour_window, digit_width * 2, digit_height);
+	gtk_widget_set_size_request (colon_window, colon_width, digit_height);
+	gtk_widget_set_size_request (minute_window, digit_width * 2, digit_height);
+	gtk_widget_set_size_request (date_window, sizes.w_width, digit_height*0.3);
+	gtk_widget_set_size_request (main_window, sizes.w_width, sizes.w_height);
+
+	//compensate for triangles at endpoints of the
+  //digit-bars (see draw_horizontal_bar or draw_vertical_bar)
+	sizes.bar_length =  2.5 * sizes.linewidth;
+	sizes.triangle_side_length = sqrt((0.25 * sizes.linewidth * sizes.linewidth) + (0.25 * sizes.linewidth * sizes.linewidth));
+
+	offsets.x_delta = 5.5*sizes.linewidth;
+	offsets.x_0_3_6 = 1.25*sizes.linewidth;
+	offsets.x_2_5 = 4*sizes.linewidth;
+	offsets.x_7_9_11 = offsets.x_2_5 + offsets.x_0_3_6;
+	offsets.x_8_10 = 2 * offsets.x_2_5;
+	offsets.x_14_18 = (offsets.x_2_5 - sizes.linewidth)/2 + 0.875*sizes.linewidth;
+	offsets.x_15_19 = offsets.x_14_18 + (0.25 * sizes.linewidth);
+	offsets.x_13_17 = offsets.x_2_5 - (0.25 *  sizes.linewidth); 
+	offsets.y_0 = -offsets.x_0_3_6;
+	offsets.y_3 = 0.25*sizes.linewidth + sizes.bar_length;
+	offsets.y_4_5 = offsets.y_3 + 1.25*sizes.linewidth;
+	offsets.y_6 = offsets.y_4_5 + offsets.y_3;
+	offsets.y_14_15_22_23 = offsets.x_15_19 - 1.25 * sizes.linewidth;
+	offsets.y_18_19_26_27 = offsets.y_4_5 + offsets.y_14_15_22_23;
+	return TRUE;
+}
+
+static gboolean calculate_offsets_clock(GtkWidget *widget, GdkEventConfigure *event, gpointer data)
+{
+	gint time_passed = 0;
+	gfloat digit_width;
+	gfloat digit_height;
+	gfloat colon_width;
+
+	//see digits-diagram.dia to make sense out of these numbers
+
+	//width is 4 * x_delta + columnwidth = 23.5 * linewidth
+  //as we only get the width from gappman we calculate from
+  //that the required linewidth.
+	sizes.linewidth = sizes.w_width/23.5;
+
+	colon_width = 1.5*sizes.linewidth;
+
+	digit_width = (sizes.w_width - colon_width)/4;
+  digit_height = sizes.w_height * 0.7;
+	
+	gtk_widget_set_size_request (hour_window, digit_width * 2, digit_height);
+	gtk_widget_set_size_request (colon_window, colon_width, digit_height);
+	gtk_widget_set_size_request (minute_window, digit_width * 2, digit_height);
+	gtk_widget_set_size_request (date_window, sizes.w_width, digit_height*0.3);
+	gtk_widget_set_size_request (main_window, sizes.w_width, sizes.w_height);
+
+	//compensate for triangles at endpoints of the
+  //digit-bars (see draw_horizontal_bar or draw_vertical_bar)
+	sizes.bar_length =  2.5 * sizes.linewidth;
+	sizes.triangle_side_length = sqrt((0.25 * sizes.linewidth * sizes.linewidth) + (0.25 * sizes.linewidth * sizes.linewidth));
+
+	offsets.x_delta = 5.5*sizes.linewidth;
+	offsets.x_0_3_6 = 1.25*sizes.linewidth;
+	offsets.x_2_5 = 4*sizes.linewidth;
+	offsets.x_7_9_11 = offsets.x_2_5 + offsets.x_0_3_6;
+	offsets.x_8_10 = 2 * offsets.x_2_5;
+	offsets.x_14_18 = (offsets.x_2_5 - sizes.linewidth)/2 + 0.875*sizes.linewidth;
+	offsets.x_15_19 = offsets.x_14_18 + (0.25 * sizes.linewidth);
+	offsets.x_13_17 = offsets.x_2_5 - (0.25 *  sizes.linewidth); 
+	offsets.y_0 = -offsets.x_0_3_6;
+	offsets.y_3 = 0.25*sizes.linewidth + sizes.bar_length;
+	offsets.y_4_5 = offsets.y_3 + 1.25*sizes.linewidth;
+	offsets.y_6 = offsets.y_4_5 + offsets.y_3;
+	offsets.y_14_15_22_23 = offsets.x_15_19 - 1.25 * sizes.linewidth;
+	offsets.y_18_19_26_27 = offsets.y_4_5 + offsets.y_14_15_22_23;
+	return TRUE;
 }
 
 static gboolean draw_diagonal_bar_left(cairo_t *cr, gdouble x, gdouble y)
@@ -369,12 +463,13 @@ static draw_letter(cairo_t *cr, int letter, gdouble x_offset, gdouble y_offset)
 	gint bar;
 	for(i = 0; i < 26; i++)
 	{
-		bar = digits_bars_on_off[letter][i];
+		bar = letters_bars_on_off[letter][i];
 		if( bar == -1 )
 		{
 			break;
 		}
-		draw_letter(cr, bar, x_offset, y_offset);
+		g_debug("letter %d drawing bar %d", letter, i);
+		draw_bar(cr, bar, x_offset, y_offset);
 	}
 }
 
@@ -465,6 +560,32 @@ static gboolean minute_on_expose_event(GtkWidget *widget, GdkEventExpose *event,
 	return TRUE;
 }
 
+static gboolean date_on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data)
+{
+	cairo_t *cr;
+	GtkStyle *rc_style;
+	gint time_passed = 0;
+
+	cr = gdk_cairo_create (widget->window);
+
+	rc_style = gtk_rc_get_style(widget);
+
+	cairo_set_source_rgb (cr, 
+		rc_style->fg[0].red,
+		rc_style->fg[0].green,
+		rc_style->fg[0].blue);
+
+	cairo_set_line_width(cr, 0);
+
+	draw_letter(cr, date.day_first_letter, 0, -offsets.y_0);
+	draw_letter(cr, date.day_second_letter, offsets.x_delta, -offsets.y_0);
+
+	cairo_stroke (cr);
+	cairo_destroy(cr);
+
+	return TRUE;
+}
+
 
 static gboolean update_time(gpointer data)
 {
@@ -510,51 +631,7 @@ static gboolean update_time(gpointer data)
 	return TRUE;
 }
 
-static gboolean calculate_offsets(GtkWidget *widget, GdkEventConfigure *event, gpointer data)
-{
-	gint time_passed = 0;
-	gfloat digit_width;
-	gfloat digit_height;
-	gfloat colon_width;
 
-	//see digits-diagram.dia to make sense out of these numbers
-
-	//width is 4 * x_delta + columnwidth = 23.5 * linewidth
-  //as we only get the width from gappman we calculate from
-  //that the required linewidth.
-	sizes.linewidth = sizes.w_width/23.5;
-
-	colon_width = 1.5*sizes.linewidth;
-
-	digit_width = (sizes.w_width - colon_width)/4;
-  digit_height = sizes.w_height;
-
-	gtk_widget_set_size_request (hour_window, digit_width * 2, digit_height);
-	gtk_widget_set_size_request (colon_window, colon_width, digit_height);
-	gtk_widget_set_size_request (minute_window, digit_width * 2, digit_height);
-	gtk_widget_set_size_request (main_window, sizes.w_width, digit_height);
-
-	//compensate for triangles at endpoints of the
-  //digit-bars (see draw_horizontal_bar or draw_vertical_bar)
-	sizes.bar_length =  2.5 * sizes.linewidth;
-	sizes.triangle_side_length = sqrt((0.25 * sizes.linewidth * sizes.linewidth) + (0.25 * sizes.linewidth * sizes.linewidth));
-
-	offsets.x_delta = 5.5*sizes.linewidth;
-	offsets.x_0_3_6 = 1.25*sizes.linewidth;
-	offsets.x_2_5 = 4*sizes.linewidth;
-	offsets.x_7_9_11 = offsets.x_2_5 + offsets.x_0_3_6;
-	offsets.x_8_10 = 2 * offsets.x_2_5;
-	offsets.x_14_18 = (offsets.x_2_5 - sizes.linewidth)/2 + 0.875*sizes.linewidth;
-	offsets.x_15_19 = offsets.x_14_18 + (0.25 * sizes.linewidth);
-	offsets.x_13_17 = offsets.x_2_5 - (0.25 *  sizes.linewidth); 
-	offsets.y_0 = -offsets.x_0_3_6;
-	offsets.y_3 = 0.25*sizes.linewidth + sizes.bar_length;
-	offsets.y_4_5 = offsets.y_3 + 1.25*sizes.linewidth;
-	offsets.y_6 = offsets.y_4_5 + offsets.y_3;
-	offsets.y_14_15_22_23 = offsets.x_15_19 - 1.25 * sizes.linewidth;
-	offsets.y_18_19_26_27 = offsets.y_4_5 + offsets.y_14_15_22_23;
-	return TRUE;
-}
 
 /**
 * \brief converts a character to the correct arraynumber in letter_bars array
@@ -578,23 +655,32 @@ G_MODULE_EXPORT int gm_module_init()
 	time_t time_secs;
 	struct tm cur_time;
 	gchar *datestring;
+	GtkWidget *hbox;
 
-	main_window = gtk_hbox_new(FALSE, 0);
+	main_window = gtk_vbox_new(FALSE, 0);
+	hbox = gtk_hbox_new(FALSE, 0);
 
 	hour_window = gtk_drawing_area_new();
-	gtk_container_add(GTK_CONTAINER(main_window), hour_window);
+	gtk_container_add(GTK_CONTAINER(hbox), hour_window);
 
 	colon_window = gtk_drawing_area_new();
-	gtk_container_add(GTK_CONTAINER(main_window), colon_window);
+	gtk_container_add(GTK_CONTAINER(hbox), colon_window);
 	
 	minute_window = gtk_drawing_area_new();
-	gtk_container_add(GTK_CONTAINER(main_window), minute_window);
+	gtk_container_add(GTK_CONTAINER(hbox), minute_window);
+
+	gtk_container_add(GTK_CONTAINER(main_window), hbox);
+
+	date_window = gtk_drawing_area_new();
+	gtk_container_add(GTK_CONTAINER(main_window), date_window);
 
 	g_signal_connect(minute_window, "expose-event", G_CALLBACK(minute_on_expose_event), NULL);
 	g_signal_connect(hour_window, "expose-event", G_CALLBACK(hour_on_expose_event), NULL);
 	g_signal_connect(colon_window, "expose-event", G_CALLBACK(colon_on_expose_event), NULL);
+	g_signal_connect(date_window, "expose-event", G_CALLBACK(date_on_expose_event), NULL);
 
-	g_signal_connect(minute_window, "configure-event", G_CALLBACK(calculate_offsets), NULL);
+	g_signal_connect(minute_window, "configure-event", G_CALLBACK(calculate_offsets_clock), NULL);
+	g_signal_connect(date_window, "configure-event", G_CALLBACK(calculate_offsets_calendar), NULL);
 
 	time( &time_secs );
 	localtime_r (&time_secs, &cur_time);
