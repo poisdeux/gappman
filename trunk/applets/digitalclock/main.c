@@ -66,8 +66,9 @@ static struct _sizes {
  * \struct _offsets
  * \brief holds all offsets for drawing horizontal and vertical bars in a digit. See diagrams calendar-diagram.dia and digits-diagram.dia for explanation
  */
-static struct _offsets {
-  gdouble x_delta;
+static struct _letter_offsets {
+  gdouble digit_x_delta;
+  gdouble letter_x_delta;
 	gdouble x_0_3_6;
 	gdouble x_2_5;
 	gdouble x_7_9_11;
@@ -81,7 +82,30 @@ static struct _offsets {
 	gdouble y_6; 
 	gdouble y_14_15_22_23;
 	gdouble y_18_19_26_27;
-} offsets;
+} letter_offsets;
+
+
+/**
+ * \struct _offsets
+ * \brief holds all offsets for drawing horizontal and vertical bars in a digit. See diagrams calendar-diagram.dia and digits-diagram.dia for explanation
+ */
+static struct _digit_offsets {
+  gdouble digit_x_delta;
+  gdouble letter_x_delta;
+	gdouble x_0_3_6;
+	gdouble x_2_5;
+	gdouble x_7_9_11;
+	gdouble x_8_10;
+	gdouble x_14_18;
+	gdouble x_13_17;
+	gdouble x_15_19;
+	gdouble y_0;
+	gdouble y_3; 
+	gdouble y_4_5; 
+	gdouble y_6; 
+	gdouble y_14_15_22_23;
+	gdouble y_18_19_26_27;
+} digit_offsets;
 
 ///< double array to specify which bars should be drawn to display a specific number
 static gint digits_bars_on_off[10][7] = {
@@ -142,48 +166,31 @@ static void measure_time(int *prev_microseconds)
 
 static gboolean calculate_offsets_calendar(GtkWidget *widget, GdkEventConfigure *event, gpointer data)
 {
-	gint time_passed = 0;
-	gfloat digit_width;
-	gfloat digit_height;
-	gfloat colon_width;
-
 	//see calendar-diagram.dia to make sense out of these numbers
 
-	//width is 4 * x_delta + columnwidth = 23.5 * linewidth
-  //as we only get the width from gappman we calculate from
-  //that the required linewidth.
-	sizes.linewidth = sizes.w_width/23.5;
+	sizes.linewidth = sizes.w_width/83.5;
 
-	colon_width = 1.5*sizes.linewidth;
-
-	digit_width = (sizes.w_width - colon_width)/4;
-  digit_height = sizes.w_height * 0.7;
-	
-	gtk_widget_set_size_request (hour_window, digit_width * 2, digit_height);
-	gtk_widget_set_size_request (colon_window, colon_width, digit_height);
-	gtk_widget_set_size_request (minute_window, digit_width * 2, digit_height);
-	gtk_widget_set_size_request (date_window, sizes.w_width, digit_height*0.3);
-	gtk_widget_set_size_request (main_window, sizes.w_width, sizes.w_height);
+	gtk_widget_set_size_request (date_window, sizes.w_width, sizes.w_height*0.3);
 
 	//compensate for triangles at endpoints of the
   //digit-bars (see draw_horizontal_bar or draw_vertical_bar)
 	sizes.bar_length =  2.5 * sizes.linewidth;
 	sizes.triangle_side_length = sqrt((0.25 * sizes.linewidth * sizes.linewidth) + (0.25 * sizes.linewidth * sizes.linewidth));
 
-	offsets.x_delta = 5.5*sizes.linewidth;
-	offsets.x_0_3_6 = 1.25*sizes.linewidth;
-	offsets.x_2_5 = 4*sizes.linewidth;
-	offsets.x_7_9_11 = offsets.x_2_5 + offsets.x_0_3_6;
-	offsets.x_8_10 = 2 * offsets.x_2_5;
-	offsets.x_14_18 = (offsets.x_2_5 - sizes.linewidth)/2 + 0.875*sizes.linewidth;
-	offsets.x_15_19 = offsets.x_14_18 + (0.25 * sizes.linewidth);
-	offsets.x_13_17 = offsets.x_2_5 - (0.25 *  sizes.linewidth); 
-	offsets.y_0 = -offsets.x_0_3_6;
-	offsets.y_3 = 0.25*sizes.linewidth + sizes.bar_length;
-	offsets.y_4_5 = offsets.y_3 + 1.25*sizes.linewidth;
-	offsets.y_6 = offsets.y_4_5 + offsets.y_3;
-	offsets.y_14_15_22_23 = offsets.x_15_19 - 1.25 * sizes.linewidth;
-	offsets.y_18_19_26_27 = offsets.y_4_5 + offsets.y_14_15_22_23;
+	letter_offsets.letter_x_delta = 9.5*sizes.linewidth;
+	letter_offsets.x_0_3_6 = 1.25*sizes.linewidth;
+	letter_offsets.x_2_5 = 4*sizes.linewidth;
+	letter_offsets.x_7_9_11 = digit_offsets.x_2_5 + digit_offsets.x_0_3_6;
+	letter_offsets.x_8_10 = 2 * digit_offsets.x_2_5;
+	letter_offsets.x_14_18 = (digit_offsets.x_2_5 - sizes.linewidth)/2 + 0.875*sizes.linewidth;
+	letter_offsets.x_15_19 = digit_offsets.x_14_18 + (0.25 * sizes.linewidth);
+	letter_offsets.x_13_17 = digit_offsets.x_2_5 - (0.25 *  sizes.linewidth); 
+	letter_offsets.y_0 = -digit_offsets.x_0_3_6;
+	letter_offsets.y_3 = 0.25*sizes.linewidth + sizes.bar_length;
+	letter_offsets.y_4_5 = digit_offsets.y_3 + 1.25*sizes.linewidth;
+	letter_offsets.y_6 = digit_offsets.y_4_5 + digit_offsets.y_3;
+	letter_offsets.y_14_15_22_23 = digit_offsets.x_15_19 - 1.25 * sizes.linewidth;
+	letter_offsets.y_18_19_26_27 = digit_offsets.y_4_5 + digit_offsets.y_14_15_22_23;
 	return TRUE;
 }
 
@@ -217,20 +224,20 @@ static gboolean calculate_offsets_clock(GtkWidget *widget, GdkEventConfigure *ev
 	sizes.bar_length =  2.5 * sizes.linewidth;
 	sizes.triangle_side_length = sqrt((0.25 * sizes.linewidth * sizes.linewidth) + (0.25 * sizes.linewidth * sizes.linewidth));
 
-	offsets.x_delta = 5.5*sizes.linewidth;
-	offsets.x_0_3_6 = 1.25*sizes.linewidth;
-	offsets.x_2_5 = 4*sizes.linewidth;
-	offsets.x_7_9_11 = offsets.x_2_5 + offsets.x_0_3_6;
-	offsets.x_8_10 = 2 * offsets.x_2_5;
-	offsets.x_14_18 = (offsets.x_2_5 - sizes.linewidth)/2 + 0.875*sizes.linewidth;
-	offsets.x_15_19 = offsets.x_14_18 + (0.25 * sizes.linewidth);
-	offsets.x_13_17 = offsets.x_2_5 - (0.25 *  sizes.linewidth); 
-	offsets.y_0 = -offsets.x_0_3_6;
-	offsets.y_3 = 0.25*sizes.linewidth + sizes.bar_length;
-	offsets.y_4_5 = offsets.y_3 + 1.25*sizes.linewidth;
-	offsets.y_6 = offsets.y_4_5 + offsets.y_3;
-	offsets.y_14_15_22_23 = offsets.x_15_19 - 1.25 * sizes.linewidth;
-	offsets.y_18_19_26_27 = offsets.y_4_5 + offsets.y_14_15_22_23;
+	digit_offsets.digit_x_delta = 5.5*sizes.linewidth;
+	digit_offsets.x_0_3_6 = 1.25*sizes.linewidth;
+	digit_offsets.x_2_5 = 4*sizes.linewidth;
+	digit_offsets.x_7_9_11 = digit_offsets.x_2_5 + digit_offsets.x_0_3_6;
+	digit_offsets.x_8_10 = 2 * digit_offsets.x_2_5;
+	digit_offsets.x_14_18 = (digit_offsets.x_2_5 - sizes.linewidth)/2 + 0.875*sizes.linewidth;
+	digit_offsets.x_15_19 = digit_offsets.x_14_18 + (0.25 * sizes.linewidth);
+	digit_offsets.x_13_17 = digit_offsets.x_2_5 - (0.25 *  sizes.linewidth); 
+	digit_offsets.y_0 = -digit_offsets.x_0_3_6;
+	digit_offsets.y_3 = 0.25*sizes.linewidth + sizes.bar_length;
+	digit_offsets.y_4_5 = digit_offsets.y_3 + 1.25*sizes.linewidth;
+	digit_offsets.y_6 = digit_offsets.y_4_5 + digit_offsets.y_3;
+	digit_offsets.y_14_15_22_23 = digit_offsets.x_15_19 - 1.25 * sizes.linewidth;
+	digit_offsets.y_18_19_26_27 = digit_offsets.y_4_5 + digit_offsets.y_14_15_22_23;
 	return TRUE;
 }
 
@@ -355,88 +362,88 @@ bar positions:
 	switch(bar)
 	{
 		case 0:
-			draw_horizontal_bar(cr, x + offsets.x_0_3_6, y + offsets.y_0);
+			draw_horizontal_bar(cr, x + digit_offsets.x_0_3_6, y + digit_offsets.y_0);
 			break;
 		case 1:
 			draw_vertical_bar(cr, x , y);
 			break;
 		case 2:
-			draw_vertical_bar(cr, x + offsets.x_2_5, y);
+			draw_vertical_bar(cr, x + digit_offsets.x_2_5, y);
 			break;
 		case 3:
-			draw_horizontal_bar(cr, x + offsets.x_0_3_6, y + offsets.y_3);
+			draw_horizontal_bar(cr, x + digit_offsets.x_0_3_6, y + digit_offsets.y_3);
 			break;
 		case 4:
-			draw_vertical_bar(cr, x, y + offsets.y_4_5);
+			draw_vertical_bar(cr, x, y + digit_offsets.y_4_5);
 			break;
 		case 5:
-			draw_vertical_bar(cr, x + offsets.x_2_5, y + offsets.y_4_5);
+			draw_vertical_bar(cr, x + digit_offsets.x_2_5, y + digit_offsets.y_4_5);
 			break;
 		case 6:
-			draw_horizontal_bar(cr, x + offsets.x_0_3_6, y + offsets.y_6);
+			draw_horizontal_bar(cr, x + digit_offsets.x_0_3_6, y + digit_offsets.y_6);
 			break;
 		case 7:
-			draw_horizontal_bar(cr, x + offsets.x_0_3_6 + offsets.x_2_5, y + offsets.y_6);
+			draw_horizontal_bar(cr, x + digit_offsets.x_0_3_6 + digit_offsets.x_2_5, y + digit_offsets.y_6);
 			break;
 		case 8:
-			draw_horizontal_bar(cr, x + offsets.x_0_3_6 + offsets.x_2_5, y + offsets.y_6);
+			draw_horizontal_bar(cr, x + digit_offsets.x_0_3_6 + digit_offsets.x_2_5, y + digit_offsets.y_6);
 			break;
 		case 9:
-			draw_horizontal_bar(cr, x + offsets.x_0_3_6 + offsets.x_2_5, y + offsets.y_6);
+			draw_horizontal_bar(cr, x + digit_offsets.x_0_3_6 + digit_offsets.x_2_5, y + digit_offsets.y_6);
 			break;
 		case 10:
-			draw_horizontal_bar(cr, x + offsets.x_0_3_6 + offsets.x_2_5, y + offsets.y_6);
+			draw_horizontal_bar(cr, x + digit_offsets.x_0_3_6 + digit_offsets.x_2_5, y + digit_offsets.y_6);
 			break;
 		case 11:
-			draw_horizontal_bar(cr, x + offsets.x_0_3_6 + offsets.x_2_5, y + offsets.y_6);
+			draw_horizontal_bar(cr, x + digit_offsets.x_0_3_6 + digit_offsets.x_2_5, y + digit_offsets.y_6);
 			break;
 		case 12:
-			draw_diagonal_bar_left(cr, x + offsets.x_0_3_6, y);
+			draw_diagonal_bar_left(cr, x + digit_offsets.x_0_3_6, y);
 			break;
 		case 13:
-			draw_diagonal_bar_right(cr, x + offsets.x_13_17, y);
+			draw_diagonal_bar_right(cr, x + digit_offsets.x_13_17, y);
 			break;
 		case 14:
-			draw_diagonal_bar_right(cr, x + offsets.x_14_18, y + offsets.y_14_15_22_23);
+			draw_diagonal_bar_right(cr, x + digit_offsets.x_14_18, y + digit_offsets.y_14_15_22_23);
 			break;
 		case 15:
-			draw_diagonal_bar_left(cr, x + offsets.x_15_19, y + offsets.y_14_15_22_23);
+			draw_diagonal_bar_left(cr, x + digit_offsets.x_15_19, y + digit_offsets.y_14_15_22_23);
 			break;
 		case 16:
-			draw_diagonal_bar_left(cr, x + offsets.x_0_3_6, y + offsets.y_4_5);
+			draw_diagonal_bar_left(cr, x + digit_offsets.x_0_3_6, y + digit_offsets.y_4_5);
 			break;
 		case 17:
-			draw_diagonal_bar_right(cr, x + offsets.x_13_17, y + offsets.y_4_5);
+			draw_diagonal_bar_right(cr, x + digit_offsets.x_13_17, y + digit_offsets.y_4_5);
 			break;
 		case 18:
-			draw_diagonal_bar_right(cr, x + offsets.x_14_18, y + offsets.y_18_19_26_27);
+			draw_diagonal_bar_right(cr, x + digit_offsets.x_14_18, y + digit_offsets.y_18_19_26_27);
 			break;
 		case 19:
-			draw_diagonal_bar_left(cr, x + offsets.x_15_19, y + offsets.y_18_19_26_27);
+			draw_diagonal_bar_left(cr, x + digit_offsets.x_15_19, y + digit_offsets.y_18_19_26_27);
 			break;
 		case 20:
-			draw_diagonal_bar_left(cr, x + offsets.x_0_3_6 + offsets.x_2_5, y);
+			draw_diagonal_bar_left(cr, x + digit_offsets.x_0_3_6 + digit_offsets.x_2_5, y);
 			break;
 		case 21:
-			draw_diagonal_bar_right(cr, x + offsets.x_13_17 + offsets.x_2_5, y);
+			draw_diagonal_bar_right(cr, x + digit_offsets.x_13_17 + digit_offsets.x_2_5, y);
 			break;
 		case 22:
-			draw_diagonal_bar_right(cr, x + offsets.x_14_18 + offsets.x_2_5, y + offsets.y_14_15_22_23);
+			draw_diagonal_bar_right(cr, x + digit_offsets.x_14_18 + digit_offsets.x_2_5, y + digit_offsets.y_14_15_22_23);
 			break;
 		case 23:
-			draw_diagonal_bar_left(cr, x + offsets.x_15_19 + offsets.x_2_5, y + offsets.y_14_15_22_23);
+			draw_diagonal_bar_left(cr, x + digit_offsets.x_15_19 + digit_offsets.x_2_5, y + digit_offsets.y_14_15_22_23);
 			break;
 		case 24:
-			draw_diagonal_bar_left(cr, x + offsets.x_0_3_6 + offsets.x_2_5, y + offsets.y_4_5);
+			draw_diagonal_bar_left(cr, x + digit_offsets.x_0_3_6 + digit_offsets.x_2_5, y + digit_offsets.y_4_5);
 			break;
 		case 25:
-			draw_diagonal_bar_right(cr, x + offsets.x_13_17 + offsets.x_2_5, y + offsets.y_4_5);
+			draw_diagonal_bar_right(cr, x + digit_offsets.x_13_17 + digit_offsets.x_2_5, y + digit_offsets.y_4_5);
 			break;
 		case 26:
-			draw_diagonal_bar_right(cr, x + offsets.x_14_18 + offsets.x_2_5, y + offsets.y_18_19_26_27);
+			draw_diagonal_bar_right(cr, x + digit_offsets.x_14_18 + digit_offsets.x_2_5, y + digit_offsets.y_18_19_26_27);
 			break;
 		case 27:
-			draw_diagonal_bar_left(cr, x + offsets.x_15_19 + offsets.x_2_5, y + offsets.y_18_19_26_27);
+			draw_diagonal_bar_left(cr, x + digit_offsets.x_15_19 + digit_offsets.x_2_5, y + digit_offsets.y_18_19_26_27);
 			break;
 	default:
 			g_warning("Sorry sir, but I have no knowledge of bar number %d", bar);
@@ -490,8 +497,8 @@ static gboolean hour_on_expose_event(GtkWidget *widget, GdkEventExpose *event, g
 
 	cairo_set_line_width(cr, 0);
 
-	draw_digit(cr, hours.first_digit, 0, -offsets.y_0);
-	draw_digit(cr, hours.second_digit, offsets.x_delta + 0.5*sizes.linewidth, -offsets.y_0);
+	draw_digit(cr, hours.first_digit, 0, -digit_offsets.y_0);
+	draw_digit(cr, hours.second_digit, digit_offsets.digit_x_delta + 0.5*sizes.linewidth, -digit_offsets.y_0);
 
 	cairo_stroke (cr);
 	cairo_destroy(cr);
@@ -519,8 +526,8 @@ static gboolean colon_on_expose_event(GtkWidget *widget, GdkEventExpose *event, 
 
 		cairo_set_line_width(cr, 0);
 
-  	cairo_rectangle(cr, 0.25*sizes.linewidth, offsets.y_3 - sizes.linewidth - offsets.y_0, sizes.linewidth, sizes.linewidth);
-  	cairo_rectangle(cr, 0.25*sizes.linewidth, offsets.y_4_5 - offsets.y_0, sizes.linewidth, sizes.linewidth);
+  	cairo_rectangle(cr, 0.25*sizes.linewidth, digit_offsets.y_3 - sizes.linewidth - digit_offsets.y_0, sizes.linewidth, sizes.linewidth);
+  	cairo_rectangle(cr, 0.25*sizes.linewidth, digit_offsets.y_4_5 - digit_offsets.y_0, sizes.linewidth, sizes.linewidth);
 
 		cairo_fill (cr);
 		cairo_destroy(cr);
@@ -551,8 +558,8 @@ static gboolean minute_on_expose_event(GtkWidget *widget, GdkEventExpose *event,
 
 	cairo_set_line_width(cr, 0);
 
-	draw_digit(cr, minutes.first_digit, 0, -offsets.y_0);
-	draw_digit(cr, minutes.second_digit, offsets.x_delta + 0.5*sizes.linewidth, -offsets.y_0);
+	draw_digit(cr, minutes.first_digit, 0, -digit_offsets.y_0);
+	draw_digit(cr, minutes.second_digit, digit_offsets.digit_x_delta + 0.5*sizes.linewidth, -digit_offsets.y_0);
 
 	cairo_stroke (cr);
 	cairo_destroy(cr);
@@ -577,8 +584,8 @@ static gboolean date_on_expose_event(GtkWidget *widget, GdkEventExpose *event, g
 
 	cairo_set_line_width(cr, 0);
 
-	draw_letter(cr, date.day_first_letter, 0, -offsets.y_0);
-	draw_letter(cr, date.day_second_letter, offsets.x_delta, -offsets.y_0);
+	draw_letter(cr, date.day_first_letter, 0, -letter_offsets.y_0);
+	draw_letter(cr, date.day_second_letter, letter_offsets.digit_x_delta, -letter_offsets.y_0);
 
 	cairo_stroke (cr);
 	cairo_destroy(cr);
