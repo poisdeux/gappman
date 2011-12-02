@@ -7,7 +7,6 @@
  *
  * Authors:
  *   Martijn Brekhof <m.brekhof@gmail.com>
- * \bug hor_bar_length != vert_bar_length. Shouldn't we make these equal?
  */
 
 #include <gtk/gtk.h>
@@ -54,21 +53,23 @@ struct _date {
  * \struct _sizes
  * \brief holds all widths and heights needed to draw the clock
  */
-static struct _sizes {
+struct sizes {
 	gdouble w_width; ///< width of the window in which the clock will be drawn
 	gdouble w_height; ///< height of the window in which the clock will be drawn
 	gdouble linewidth; ///< default sizes.linewidth for horizontal and vertical bars
 	gdouble bar_length; ///< length of the bar excluding the top and bottom of the bar
 	gdouble triangle_side_length; ///< length of the left and right sides of the triangles at the ends of the bar
-} sizes;
+};
+
+struct sizes sizes_calendar;
+struct sizes sizes_clock;
 
 /**
  * \struct _offsets
- * \brief holds all offsets for drawing horizontal and vertical bars in a digit. See diagrams calendar-diagram.dia and digits-diagram.dia for explanation
+ * \brief holds all offsets for drawing horizontal and vertical bars in a digit or letter. See diagrams calendar-diagram.dia and digits-diagram.dia for explanation
  */
-static struct _letter_offsets {
-  gdouble digit_x_delta;
-  gdouble letter_x_delta;
+struct offsets {
+  gdouble x_delta;
 	gdouble x_0_3_6;
 	gdouble x_2_5;
 	gdouble x_7_9_11;
@@ -82,30 +83,10 @@ static struct _letter_offsets {
 	gdouble y_6; 
 	gdouble y_14_15_22_23;
 	gdouble y_18_19_26_27;
-} letter_offsets;
+};
 
-
-/**
- * \struct _offsets
- * \brief holds all offsets for drawing horizontal and vertical bars in a digit. See diagrams calendar-diagram.dia and digits-diagram.dia for explanation
- */
-static struct _digit_offsets {
-  gdouble digit_x_delta;
-  gdouble letter_x_delta;
-	gdouble x_0_3_6;
-	gdouble x_2_5;
-	gdouble x_7_9_11;
-	gdouble x_8_10;
-	gdouble x_14_18;
-	gdouble x_13_17;
-	gdouble x_15_19;
-	gdouble y_0;
-	gdouble y_3; 
-	gdouble y_4_5; 
-	gdouble y_6; 
-	gdouble y_14_15_22_23;
-	gdouble y_18_19_26_27;
-} digit_offsets;
+struct offsets offsets_calendar;
+struct offsets offsets_clock;
 
 ///< double array to specify which bars should be drawn to display a specific number
 static gint digits_bars_on_off[10][7] = {
@@ -168,29 +149,31 @@ static gboolean calculate_offsets_calendar(GtkWidget *widget, GdkEventConfigure 
 {
 	//see calendar-diagram.dia to make sense out of these numbers
 
-	sizes.linewidth = sizes.w_width/83.5;
+	sizes_calendar.linewidth = sizes_calendar.w_width/83.5;
+	
+	sizes_calendar.w_height = 9 * sizes_calendar.linewidth;
 
-	gtk_widget_set_size_request (date_window, sizes.w_width, sizes.w_height*0.3);
+	gtk_widget_set_size_request (date_window, sizes_calendar.w_width, sizes_calendar.w_height);
 
 	//compensate for triangles at endpoints of the
   //digit-bars (see draw_horizontal_bar or draw_vertical_bar)
-	sizes.bar_length =  2.5 * sizes.linewidth;
-	sizes.triangle_side_length = sqrt((0.25 * sizes.linewidth * sizes.linewidth) + (0.25 * sizes.linewidth * sizes.linewidth));
+	sizes_calendar.bar_length =  2.5 * sizes_calendar.linewidth;
+	sizes_calendar.triangle_side_length = sqrt((0.25 * sizes_calendar.linewidth * sizes_calendar.linewidth) + (0.25 * sizes_calendar.linewidth * sizes_calendar.linewidth));
 
-	letter_offsets.letter_x_delta = 9.5*sizes.linewidth;
-	letter_offsets.x_0_3_6 = 1.25*sizes.linewidth;
-	letter_offsets.x_2_5 = 4*sizes.linewidth;
-	letter_offsets.x_7_9_11 = digit_offsets.x_2_5 + digit_offsets.x_0_3_6;
-	letter_offsets.x_8_10 = 2 * digit_offsets.x_2_5;
-	letter_offsets.x_14_18 = (digit_offsets.x_2_5 - sizes.linewidth)/2 + 0.875*sizes.linewidth;
-	letter_offsets.x_15_19 = digit_offsets.x_14_18 + (0.25 * sizes.linewidth);
-	letter_offsets.x_13_17 = digit_offsets.x_2_5 - (0.25 *  sizes.linewidth); 
-	letter_offsets.y_0 = -digit_offsets.x_0_3_6;
-	letter_offsets.y_3 = 0.25*sizes.linewidth + sizes.bar_length;
-	letter_offsets.y_4_5 = digit_offsets.y_3 + 1.25*sizes.linewidth;
-	letter_offsets.y_6 = digit_offsets.y_4_5 + digit_offsets.y_3;
-	letter_offsets.y_14_15_22_23 = digit_offsets.x_15_19 - 1.25 * sizes.linewidth;
-	letter_offsets.y_18_19_26_27 = digit_offsets.y_4_5 + digit_offsets.y_14_15_22_23;
+	offsets_calendar.x_delta = 9.5*sizes_calendar.linewidth;
+	offsets_calendar.x_0_3_6 = 1.25*sizes_calendar.linewidth;
+	offsets_calendar.x_2_5 = 4*sizes_calendar.linewidth;
+	offsets_calendar.x_7_9_11 = offsets_calendar.x_2_5 + offsets_calendar.x_0_3_6;
+	offsets_calendar.x_8_10 = 2 * offsets_calendar.x_2_5;
+	offsets_calendar.x_14_18 = (offsets_calendar.x_2_5 - sizes_calendar.linewidth)/2 + 0.875*sizes_calendar.linewidth;
+	offsets_calendar.x_15_19 = offsets_calendar.x_14_18 + (0.25 * sizes_calendar.linewidth);
+	offsets_calendar.x_13_17 = offsets_calendar.x_2_5 - (0.25 *  sizes_calendar.linewidth); 
+	offsets_calendar.y_0 = -offsets_calendar.x_0_3_6;
+	offsets_calendar.y_3 = 0.25*sizes_calendar.linewidth + sizes_calendar.bar_length;
+	offsets_calendar.y_4_5 = offsets_calendar.y_3 + 1.25*sizes_calendar.linewidth;
+	offsets_calendar.y_6 = offsets_calendar.y_4_5 + offsets_calendar.y_3;
+	offsets_calendar.y_14_15_22_23 = offsets_calendar.x_15_19 - 1.25 * sizes_calendar.linewidth;
+	offsets_calendar.y_18_19_26_27 = offsets_calendar.y_4_5 + offsets_calendar.y_14_15_22_23;
 	return TRUE;
 }
 
@@ -206,90 +189,90 @@ static gboolean calculate_offsets_clock(GtkWidget *widget, GdkEventConfigure *ev
 	//width is 4 * x_delta + columnwidth = 23.5 * linewidth
   //as we only get the width from gappman we calculate from
   //that the required linewidth.
-	sizes.linewidth = sizes.w_width/23.5;
+	sizes_clock.linewidth = sizes_clock.w_width/23.5;
 
-	colon_width = 1.5*sizes.linewidth;
+	sizes_clock.w_height = 9 * sizes_clock.linewidth;
 
-	digit_width = (sizes.w_width - colon_width)/4;
-  digit_height = sizes.w_height * 0.7;
+	colon_width = 1.5*sizes_clock.linewidth;
+
+	digit_width = (sizes_clock.w_width - colon_width)/4;
+  digit_height = sizes_clock.w_height;
 	
 	gtk_widget_set_size_request (hour_window, digit_width * 2, digit_height);
 	gtk_widget_set_size_request (colon_window, colon_width, digit_height);
 	gtk_widget_set_size_request (minute_window, digit_width * 2, digit_height);
-	gtk_widget_set_size_request (date_window, sizes.w_width, digit_height*0.3);
-	gtk_widget_set_size_request (main_window, sizes.w_width, sizes.w_height);
 
 	//compensate for triangles at endpoints of the
   //digit-bars (see draw_horizontal_bar or draw_vertical_bar)
-	sizes.bar_length =  2.5 * sizes.linewidth;
-	sizes.triangle_side_length = sqrt((0.25 * sizes.linewidth * sizes.linewidth) + (0.25 * sizes.linewidth * sizes.linewidth));
+	sizes_clock.bar_length =  2.5 * sizes_clock.linewidth;
+	sizes_clock.triangle_side_length = sqrt((0.25 * sizes_clock.linewidth * sizes_clock.linewidth) + (0.25 * sizes_clock.linewidth * sizes_clock.linewidth));
 
-	digit_offsets.digit_x_delta = 5.5*sizes.linewidth;
-	digit_offsets.x_0_3_6 = 1.25*sizes.linewidth;
-	digit_offsets.x_2_5 = 4*sizes.linewidth;
-	digit_offsets.x_7_9_11 = digit_offsets.x_2_5 + digit_offsets.x_0_3_6;
-	digit_offsets.x_8_10 = 2 * digit_offsets.x_2_5;
-	digit_offsets.x_14_18 = (digit_offsets.x_2_5 - sizes.linewidth)/2 + 0.875*sizes.linewidth;
-	digit_offsets.x_15_19 = digit_offsets.x_14_18 + (0.25 * sizes.linewidth);
-	digit_offsets.x_13_17 = digit_offsets.x_2_5 - (0.25 *  sizes.linewidth); 
-	digit_offsets.y_0 = -digit_offsets.x_0_3_6;
-	digit_offsets.y_3 = 0.25*sizes.linewidth + sizes.bar_length;
-	digit_offsets.y_4_5 = digit_offsets.y_3 + 1.25*sizes.linewidth;
-	digit_offsets.y_6 = digit_offsets.y_4_5 + digit_offsets.y_3;
-	digit_offsets.y_14_15_22_23 = digit_offsets.x_15_19 - 1.25 * sizes.linewidth;
-	digit_offsets.y_18_19_26_27 = digit_offsets.y_4_5 + digit_offsets.y_14_15_22_23;
+	offsets_clock.x_delta = 5.5*sizes_clock.linewidth;
+	offsets_clock.x_0_3_6 = 1.25*sizes_clock.linewidth;
+	offsets_clock.x_2_5 = 4*sizes_clock.linewidth;
+	offsets_clock.x_7_9_11 = offsets_clock.x_2_5 + offsets_clock.x_0_3_6;
+	offsets_clock.x_8_10 = 2 * offsets_clock.x_2_5;
+	offsets_clock.x_14_18 = (offsets_clock.x_2_5 - sizes_clock.linewidth)/2 + 0.875*sizes_clock.linewidth;
+	offsets_clock.x_15_19 = offsets_clock.x_14_18 + (0.25 * sizes_clock.linewidth);
+	offsets_clock.x_13_17 = offsets_clock.x_2_5 - (0.25 *  sizes_clock.linewidth); 
+	offsets_clock.y_0 = -offsets_clock.x_0_3_6;
+	offsets_clock.y_3 = 0.25*sizes_clock.linewidth + sizes_clock.bar_length;
+	offsets_clock.y_4_5 = offsets_clock.y_3 + 1.25*sizes_clock.linewidth;
+	offsets_clock.y_6 = offsets_clock.y_4_5 + offsets_clock.y_3;
+	offsets_clock.y_14_15_22_23 = offsets_clock.x_15_19 - 1.25 * sizes_clock.linewidth;
+	offsets_clock.y_18_19_26_27 = offsets_clock.y_4_5 + offsets_clock.y_14_15_22_23;
 	return TRUE;
 }
 
-static gboolean draw_diagonal_bar_left(cairo_t *cr, gdouble x, gdouble y)
+static gboolean draw_diagonal_bar_left(cairo_t *cr, struct sizes s, gdouble x, gdouble y)
 {
 	//draw left triangle
 	cairo_move_to(cr, x, y);
 
 	//draw left vertical line
-	cairo_rel_line_to(cr, 0, sizes.triangle_side_length);
+	cairo_rel_line_to(cr, 0, s.triangle_side_length);
 
 	//draw bottom line rectangle
-	cairo_rel_line_to (cr, 0.37 * sizes.linewidth, 0.37 * sizes.linewidth);
+	cairo_rel_line_to (cr, 0.37 * s.linewidth, 0.37 * s.linewidth);
 
   //draw bottom horizontal line
-	cairo_rel_line_to(cr, sizes.triangle_side_length, 0);
+	cairo_rel_line_to(cr, s.triangle_side_length, 0);
 
 	//draw right vertical line
-	cairo_rel_line_to(cr, 0, -sizes.triangle_side_length);
+	cairo_rel_line_to(cr, 0, -s.triangle_side_length);
 
 	//draw top line rectangle
-	cairo_rel_line_to (cr, -0.37 * sizes.linewidth, -0.37 * sizes.linewidth);
+	cairo_rel_line_to (cr, -0.37 * s.linewidth, -0.37 * s.linewidth);
 
 	//draw top horizontal line
-	cairo_rel_line_to(cr, -sizes.triangle_side_length, 0);
+	cairo_rel_line_to(cr, -s.triangle_side_length, 0);
 
 	cairo_close_path(cr);
 	cairo_set_line_join (cr, CAIRO_LINE_JOIN_ROUND);
 	cairo_fill(cr);
 }
 
-static gboolean draw_diagonal_bar_right(cairo_t *cr, gdouble x, gdouble y)
+static gboolean draw_diagonal_bar_right(cairo_t *cr, struct sizes s, gdouble x, gdouble y)
 {
 	//draw left triangle
 	cairo_move_to(cr, x, y);
 
-	cairo_rel_line_to(cr, 0, sizes.triangle_side_length);
+	cairo_rel_line_to(cr, 0, s.triangle_side_length);
 
 	//draw bottom line rectangle
-	cairo_rel_line_to (cr, -0.37 * sizes.linewidth, 0.37 * sizes.linewidth);
+	cairo_rel_line_to (cr, -0.37 * s.linewidth, 0.37 * s.linewidth);
 
 	//draw bottom horizontal line
-	cairo_rel_line_to(cr, -sizes.triangle_side_length, 0);
+	cairo_rel_line_to(cr, -s.triangle_side_length, 0);
 
 	//draw right vertical line
-	cairo_rel_line_to(cr, 0, -sizes.triangle_side_length);
+	cairo_rel_line_to(cr, 0, -s.triangle_side_length);
 
 	//draw top line rectangle
-	cairo_rel_line_to (cr, 0.37 * sizes.linewidth, -0.37 * sizes.linewidth);
+	cairo_rel_line_to (cr, 0.37 * s.linewidth, -0.37 * s.linewidth);
 
 	//draw top horizontal line
-	cairo_rel_line_to(cr, sizes.triangle_side_length, 0);
+	cairo_rel_line_to(cr, s.triangle_side_length, 0);
 
 	cairo_close_path(cr);
 
@@ -297,10 +280,10 @@ static gboolean draw_diagonal_bar_right(cairo_t *cr, gdouble x, gdouble y)
 	cairo_fill(cr);
 }
 
-static gboolean draw_horizontal_bar(cairo_t *cr, gdouble x, gdouble y)
+static gboolean draw_horizontal_bar(cairo_t *cr, struct sizes s, gdouble x, gdouble y)
 {
 
-	gdouble halflinewidth = (sizes.linewidth)/2.0;
+	gdouble halflinewidth = (s.linewidth)/2.0;
 
 	//draw left triangle
 	cairo_move_to(cr, x, y);
@@ -309,10 +292,10 @@ static gboolean draw_horizontal_bar(cairo_t *cr, gdouble x, gdouble y)
 	cairo_close_path(cr);
 
 	//draw vertical line
-	cairo_rectangle(cr, x, y, sizes.bar_length, sizes.linewidth);
+	cairo_rectangle(cr, x, y, s.bar_length, s.linewidth);
 
 	//draw right triangle
-	cairo_move_to(cr, x+sizes.bar_length, y);
+	cairo_move_to(cr, x+s.bar_length, y);
 	cairo_rel_line_to(cr, halflinewidth, halflinewidth);
 	cairo_rel_line_to(cr, -halflinewidth, halflinewidth);
 	cairo_close_path(cr);
@@ -322,10 +305,10 @@ static gboolean draw_horizontal_bar(cairo_t *cr, gdouble x, gdouble y)
 }
 
 
-static gboolean draw_vertical_bar(cairo_t *cr, gdouble x, gdouble y)
+static gboolean draw_vertical_bar(cairo_t *cr, struct sizes s, gdouble x, gdouble y)
 {
 
-	double halflinewidth = sizes.linewidth/2;
+	double halflinewidth = s.linewidth/2;
 
 	//draw top triangle
 	cairo_move_to(cr, x, y);
@@ -334,10 +317,10 @@ static gboolean draw_vertical_bar(cairo_t *cr, gdouble x, gdouble y)
 	cairo_close_path(cr);
 
 	//draw vertical line
-	cairo_rectangle(cr, x, y, sizes.linewidth, sizes.bar_length);
+	cairo_rectangle(cr, x, y, s.linewidth, s.bar_length);
 
 	//draw bottom triangle
-	cairo_move_to(cr, x, y+sizes.bar_length);
+	cairo_move_to(cr, x, y+s.bar_length);
 	cairo_rel_line_to(cr, halflinewidth, halflinewidth);
 	cairo_rel_line_to(cr, halflinewidth, -halflinewidth);
 	cairo_close_path(cr);
@@ -346,7 +329,7 @@ static gboolean draw_vertical_bar(cairo_t *cr, gdouble x, gdouble y)
 	cairo_fill(cr);
 }
 
-static void draw_bar(cairo_t *cr, int bar, gdouble x, gdouble y)
+static void draw_bar(cairo_t *cr, struct sizes s, struct offsets o, int bar, gdouble x, gdouble y)
 {
 /*
 bar positions:
@@ -362,88 +345,88 @@ bar positions:
 	switch(bar)
 	{
 		case 0:
-			draw_horizontal_bar(cr, x + digit_offsets.x_0_3_6, y + digit_offsets.y_0);
+			draw_horizontal_bar(cr, s, x + o.x_0_3_6, y + o.y_0);
 			break;
 		case 1:
-			draw_vertical_bar(cr, x , y);
+			draw_vertical_bar(cr, s, x , y);
 			break;
 		case 2:
-			draw_vertical_bar(cr, x + digit_offsets.x_2_5, y);
+			draw_vertical_bar(cr, s, x + o.x_2_5, y);
 			break;
 		case 3:
-			draw_horizontal_bar(cr, x + digit_offsets.x_0_3_6, y + digit_offsets.y_3);
+			draw_horizontal_bar(cr, s, x + o.x_0_3_6, y + o.y_3);
 			break;
 		case 4:
-			draw_vertical_bar(cr, x, y + digit_offsets.y_4_5);
+			draw_vertical_bar(cr, s, x, y + o.y_4_5);
 			break;
 		case 5:
-			draw_vertical_bar(cr, x + digit_offsets.x_2_5, y + digit_offsets.y_4_5);
+			draw_vertical_bar(cr, s, x + o.x_2_5, y + o.y_4_5);
 			break;
 		case 6:
-			draw_horizontal_bar(cr, x + digit_offsets.x_0_3_6, y + digit_offsets.y_6);
+			draw_horizontal_bar(cr, s, x + o.x_0_3_6, y + o.y_6);
 			break;
 		case 7:
-			draw_horizontal_bar(cr, x + digit_offsets.x_0_3_6 + digit_offsets.x_2_5, y + digit_offsets.y_6);
+			draw_horizontal_bar(cr, s, x + o.x_0_3_6 + o.x_2_5, y + o.y_6);
 			break;
 		case 8:
-			draw_horizontal_bar(cr, x + digit_offsets.x_0_3_6 + digit_offsets.x_2_5, y + digit_offsets.y_6);
+			draw_horizontal_bar(cr, s, x + o.x_0_3_6 + o.x_2_5, y + o.y_6);
 			break;
 		case 9:
-			draw_horizontal_bar(cr, x + digit_offsets.x_0_3_6 + digit_offsets.x_2_5, y + digit_offsets.y_6);
+			draw_horizontal_bar(cr, s, x + o.x_0_3_6 + o.x_2_5, y + o.y_6);
 			break;
 		case 10:
-			draw_horizontal_bar(cr, x + digit_offsets.x_0_3_6 + digit_offsets.x_2_5, y + digit_offsets.y_6);
+			draw_horizontal_bar(cr, s, x + o.x_0_3_6 + o.x_2_5, y + o.y_6);
 			break;
 		case 11:
-			draw_horizontal_bar(cr, x + digit_offsets.x_0_3_6 + digit_offsets.x_2_5, y + digit_offsets.y_6);
+			draw_horizontal_bar(cr, s, x + o.x_0_3_6 + o.x_2_5, y + o.y_6);
 			break;
 		case 12:
-			draw_diagonal_bar_left(cr, x + digit_offsets.x_0_3_6, y);
+			draw_diagonal_bar_left(cr, s, x + o.x_0_3_6, y);
 			break;
 		case 13:
-			draw_diagonal_bar_right(cr, x + digit_offsets.x_13_17, y);
+			draw_diagonal_bar_right(cr, s, x + o.x_13_17, y);
 			break;
 		case 14:
-			draw_diagonal_bar_right(cr, x + digit_offsets.x_14_18, y + digit_offsets.y_14_15_22_23);
+			draw_diagonal_bar_right(cr, s, x + o.x_14_18, y + o.y_14_15_22_23);
 			break;
 		case 15:
-			draw_diagonal_bar_left(cr, x + digit_offsets.x_15_19, y + digit_offsets.y_14_15_22_23);
+			draw_diagonal_bar_left(cr, s, x + o.x_15_19, y + o.y_14_15_22_23);
 			break;
 		case 16:
-			draw_diagonal_bar_left(cr, x + digit_offsets.x_0_3_6, y + digit_offsets.y_4_5);
+			draw_diagonal_bar_left(cr, s, x + o.x_0_3_6, y + o.y_4_5);
 			break;
 		case 17:
-			draw_diagonal_bar_right(cr, x + digit_offsets.x_13_17, y + digit_offsets.y_4_5);
+			draw_diagonal_bar_right(cr, s, x + o.x_13_17, y + o.y_4_5);
 			break;
 		case 18:
-			draw_diagonal_bar_right(cr, x + digit_offsets.x_14_18, y + digit_offsets.y_18_19_26_27);
+			draw_diagonal_bar_right(cr, s, x + o.x_14_18, y + o.y_18_19_26_27);
 			break;
 		case 19:
-			draw_diagonal_bar_left(cr, x + digit_offsets.x_15_19, y + digit_offsets.y_18_19_26_27);
+			draw_diagonal_bar_left(cr, s, x + o.x_15_19, y + o.y_18_19_26_27);
 			break;
 		case 20:
-			draw_diagonal_bar_left(cr, x + digit_offsets.x_0_3_6 + digit_offsets.x_2_5, y);
+			draw_diagonal_bar_left(cr, s, x + o.x_0_3_6 + o.x_2_5, y);
 			break;
 		case 21:
-			draw_diagonal_bar_right(cr, x + digit_offsets.x_13_17 + digit_offsets.x_2_5, y);
+			draw_diagonal_bar_right(cr, s, x + o.x_13_17 + o.x_2_5, y);
 			break;
 		case 22:
-			draw_diagonal_bar_right(cr, x + digit_offsets.x_14_18 + digit_offsets.x_2_5, y + digit_offsets.y_14_15_22_23);
+			draw_diagonal_bar_right(cr, s, x + o.x_14_18 + o.x_2_5, y + o.y_14_15_22_23);
 			break;
 		case 23:
-			draw_diagonal_bar_left(cr, x + digit_offsets.x_15_19 + digit_offsets.x_2_5, y + digit_offsets.y_14_15_22_23);
+			draw_diagonal_bar_left(cr, s, x + o.x_15_19 + o.x_2_5, y + o.y_14_15_22_23);
 			break;
 		case 24:
-			draw_diagonal_bar_left(cr, x + digit_offsets.x_0_3_6 + digit_offsets.x_2_5, y + digit_offsets.y_4_5);
+			draw_diagonal_bar_left(cr, s, x + o.x_0_3_6 + o.x_2_5, y + o.y_4_5);
 			break;
 		case 25:
-			draw_diagonal_bar_right(cr, x + digit_offsets.x_13_17 + digit_offsets.x_2_5, y + digit_offsets.y_4_5);
+			draw_diagonal_bar_right(cr, s, x + o.x_13_17 + o.x_2_5, y + o.y_4_5);
 			break;
 		case 26:
-			draw_diagonal_bar_right(cr, x + digit_offsets.x_14_18 + digit_offsets.x_2_5, y + digit_offsets.y_18_19_26_27);
+			draw_diagonal_bar_right(cr, s, x + o.x_14_18 + o.x_2_5, y + o.y_18_19_26_27);
 			break;
 		case 27:
-			draw_diagonal_bar_left(cr, x + digit_offsets.x_15_19 + digit_offsets.x_2_5, y + digit_offsets.y_18_19_26_27);
+			draw_diagonal_bar_left(cr, s, x + o.x_15_19 + o.x_2_5, y + o.y_18_19_26_27);
 			break;
 	default:
 			g_warning("Sorry sir, but I have no knowledge of bar number %d", bar);
@@ -459,7 +442,7 @@ static draw_digit(cairo_t *cr, int digit, gdouble x_offset, gdouble y_offset)
 	{
 		if( digits_bars_on_off[digit][i] == 1 )
 		{
-			draw_bar(cr, i, x_offset, y_offset);
+			draw_bar(cr, sizes_clock, offsets_clock, i, x_offset, y_offset);
 		}
 	}  
 }
@@ -476,7 +459,7 @@ static draw_letter(cairo_t *cr, int letter, gdouble x_offset, gdouble y_offset)
 			break;
 		}
 		g_debug("letter %d drawing bar %d", letter, i);
-		draw_bar(cr, bar, x_offset, y_offset);
+		draw_bar(cr, sizes_calendar, offsets_calendar, bar, x_offset, y_offset);
 	}
 }
 
@@ -497,8 +480,8 @@ static gboolean hour_on_expose_event(GtkWidget *widget, GdkEventExpose *event, g
 
 	cairo_set_line_width(cr, 0);
 
-	draw_digit(cr, hours.first_digit, 0, -digit_offsets.y_0);
-	draw_digit(cr, hours.second_digit, digit_offsets.digit_x_delta + 0.5*sizes.linewidth, -digit_offsets.y_0);
+	draw_digit(cr, hours.first_digit, 0, -offsets_clock.y_0);
+	draw_digit(cr, hours.second_digit, offsets_clock.x_delta + 0.5*sizes_clock.linewidth, -offsets_clock.y_0);
 
 	cairo_stroke (cr);
 	cairo_destroy(cr);
@@ -526,8 +509,8 @@ static gboolean colon_on_expose_event(GtkWidget *widget, GdkEventExpose *event, 
 
 		cairo_set_line_width(cr, 0);
 
-  	cairo_rectangle(cr, 0.25*sizes.linewidth, digit_offsets.y_3 - sizes.linewidth - digit_offsets.y_0, sizes.linewidth, sizes.linewidth);
-  	cairo_rectangle(cr, 0.25*sizes.linewidth, digit_offsets.y_4_5 - digit_offsets.y_0, sizes.linewidth, sizes.linewidth);
+  	cairo_rectangle(cr, 0.25*sizes_clock.linewidth, offsets_clock.y_3 - sizes_clock.linewidth - offsets_clock.y_0, sizes_clock.linewidth, sizes_clock.linewidth);
+  	cairo_rectangle(cr, 0.25*sizes_clock.linewidth, offsets_clock.y_4_5 - offsets_clock.y_0, sizes_clock.linewidth, sizes_clock.linewidth);
 
 		cairo_fill (cr);
 		cairo_destroy(cr);
@@ -558,8 +541,8 @@ static gboolean minute_on_expose_event(GtkWidget *widget, GdkEventExpose *event,
 
 	cairo_set_line_width(cr, 0);
 
-	draw_digit(cr, minutes.first_digit, 0, -digit_offsets.y_0);
-	draw_digit(cr, minutes.second_digit, digit_offsets.digit_x_delta + 0.5*sizes.linewidth, -digit_offsets.y_0);
+	draw_digit(cr, minutes.first_digit, 0, -offsets_clock.y_0);
+	draw_digit(cr, minutes.second_digit, offsets_clock.x_delta + 0.5*sizes_clock.linewidth, -offsets_clock.y_0);
 
 	cairo_stroke (cr);
 	cairo_destroy(cr);
@@ -584,8 +567,8 @@ static gboolean date_on_expose_event(GtkWidget *widget, GdkEventExpose *event, g
 
 	cairo_set_line_width(cr, 0);
 
-	draw_letter(cr, date.day_first_letter, 0, -letter_offsets.y_0);
-	draw_letter(cr, date.day_second_letter, letter_offsets.digit_x_delta, -letter_offsets.y_0);
+	draw_letter(cr, date.day_first_letter, 0, -offsets_calendar.y_0);
+	draw_letter(cr, date.day_second_letter, offsets_calendar.x_delta, -offsets_calendar.y_0);
 
 	cairo_stroke (cr);
 	cairo_destroy(cr);
@@ -751,6 +734,8 @@ G_MODULE_EXPORT GtkWidget* gm_module_get_widget()
 */
 G_MODULE_EXPORT void gm_module_set_icon_size(int width, int height)
 {
-	sizes.w_width = width;
-	sizes.w_height = height;
+	sizes_clock.w_width = width;
+	sizes_clock.w_height = height;
+	sizes_calendar.w_width = width;
+	sizes_calendar.w_height = height;
 }
