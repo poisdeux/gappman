@@ -13,6 +13,7 @@
 #include <gm_generic.h>
 #include <sys/time.h>
 #include <math.h>
+#include <string.h>
 
 static GtkWidget *main_window = NULL;
 static GtkWidget *hour_window = NULL;
@@ -69,7 +70,8 @@ struct sizes sizes_clock;
  * \brief holds all offsets for drawing horizontal and vertical bars in a digit or letter. See diagrams calendar-diagram.dia and digits-diagram.dia for explanation
  */
 struct offsets {
-  gdouble x_delta;
+  gdouble digit_x_delta;
+  gdouble letter_x_delta;
 	gdouble x_0_3_6;
 	gdouble x_2_5;
 	gdouble x_7_9_11;
@@ -160,7 +162,8 @@ static gboolean calculate_offsets_calendar(GtkWidget *widget, GdkEventConfigure 
 	sizes_calendar.bar_length =  2.5 * sizes_calendar.linewidth;
 	sizes_calendar.triangle_side_length = sqrt((0.25 * sizes_calendar.linewidth * sizes_calendar.linewidth) + (0.25 * sizes_calendar.linewidth * sizes_calendar.linewidth));
 
-	offsets_calendar.x_delta = 9.5*sizes_calendar.linewidth;
+	offsets_calendar.letter_x_delta = 9.5*sizes_calendar.linewidth;
+	offsets_calendar.digit_x_delta = 5.5*sizes_clock.linewidth;
 	offsets_calendar.x_0_3_6 = 1.25*sizes_calendar.linewidth;
 	offsets_calendar.x_2_5 = 4*sizes_calendar.linewidth;
 	offsets_calendar.x_7_9_11 = offsets_calendar.x_2_5 + offsets_calendar.x_0_3_6;
@@ -207,7 +210,7 @@ static gboolean calculate_offsets_clock(GtkWidget *widget, GdkEventConfigure *ev
 	sizes_clock.bar_length =  2.5 * sizes_clock.linewidth;
 	sizes_clock.triangle_side_length = sqrt((0.25 * sizes_clock.linewidth * sizes_clock.linewidth) + (0.25 * sizes_clock.linewidth * sizes_clock.linewidth));
 
-	offsets_clock.x_delta = 5.5*sizes_clock.linewidth;
+	offsets_clock.digit_x_delta = 5.5*sizes_clock.linewidth;
 	offsets_clock.x_0_3_6 = 1.25*sizes_clock.linewidth;
 	offsets_clock.x_2_5 = 4*sizes_clock.linewidth;
 	offsets_clock.x_7_9_11 = offsets_clock.x_2_5 + offsets_clock.x_0_3_6;
@@ -481,7 +484,7 @@ static gboolean hour_on_expose_event(GtkWidget *widget, GdkEventExpose *event, g
 	cairo_set_line_width(cr, 0);
 
 	draw_digit(cr, hours.first_digit, 0, -offsets_clock.y_0);
-	draw_digit(cr, hours.second_digit, offsets_clock.x_delta + 0.5*sizes_clock.linewidth, -offsets_clock.y_0);
+	draw_digit(cr, hours.second_digit, offsets_clock.digit_x_delta + 0.5*sizes_clock.linewidth, -offsets_clock.y_0);
 
 	cairo_stroke (cr);
 	cairo_destroy(cr);
@@ -542,7 +545,7 @@ static gboolean minute_on_expose_event(GtkWidget *widget, GdkEventExpose *event,
 	cairo_set_line_width(cr, 0);
 
 	draw_digit(cr, minutes.first_digit, 0, -offsets_clock.y_0);
-	draw_digit(cr, minutes.second_digit, offsets_clock.x_delta + 0.5*sizes_clock.linewidth, -offsets_clock.y_0);
+	draw_digit(cr, minutes.second_digit, offsets_clock.digit_x_delta + 0.5*sizes_clock.linewidth, -offsets_clock.y_0);
 
 	cairo_stroke (cr);
 	cairo_destroy(cr);
@@ -568,7 +571,15 @@ static gboolean date_on_expose_event(GtkWidget *widget, GdkEventExpose *event, g
 	cairo_set_line_width(cr, 0);
 
 	draw_letter(cr, date.day_first_letter, 0, -offsets_calendar.y_0);
-	draw_letter(cr, date.day_second_letter, offsets_calendar.x_delta, -offsets_calendar.y_0);
+	draw_letter(cr, date.day_second_letter, offsets_calendar.letter_x_delta, -offsets_calendar.y_0);
+
+	draw_digit(cr, date.day_of_month_first_digit, offsets_calendar.letter_x_delta*2 + 
+							sizes_calendar.linewidth, -offsets_calendar.y_0);
+	//draw_digit(cr, date.day_of_month_second_digit, offsets_calendar.letter_x_delta*2 + 
+//							sizes_calendar.linewidth + offsets_calendar.digit_x_delta, -offsets_calendar.y_0);
+
+	//draw_letter(cr, date.day_second_letter, offsets_calendar.letter_x_delta*2 + sizes_calendar.linewidth, 
+	//							-offsets_calendar.y_0);
 
 	cairo_stroke (cr);
 	cairo_destroy(cr);
@@ -644,7 +655,9 @@ G_MODULE_EXPORT int gm_module_init()
 {
 	time_t time_secs;
 	struct tm cur_time;
+	gint i;
 	gchar *datestring;
+	gchar *datestring_tokens;
 	GtkWidget *hbox;
 
 	main_window = gtk_vbox_new(FALSE, 0);
@@ -685,18 +698,36 @@ G_MODULE_EXPORT int gm_module_init()
 
 	datestring = ctime(&time_secs);
 	g_debug("Date: %s\n", datestring);
-	date.day_first_letter = convert_to_letterbars_number(tolower(datestring[0]));
-	date.day_second_letter = convert_to_letterbars_number(datestring[1]);
-	date.month_first_letter = convert_to_letterbars_number(tolower(datestring[4]));
-	date.month_second_letter = convert_to_letterbars_number(datestring[5]);
-	date.month_third_letter = convert_to_letterbars_number(datestring[6]);
+	i = 0;
+	datestring_tokens = strtok(datestring, " \t");
+	while ( datestring_tokens != NULL )
+	{
+		g_debug("TEST: %d datestring_tokens = %s", i, datestring_tokens); 	
+		if( i > 2 )
+			break;
 
-	// we assume this software will not last 7989 years
-	date.year_first_digit = cur_time.tm_year / 1000;
-	date.year_second_digit = cur_time.tm_year % 1000 / 100;
-	date.year_third_digit = cur_time.tm_year % 100 / 10;
-	date.year_fourth_digit = cur_time.tm_year % 10;
-
+		switch (i++) {
+			case 0:
+				date.day_first_letter = convert_to_letterbars_number(tolower(datestring_tokens[0]));
+				date.day_second_letter = convert_to_letterbars_number(datestring_tokens[1]);
+				break;
+			case 1:
+				date.month_first_letter = convert_to_letterbars_number(tolower(datestring_tokens[0]));
+				date.month_second_letter = convert_to_letterbars_number(datestring_tokens[1]);
+				date.month_third_letter = convert_to_letterbars_number(datestring_tokens[2]);
+				break;
+  		case 2:
+				date.day_of_month_first_digit = atoi(datestring_tokens[0]);
+				//date.day_of_month_second_digit = atoi(datestring_tokens[1]);
+				break;
+			}
+			datestring_tokens = strtok(NULL, " \t");
+		}
+		// we assume this software will not last 7989 years
+		date.year_first_digit = cur_time.tm_year / 1000;
+		date.year_second_digit = cur_time.tm_year % 1000 / 100;
+		date.year_third_digit = cur_time.tm_year % 100 / 10;
+		date.year_fourth_digit = cur_time.tm_year % 10;
 	return GM_SUCCESS;
 }
 
