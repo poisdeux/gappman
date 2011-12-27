@@ -1,38 +1,33 @@
+<?xml version="1.0"?>
 <appmanager>
   <actions width="20%" height="10%" align="top,left">
     <action>
       <name>Shutdown</name>
       <exec>@bindir@/gmshutdown</exec>
-	<arg>-c</arg>
-	<arg>applets/shutdown/xml-config-files/shutdown.xml</arg>
-	<arg>-r</arg>
-	<arg>gtk-config/gtkrc</arg>
-      <logo>./applets/shutdown/logos/shutdown.png</logo>
+      <arg>-c</arg>
+      <arg>@sysconfdir@/gappman/shutdown.xml</arg>
+      <logo>@datadir@/gappman/shutdown.png</logo>
     </action>
     <action>
       <name>Processmanager</name>
       <exec>@bindir@/gmprocessmanager</exec>
-	<arg>-c</arg>
-	<arg>xml-config-files/conf.xml</arg>
-	<arg>-r</arg>
-	<arg>gtk-config/gtkrc</arg>
-      <logo>./applets/processmanager/logos/clanbomber.png</logo>
+      <arg>-c</arg>
+      <arg>@sysconfdir@/gappman/conf.xml</arg>
+      <logo>@datadir@/gappman/clanbomber.png</logo>
     </action>
     <action>
       <name>Change resolution</name>
       <exec>@bindir@/gmchangeresolution</exec>
-	<arg>-c</arg>
-	<arg>xml-config-files/conf.xml</arg>
-	<arg>-r</arg>
-	<arg>gtk-config/gtkrc</arg>
-      <logo>./applets/changeresolution/logos/randr.png</logo>
+      <arg>-c</arg>
+      <arg>@sysconfdir@/gappman/conf.xml</arg>
+      <logo>@datadir@/gappman/randr.png</logo>
     </action>
   </actions>
-	<panel width="10%" height="10%" align="top,right">
-		<applet>
-			<name>Network manager</name>
-			<objectfile>./applets/netman/.libs/gm_netman.so</objectfile>
-			<conffile>./applets/netman/xml-config-files/netman.xml</conffile>
-		</applet>
+  <panel width="10%" height="10%" align="top,right">
+    <applet>
+      <name>Network manager</name>
+      <objectfile>@libdir@/gm_netman.so</objectfile>
+      <conffile>@sysconfdir@/gappman/netman.xml</conffile>
+    </applet>
   </panel>
 </appmanager>
