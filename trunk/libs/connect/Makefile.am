@@ -1,12 +1,12 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
 lib_LTLIBRARIES = libgm_connect.la
+include_HEADERS = gm_connect.h gm_connect-dbus.h gm_connect-socket.h gm_connect-generic.h
 libgm_connect_la_SOURCES = gm_connect.c gm_connect-generic.c
 if WITH_DBUS_SUPPORT
 libgm_connect_la_SOURCES += gm_connect-dbus.c
 else
 libgm_connect_la_SOURCES += gm_connect-socket.c
 endif
-include_HEADERS = gm_connect.h
 libgm_connect_la_CPPFLAGS = $(GTK_CFLAGS)
 if WITH_DBUS_SUPPORT
 libgm_connect_la_CPPFLAGS += $(DBUS_CFLAGS)

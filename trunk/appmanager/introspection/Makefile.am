@@ -1,1 +1,1 @@
-EXTRA_DIST = gm_appman.xml
+EXTRA_DIST = gm_appmanager.xml
