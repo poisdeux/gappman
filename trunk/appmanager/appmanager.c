@@ -37,6 +37,10 @@
 #include <gm_generic.h>
 #include "listener.h"
 
+#ifndef SYSCONFDIR
+#define SYSCONFDIR "/etc"
+#endif
+
 struct appwidgetinfo *started_apps;	// /< holds the currently started apps
 menu_elements *programs;		// /< list of all programs gappman manages.
 								// Currently only programs need to be global
@@ -415,7 +419,9 @@ int main(int argc, char **argv)
 	GtkWidget *vbox;
 	menu_elements *actions;
 	menu_elements *panel;
-	const char *conffile = SYSCONFDIR "/conf.xml";
+	const char *conffile = g_strconcat(SYSCONFDIR, "/gappman/conf.xml", NULL);
+
+	g_debug("%s", conffile);
 	int c;
 
 	// Needs to be called before any another glib function

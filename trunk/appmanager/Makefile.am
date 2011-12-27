@@ -26,10 +26,14 @@ gappman_LDADD += $(GLIB_LIBS)
 gappman_LDADD += $(GTHREAD_LIBS)
 gappman_LDADD += $(GTK_LIBS)
 gappman_LDADD += $(LIBXML_LIBS)
-gappmandir = $(top_builddir)/src
+gappmandir = $(top_builddir)/appmanager
+
+gappmanconfdir = $(sysconfdir)/gappman
+gappmanconf_DATA = etc/gappman/conf.xml
 
 BUILT_SOURCES = gm_listener_glue.h
 
 gm_listener_glue.h: introspection/gm_appmanager.xml
 	dbus-binding-tool --prefix=gm_appmanager --mode=glib-server --output=$@ $<
 
+EXTRA_DIST = $(srcdir)/etc

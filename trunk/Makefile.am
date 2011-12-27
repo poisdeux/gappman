@@ -26,6 +26,7 @@ dist-hook:
 	find $(distdir) -depth \( -name "*~" -o -name ".svn" \) -exec rm -rf {} \;
 
 deb:
+	cp ../gappman-$(PACKAGE_VERSION).tar.gz ../gappman_$(PACKAGE_VERSION).orig.tar.gz
 	cd debian
 	debuild -us -uc
 
