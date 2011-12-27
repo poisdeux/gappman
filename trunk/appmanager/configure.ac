@@ -73,7 +73,8 @@ AC_FUNC_REALLOC
 #AC_CHECK_FUNCS([gethostbyname localtime_r memset pow socket sqrt strndup strspn strstr])
 
 AC_CONFIG_FILES([Makefile
-								 introspection/Makefile])
+								 introspection/Makefile
+								 etc/gappman/Makefile])
 AC_OUTPUT
 
 echo \
