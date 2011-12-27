@@ -1,0 +1,16 @@
+Source: gappman
+Maintainer: Martijn Brekhof <m.brekhof@gmail.com>
+Section: misc
+Priority: optional
+Standards-Version: 3.9.1
+Build-Depends: debhelper (>= 7.3.8)
+
+Package: gappman
+Architecture: i386
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Graphical Application Manager
+	GAppMan is a simple application manager to start and stop applications
+	and perform some simple system maintenance. GAppMan's focus is on heterogeneous
+	environments where systems may be controlled using different HID and display
+	resolutions and sizes vary considerably. GAppMan manages the GUI autonomously
+	trying to provide a nice GUI no matter the display size and/or resolution.
