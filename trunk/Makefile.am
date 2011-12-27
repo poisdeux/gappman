@@ -25,3 +25,8 @@ EXTRA_DIST = $(srcdir)/gtk-config/gtkrc $(srcdir)/xml-config-files/*.xml $(srcdi
 dist-hook:
 	find $(distdir) -depth \( -name "*~" -o -name ".svn" \) -exec rm -rf {} \;
 
+deb:
+	make dist
+	mv gappman-$(PACKAGE_VERSION).tar.gz debian/gappman_$(PACKAGE_VERSION).orig.tar.gz
+	cd debian
+	debuild -us -uc
