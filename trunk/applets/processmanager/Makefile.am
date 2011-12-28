@@ -9,3 +9,4 @@ gmprocessmanager_LDADD = @GM_OBJS@
 gmprocessmanager_LDADD += $(GTK_LIBS)
 gmprocessmanager_LDADD += $(LIBXML_LIBS)
 
+data_DATA = logos/*.png

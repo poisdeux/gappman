@@ -38,7 +38,7 @@
 #include "listener.h"
 
 #ifndef SYSCONFDIR
-#define SYSCONFDIR "/etc"
+#define SYSCONFDIR "/etc/gappman"
 #endif
 
 struct appwidgetinfo *started_apps;	// /< holds the currently started apps
@@ -419,7 +419,7 @@ int main(int argc, char **argv)
 	GtkWidget *vbox;
 	menu_elements *actions;
 	menu_elements *panel;
-	const char *conffile = g_strconcat(SYSCONFDIR, "/gappman/conf.xml", NULL);
+	const char *conffile = g_strconcat(SYSCONFDIR, "/conf.xml", NULL);
 
 	g_debug("%s", conffile);
 	int c;

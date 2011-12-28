@@ -32,5 +32,3 @@ BUILT_SOURCES = gm_listener_glue.h
 
 gm_listener_glue.h: introspection/gm_appmanager.xml
 	dbus-binding-tool --prefix=gm_appmanager --mode=glib-server --output=$@ $<
-
-EXTRA_DIST = $(srcdir)/etc
