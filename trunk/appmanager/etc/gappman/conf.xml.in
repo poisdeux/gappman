@@ -6,7 +6,7 @@
       <exec>@bindir@/gmshutdown</exec>
       <arg>-c</arg>
       <arg>@sysconfdir@/shutdown.xml</arg>
-      <logo>@datadir@/gappman/shutdown.png</logo>
+      <logo>@datadir@/shutdown.png</logo>
     </action>
     <action>
       <name>Processmanager</name>

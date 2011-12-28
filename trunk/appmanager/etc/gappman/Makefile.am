@@ -10,4 +10,4 @@ edit = sed -e 's|@bindir[@]|$(bindir)|g' \
 conf.xml: conf.xml.in Makefile
 	$(edit) $(srcdir)/$@.in > $@
 
-CLEANFILES = gappman/conf.xml
+CLEANFILES = conf.xml
