@@ -46,7 +46,8 @@ AC_CONFIG_FILES([Makefile
                  changeresolution/Makefile
                  netman/Makefile
                  processmanager/Makefile
-                 shutdown/Makefile])
+                 shutdown/Makefile
+								 shutdown/xml-config-files/Makefile])
 AC_OUTPUT
 
 echo \

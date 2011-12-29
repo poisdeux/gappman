@@ -1,4 +1,5 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
+SUBDIRS = xml-config-files
 EXTRA_DIST = $(srcdir)/xml-config-files/shutdown.xml.in $(srcdir)/logos/*.png
 bin_PROGRAMS = gmshutdown
 gmshutdown_SOURCES = main.c

@@ -19,6 +19,37 @@ m4
 config.h
 .deps
 .libs
+*/missing
+missing
+autom4te.cache
+config.guess
+config.status
+config.sub
+*/aclocal.m4
+*/config.h.in
+*/connect/libgm_connect.pc
+*/depcomp
+*/install-sh
+*/libtool
+*/ltmain.sh
+*/network/
+*/stamp-h1
+*/ltmain.sh
+aclocal.m4
+config.h.in
+connect/libgm_connect.pc
+depcomp
+install-sh
+libtool
+ltmain.sh
+network/
+stamp-h1
+ltmain.sh
+
+# vi #
+######
+*~
+*/*~
 
 # Packages #
 ############
