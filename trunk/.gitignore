@@ -12,6 +12,7 @@
 *.in
 Makefile
 configure
+Doxyfile
 
 # autotools #
 #############
@@ -42,9 +43,9 @@ depcomp
 install-sh
 libtool
 ltmain.sh
-network/
 stamp-h1
 ltmain.sh
+compile
 
 # vi #
 ######

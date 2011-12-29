@@ -1,0 +1,25 @@
+# Defaults for gappman initscript
+# sourced by /etc/init.d/gappman
+# installed at /etc/default/gappman by the maintainer scripts
+
+#
+# This is a POSIX shell fragment
+#
+
+# Uncomment to enable gappman
+ENABLE="yes"
+
+# Uncomment to use a window manager 
+WM_DAEMON="/usr/bin/metacity"
+
+# Should GAppMan start a display manager?
+START_DM=1
+
+# Mandatory if START_X != 0
+DM_DAEMON="/usr/bin/Xorg"
+
+# Additional options that are passed to the Daemon.
+DAEMON_OPTS=""
+
+# GTK theme. Leave empty to use default
+GTK2_RC_FILES="/etc/gappman/gtkrc"

@@ -20,6 +20,7 @@ endif
 SUBDIRS = $(LIBSDIR) $(GAPPMANDIR) $(APPLETSDIR) $(DOXYDIR)
 
 dist_doc_DATA = README ChangeLog COPYING
+dist_sysconf_DATA = gtk-config/gtkrc
 EXTRA_DIST = $(srcdir)/gtk-config/gtkrc $(srcdir)/xml-config-files/*.xml $(srcdir)/logos/*.png $(srcdir)/ChangeLog $(srcdir)/debian
 
 dist-hook:
