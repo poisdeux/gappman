@@ -1,4 +1,5 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
+SUBDIRS = xml-config-files
 EXTRA_DIST = $(srcdir)/xml-config-files/netman.xml 
 EXTRA_DIST += $(srcdir)/logos
 noinst_HEADERS = nm_parseconf.h

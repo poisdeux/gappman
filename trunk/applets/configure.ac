@@ -45,6 +45,7 @@ AC_CHECK_FUNCS([gethostbyname localtime_r memset pow socket sqrt strndup strspn 
 AC_CONFIG_FILES([Makefile
                  changeresolution/Makefile
                  netman/Makefile
+                 netman/xml-config-files/Makefile
                  processmanager/Makefile
                  shutdown/Makefile
 								 shutdown/xml-config-files/Makefile])
