@@ -157,7 +157,7 @@ Maintenance/update releases should be tested on the branch and result in a
 
 3. Create the tarball as follows:
 
-  make dist
+	make && make dist
 
 4. Test if the tarball builds
 
@@ -167,9 +167,13 @@ Maintenance/update releases should be tested on the branch and result in a
   cd gappman-*
   ./configure
   make
-  ./src/gappman --conffile xml-config-files/conf.xml --windowed
+  ./appmanager/gappman --conffile xml-config-files/conf.xml --windowed
 
-5. If step 4 was succesfule you may upload the tarball to the website.
+5. If step 4 was succesful you may upload the tarball to the website.
+
+6. Optionally create a debian package as follows:
+
+  make deb
 
 -----------------------------------------------------------------------------
 6. Checking the code
