@@ -4,15 +4,15 @@
     <action>
       <name>Shutdown</name>
       <printlabel>1</printlabel>
-      <exec>ngc</exec>
-      <arg>-0</arg>
+      <exec>shutdown</exec>
+			<arg>-h</arg>
       <logo>@datadir@/system-shutdown.png</logo>
     </action>
     <action>
       <name>Reboot</name>
       <printlabel>1</printlabel>
-      <exec>ngc</exec>
-      <arg>-6</arg>
+      <exec>shutdown</exec>
+			<arg>-r</arg>
       <logo>@datadir@/system-restart.png</logo>
     </action>
     <action>
