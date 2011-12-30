@@ -37,12 +37,8 @@
 #define SYSCONFDIR "/etc/gappman"
 #endif
 
-struct appwidgetinfo *started_apps;	// /< holds the currently started apps
-menu_elements *programs;		// /< list of all programs gappman manages.
-								// Currently only programs need to be global
-								// as only programs have meta-info that can be 
-								// updated. E.g. resolution updates for a
-								// specific program. 
+static struct process_info *started_apps;      ///< holds the currently started apps
+static gm_menu *programs;              ///< list of all programs gappman manages.
 
 static struct metadata *config; ///< holds the configuration data used by gappman
 
