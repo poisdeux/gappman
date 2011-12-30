@@ -8,3 +8,5 @@ gmchangeresolution_CPPFLAGS += @GM_INCLUDES@
 gmchangeresolution_LDADD = @GM_OBJS@
 gmchangeresolution_LDADD += $(GTK_LIBS) 
 gmchangeresolution_LDADD += $(LIBXML_LIBS)
+
+data_DATA = logos/randr.png

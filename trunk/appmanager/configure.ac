@@ -85,7 +85,8 @@ This adds additional code.
 AC_DEFINE([DEBUG], 1, [debug code enabled]))
 
 AC_CONFIG_FILES([Makefile
-								 introspection/Makefile])
+								 introspection/Makefile
+								 etc/gappman/Makefile])
 AC_OUTPUT
 
 echo \

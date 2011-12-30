@@ -20,13 +20,13 @@ endif
 SUBDIRS = $(LIBSDIR) $(GAPPMANDIR) $(APPLETSDIR) $(DOXYDIR)
 
 dist_doc_DATA = README ChangeLog COPYING
-EXTRA_DIST = $(srcdir)/gtk-config/gtkrc $(srcdir)/xml-config-files/*.xml $(srcdir)/logos/*.png $(srcdir)/ChangeLog $(srcdir)/tests
+dist_sysconf_DATA = gtk-config/gtkrc
+EXTRA_DIST = $(srcdir)/gtk-config/gtkrc $(srcdir)/xml-config-files/*.xml $(srcdir)/logos/*.png $(srcdir)/ChangeLog $(srcdir)/debian $(srcdir)/tests
 
 dist-hook:
 	find $(distdir) -depth \( -name "*~" -o -name ".svn" \) -exec rm -rf {} \;
 
 deb:
-	make dist
-	mv gappman-$(PACKAGE_VERSION).tar.gz debian/gappman_$(PACKAGE_VERSION).orig.tar.gz
+	cp ../gappman-$(PACKAGE_VERSION).tar.gz ../gappman_$(PACKAGE_VERSION).orig.tar.gz
 	cd debian
 	debuild -us -uc

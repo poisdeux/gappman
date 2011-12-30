@@ -4,24 +4,22 @@
     <action>
       <name>Shutdown</name>
       <exec>./applets/shutdown/gmshutdown</exec>
-      <arg>-c</arg>
-      <arg>applets/shutdown/xml-config-files/shutdown.xml</arg>
-      <arg>-r</arg>
-      <arg>gtk-config/gtkrc</arg>
+	<arg>-c</arg>
+	<arg>applets/shutdown/xml-config-files/shutdown.xml</arg>
       <logo>./applets/shutdown/logos/shutdown.png</logo>
     </action>
     <action>
       <name>Processmanager</name>
       <exec>./applets/processmanager/gmprocessmanager</exec>
-      <arg>-r</arg>
-      <arg>gtk-config/gtkrc</arg>
+	<arg>-c</arg>
+	<arg>xml-config-files/conf.xml</arg>
       <logo>./applets/processmanager/logos/clanbomber.png</logo>
     </action>
     <action>
       <name>Change resolution</name>
       <exec>./applets/changeresolution/gmchangeresolution</exec>
-      <arg>-r</arg>
-      <arg>gtk-config/gtkrc</arg>
+	<arg>-c</arg>
+	<arg>xml-config-files/conf.xml</arg>
       <logo>./applets/changeresolution/logos/randr.png</logo>
     </action>
   </actions>

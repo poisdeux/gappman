@@ -1,6 +1,12 @@
 #!/usr/bin/make -f
+build:
+	dh_testdir
+	./configure --prefix=/usr --sysconfdir=/etc/gappman --localstatedir=/var --datadir=/usr/share/gappman 
+	dh_auto_build
+	dh_auto_test
+
 %:
 	dh $@
 
 override_dh_auto_install:
-	$(MAKE) DESTDIR=$$(pwd)/debian/gappman prefix=/usr install
+	$(MAKE) DESTDIR=$$(pwd)/debian/gappman install

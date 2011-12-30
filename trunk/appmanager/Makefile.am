@@ -1,5 +1,5 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
-SUBDIRS = introspection
+SUBDIRS = introspection etc/gappman
 
 ACLOCAL_AMFLAGS = -I m4
 noinst_HEADERS = listener.h appmanager.h listener-dbus.h appmanager_panel.h appmanager_buttonmenu.h
@@ -26,10 +26,9 @@ gappman_LDADD += $(GLIB_LIBS)
 gappman_LDADD += $(GTHREAD_LIBS)
 gappman_LDADD += $(GTK_LIBS)
 gappman_LDADD += $(LIBXML_LIBS)
-gappmandir = $(top_builddir)/src
+gappmandir = $(top_builddir)/appmanager
 
 BUILT_SOURCES = gm_listener_glue.h
 
 gm_listener_glue.h: introspection/gm_appmanager.xml
 	dbus-binding-tool --prefix=gm_appmanager --mode=glib-server --output=$@ $<
-

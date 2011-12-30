@@ -1,5 +1,6 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
-EXTRA_DIST = $(srcdir)/xml-config-files/*.xml 
+SUBDIRS = xml-config-files
+EXTRA_DIST = $(srcdir)/xml-config-files/netman.xml 
 EXTRA_DIST += $(srcdir)/logos
 noinst_HEADERS = parseconf.h
 lib_LTLIBRARIES = gm_netman.la
@@ -13,3 +14,6 @@ gm_netman_la_LIBADD += $(GTK_LIBS)
 gm_netman_la_LIBADD += $(LIBXML_LIBS) 
 gm_netman_la_LIBADD += $(DBUS_LIBS) 
 gm_netman_la_LDFLAGS = -module -avoid-version
+
+data_DATA = logos/*.png
+sysconf_DATA = xml-config-files/netman.xml

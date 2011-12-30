@@ -7,7 +7,7 @@ Build-Depends: debhelper (>= 7.3.8)
 
 Package: gappman
 Architecture: i386
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, x-window-manager, xserver
 Description: Graphical Application Manager
 	GAppMan is a simple application manager to start and stop applications
 	and perform some simple system maintenance. GAppMan's focus is on heterogeneous

@@ -3,7 +3,6 @@
       specifies the maximum amount of elements which may reside in
       one box of the menu.
     * Added new applet called digitalclock (see applets/digitalclock)
-    
 		
 2011-02-15  Martijn Brekhof  <m.brekhof@gmail.com>
  	

@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<appmanager>
+  <actions width="20%" height="10%" align="top,left">
+    <action>
+      <name>Shutdown</name>
+      <exec>@bindir@/gmshutdown</exec>
+      <arg>-c</arg>
+      <arg>@sysconfdir@/shutdown.xml</arg>
+      <logo>@datadir@/shutdown.png</logo>
+    </action>
+    <action>
+      <name>Processmanager</name>
+      <exec>@bindir@/gmprocessmanager</exec>
+      <arg>-c</arg>
+      <arg>@sysconfdir@/conf.xml</arg>
+      <logo>@datadir@/clanbomber.png</logo>
+    </action>
+    <action>
+      <name>Change resolution</name>
+      <exec>@bindir@/gmchangeresolution</exec>
+      <arg>-c</arg>
+      <arg>@sysconfdir@/conf.xml</arg>
+      <logo>@datadir@/randr.png</logo>
+    </action>
+  </actions>
+  <panel width="10%" height="10%" align="top,right">
+    <applet>
+      <name>Network manager</name>
+      <objectfile>@libdir@/gm_netman.so</objectfile>
+      <conffile>@sysconfdir@/netman.xml</conffile>
+    </applet>
+  </panel>
+</appmanager>

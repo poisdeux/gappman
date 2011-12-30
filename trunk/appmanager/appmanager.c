@@ -33,8 +33,12 @@
 #include "appmanager_panel.h"
 #include "appmanager_buttonmenu.h"
 
-static struct process_info *started_apps;	///< holds the currently started apps
-static gm_menu *programs;		///< list of all programs gappman manages.
+#ifndef SYSCONFDIR
+#define SYSCONFDIR "/etc/gappman"
+#endif
+
+struct appwidgetinfo *started_apps;	// /< holds the currently started apps
+menu_elements *programs;		// /< list of all programs gappman manages.
 								// Currently only programs need to be global
 								// as only programs have meta-info that can be 
 								// updated. E.g. resolution updates for a
@@ -354,6 +358,7 @@ int main(int argc, char **argv)
 	gm_menu *panel;
 	gint c;
 	gint fontsize;
+	const char *conffile = g_strconcat(SYSCONFDIR, "/conf.xml", NULL);
 
 	// Needs to be called before any another glib function
 	if (!g_thread_supported())

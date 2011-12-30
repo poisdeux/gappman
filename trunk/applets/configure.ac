@@ -59,9 +59,11 @@ AC_DEFINE([DEBUG], 1, [debug code enabled]))
 AC_CONFIG_FILES([Makefile
                  changeresolution/Makefile
                  netman/Makefile
+                 netman/xml-config-files/Makefile
                  processmanager/Makefile
                  digitalclock/Makefile
-                 shutdown/Makefile])
+                 shutdown/Makefile
+								 shutdown/xml-config-files/Makefile])
 AC_OUTPUT
 
 echo \
