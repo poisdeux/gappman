@@ -1,3 +1,6 @@
+2011-12-30  Martijn Brekhof  <m.brekhof@gmail.com>
+    * Added support for creating a debian package
+      
 2010-11-15  Martijn Brekhof  <m.brekhof@gmail.com>
 		
     * Added new applet called netman (see applets/netman)
