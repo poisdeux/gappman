@@ -140,7 +140,6 @@ static void measure_time(int *prev_microseconds)
 	if(*prev_microseconds)
 	{
 		gettimeofday( &time_tv, NULL );
-		g_debug("Microseconds passed: %d", (int) time_tv.tv_usec - *prev_microseconds);
 		*prev_microseconds = (int) time_tv.tv_usec;
 	}	
 	gettimeofday( &time_tv, NULL );
@@ -163,7 +162,7 @@ static gboolean calculate_offsets_calendar(GtkWidget *widget, GdkEventConfigure 
 	sizes_calendar.triangle_side_length = sqrt((0.25 * sizes_calendar.linewidth * sizes_calendar.linewidth) + (0.25 * sizes_calendar.linewidth * sizes_calendar.linewidth));
 
 	offsets_calendar.letter_x_delta = 9.5*sizes_calendar.linewidth;
-	offsets_calendar.digit_x_delta = 5.5*sizes_clock.linewidth;
+	offsets_calendar.digit_x_delta = 5.5*sizes_calendar.linewidth;
 	offsets_calendar.x_0_3_6 = 1.25*sizes_calendar.linewidth;
 	offsets_calendar.x_2_5 = 4*sizes_calendar.linewidth;
 	offsets_calendar.x_7_9_11 = offsets_calendar.x_2_5 + offsets_calendar.x_0_3_6;
@@ -437,7 +436,7 @@ bar positions:
 	}
 }
 
-static draw_digit(cairo_t *cr, int digit, gdouble x_offset, gdouble y_offset)
+static draw_digit(cairo_t *cr, struct sizes *sizes_digit, struct offsets *offsets_digit, int digit, gdouble x_offset, gdouble y_offset)
 {
 	int i;
 
@@ -445,7 +444,7 @@ static draw_digit(cairo_t *cr, int digit, gdouble x_offset, gdouble y_offset)
 	{
 		if( digits_bars_on_off[digit][i] == 1 )
 		{
-			draw_bar(cr, sizes_clock, offsets_clock, i, x_offset, y_offset);
+			draw_bar(cr, *sizes_digit, *offsets_digit, i, x_offset, y_offset);
 		}
 	}  
 }
@@ -461,7 +460,6 @@ static draw_letter(cairo_t *cr, int letter, gdouble x_offset, gdouble y_offset)
 		{
 			break;
 		}
-		g_debug("letter %d drawing bar %d", letter, i);
 		draw_bar(cr, sizes_calendar, offsets_calendar, bar, x_offset, y_offset);
 	}
 }
@@ -483,8 +481,8 @@ static gboolean hour_on_expose_event(GtkWidget *widget, GdkEventExpose *event, g
 
 	cairo_set_line_width(cr, 0);
 
-	draw_digit(cr, hours.first_digit, 0, -offsets_clock.y_0);
-	draw_digit(cr, hours.second_digit, offsets_clock.digit_x_delta + 0.5*sizes_clock.linewidth, -offsets_clock.y_0);
+	draw_digit(cr, &sizes_clock, &offsets_clock, hours.first_digit, 0, -offsets_clock.y_0);
+	draw_digit(cr, &sizes_clock, &offsets_clock, hours.second_digit, offsets_clock.digit_x_delta + 0.5*sizes_clock.linewidth, -offsets_clock.y_0);
 
 	cairo_stroke (cr);
 	cairo_destroy(cr);
@@ -544,8 +542,8 @@ static gboolean minute_on_expose_event(GtkWidget *widget, GdkEventExpose *event,
 
 	cairo_set_line_width(cr, 0);
 
-	draw_digit(cr, minutes.first_digit, 0, -offsets_clock.y_0);
-	draw_digit(cr, minutes.second_digit, offsets_clock.digit_x_delta + 0.5*sizes_clock.linewidth, -offsets_clock.y_0);
+	draw_digit(cr, &sizes_clock, &offsets_clock, minutes.first_digit, 0, -offsets_clock.y_0);
+	draw_digit(cr, &sizes_clock, &offsets_clock, minutes.second_digit, offsets_clock.digit_x_delta + 0.5*sizes_clock.linewidth, -offsets_clock.y_0);
 
 	cairo_stroke (cr);
 	cairo_destroy(cr);
@@ -557,7 +555,7 @@ static gboolean date_on_expose_event(GtkWidget *widget, GdkEventExpose *event, g
 {
 	cairo_t *cr;
 	GtkStyle *rc_style;
-	gint time_passed = 0;
+	gint x_delta;
 
 	cr = gdk_cairo_create (widget->window);
 
@@ -570,17 +568,47 @@ static gboolean date_on_expose_event(GtkWidget *widget, GdkEventExpose *event, g
 
 	cairo_set_line_width(cr, 0);
 
-	draw_letter(cr, date.day_first_letter, 0, -offsets_calendar.y_0);
-	draw_letter(cr, date.day_second_letter, offsets_calendar.letter_x_delta, -offsets_calendar.y_0);
+	x_delta = 0;
+	
+	/**
+	*	draw day
+	*/
+	draw_letter(cr, date.day_first_letter, x_delta, -offsets_calendar.y_0);
+	x_delta = offsets_calendar.letter_x_delta;
+	draw_letter(cr, date.day_second_letter, x_delta, -offsets_calendar.y_0);
 
-	draw_digit(cr, date.day_of_month_first_digit, offsets_calendar.letter_x_delta*2 + 
-							sizes_calendar.linewidth, -offsets_calendar.y_0);
-	//draw_digit(cr, date.day_of_month_second_digit, offsets_calendar.letter_x_delta*2 + 
-//							sizes_calendar.linewidth + offsets_calendar.digit_x_delta, -offsets_calendar.y_0);
+	/**
+	*	draw day of month
+	*/
+	x_delta += offsets_calendar.letter_x_delta + sizes_calendar.linewidth;
+	draw_digit(cr, &sizes_calendar, &offsets_calendar, date.day_of_month_first_digit, x_delta, -offsets_calendar.y_0);
+	x_delta += offsets_calendar.digit_x_delta;
+	if( date.day_of_month_second_digit > -1  ) 
+	{
+		draw_digit(cr, &sizes_calendar, &offsets_calendar, date.day_of_month_second_digit, x_delta, -offsets_calendar.y_0);
+	}
 
-	//draw_letter(cr, date.day_second_letter, offsets_calendar.letter_x_delta*2 + sizes_calendar.linewidth, 
-	//							-offsets_calendar.y_0);
+	/**
+	*	draw month
+	*/
+	x_delta += offsets_calendar.digit_x_delta + sizes_calendar.linewidth;
+	draw_letter(cr, date.month_first_letter, x_delta, -offsets_calendar.y_0);
+	x_delta += offsets_calendar.letter_x_delta;
+	draw_letter(cr, date.month_second_letter, x_delta, -offsets_calendar.y_0);
+	x_delta += offsets_calendar.letter_x_delta;
+	draw_letter(cr, date.month_third_letter, x_delta, -offsets_calendar.y_0);
 
+	/**
+	*	draw year
+	*/
+	x_delta += offsets_calendar.letter_x_delta + sizes_calendar.linewidth;
+	draw_digit(cr, &sizes_calendar, &offsets_calendar, date.year_first_digit, x_delta, -offsets_calendar.y_0);
+	x_delta += offsets_calendar.digit_x_delta;
+	draw_digit(cr, &sizes_calendar, &offsets_calendar, date.year_second_digit, x_delta, -offsets_calendar.y_0);
+	x_delta += offsets_calendar.digit_x_delta;
+	draw_digit(cr, &sizes_calendar, &offsets_calendar, date.year_third_digit, x_delta, -offsets_calendar.y_0);
+	x_delta += offsets_calendar.digit_x_delta;
+	draw_digit(cr, &sizes_calendar, &offsets_calendar, date.year_fourth_digit, x_delta, -offsets_calendar.y_0);
 	cairo_stroke (cr);
 	cairo_destroy(cr);
 
@@ -656,11 +684,16 @@ G_MODULE_EXPORT int gm_module_init()
 	time_t time_secs;
 	struct tm cur_time;
 	gint i;
+	gint year;
 	gchar *datestring;
 	gchar *datestring_tokens;
 	GtkWidget *hbox;
 
-	main_window = gtk_vbox_new(FALSE, 0);
+	//sizes_calendar.w_height = 0.25*height;
+  //and digit height = 0.7 so we leave a 0.05% gap
+  //height*0.05 == (sizes_calendar.w_height*4)*0.05 ==
+  //sizes_calendar.w_height*0.2
+	main_window = gtk_vbox_new(FALSE, sizes_calendar.w_height*0.2);
 	hbox = gtk_hbox_new(FALSE, 0);
 
 	hour_window = gtk_drawing_area_new();
@@ -697,13 +730,11 @@ G_MODULE_EXPORT int gm_module_init()
 	minutes.second_digit = cur_time.tm_min % 10;
 
 	datestring = ctime(&time_secs);
-	g_debug("Date: %s\n", datestring);
 	i = 0;
 	datestring_tokens = strtok(datestring, " \t");
 	while ( datestring_tokens != NULL )
 	{
-		g_debug("TEST: %d datestring_tokens = %s", i, datestring_tokens); 	
-		if( i > 2 )
+		if( i > 3 )
 			break;
 
 		switch (i++) {
@@ -717,17 +748,26 @@ G_MODULE_EXPORT int gm_module_init()
 				date.month_third_letter = convert_to_letterbars_number(datestring_tokens[2]);
 				break;
   		case 2:
-				date.day_of_month_first_digit = atoi(datestring_tokens[0]);
-				//date.day_of_month_second_digit = atoi(datestring_tokens[1]);
+				if(strlen(datestring_tokens) > 1)
+				{
+					date.day_of_month_first_digit = atoi(datestring_tokens[0]);
+					date.day_of_month_second_digit = atoi(datestring_tokens[1]);
+				}
+				else
+				{
+					date.day_of_month_first_digit = atoi(datestring_tokens);
+					date.day_of_month_second_digit = -1;
+				}
 				break;
 			}
 			datestring_tokens = strtok(NULL, " \t");
 		}
 		// we assume this software will not last 7989 years
-		date.year_first_digit = cur_time.tm_year / 1000;
-		date.year_second_digit = cur_time.tm_year % 1000 / 100;
-		date.year_third_digit = cur_time.tm_year % 100 / 10;
-		date.year_fourth_digit = cur_time.tm_year % 10;
+		year = cur_time.tm_year + 1900;
+		date.year_first_digit = year / 1000;
+		date.year_second_digit = year % 1000 / 100;
+		date.year_third_digit = year % 100 / 10;
+		date.year_fourth_digit = year % 10;
 	return GM_SUCCESS;
 }
 
@@ -766,7 +806,7 @@ G_MODULE_EXPORT GtkWidget* gm_module_get_widget()
 G_MODULE_EXPORT void gm_module_set_icon_size(int width, int height)
 {
 	sizes_clock.w_width = width;
-	sizes_clock.w_height = height;
+	sizes_clock.w_height = 0.7*height;
 	sizes_calendar.w_width = width;
-	sizes_calendar.w_height = height;
+	sizes_calendar.w_height = 0.20*height;
 }

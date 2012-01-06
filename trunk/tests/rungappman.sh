@@ -9,5 +9,5 @@ fi
 [ ! -x ./tests/rungappman.sh ] && echo "Error: script must be executed from package toplevel directory as follows:
 ./tests/rungappman.sh" && exit 1
 
-GTK2_RC_FILES=./gtk-config/gtkrc ./appmanager/gappman --width $1 --height $2 --conffile xml-config-files/conf.xml
+GTK2_RC_FILES=./gtk-config/gtkrc ./appmanager/gappman --width $1 --height $2 --conffile xml-config-files/conf.xml --windowed
 [ $? -ne 0 ] && echo "Error: gappman failed to start" && exit 1
