@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include "gm_generic.h"
 
-#define MENU_ELTS_ARRAY_INCREMENT 5
+#define MENU_ELTS_ARRAY_INCREMENT 5 ///<
 
 void gm_menu_free(gm_menu *menu)
 {
