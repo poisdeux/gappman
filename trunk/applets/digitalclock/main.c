@@ -37,6 +37,7 @@ static struct digit_time hours;  ///< represents the current clock value for hou
 static struct digit_time minutes; ///< represents the current clock value for minutes
 
 struct _date {
+	gint day_of_month; ///< required to determine if date should be recalculated
 	gint day_first_letter;
 	gint day_second_letter;
 	gint day_of_month_first_digit;
@@ -120,7 +121,7 @@ static gint letters_bars_on_off[26][26] = {
 	{1, 4, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //12 l
 	{0, 1, 4, 2, 7, 8, 10, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //13 m
 	{0, 1, 2, 4, 5, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //14 n
-	{1, 1, 2, 4, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //15 o
+	{0, 1, 2, 4, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //15 o
 	{0, 1, 2, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //16 p
 	{0, 1, 2, 3, 5, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //17 q
 	{0, 1, 4, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //18 r
@@ -368,19 +369,19 @@ bar positions:
 			draw_horizontal_bar(cr, s, x + o.x_0_3_6, y + o.y_6);
 			break;
 		case 7:
-			draw_horizontal_bar(cr, s, x + o.x_0_3_6 + o.x_2_5, y + o.y_6);
+			draw_horizontal_bar(cr, s, x + o.x_7_9_11, y + o.y_0);
 			break;
 		case 8:
-			draw_horizontal_bar(cr, s, x + o.x_0_3_6 + o.x_2_5, y + o.y_6);
+			draw_vertical_bar(cr, s, x + o.x_8_10, y);
 			break;
 		case 9:
-			draw_horizontal_bar(cr, s, x + o.x_0_3_6 + o.x_2_5, y + o.y_6);
+			draw_horizontal_bar(cr, s, x + o.x_7_9_11, y + o.y_3);
 			break;
 		case 10:
-			draw_horizontal_bar(cr, s, x + o.x_0_3_6 + o.x_2_5, y + o.y_6);
+			draw_vertical_bar(cr, s, x + o.x_8_10, y + o.y_4_5);
 			break;
 		case 11:
-			draw_horizontal_bar(cr, s, x + o.x_0_3_6 + o.x_2_5, y + o.y_6);
+			draw_horizontal_bar(cr, s, x + o.x_7_9_11, y + o.y_6);
 			break;
 		case 12:
 			draw_diagonal_bar_left(cr, s, x + o.x_0_3_6, y);
@@ -615,12 +616,78 @@ static gboolean date_on_expose_event(GtkWidget *widget, GdkEventExpose *event, g
 	return TRUE;
 }
 
+/**
+* \brief converts a character to the correct arraynumber in letter_bars array
+* \return gint
+*/
+static gint convert_to_letterbars_number(gchar c)
+{
+	int number = (int) c - 'a';
+	if (number < 0 && number > 26)
+		return 0;
+	
+	return number;
+}
+
+static void update_date()
+{
+	int i = 0;
+	gchar *datestring_tokens;
+	gint year;
+	gint day;
+	time_t time_secs;
+	
+	time( &time_secs );
+
+	datestring_tokens = strtok(ctime(&time_secs), " \t");
+	while ( datestring_tokens != NULL )
+	{
+		g_debug("TOKEN: %s", datestring_tokens);
+		if( i > 4 )
+			break;
+
+		switch (i++) {
+			case 0:
+				date.day_first_letter = convert_to_letterbars_number(tolower(datestring_tokens[0]));
+				date.day_second_letter = convert_to_letterbars_number(datestring_tokens[1]);
+				break;
+			case 1:
+				date.month_first_letter = convert_to_letterbars_number(tolower(datestring_tokens[0]));
+				date.month_second_letter = convert_to_letterbars_number(datestring_tokens[1]);
+				date.month_third_letter = convert_to_letterbars_number(datestring_tokens[2]);
+				break;
+  		case 2:
+				day = atoi(datestring_tokens);
+				date.day_of_month = day;
+				if(strlen(datestring_tokens) > 1)
+				{
+					date.day_of_month_first_digit = day / 10;
+					date.day_of_month_second_digit = day % 10;
+				}
+				else
+				{
+					date.day_of_month_first_digit = day;
+					date.day_of_month_second_digit = -1;
+				}
+				break;
+			case 4:
+				year = atoi(datestring_tokens);
+				// we assume this software will not last 7989 years
+				date.year_first_digit = year / 1000;
+				date.year_second_digit = year % 1000 / 100;
+				date.year_third_digit = year % 100 / 10;
+				date.year_fourth_digit = year % 10;
+			}
+			datestring_tokens = strtok(NULL, " \t");
+		}
+}
 
 static gboolean update_time(gpointer data)
 {
 	GdkRegion *region;
 	time_t time_secs;
 	struct tm cur_time;
+	gchar* datestring;
 
 	time( &time_secs );
 	localtime_r (&time_secs, &cur_time);
@@ -653,6 +720,15 @@ static gboolean update_time(gpointer data)
  		gdk_region_destroy (region);
 	}
 
+	if ( date.day_of_month != cur_time.tm_mday ) 
+	{
+		update_date();
+		region = gdk_drawable_get_clip_region (date_window->window);
+ 		gdk_window_invalidate_region (date_window->window, region, TRUE);
+ 		gdk_window_process_updates (date_window->window, TRUE);
+ 		gdk_region_destroy (region);
+	}
+
 	region = gdk_drawable_get_clip_region (colon_window->window);
  	gdk_window_invalidate_region (colon_window->window, region, TRUE);
  	gdk_window_process_updates (colon_window->window, TRUE);
@@ -662,18 +738,7 @@ static gboolean update_time(gpointer data)
 
 
 
-/**
-* \brief converts a character to the correct arraynumber in letter_bars array
-* \return gint
-*/
-gint convert_to_letterbars_number(gchar c)
-{
-	int number = (int) c - 'a';
-	if (number < 0 && number > 26)
-		return 0;
-	
-	return number;
-}
+
 
 /**
 * \brief initializes the digital clock
@@ -683,10 +748,6 @@ G_MODULE_EXPORT int gm_module_init()
 {
 	time_t time_secs;
 	struct tm cur_time;
-	gint i;
-	gint year;
-	gchar *datestring;
-	gchar *datestring_tokens;
 	GtkWidget *hbox;
 
 	//sizes_calendar.w_height = 0.25*height;
@@ -729,45 +790,9 @@ G_MODULE_EXPORT int gm_module_init()
 	minutes.first_digit = cur_time.tm_min / 10;
 	minutes.second_digit = cur_time.tm_min % 10;
 
-	datestring = ctime(&time_secs);
-	i = 0;
-	datestring_tokens = strtok(datestring, " \t");
-	while ( datestring_tokens != NULL )
-	{
-		if( i > 3 )
-			break;
+	date.day_of_month = cur_time.tm_mday;
+	update_date();
 
-		switch (i++) {
-			case 0:
-				date.day_first_letter = convert_to_letterbars_number(tolower(datestring_tokens[0]));
-				date.day_second_letter = convert_to_letterbars_number(datestring_tokens[1]);
-				break;
-			case 1:
-				date.month_first_letter = convert_to_letterbars_number(tolower(datestring_tokens[0]));
-				date.month_second_letter = convert_to_letterbars_number(datestring_tokens[1]);
-				date.month_third_letter = convert_to_letterbars_number(datestring_tokens[2]);
-				break;
-  		case 2:
-				if(strlen(datestring_tokens) > 1)
-				{
-					date.day_of_month_first_digit = atoi(datestring_tokens[0]);
-					date.day_of_month_second_digit = atoi(datestring_tokens[1]);
-				}
-				else
-				{
-					date.day_of_month_first_digit = atoi(datestring_tokens);
-					date.day_of_month_second_digit = -1;
-				}
-				break;
-			}
-			datestring_tokens = strtok(NULL, " \t");
-		}
-		// we assume this software will not last 7989 years
-		year = cur_time.tm_year + 1900;
-		date.year_first_digit = year / 1000;
-		date.year_second_digit = year % 1000 / 100;
-		date.year_third_digit = year % 100 / 10;
-		date.year_fourth_digit = year % 10;
 	return GM_SUCCESS;
 }
 
