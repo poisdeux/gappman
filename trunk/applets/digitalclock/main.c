@@ -14,12 +14,18 @@
 #include <sys/time.h>
 #include <math.h>
 #include <string.h>
+#include "parseconf.h"
 
 static GtkWidget *main_window = NULL;
 static GtkWidget *hour_window = NULL;
 static GtkWidget *minute_window = NULL;
 static GtkWidget *colon_window = NULL;
 static GtkWidget *date_window = NULL;
+
+static const gchar *configuration_file;
+static gint show_date;
+static gint max_width;
+static gint max_height;
 
 static gint timeout_source_id = -1;
 
@@ -134,6 +140,8 @@ static gint letters_bars_on_off[26][26] = {
 	{1, 2, 3, 5, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //y
 	{0, 2, 3, 4, 6, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, //z
 };
+
+
 static void measure_time(int *prev_microseconds)
 {
 	struct timeval time_tv;
@@ -721,7 +729,7 @@ static gboolean update_time(gpointer data)
  		gdk_region_destroy (region);
 	}
 
-	if ( date.day_of_month != cur_time.tm_mday ) 
+	if ( show_date && (date.day_of_month != cur_time.tm_mday ) )
 	{
 		update_date();
 		region = gdk_drawable_get_clip_region (date_window->window);
@@ -751,6 +759,31 @@ G_MODULE_EXPORT int gm_module_init()
 	struct tm cur_time;
 	GtkWidget *hbox;
 
+	if ( load_conf( configuration_file ) == 0 )
+	{
+		show_date = get_show_date();
+	}
+	else
+	{
+		show_date = 0;
+	}
+
+	g_debug("show_date = %d", show_date);
+	if( show_date )
+	{
+		sizes_clock.w_width = max_width;
+		sizes_clock.w_height = 0.7*max_height;
+		sizes_calendar.w_width = max_width;
+		sizes_calendar.w_height = 0.20*max_height;
+	}
+	else
+	{
+		sizes_clock.w_width = max_width;
+		sizes_clock.w_height = max_height;
+		sizes_calendar.w_width = 0;
+		sizes_calendar.w_height = 0;
+	}
+
 	//sizes_calendar.w_height = 0.25*height;
   //and digit height = 0.7 so we leave a 0.05% gap
   //height*0.05 == (sizes_calendar.w_height*4)*0.05 ==
@@ -769,17 +802,11 @@ G_MODULE_EXPORT int gm_module_init()
 
 	gtk_container_add(GTK_CONTAINER(main_window), hbox);
 
-	date_window = gtk_drawing_area_new();
-	gtk_container_add(GTK_CONTAINER(main_window), date_window);
 
 	g_signal_connect(minute_window, "expose-event", G_CALLBACK(minute_on_expose_event), NULL);
 	g_signal_connect(hour_window, "expose-event", G_CALLBACK(hour_on_expose_event), NULL);
 	g_signal_connect(colon_window, "expose-event", G_CALLBACK(colon_on_expose_event), NULL);
-	g_signal_connect(date_window, "expose-event", G_CALLBACK(date_on_expose_event), NULL);
-
-	g_signal_connect(minute_window, "configure-event", G_CALLBACK(calculate_offsets_clock), NULL);
-	g_signal_connect(date_window, "configure-event", G_CALLBACK(calculate_offsets_calendar), NULL);
-
+	
 	time( &time_secs );
 	localtime_r (&time_secs, &cur_time);
 
@@ -791,8 +818,18 @@ G_MODULE_EXPORT int gm_module_init()
 	minutes.first_digit = cur_time.tm_min / 10;
 	minutes.second_digit = cur_time.tm_min % 10;
 
-	date.day_of_month = cur_time.tm_mday;
-	update_date();
+
+	g_signal_connect(minute_window, "configure-event", G_CALLBACK(calculate_offsets_clock), NULL);
+
+	if ( show_date )
+	{
+		date_window = gtk_drawing_area_new();
+		gtk_container_add(GTK_CONTAINER(main_window), date_window);
+		g_signal_connect(date_window, "expose-event", G_CALLBACK(date_on_expose_event), NULL);
+		g_signal_connect(date_window, "configure-event", G_CALLBACK(calculate_offsets_calendar), NULL);
+		date.day_of_month = 0;
+		update_date();
+	}
 
 	return GM_SUCCESS;
 }
@@ -831,8 +868,12 @@ G_MODULE_EXPORT GtkWidget* gm_module_get_widget()
 */
 G_MODULE_EXPORT void gm_module_set_icon_size(int width, int height)
 {
-	sizes_clock.w_width = width;
-	sizes_clock.w_height = 0.7*height;
-	sizes_calendar.w_width = width;
-	sizes_calendar.w_height = 0.20*height;
+	max_width = width;
+	max_height = height;
 }
+
+G_MODULE_EXPORT void gm_module_set_conffile(const char *filename)
+{
+	configuration_file = filename;
+}
+

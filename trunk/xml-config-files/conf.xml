@@ -68,6 +68,7 @@
     <applet>
       <name>Digital Clock</name>
       <objectfile>./applets/digitalclock/.libs/gm_digitalclock.so</objectfile>
+      <conffile>./applets/digitalclock/xml-config-files/digitalclock.xml</conffile>
     </applet>
   </panel>
 </appmanager>
