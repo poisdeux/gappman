@@ -33,7 +33,7 @@ config.sub
 */install-sh
 */libtool
 */ltmain.sh
-*/network/
+*/network/libgm_network.pc
 */stamp-h1
 */ltmain.sh
 aclocal.m4
