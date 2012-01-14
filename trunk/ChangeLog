@@ -1,3 +1,12 @@
+2012-01-14     Martijn Brekhof  <m.brekhof@gmail.com>
+    * Added date for digitalclock
+
+2011-12-30     Martijn Brekhof  <m.brekhof@gmail.com>
+
+    * Release v0.4.3
+    * Added debian directory for creating a .deb package
+    * Replaced configuration files with .in versions to make configuration dynamic
+
 2011-06-25  Martijn Brekhof  <m.brekhof@gmail.com>
     * Added max_elts attribute in gappman configuration file which
       specifies the maximum amount of elements which may reside in
