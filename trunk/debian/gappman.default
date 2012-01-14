@@ -7,7 +7,7 @@
 #
 
 # Uncomment to enable gappman
-ENABLE="yes"
+#ENABLE="yes"
 
 # Uncomment to use a window manager 
 WM_DAEMON="/usr/bin/metacity"

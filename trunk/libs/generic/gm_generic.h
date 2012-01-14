@@ -190,7 +190,7 @@ void gm_menu_free(gm_menu *menu);
 
 /**
 * \brief relinguishes the memory occupied by a menu_element
-* \param menu menu structure
+* \param elt gm_menu_element structure
 */
 void gm_menu_element_free(gm_menu_element *elt);
 
@@ -239,14 +239,14 @@ gchar *gm_menu_element_get_name(gm_menu_element *elt);
 
 /**
 * \brief sets the name of the gm_menu_element elt that is used for instance to set the label that will be displayed when printlabel is true
-* \param gchar string holding the labelname
+* \param name string holding the labelname
 * \param elt gm_menu_element
 */
 void gm_menu_element_set_name(gchar* name, gm_menu_element *elt);
 
 /**
 * \brief use this to specify if you want the name (label) to be shown in the user interface or not.
-* \param gboolean true if you want the label to be shown, false otherwise
+* \param printlabel true if you want the label to be shown, false otherwise
 * \param elt gm_menu_element
 */
 void gm_menu_element_set_print_label(gboolean printlabel, gm_menu_element *elt);
@@ -291,7 +291,7 @@ gm_menu_element* gm_menu_get_menu_element(int index, gm_menu *menu);
 
 /**
 * \brief adds a gm_menu_page to a gm_menu
-* \param elt pointer to gm_menu_page that must be added
+* \param page pointer to gm_menu_page that must be added
 * \param menu pointer to gm_menu that should be enlarged with elt
 * \return GM_SUCCESS on success, GM_FALSE on failure
 */
@@ -308,7 +308,7 @@ void gm_menu_set_width(GmLengthType length_type, gint width, gm_menu *menu);
 /**
 * \brief sets the preferred height for the menu
 * \param length_type this can be PERCENTAGE or PIXELS
-* \param width positive integer number. Note that percentages are counted from 0 to 100.
+* \param height positive integer number. Note that percentages are counted from 0 to 100.
 * \param menu pointer to the gm_menu that should be changed
 */
 void gm_menu_set_height(GmLengthType length_type, gint height, gm_menu *menu);
@@ -337,7 +337,7 @@ gboolean gm_menu_element_add_argument(gchar *arg, gm_menu_element *elt);
 
 /**
 * \brief returns the number of arguments for the menu element
-* \param *elt gm_menu_element
+* \param elt gm_menu_element
 * \return positive integer
 */
 gint gm_menu_elements_get_amount_of_arguments(gm_menu_element *elt);

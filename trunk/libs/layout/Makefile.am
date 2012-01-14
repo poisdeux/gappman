@@ -12,4 +12,4 @@ libgm_layout_la_LIBADD = $(top_builddir)/parseconf/libgm_parseconf.la
 libgm_layout_la_LIBADD += $(GTK_LIBS)
 libgm_layout_la_LIBADD += $(LIBXML_LIBS)
 libgm_layout_la_LIBADD += $(XRANDR_LIBS)
-libgm_layout_la_LDFLAGS = -version-info 0:0:0
+libgm_layout_la_LDFLAGS = -version-info 1:0:1

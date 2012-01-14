@@ -449,7 +449,7 @@ gboolean gm_layout_check_key(GdkEvent * event)
 	return FALSE;
 }
 
-void gm_layout_show_confirmation_dialog(gchar * message,
+static void gm_layout_show_confirmation_dialog(gchar * message,
 								 gchar * msg_button1, void *callback1,
 								 void *data1, gchar * msg_button2,
 								 void *callback2, void *data2,

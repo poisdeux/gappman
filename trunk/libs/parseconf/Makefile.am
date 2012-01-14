@@ -7,4 +7,4 @@ libgm_parseconf_la_CPPFLAGS += $(GTK_CFLAGS)
 libgm_parseconf_la_CPPFLAGS += -I$(top_builddir)/generic
 libgm_parseconf_la_LIBADD = $(LIBXML_LIBS)
 libgm_parseconf_la_LIBADD += $(GTK_LIBS)
-libgm_parseconf_la_LDFLAGS = -version-info 0:0:0
+libgm_parseconf_la_LDFLAGS = -version-info 1:0:1

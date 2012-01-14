@@ -133,15 +133,17 @@ GtkWidget *appmanager_panel_create(gm_menu *panel)
 		menu_elt = gm_menu_get_menu_element(i, panel);
 		if( setup_panel_element(menu_elt) != GM_SUCCESS )
 			continue;
-
+		
+		if(menu_elt->gm_module_set_icon_size != NULL)
+		{
+				menu_elt->gm_module_set_icon_size(panel->widget_width, panel->widget_height);
+		}
+		
 		if ( (menu_elt->gm_module_init != NULL ) && (menu_elt->gm_module_init() == GM_SUCCESS) )
 		{
 			gm_menu_element_set_widget(menu_elt->gm_module_get_widget(), menu_elt);
 
-			if(menu_elt->gm_module_set_icon_size != NULL)
-			{
-				menu_elt->gm_module_set_icon_size(panel->widget_width, panel->widget_height);
-			}
+			
 		}
 		else
     {

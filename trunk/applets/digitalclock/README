@@ -1,9 +1,5 @@
 == TODO ==
 
-We calculate every second the digits for hours and minutes.
-Is this expensive? Should we only do this when the digit 
-actually changes? Is an if-statement cheaper?
-
 Add support for images to use as bars instead of drawing them.
 
 == Drawing Digits ==
