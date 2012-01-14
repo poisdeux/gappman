@@ -63,7 +63,7 @@
     <applet>
       <name>Network manager</name>
       <objectfile>./applets/netman/.libs/gm_netman.so</objectfile>
-      <conffile>./applets/netman/xml-config-files/netman.xml</conffile>
+      <conffile>./applets/netman/xml-config-files/netman-test.xml</conffile>
     </applet>
     <applet>
       <name>Digital Clock</name>
