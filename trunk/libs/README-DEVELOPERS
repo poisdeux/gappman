@@ -4,7 +4,8 @@
 
 We use libtool library version mechanism which works with current, revision,
 and age values. These are specified in the "-version-info" option which is
-added to a library's LDFLAGS (see Makefile.am for the library).
+added to a library's LDFLAGS (see Makefile.am in the directory for a specific
+library).
 
 The "current" value represents the interface version number. This number
 changes when the public interface of the library changes.
