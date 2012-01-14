@@ -592,7 +592,8 @@ static gboolean date_on_expose_event(GtkWidget *widget, GdkEventExpose *event, g
 	/**
 	*	draw month
 	*/
-	x_delta += offsets_calendar.digit_x_delta + sizes_calendar.linewidth;
+	//x_delta += offsets_calendar.digit_x_delta + sizes_calendar.linewidth;
+	x_delta += offsets_calendar.digit_x_delta * 2;
 	draw_letter(cr, date.month_first_letter, x_delta, -offsets_calendar.y_0);
 	x_delta += offsets_calendar.letter_x_delta;
 	draw_letter(cr, date.month_second_letter, x_delta, -offsets_calendar.y_0);
