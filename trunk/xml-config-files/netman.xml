@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<netman>
+  <stati>
+    <logounavail>./applets/netman/logos/gnome-netstatus-error.png</logounavail>
+    <status>
+      <name>Internet reachable</name>
+      <exec>/bin/ping</exec>
+      <arg>-q</arg>
+      <arg>-c</arg>
+      <arg>1</arg>
+      <arg>google.com</arg>
+      <success>0</success>
+      <logosuccess>./applets/netman/logos/network-up.png</logosuccess>
+      <logofail>./applets/netman/logos/network-down.png</logofail>
+    </status>
+    <status>
+      <name>Gateway reachable</name>
+      <exec>/bin/ping</exec>
+      <arg>-q</arg>
+      <arg>-c</arg>
+      <arg>1</arg>
+      <arg>10.0.0.1</arg>
+      <success>0</success>
+      <logosuccess>./applets/netman/logos/network-up.png</logosuccess>
+      <logofail>./applets/netman/logos/network-down.png</logofail>
+    </status>
+  </stati>
+  <actions width="30%" height="10%" align="center">
+    <action>
+      <name>Restart network</name>
+      <exec>./if-restart</exec>
+      <arg>eth0</arg>
+    </action>
+  </actions>
+</netman>

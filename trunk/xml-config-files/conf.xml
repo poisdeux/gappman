@@ -5,7 +5,7 @@
       <name>Shutdown</name>
       <exec>./applets/shutdown/gmshutdown</exec>
       <arg>-c</arg>
-      <arg>applets/shutdown/xml-config-files/shutdown.xml</arg>
+      <arg>xml-config-files/shutdown.xml</arg>
       <logo>./applets/shutdown/logos/shutdown.png</logo>
     </action>
     <action>
@@ -63,12 +63,12 @@
     <applet>
       <name>Network manager</name>
       <objectfile>./applets/netman/.libs/gm_netman.so</objectfile>
-      <conffile>./applets/netman/xml-config-files/netman-test.xml</conffile>
+      <conffile>./xml-config-files/netman.xml</conffile>
     </applet>
     <applet>
       <name>Digital Clock</name>
       <objectfile>./applets/digitalclock/.libs/gm_digitalclock.so</objectfile>
-      <conffile>./applets/digitalclock/xml-config-files/digitalclock.xml</conffile>
+      <conffile>./xml-config-files/digitalclock.xml</conffile>
     </applet>
   </panel>
 </appmanager>

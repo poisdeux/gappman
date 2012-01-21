@@ -1,0 +1,26 @@
+<shutdown>
+  <cachelocation>/tmp/</cachelocation>
+  <actions width="50%" height="30%" align="center">
+    <action>
+      <name>Shutdown</name>
+      <printlabel>1</printlabel>
+      <exec>shutdown</exec>
+			<arg>-h</arg>
+      <logo>./applets/shutdown/logos/system-shutdown.png</logo>
+    </action>
+    <action>
+      <name>Reboot</name>
+      <printlabel>1</printlabel>
+      <exec>shutdown</exec>
+			<arg>-r</arg>
+      <logo>./applets/shutdown/logos/system-restart.png</logo>
+    </action>
+    <action>
+      <name>Suspend</name>
+      <printlabel>1</printlabel>
+      <exec></exec>
+      <arg></arg>
+      <logo>./applets/shutdown/logos/system-suspend.png</logo>
+    </action>
+  </actions>
+</shutdown>
