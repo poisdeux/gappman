@@ -69,8 +69,8 @@ bottom.
 
 1. Make a branch to test and debug the release
 
-   git branch <VERSION>-alpha
-	 git checkout <VERSION>-alpha
+   git branch <NEW_VERSION>
+	 git checkout <NEW_VERSION>
 
 2. Edit the Changelog and raise the version number in configure.ac
 
@@ -90,7 +90,7 @@ bottom.
 7. Merge changes back to master
 
    git checkout master
-   git merge <VERSION>-alpha
+   git merge <NEW_VERSION>
 
 8. Delete branch
 

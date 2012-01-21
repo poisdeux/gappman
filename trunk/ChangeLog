@@ -1,10 +1,11 @@
 2012-01-14     Martijn Brekhof  <m.brekhof@gmail.com>
+
     * Added date for digitalclock
-		* Expanded gm_generic with functions to create a 
+    * Expanded gm_generic with functions to create a 
       menu programmatically instead from an xml file.
     * Redesigned libs and appmanager
     * Source code is now maintained using git
-		* gm_connect renamed to gm_network
+    * gm_connect renamed to gm_network
 
 2011-12-30     Martijn Brekhof  <m.brekhof@gmail.com>
 
