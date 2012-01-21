@@ -287,6 +287,11 @@ gboolean gm_menu_element_add_argument(gchar *arg, gm_menu_element *elt)
 	return TRUE;
 }
 
+gint gm_menu_element_get_amount_of_arguments(gm_menu_element *elt)
+{
+       return elt->amount_of_args;
+}
+
 void gm_menu_element_set_widget(GtkWidget *widget, gm_menu_element *elt)
 {
 	elt->widget = widget;
