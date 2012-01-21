@@ -147,7 +147,7 @@ Maintenance/update releases should be tested on the branch and result in a
 
     TMPDIR=$(mktemp -d)
     pushd ${TMPDIR}
-    git clone https://code.google.com/p/gappman/
+    git clone <YOUR_LOCAL_GIT_REPOS>
 
     pushd gappman
 		git checkout release-<VERSION>-alpha
