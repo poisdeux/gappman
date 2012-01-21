@@ -149,8 +149,8 @@ Maintenance/update releases should be tested on the branch and result in a
     pushd ${TMPDIR}
     git clone <YOUR_LOCAL_GIT_REPOS>
 
-    pushd gappman
-		git checkout release-<VERSION>-alpha
+    pushd gappman/trunk
+		git checkout <NEW_VERSION>
     libtoolize
     pushd libs
     libtoolize
@@ -158,7 +158,7 @@ Maintenance/update releases should be tested on the branch and result in a
     autoreconf -vif
     ./configure
     make
-    ./tests/rungappman.sh
+    ./tests/rungappman.sh 400 300
     popd
     popd
     rm -rf ${TMPDIR}
