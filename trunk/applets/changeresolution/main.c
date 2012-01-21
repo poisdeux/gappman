@@ -323,7 +323,7 @@ static GtkWidget *show_possible_resolutions()
 		
 		menu_elt = gm_menu_element_create();
 		gm_menu_element_set_name(text, menu_elt);
-		gm_menu_element_printlabel(TRUE, menu_elt);
+		gm_menu_element_set_print_label(TRUE, menu_elt);
 		gm_menu_element_set_data((gpointer) &sizes[i], menu_elt);
 		gm_menu_add_menu_element(menu_elt, menu);
 	}

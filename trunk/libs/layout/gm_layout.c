@@ -684,7 +684,7 @@ g_debug("gm_layout_create_label_button: buttontext=%s", buttontext);
 
 GtkWidget *gm_layout_load_image(gchar *elt_name, gchar *elt_logo,
 						 gchar *cacheloc, gchar *programname,
-						 int max_width, int max_height)
+						 gint max_width, gint max_height)
 {
 	GtkWidget *image = NULL;
 	GdkPixbuf *pixbuf;

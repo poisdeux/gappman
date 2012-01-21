@@ -340,7 +340,7 @@ gboolean gm_menu_element_add_argument(gchar *arg, gm_menu_element *elt);
 * \param elt gm_menu_element
 * \return positive integer
 */
-gint gm_menu_elements_get_amount_of_arguments(gm_menu_element *elt);
+gint gm_menu_element_get_amount_of_arguments(gm_menu_element *elt);
 
 /**
 * \brief set the pid in a gm_menu_element

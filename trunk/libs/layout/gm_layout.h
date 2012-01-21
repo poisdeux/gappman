@@ -37,9 +37,9 @@ gboolean gm_layout_check_key(GdkEvent * event);
 * \param max_height maximum height image may have
 * \return GtkWidget pointer to image
 */
-GtkWidget *gm_layout_load_image(char *elt_name, char *elt_logo,
-						 char *cacheloc, char *programname,
-						 int max_width, int max_height);
+GtkWidget *gm_layout_load_image(gchar *elt_name, gchar *elt_logo,
+						 gchar *cacheloc, gchar *programname,
+						 gint max_width, gint max_height);
 
 /**
 * \brief shows a question dialog with regards to gappman fontsize.
@@ -83,7 +83,7 @@ int gm_layout_get_fontsize();
 * \brief sets the fontsize for the layout manager
 * \param size the fontsize
 */
-void gm_layout_set_fontsize(int size);
+void gm_layout_set_fontsize(gint size);
 
 /**
 * \brief gets the window width and height that is used by the layout manager to calculate the layout
@@ -97,7 +97,7 @@ void gm_layout_get_window_geometry(gint *width, gint *height);
 * \param width width of the screen
 * \param height height of the screen
 */
-void gm_layout_set_window_geometry(int width, int height);
+void gm_layout_set_window_geometry(gint width, gint height);
 
 /**
 * \brief creates a widget that will hold the specified text

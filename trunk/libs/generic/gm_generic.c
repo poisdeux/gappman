@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include "gm_generic.h"
 
-#define MENU_ELTS_ARRAY_INCREMENT 5 ///<
+#define MENU_ELTS_ARRAY_INCREMENT 5 ///< amount with which menu_elts should be incremented if too small
 
 void gm_menu_free(gm_menu *menu)
 {
@@ -285,18 +285,6 @@ gboolean gm_menu_element_add_argument(gchar *arg, gm_menu_element *elt)
   elt->args[elt->amount_of_args++] = arg;
 
 	return TRUE;
-}
-
-void gm_menu_element_printlabel(gboolean bool, gm_menu_element *elt)
-{
-	if( bool == TRUE )
-	{
-		elt->printlabel = 1;
-	}
-	else
-	{
-		elt->printlabel = 0;
-	}
 }
 
 void gm_menu_element_set_widget(GtkWidget *widget, gm_menu_element *elt)
