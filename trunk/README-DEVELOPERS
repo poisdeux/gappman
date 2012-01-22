@@ -69,8 +69,8 @@ bottom.
 
 1. Make a branch to test and debug the release
 
-   git branch <NEW_VERSION>
-	 git checkout <NEW_VERSION>
+   git branch release-<NEW_VERSION>
+	 git checkout release-<NEW_VERSION>
 
 2. Edit the Changelog and raise the version number in configure.ac
 
