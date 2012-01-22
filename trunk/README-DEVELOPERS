@@ -195,11 +195,13 @@ Maintenance/update releases should be tested on the branch and result in a
 
 1. Create a new branch
 
+	 TMPDIR=$(mktemp -d)
+	 pushd ${TMPDIR}
+	 git clone https://code.google.com/p/gappman/
    git checkout -b package release-<VERSION>
 
 2. Create the makefiles
 
-  cd package
   libtoolize
   pushd libs
   libtoolize
@@ -211,7 +213,7 @@ Maintenance/update releases should be tested on the branch and result in a
 3. Create the tarball as follows 
    (make sure all dependencies are installed, e.g. doxygen):
 
-  make dist
+  make && make dist
 
 4. Test if the tarball builds
 
@@ -222,7 +224,7 @@ Maintenance/update releases should be tested on the branch and result in a
   cd gappman-*
   ./configure
   make
-  ./tests/rungappman.sh
+  ./tests/rungappman.sh 400 300
   popd
   rm -rf ${TMPDIR}
 
