@@ -38,6 +38,11 @@ AC_ARG_ENABLE([building-libs],
 		[disable building the libs])],
 	[building_libs=no], [building_libs=yes])
 
+AC_ARG_ENABLE([building-tools], 
+	[AS_HELP_STRING([--disable-building-tools],
+		[disable building the tools])],
+	[building_tools=no], [building_tools=yes])
+
 AC_ARG_ENABLE([building-gappman], 
 	[AS_HELP_STRING([--disable-building-gappman],
 		[disable building gappman])],
@@ -51,6 +56,9 @@ AM_COND_IF([BUILD_LIBS], AC_CONFIG_SUBDIRS([libs]))
 
 AM_CONDITIONAL([BUILD_APPLETS], [test "x$building_applets" == "xyes"])
 AM_COND_IF([BUILD_APPLETS], AC_CONFIG_SUBDIRS([applets]))
+
+AM_CONDITIONAL([BUILD_TOOLS], [test "x$building_tools" == "xyes"])
+AM_COND_IF([BUILD_TOOLS], AC_CONFIG_FILES([tools/Makefile]))
 
 # Check for programs if doxygen docs should be build
 
