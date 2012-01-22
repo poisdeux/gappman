@@ -83,20 +83,35 @@ bottom.
 
 5. Do a final release test. See section "5. Testing ..."
 
-6. Make a release version
+6. Check if creating a tarball will include all necessary files
+
+	 ./configure
+   make && make dist
+   TMPDIR=$(mktemp -d)
+   cp gappman-*.tar.gz ${TMPDIR}
+   pushd ${TMPDIR}
+   tar xzf gappman-*.tar.gz
+   cd gappman-*
+   ./configure
+   make
+   ./tests/rungappman.sh 400 300
+   popd
+   rm -rf ${TMPDIR}
+
+8. Make a release version
 
    git tag release-<NEW_VERSION>
 
-7. Merge changes back to master
+9. Merge changes back to master
 
    git checkout master
    git merge <NEW_VERSION>
 
-8. Delete branch
+10. Delete branch
 
    git branch -d <NEW_VERSION>
 
-9. Push changes to remote
+11. Push changes to remote
 
    git push 
    git push --tags
