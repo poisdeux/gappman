@@ -235,7 +235,6 @@ static gboolean handleconnection(GIOChannel * gio, GIOCondition cond,
 				g_free(msg);
 				appmanager_config = appmanager_get_metadata();
 				msg = (gchar *) malloc(30 * sizeof(gchar));
-				g_debug("test 3");
 				if(msg != NULL)
 				{
 					g_snprintf(msg, 30, "windowgeometry::%dx%d", appmanager_config->window_width, appmanager_config->window_height);

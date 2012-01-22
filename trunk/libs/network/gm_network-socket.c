@@ -403,7 +403,6 @@ int gm_socket_get_window_geometry_from_gappman(int portno, const char *hostname,
 
 	if(geom_msg != NULL)
 	{
-		g_debug("geom_msg: %s", geom_msg);
   	contentssplit = g_strsplit(geom_msg, "x", 2);
 		if((contentssplit[0] != NULL) && (contentssplit[1] != NULL))
 		{
