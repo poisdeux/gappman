@@ -1,3 +1,9 @@
+gappman (0.5.0-dev-1) UNRELEASED; urgency=low
+
+  * Initial release. (Closes: #XXXXXX)
+
+ -- Martijn Brekhof <m.brekhof@gmail.com>  Tue, 28 Jan 2012 13:35:43 +0100
+
 gappman (0.4.3-dev-1) UNRELEASED; urgency=low
 
   * Initial release. (Closes: #XXXXXX)
