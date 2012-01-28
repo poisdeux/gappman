@@ -141,7 +141,7 @@ static void perform_action(GtkWidget * widget, GdkEvent * event,
 	}
 	else
 	{
-		gm_layout_show_confirmation_dialog
+		gm_layout_show_question_dialog
 			("Action already started.\nDo you want to start it anyway?",
 			 "Start action", exec_program_by_gtk_callback, elt, "Cancel", NULL,
 			 NULL, NULL);

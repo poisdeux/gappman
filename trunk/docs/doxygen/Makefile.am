@@ -1,5 +1,7 @@
 docpkg = $(PACKAGE_TARNAME)-doxy-$(PACKAGE_VERSION).tar.gz
 
+dist_doc_DATA = mainpage
+
 doc_DATA = $(docpkg)
 
 $(docpkg): doxygen.stamp

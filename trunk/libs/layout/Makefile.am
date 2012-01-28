@@ -9,6 +9,7 @@ libgm_layout_la_CPPFLAGS += $(XRANDR_CFLAGS)
 libgm_layout_la_CPPFLAGS += -I$(top_builddir)/parseconf
 libgm_layout_la_CPPFLAGS += -I$(top_builddir)/generic
 libgm_layout_la_LIBADD = $(top_builddir)/parseconf/libgm_parseconf.la
+libgm_layout_la_LIBADD += $(top_builddir)/generic/libgm_generic.la
 libgm_layout_la_LIBADD += $(GTK_LIBS)
 libgm_layout_la_LIBADD += $(LIBXML_LIBS)
 libgm_layout_la_LIBADD += $(XRANDR_LIBS)
