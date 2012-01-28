@@ -600,8 +600,8 @@ static gboolean date_on_expose_event(GtkWidget *widget, GdkEventExpose *event, g
 	/**
 	*	draw month
 	*/
-	//x_delta += offsets_calendar.digit_x_delta + sizes_calendar.linewidth;
-	x_delta += offsets_calendar.digit_x_delta * 2;
+	x_delta += offsets_calendar.digit_x_delta + (sizes_calendar.linewidth*2);
+	//x_delta += offsets_calendar.digit_x_delta * 2;
 	draw_letter(cr, date.month_first_letter, x_delta, -offsets_calendar.y_0);
 	x_delta += offsets_calendar.letter_x_delta;
 	draw_letter(cr, date.month_second_letter, x_delta, -offsets_calendar.y_0);
@@ -651,7 +651,6 @@ static void update_date()
 	datestring_tokens = strtok(ctime(&time_secs), " \t");
 	while ( datestring_tokens != NULL )
 	{
-		g_debug("TOKEN: %s", datestring_tokens);
 		if( i > 4 )
 			break;
 
@@ -768,13 +767,12 @@ G_MODULE_EXPORT int gm_module_init()
 		show_date = 0;
 	}
 
-	g_debug("show_date = %d", show_date);
 	if( show_date )
 	{
 		sizes_clock.w_width = max_width;
-		sizes_clock.w_height = 0.7*max_height;
+		sizes_clock.w_height = 0.6*max_height;
 		sizes_calendar.w_width = max_width;
-		sizes_calendar.w_height = 0.20*max_height;
+		sizes_calendar.w_height = 0.35*max_height;
 	}
 	else
 	{
@@ -784,8 +782,8 @@ G_MODULE_EXPORT int gm_module_init()
 		sizes_calendar.w_height = 0;
 	}
 
-	//sizes_calendar.w_height = 0.25*height;
-  //and digit height = 0.7 so we leave a 0.05% gap
+	//sizes_calendar.w_height = 0.35*height;
+  //and digit height = 0.6 so we leave a 0.05% gap
   //height*0.05 == (sizes_calendar.w_height*4)*0.05 ==
   //sizes_calendar.w_height*0.2
 	main_window = gtk_vbox_new(FALSE, sizes_calendar.w_height*0.2);

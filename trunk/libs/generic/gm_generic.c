@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include "gm_generic.h"
 
-#define MENU_ELTS_ARRAY_INCREMENT 5 ///< amount with which menu_elts should be incremented if too small
+#define MENU_ELTS_ARRAY_INCREMENT 5 ///< amount with which the menu_elts array should be incremented when too small to hold all elements
 
 void gm_menu_free(gm_menu *menu)
 {
@@ -65,7 +65,7 @@ gint gm_menu_get_amount_of_elements(gm_menu *menu)
 
 void gm_menu_element_set_logo(gchar* filename, gm_menu_element *elt)
 {
-	elt->logo = filename;
+	elt->logo = g_strdup(filename);
 }
 
 gchar* gm_menu_element_get_logo(gm_menu_element *elt)
@@ -80,7 +80,7 @@ gchar *gm_menu_element_get_name(gm_menu_element *elt)
 
 void gm_menu_element_set_name(gchar* name, gm_menu_element *elt)
 {
-	elt->name = name;
+	elt->name = g_strdup(name);
 }
 
 void gm_menu_element_set_print_label(gboolean printlabel, gm_menu_element *elt)
@@ -260,6 +260,10 @@ void gm_menu_element_free(gm_menu_element *elt)
 	if (elt == NULL)
 		return;
 	
+#if defined(DEBUG)
+	g_debug("gm_menu_element_free: freeing %s", elt->name);
+#endif
+
 	free(elt->name);
   free(elt->exec);
   free(elt->module);
@@ -287,14 +291,14 @@ gboolean gm_menu_element_add_argument(gchar *arg, gm_menu_element *elt)
 	return TRUE;
 }
 
+gint gm_menu_element_get_amount_of_arguments(gm_menu_element *elt)
+{
+       return elt->amount_of_args;
+}
+
 void gm_menu_element_set_widget(GtkWidget *widget, gm_menu_element *elt)
 {
 	elt->widget = widget;
-}
-
-gint gm_menu_element_get_amount_of_arguments(gm_menu_element *elt)
-{
-	return elt->amount_of_args;
 }
 
 void gm_menu_element_set_pid(gint pid, gm_menu_element *elt)

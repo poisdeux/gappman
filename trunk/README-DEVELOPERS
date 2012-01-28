@@ -69,8 +69,8 @@ bottom.
 
 1. Make a branch to test and debug the release
 
-   git branch <VERSION>-alpha
-	 git checkout <VERSION>-alpha
+   git branch <NEW_VERSION>
+	 git checkout <NEW_VERSION>
 
 2. Edit the Changelog and raise the version number in configure.ac
 
@@ -85,16 +85,16 @@ bottom.
 
 6. Make a release version
 
-   git tag release-<VERSION>
+   git tag release-<NEW_VERSION>
 
 7. Merge changes back to master
 
    git checkout master
-   git merge <VERSION>-alpha
+   git merge <NEW_VERSION>
 
 8. Delete branch
 
-   git branch -d <VERSION>-alpha
+   git branch -d <NEW_VERSION>
 
 9. Push changes to remote
 
@@ -118,7 +118,25 @@ Maintenance/update releases should be tested on the branch and result in a
 
    git commit
 
-4. Do a final release test. See section "5. Testing ..."
+4. Do a final release test to check that all needed files are in git
+
+    TMPDIR=$(mktemp -d)
+    pushd ${TMPDIR}
+    git clone <YOUR_LOCAL_GIT_REPOS>
+
+    pushd gappman/trunk
+		git checkout <NEW_VERSION>
+    libtoolize
+    pushd libs
+    libtoolize
+    popd
+    autoreconf -vif
+    ./configure
+    make
+    ./tests/rungappman.sh 400 300
+    popd
+    popd
+    rm -rf ${TMPDIR}
 
 5. Make a release version
 
@@ -139,33 +157,25 @@ Maintenance/update releases should be tested on the branch and result in a
    git push --tags
  
 -----------------------------------------------------------------------------
-5. Testing to ensure essential stuff is in git repo
+5. Testing 
 -----------------------------------------------------------------------------
 
-1. Create a new clean checkout and build and test the new release. Fix any
-     issues on the branch (ofcourse)
+1. Configure gappman with --enable-debug
 
-    TMPDIR=$(mktemp -d)
-    pushd ${TMPDIR}
-    git clone https://code.google.com/p/gappman/
+    ./configure --enable-debug
 
-    pushd gappman
-		git checkout release-<VERSION>-alpha
-    libtoolize
-    pushd libs
-    libtoolize
-    popd
-    autoreconf -vif
-    ./configure
-    make
-    ./tests/rungappman.sh
-    popd
-    popd
-    rm -rf ${TMPDIR}
- 
+2. Test gappman for different resolutions
+
+   ./tests/rungappman.sh 200 100
+   ./tests/rungappman.sh 100 200
+   ./tests/rungappman.sh 200 200
+   ./tests/rungappman.sh 400 300
+   ./tests/rungappman.sh 400 100
+   ./tests/rungappman.sh 100 400
+   
 
 -----------------------------------------------------------------------------
-5. Create a downloadable version of the release
+6. Create a downloadable version of the release
 -----------------------------------------------------------------------------
 
 1. Create a new branch
@@ -204,7 +214,7 @@ Maintenance/update releases should be tested on the branch and result in a
 5. If step 4 was succesful you may upload the tarball to the website.
 
 -----------------------------------------------------------------------------
-6. Checking the code
+7. Checking the code
 -----------------------------------------------------------------------------
 
 Splint generates a lot of false positives. A better tool might be cppcheck.

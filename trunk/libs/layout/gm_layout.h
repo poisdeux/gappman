@@ -50,7 +50,7 @@ GtkWidget *gm_layout_load_image(gchar *elt_name, gchar *elt_logo,
 * \param data1 void pointer pointing to any data that should be passed as an argument when calling the callbackfunction callback1
 * \param callback2 callback function that should be called when the second button is pressed. Use NULL to disable using a callbackfunction for the second button
 * \param data2 void pointer pointing to any data that should be passed as an argument when calling the callbackfunction callback2
-* \param mainwin pointer to parent window GtkWidget that called gm_layout_show_confirmation_dialog. If NULL dialog is positioned in the center.
+* \param mainwin pointer to parent window GtkWidget that called gm_layout_show_question_dialog. If NULL dialog is positioned in the center.
 */
 void gm_layout_show_question_dialog(gchar * message,
 								 gchar * msg_button1, void *callback1,

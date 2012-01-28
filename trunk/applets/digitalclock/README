@@ -1,3 +1,17 @@
+== Usage ==
+
+Digital clock must be used in combination with gappman.
+It is compiled as a shared object that can be loaded by
+gappman as part of the panel. 
+
+The digital clock will show both time and date by default.
+You can disable this by providing an xml configuration file
+with the following content:
+
+<digitalclock>
+	<show_date>0</show_date>
+</digitalclock>
+
 == TODO ==
 
 Add support for images to use as bars instead of drawing them.
@@ -26,6 +40,9 @@ turned off.
 8: 0, 1, 2, 3, 4, 5, 6
 9: 0, 1, 2, 3, 5, 6
 
+See DIA diagram digits-diagram.dia for more details on drawing the
+clock.
+
 == Drawing date ==
 
 The date drawing is performed using the same digits.
@@ -35,13 +52,12 @@ as we would like to show dates as follows:
 
 zo 13 nov 2011
 
-All letters will be uppercase.
-
 The letters A - J, L, N - P, S, U, Z can be represented by a single digit.
 The digits will need to be extended to include diagonal bars
 as well to support the letters K, M, Q, R.
 K, Q, and R will require a single digit.
 M, T, V, W, X, Y will require two digits.
 
-
+See DIA diagram calendar-diagram.dia for more details on drawing the
+date. 
 
