@@ -206,7 +206,8 @@ static gboolean calculate_offsets_clock(GtkWidget *widget, GdkEventConfigure *ev
 
 	colon_width = 1.5*sizes_clock.linewidth;
 
-	digit_width = (sizes_clock.w_width - colon_width)/4;
+	//we add 1 to compensate for clipping in drawing area
+	digit_width = (sizes_clock.w_width - colon_width)/4 + 1;
   digit_height = sizes_clock.w_height;
 	
 	gtk_widget_set_size_request (hour_window, digit_width * 2, digit_height);

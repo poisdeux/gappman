@@ -69,8 +69,8 @@ bottom.
 
 1. Make a branch to test and debug the release
 
-   git branch <NEW_VERSION>
-	 git checkout <NEW_VERSION>
+   git branch release-<NEW_VERSION>
+	 git checkout release-<NEW_VERSION>
 
 2. Edit the Changelog and raise the version number in configure.ac
 
@@ -83,20 +83,35 @@ bottom.
 
 5. Do a final release test. See section "5. Testing ..."
 
-6. Make a release version
+6. Check if creating a tarball will include all necessary files
+
+	 ./configure
+   make && make dist
+   TMPDIR=$(mktemp -d)
+   cp gappman-*.tar.gz ${TMPDIR}
+   pushd ${TMPDIR}
+   tar xzf gappman-*.tar.gz
+   cd gappman-*
+   ./configure
+   make
+   ./tests/rungappman.sh 400 300
+   popd
+   rm -rf ${TMPDIR}
+
+8. Make a release version
 
    git tag release-<NEW_VERSION>
 
-7. Merge changes back to master
+9. Merge changes back to master
 
    git checkout master
    git merge <NEW_VERSION>
 
-8. Delete branch
+10. Delete branch
 
    git branch -d <NEW_VERSION>
 
-9. Push changes to remote
+11. Push changes to remote
 
    git push 
    git push --tags
@@ -180,11 +195,13 @@ Maintenance/update releases should be tested on the branch and result in a
 
 1. Create a new branch
 
+	 TMPDIR=$(mktemp -d)
+	 pushd ${TMPDIR}
+	 git clone https://code.google.com/p/gappman/
    git checkout -b package release-<VERSION>
 
 2. Create the makefiles
 
-  cd package
   libtoolize
   pushd libs
   libtoolize
@@ -196,7 +213,7 @@ Maintenance/update releases should be tested on the branch and result in a
 3. Create the tarball as follows 
    (make sure all dependencies are installed, e.g. doxygen):
 
-  make dist
+  make && make dist
 
 4. Test if the tarball builds
 
@@ -207,7 +224,7 @@ Maintenance/update releases should be tested on the branch and result in a
   cd gappman-*
   ./configure
   make
-  ./tests/rungappman.sh
+  ./tests/rungappman.sh 400 300
   popd
   rm -rf ${TMPDIR}
 
