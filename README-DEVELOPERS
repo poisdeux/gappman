@@ -64,7 +64,7 @@ Where 23 > 13 > 3. Therefore, the above versions are increasing from top to
 bottom.
 
 -----------------------------------------------------------------------------
-3. Creating a new release version from trunk
+3. Creating a new release version from master branch 
 -----------------------------------------------------------------------------
 
 1. Make a branch to test and debug the release
@@ -139,7 +139,7 @@ Maintenance/update releases should be tested on the branch and result in a
     pushd ${TMPDIR}
     git clone <YOUR_LOCAL_GIT_REPOS>
 
-    pushd gappman/trunk
+    pushd gappman
 		git checkout <NEW_VERSION>
     libtoolize
     pushd libs
