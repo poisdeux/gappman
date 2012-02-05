@@ -69,8 +69,8 @@ bottom.
 
 1. Make a branch to test and debug the release
 
-   git branch release-<NEW_VERSION>
-	 git checkout release-<NEW_VERSION>
+   git branch <NEW_VERSION>
+	 git checkout <NEW_VERSION>
 
 2. Edit the Changelog and raise the version number in configure.ac
 
@@ -178,6 +178,7 @@ Maintenance/update releases should be tested on the branch and result in a
 1. Configure gappman with --enable-debug
 
     ./configure --enable-debug
+		make
 
 2. Test gappman for different resolutions
 
