@@ -1,0 +1,12 @@
+
+GAppMan should be able to manage window stacking. At least to bring its
+own window to the top of the stack.
+
+We can use gtk_window_present(GtkWindow *window) to bring window to top
+of the window stack.
+
+Issues:
+
+   * How to manage windows for external started applications
+   * Should GAppMan trigger on keybinding or d-bus/socket message? Or both?
+
