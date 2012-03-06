@@ -16,6 +16,7 @@
 #include "appmanager.h"
 #include <glib.h>
 #include <gtk/gtk.h>
+#include <gdk/gdkx.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib/gprintf.h>
 #include <stdlib.h>
@@ -29,6 +30,7 @@
 #include <gm_changeresolution.h>
 #include <gm_layout.h>
 #include <gm_generic.h>
+#include <gm_keybinder.h>
 #include "listener.h"
 #include "appmanager_panel.h"
 #include "appmanager_buttonmenu.h"
@@ -45,6 +47,14 @@ static struct metadata *config; ///< holds the configuration data used by gappma
 struct metadata *appmanager_get_metadata()
 {
 	return config;
+}
+
+#define EXAMPLE_KEY "<Ctrl>A"
+
+void handle_key_event(const char *keystring, void *user_data) 
+{
+  printf("Handle %s (%p)!\n", keystring, user_data);
+  gm_keybinder_unbind(keystring, handle_key_event);
 }
 
 void appmanager_update_resolution(gchar * programname, int width, int height)
@@ -355,6 +365,8 @@ int main(int argc, char **argv)
 	gint c;
 	gint fontsize;
 	const char *conffile = g_strconcat(SYSCONFDIR, "/conf.xml", NULL);
+	Display *Xdisplay;
+	Window Xwindow;
 
 	// Needs to be called before any another glib function
 	if (!g_thread_supported())
@@ -529,6 +541,11 @@ int main(int argc, char **argv)
 #endif
 
 	autostartprograms(programs);
+
+	//Test key binding
+  gm_keybinder_init();
+  gm_keybinder_bind(EXAMPLE_KEY, handle_key_event, NULL);
+  printf("Press " EXAMPLE_KEY " to activate keybinding and quit\n");
 
 	gtk_widget_show(mainwin);
 

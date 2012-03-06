@@ -140,7 +140,7 @@ Maintenance/update releases should be tested on the branch and result in a
     git clone <YOUR_LOCAL_GIT_REPOS>
 
     pushd gappman
-		git checkout <NEW_VERSION>
+    git checkout <NEW_VERSION>
     libtoolize
     pushd libs
     libtoolize

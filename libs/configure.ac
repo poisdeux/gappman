@@ -46,10 +46,23 @@ PKG_CHECK_MODULES([LIBXML],[libxml-2.0 >= 2.6.32])
 PKG_CHECK_MODULES([GTK],[gtk+-2.0 >= 2.12.12])
 PKG_CHECK_MODULES([XRANDR],[xrandr >= 1.2.3])
 
+# Checks for library functions
+
 # Checks for header files.
 AC_PATH_X
 AS_IF([test "x${disable_listener}" == "xno"],
 	AC_CHECK_HEADERS([netdb.h netinet/in.h sys/socket.h], [], [disable_listener=yes]))
+
+## Check if XkbQueryExtension is available
+X_LIBS="`$PKG_CONFIG --libs x11 xext xrender`"
+X_CFLAGS="`$PKG_CONFIG --cflags x11 xext xrender`"
+old_cflags="$CFLAGS"
+CFLAGS="$CFLAGS $X_CFLAGS"
+old_libs="$LIBS"
+LIBS="$X_LIBS $LIBS"
+AC_CHECK_FUNC(XkbQueryExtension, [], AC_MSG_ERROR(Could not find XKB))
+CFLAGS="$old_cflags"
+LIBS="$old_libs"
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T
@@ -84,7 +97,9 @@ AC_CONFIG_FILES([Makefile
                  network/libgm_network.pc
                  generic/Makefile
                  layout/Makefile
-                 parseconf/Makefile])
+                 parseconf/Makefile
+								 keybinder/Makefile
+								 keybinder/keybinder.pc])
 AC_OUTPUT
 
 echo \
