@@ -10,6 +10,7 @@
 *.a
 *.la
 *.in
+.code
 Makefile
 configure
 Doxyfile
