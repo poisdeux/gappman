@@ -39,6 +39,12 @@ gm_menu *gm_get_actions();
 gm_menu *gm_get_panel();
 
 /**
+* \brief Get the popup key definition if specified in the configuration file
+* \return string
+*/
+gchar *gm_parseconf_get_popupkey();
+
+/**
 * \brief Get the path of the cache location on disk
 * \return string
 */

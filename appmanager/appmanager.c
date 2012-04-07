@@ -49,12 +49,11 @@ struct metadata *appmanager_get_metadata()
 	return config;
 }
 
-#define EXAMPLE_KEY "<Ctrl>A"
-
 void handle_key_event(const char *keystring, void *user_data) 
 {
   printf("Handle %s (%p)!\n", keystring, user_data);
-  gm_keybinder_unbind(keystring, handle_key_event);
+  //gm_keybinder_unbind(keystring, handle_key_event);
+	gtk_window_present((GtkWindow*) user_data);
 }
 
 void appmanager_update_resolution(gchar * programname, int width, int height)
@@ -367,6 +366,7 @@ int main(int argc, char **argv)
 	const char *conffile = g_strconcat(SYSCONFDIR, "/conf.xml", NULL);
 	Display *Xdisplay;
 	Window Xwindow;
+	gchar* popup_key = NULL;
 
 	// Needs to be called before any another glib function
 	if (!g_thread_supported())
@@ -542,10 +542,12 @@ int main(int argc, char **argv)
 
 	autostartprograms(programs);
 
-	//Test key binding
+	popup_key = gm_parseconf_get_popupkey();
+	if( popup_key == NULL ) {
+		popup_key = "<ctrl>G";
+	}
   gm_keybinder_init();
-  gm_keybinder_bind(EXAMPLE_KEY, handle_key_event, NULL);
-  printf("Press " EXAMPLE_KEY " to activate keybinding and quit\n");
+  gm_keybinder_bind(popup_key, handle_key_event, mainwin);
 
 	gtk_widget_show(mainwin);
 

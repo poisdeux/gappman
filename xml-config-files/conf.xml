@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <appmanager>
+	<popupkey>&lt;ctl&gt;g</popupkey>
   <actions width="40%" height="15%" align="top,left">
     <action>
       <name>Shutdown</name>

@@ -18,8 +18,9 @@
 static gm_menu *programs = NULL;
 static gm_menu *actions = NULL;
 static gm_menu *panel = NULL;
-static char *program_name;
-static char *cache_location;
+static char *program_name = NULL;
+static char *cache_location = NULL;
+static char *popup_key = NULL;			//key that will bring GAppMan to top of the window stack
 
 static void printElements(xmlTextReaderPtr reader)
 {
@@ -268,6 +269,11 @@ gchar *gm_parseconf_get_cache_location()
 	return cache_location;
 }
 
+gchar *gm_parseconf_get_popupkey()
+{
+	return popup_key;
+}
+
 gchar *gm_parseconf_get_programname()
 {
 	return program_name;
@@ -335,8 +341,8 @@ g_debug("gm_load_conf: processing %s", name);
 g_debug("gm_load_conf: processing %s", name);
 #endif
 				processMenuElements("applet", "panel", reader, panel);
-			}
-			if (strcmp((char *)name, "cachelocation") == 0
+			} 
+			else if (strcmp((char *)name, "cachelocation") == 0
 				&& xmlTextReaderNodeType(reader) == 1)
 			{
 				ret = xmlTextReaderRead(reader);
@@ -345,10 +351,17 @@ g_debug("gm_load_conf: processing %s", name);
 g_debug("gm_load_conf: cache_location=%s", cache_location);
 #endif
 			}
-			else
-			{
+			else if (strcmp((char *)name, "popupkey") == 0
+        && xmlTextReaderNodeType(reader) == 1)
+      {
 				ret = xmlTextReaderRead(reader);
+				popup_key = (char *)xmlTextReaderValue(reader);
+#ifdef DEBUG
+g_debug("gm_load_conf: popup_key=%s", popup_key);
+#endif
 			}
+
+			ret = xmlTextReaderRead(reader);
 		}
 
 		/**
