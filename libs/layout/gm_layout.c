@@ -238,6 +238,10 @@ static int calculateAmountOfElementsPerRow(int box_width, int box_height,
 
 	elts = sqrt(amount_of_elements / ratio);
 
+#if defined(DEBUG)
+g_debug("calculateAmountOfElementsPerRow: box=(%d x %d) ratio=%lf elts=%lf amount_of_elements=%d", box_width, box_height, ratio, elts, amount_of_elements);
+#endif
+
 	// Check orientation and adjust accordingly
 	if (box_height > box_width)
 	{
@@ -336,6 +340,9 @@ static GtkWidget *create_menu_page_layout(gm_menu *menu, gint page_number,
 		box_upper_limit = menu->amount_of_elements;
 	}
 
+#if defined(DEBUG)
+g_debug("create_menu_page_layout: page_number=%d, elts_per_row=%d, menu_element_index=%d, box_upper_limit=%d", page_number, elts_per_row, menu_element_index, box_upper_limit);
+#endif
 	while(menu_element_index < box_upper_limit)
 	{
 		elt = menu->elts[menu_element_index];

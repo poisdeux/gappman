@@ -133,7 +133,6 @@ gboolean gm_menu_add_menu_element(gm_menu_element *elt, gm_menu *menu)
 		return FALSE;
 
 	menu->elts[menu->amount_of_elements++] = elt;
-
 	return TRUE;
 }
 

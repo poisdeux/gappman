@@ -251,12 +251,6 @@ static void processMenuElements(const char *element_name,
 				{
 					menu->max_elts_in_single_box = atoi(attr);		
 				}	
-				else
-				{
-					// set to maximum to disable creation of multiple boxes
-					// in gm_create_buttonboxes
-					menu->max_elts_in_single_box = menu->amount_of_elements;
-				}
 			}
 			// this should end parsing this group of elements
 			ret = 0;
