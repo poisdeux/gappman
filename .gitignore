@@ -11,6 +11,7 @@
 *.la
 *.in
 .code
+*.pc
 Makefile
 configure
 Doxyfile
