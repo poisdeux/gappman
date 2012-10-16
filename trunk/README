@@ -38,16 +38,23 @@ The tarball version can be build as follows:
 
 	./configure make && make install
 
-When you want to build the SVN version you will first need to create
+When you want to build the git version you will first need to create
 the configure script:
 
-	libtoolize --copy aclocal autoconf autoheader automake
-	--add-missing
+  libtoolize
+  cd libs
+  libtoolize
+  cd ..
+  autoreconf -vif
 
 Now you should be able to build appmanager as usual:
 
-	./configure make && make install
+  ./configure 
+  make
 
+Installing gappman is done as follows:
+
+  make install
 
 -----------------------------------------------------------------------------
 3. Running the application
@@ -56,7 +63,7 @@ Now you should be able to build appmanager as usual:
 The program can be executed as follows from the source tarball after
 building it:
 
-src/gappman --conffile xml-config-files/conf.xml --gtkrc gtk-config/gtkrc
+appmanager/gappman --conffile xml-config-files/conf.xml --gtkrc gtk-config/gtkrc
 
 This will start appmanager using the sample configuration file
 in "xml-config-files/conf.xml" and the gtk configuration file
