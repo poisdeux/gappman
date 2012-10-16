@@ -1,3 +1,6 @@
+2012-10-16  Martijn Brekhof  <m.brekhof@gmail.com>
+    * Fixed issue with debian package not installing dbus-x11
+
 2011-12-30  Martijn Brekhof  <m.brekhof@gmail.com>
     * Added support for creating a debian package
       
