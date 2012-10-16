@@ -196,9 +196,9 @@ Maintenance/update releases should be tested on the branch and result in a
 
 1. Create a new branch
 
-	 TMPDIR=$(mktemp -d)
-	 pushd ${TMPDIR}
-	 git clone https://code.google.com/p/gappman/
+   TMPDIR=$(mktemp -d)
+   pushd ${TMPDIR}
+   git clone https://code.google.com/p/gappman/
    git checkout -b package release-<VERSION>
 
 2. Create the makefiles
@@ -226,10 +226,17 @@ Maintenance/update releases should be tested on the branch and result in a
   ./configure
   make
   ./tests/rungappman.sh 400 300
-  popd
-  rm -rf ${TMPDIR}
 
 5. If step 4 was succesful you may upload the tarball to the website.
+
+6. Create a debian package (optional)
+
+  make deb
+
+7. Remove temporary files
+
+  popd
+  rm -rf ${TMPDIR}
 
 -----------------------------------------------------------------------------
 7. Checking the code
