@@ -1,3 +1,9 @@
+gappman (0.4.4-1) UNRELEASED; urgency=low
+
+  * Added dbus-x11 as required dependency
+
+ -- Martijn Brekhof <m.brekhof@gmail.com>  Tue, 27 Dec 2011 13:26:43 +0100
+
 gappman (0.4.3-1) UNRELEASED; urgency=low
 
   * Initial release. (Closes: #XXXXXX)
