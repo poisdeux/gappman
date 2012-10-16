@@ -15,11 +15,26 @@ To get your code pretty-printed in the Allman style you can use the program
 
 NOTE: above automatic pretty-printing may cause doxygen comments like ///< 
 to be rewritten as // /< which causes doxygen to fail.
-The following command will pretty-print the code and fix the doxygen comments:
 
-find -name '*.[ch]' -type f \ 
- -exec indent -bap -bli0 -i4 -l79 -ncs -npcs -npsl -fca -lc79 -fc1 -ts4 {} \; \
- -exec sed -i 's@// /<@///<@' {} \;
+When coding try to follow the following guidelines:
+
+* Avoid routines larger than 200 lines of code. Excluding comments and 
+  whitespace.
+* When using call-by-refrence, put parameters in input-modify-output order.
+  e.g. calculate_max_elts(struct menu *dish, int *max_elts)
+  Here dish is the input parameter and max_elts the output parameter
+* Use const parameters when a routine does not change the parameter value
+* When different routines use similar parameters use consistent parameter 
+  ordering
+* Status is returned by value or should be last in the parameter list
+* Put complex code in a separate routine with a self-explanatory name
+* Each public routine must be documented. Documentation should contain
+  a brief description and each parameter and the return value must be 
+  documented.
+* Encapsulate global data in a struct providing it a descriptive name
+* Provide descriptive names for routines. Use _ as word separator.
+* Put constants on the left side of comparisons (i.e. if ( MAX_ITEMS == i ) )
+  to let the compiler warn for errors like: if ( MAX_ITEMS = i ).
 
 -------------------------------------------------------------------------------
 2. Version number scheme
@@ -30,8 +45,7 @@ The following versioning scheme is used by gappman.
 <MAJOR>.<MINOR>[.<MAINTENANCE/UPDATE>]
 
 *  MAJOR version releases represent a complete implementation of a set of major
-   features. NOTE: the major set for the 1.0 release still has to be 
-   determined. 
+   features. Raising this number requires magic.
 *  MINOR version releases include one or more major features, design changes, 
    and interface changes.
 *  MAINTENANCE/UPDATE releases are optional and include bugfixes, security fixes, 
@@ -50,34 +64,58 @@ Where 23 > 13 > 3. Therefore, the above versions are increasing from top to
 bottom.
 
 -----------------------------------------------------------------------------
-3. Creating a new release version from trunk
+3. Creating a new release version from master branch 
 -----------------------------------------------------------------------------
 
 1. Make a branch to test and debug the release
 
-  svn copy https://gappman.googlecode.com/svn/trunk/ \
-    https://gappman.googlecode.com/svn/branches/<MAJOR>.<MINOR>
+   git branch <NEW_VERSION>
+	 git checkout <NEW_VERSION>
 
 2. Edit the Changelog and raise the version number in configure.ac
 
 3. Check the libs/ versions and change if necessary. See libs/README-DEVELOPERS 
    for details.
 
-4. Commit the changes on the branch
+4. After testing and debugging commit the changes, if any. 
 
-  svn commit -m "New branch <MAJOR>.<MINOR>"
+   git commit
 
-5. After testing and debugging commit the changes, if any. 
+5. Do a final release test. See section "5. Testing ..."
 
-6. Make a release version
+6. Check if creating a tarball will include all necessary files
 
-  svn copy https://gappman.googlecode.com/svn/branches/<MAJOR>.<MINOR> \
-    https://gappman.googlecode.com/svn/tags/release-<MAJOR>.<MINOR>
+	 ./configure
+   make && make dist
+   TMPDIR=$(mktemp -d)
+   cp gappman-*.tar.gz ${TMPDIR}
+   pushd ${TMPDIR}
+   tar xzf gappman-*.tar.gz
+   cd gappman-*
+   ./configure
+   make
+   ./tests/rungappman.sh 400 300
+   popd
+   rm -rf ${TMPDIR}
 
-7. Commit the new release
+8. Make a release version
 
-  svn commit -m "New release <MAJOR>.<MINOR>"
+   git tag release-<NEW_VERSION>
 
+9. Merge changes back to master
+
+   git checkout master
+   git merge <NEW_VERSION>
+
+10. Delete branch
+
+   git branch -d <NEW_VERSION>
+
+11. Push changes to remote
+
+   git push 
+   git push --tags
+ 
 -----------------------------------------------------------------------------
 4. Creating a maintenance release
 -----------------------------------------------------------------------------
@@ -85,128 +123,118 @@ bottom.
 Maintenance/update releases should be tested on the branch and result in a 
 <MAJOR>.<MINOR>.<MAINTENANCE/UPDATE> version.
 
-1. Merge wanted/needed changes from trunk to branch.
-	 NOTE: svn has a problem merging repos where dirs or files are moved or 
-         deleted. ALWAYS CHECK!!!
+1. Make a branch of the release you want to update
 
-	cd gappman/branch/<MAJOR>.<MINOR>
-  svn merge --reintegrate https://gappman.googlecode.com/svn/trunk  
-
-2. Fix conflicts and commit the merge
-
-	svn commit -m "Merge from trunk for upcoming release"
-
-3. Test the merge and fix any issues on the branch
-
-  autoreconf -i
-  ./configure
-  make
-  ./tests/rungappman.sh
-
-4. Create a new clean checkout and build and test the new release. Fix any
-	 issues on the branch (ofcourse)
-
-	TMPDIR=$(mktemp -d)
-	pushd ${TMPDIR}
-	svn checkout http://gappman.googlecode.com/svn/branches/<MAJOR>.<MINOR> \
-		gappman-read-only
-
-	pushd gappman-read-only
-  libtoolize --copy
-	for CONFIGURE_AC in . appmanager libs applets
-	do
-		pushd ${CONFIGURE_AC}
-  	aclocal
-  	autoconf
-  	autoheader
-  	automake --add-missing
-		popd
-	done
-  ./configure
-  make
-  ./tests/rungappman.sh
+   git checkout -b release-<MAINTENANCE-VERSION>-alpha release-<VERSION>
 	 
-5. Edit the Changelog and raise the version number in configure.ac
+2. Edit the Changelog and raise the version number in configure.ac
 
-6. Commit the changes on the branch
+3. After testing and debugging commit the changes, if any. 
 
-  svn commit -m "New maintenance version <MAJOR>.<MINOR>.<MAINTENANCE/UPDATE>"
+   git commit
 
-7. Make a maintenance release version
+4. Do a final release test to check that all needed files are in git
+
+    TMPDIR=$(mktemp -d)
+    pushd ${TMPDIR}
+    git clone <YOUR_LOCAL_GIT_REPOS>
+
+    pushd gappman
+    git checkout <NEW_VERSION>
+    libtoolize
+    pushd libs
+    libtoolize
+    popd
+    autoreconf -vif
+    ./configure
+    make
+    ./tests/rungappman.sh 400 300
+    popd
+    popd
+    rm -rf ${TMPDIR}
+
+5. Make a release version
+
+   git tag release-<VERSION>
+
+6. Merge changes back to master
+
+   git checkout master
+   git merge <VERSION>-alpha
+
+7. Delete branch
+
+   git branch -d <VERSION>-alpha
+
+8. Push changes to remote
+
+   git push 
+   git push --tags
  
-  svn copy https://gappman.googlecode.com/svn/branches/RELEASEVERSION \
-    https://gappman.googlecode.com/svn/tags/release-RELEASEVERSION.x
-
-
 -----------------------------------------------------------------------------
-5. Create a downloadable version of the release
+5. Testing 
 -----------------------------------------------------------------------------
 
-1. Go to the release version
+1. Configure gappman with --enable-debug
 
-  cd tags/release-RELEASEVERSION
+    ./configure --enable-debug
+		make
+
+2. Test gappman for different resolutions
+
+   ./tests/rungappman.sh 200 100
+   ./tests/rungappman.sh 100 200
+   ./tests/rungappman.sh 200 200
+   ./tests/rungappman.sh 400 300
+   ./tests/rungappman.sh 400 100
+   ./tests/rungappman.sh 100 400
+   
+
+-----------------------------------------------------------------------------
+6. Create a downloadable version of the release
+-----------------------------------------------------------------------------
+
+1. Create a new branch
+
+	 TMPDIR=$(mktemp -d)
+	 pushd ${TMPDIR}
+	 git clone https://code.google.com/p/gappman/
+   git checkout -b package release-<VERSION>
 
 2. Create the makefiles
 
-  libtoolize --copy
-  aclocal
-  autoconf
-	autoheader
-  automake --add-missing
+  libtoolize
+  pushd libs
+  libtoolize
+  popd
+  autoreconf -vif
   ./configure
 
-3. Create the tarball as follows:
 
-	make && make dist
+3. Create the tarball as follows 
+   (make sure all dependencies are installed, e.g. doxygen):
+
+  make && make dist
 
 4. Test if the tarball builds
 
-  cp gappman-*.tar.gz /tmp
-  cd /tmp
+  TMPDIR=$(mktemp -d)
+  cp gappman-*.tar.gz ${TMPDIR}
+  pushd ${TMPDIR}
   tar xzf gappman-*.tar.gz
   cd gappman-*
   ./configure
   make
-  ./appmanager/gappman --conffile xml-config-files/conf.xml --windowed
+  ./tests/rungappman.sh 400 300
+  popd
+  rm -rf ${TMPDIR}
 
 5. If step 4 was succesful you may upload the tarball to the website.
 
-6. Optionally create a debian package as follows:
-
-  make deb
-
 -----------------------------------------------------------------------------
-6. Checking the code
+7. Checking the code
 -----------------------------------------------------------------------------
 
 Splint generates a lot of false positives. A better tool might be cppcheck.
 http://sourceforge.net/projects/cppcheck/
 It supposedly also works for C-code...
-
-Splint might be a nice tool to check the code for security vulnerabilities and 
-coding mistakes. It can be executed as follows:
-
-splint +charint -warnposix -paramuse -nullpass \
-	-I `pkg-config gtk+-2.0 --cflags` `pkg-config libxml-2.0 --cflags` \
-	-I./libs/connect/ -I./libs/generic/ -I./libs/layout/ -I./libs/parseconf/ \
-  	<SOURCEFILE>
-
-It currently shows a lot of warnings.
-
-We use the following parameters to reduce the amount of warnings:
-
-  -paramuse			As we use callbacks for GTK there are functions which
-					contain parameters that are not always used in the 
-					function
-  -nullpass			Some of the gm functions use NULL as an indication that
-					the default should be used. Example: gm_show_error_dialog
-					where the callback may be NULL to use the default callback
-					function that destroys the dialog upon pressing the 
-					close-button.
-  -warnposix		the posix libs make splint barf about bugs in the posix libraries.
-					Unless we intend to debug these libs we can ignore the posix warnings.
-  +charint			We use get_opts to parse commandline options. As we use chars in the 
-					switch-statement to select the commandline options, we use chars in the 
-					long_options struct, although the struct requires type int. As long as
-					we use the same chars in the struct as in the switch-statement there is
-					no problem. Hence, we may ignore these warnings.
