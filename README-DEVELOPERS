@@ -68,9 +68,9 @@ bottom.
 -----------------------------------------------------------------------------
 
 1. Make a branch to test and debug the release
-
-   git branch <NEW_VERSION>
-	 git checkout <NEW_VERSION>
+   
+   git branch test-<NEW_VERSION>
+	 git checkout test-<NEW_VERSION>
 
 2. Edit the Changelog and raise the version number in configure.ac
 
@@ -81,7 +81,7 @@ bottom.
 
    git commit
 
-5. Do a final release test. See section "5. Testing ..."
+5. Do a final release test. See section "4. Testing ..."
 
 6. Check if creating a tarball will include all necessary files
 
@@ -105,11 +105,11 @@ bottom.
 9. Merge changes back to master
 
    git checkout master
-   git merge <NEW_VERSION>
+   git merge test-<NEW_VERSION>
 
 10. Delete branch
 
-   git branch -d <NEW_VERSION>
+   git branch -d test-<NEW_VERSION>
 
 11. Push changes to remote
 
@@ -117,62 +117,7 @@ bottom.
    git push --tags
  
 -----------------------------------------------------------------------------
-4. Creating a maintenance release
------------------------------------------------------------------------------
-
-Maintenance/update releases should be tested on the branch and result in a 
-<MAJOR>.<MINOR>.<MAINTENANCE/UPDATE> version.
-
-1. Make a branch of the release you want to update
-
-   git checkout -b release-<MAINTENANCE-VERSION>-alpha release-<VERSION>
-	 
-2. Edit the Changelog and raise the version number in configure.ac
-
-3. After testing and debugging commit the changes, if any. 
-
-   git commit
-
-4. Do a final release test to check that all needed files are in git
-
-    TMPDIR=$(mktemp -d)
-    pushd ${TMPDIR}
-    git clone <YOUR_LOCAL_GIT_REPOS>
-
-    pushd gappman
-    git checkout <NEW_VERSION>
-    libtoolize
-    pushd libs
-    libtoolize
-    popd
-    autoreconf -vif
-    ./configure
-    make
-    ./tests/rungappman.sh 400 300
-    popd
-    popd
-    rm -rf ${TMPDIR}
-
-5. Make a release version
-
-   git tag release-<VERSION>
-
-6. Merge changes back to master
-
-   git checkout master
-   git merge <VERSION>-alpha
-
-7. Delete branch
-
-   git branch -d <VERSION>-alpha
-
-8. Push changes to remote
-
-   git push 
-   git push --tags
- 
------------------------------------------------------------------------------
-5. Testing 
+4. Testing 
 -----------------------------------------------------------------------------
 
 1. Configure gappman with --enable-debug
@@ -191,7 +136,7 @@ Maintenance/update releases should be tested on the branch and result in a
    
 
 -----------------------------------------------------------------------------
-6. Create a downloadable version of the release
+5. Create a downloadable version of the release
 -----------------------------------------------------------------------------
 
 1. Create a new branch
@@ -232,7 +177,7 @@ Maintenance/update releases should be tested on the branch and result in a
 5. If step 4 was succesful you may upload the tarball to the website.
 
 -----------------------------------------------------------------------------
-7. Checking the code
+6. Checking the code
 -----------------------------------------------------------------------------
 
 Splint generates a lot of false positives. A better tool might be cppcheck.
