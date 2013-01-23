@@ -77,13 +77,23 @@ bottom.
 3. Check the libs/ versions and change if necessary. See libs/README-DEVELOPERS 
    for details.
 
-4. After testing and debugging commit the changes, if any. 
+4. Check applets/ version and change if necessary.
+
+5. Check appmanager/ version and change if necessary.
+
+5. Reconfigure, test, and debug
+
+   autoreconf -vif
+   ./configure
+   make
+
+6. After testing and debugging commit the changes, if any. 
 
    git commit
 
-5. Do a final release test. See section "4. Testing ..."
+7. Do a final release test. See section "4. Testing ..."
 
-6. Check if creating a tarball will include all necessary files
+8. Check if creating a tarball will include all necessary files
 
 	 ./configure
    make && make dist
@@ -98,20 +108,20 @@ bottom.
    popd
    rm -rf ${TMPDIR}
 
-8. Make a release version
+9. Make a release version
 
    git tag release-<NEW_VERSION>
 
-9. Merge changes back to master
+10. Merge changes back to master
 
    git checkout master
    git merge test-<NEW_VERSION>
 
-10. Delete branch
+11. Delete branch
 
    git branch -d test-<NEW_VERSION>
 
-11. Push changes to remote
+12. Push changes to remote
 
    git push 
    git push --tags
